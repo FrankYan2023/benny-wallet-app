@@ -1,0 +1,44 @@
+.DS_Store
+
+# IDE
+**/.idea/
+**/*.iml
+
+# Flutter / Dart
+**/.dart_tool/
+**/.flutter-plugins-dependencies
+**/.pub/
+**/.pub-cache/
+**/build/
+**/coverage/
+**/doc/api/
+**/flutter_*.log
+
+# Local config and secrets
+**/android/local.properties
+**/android/key.properties
+**/.env.config
+**/.env.config.local
+**/.env.config*.local
+**/.gradle-user-home/
+**/*.jks
+**/*.keystore
+**/google-services.json
+**/GoogleService-Info.plist
+
+# Release artifacts should live in GitHub Releases or the downloads repository.
+releases/
+**/*.apk
+**/*.aab
+**/*.ipa
+docs/android/SEEKER_DAPP_STORE_RELEASE_*.md
+
+# iOS generated content
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/.last_build_id
+# Local variant config and secrets
+**/.env.config*.local
