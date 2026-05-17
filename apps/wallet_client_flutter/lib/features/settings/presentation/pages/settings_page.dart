@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/di/providers.dart';
 import '../../../../core/utils/clipboard_utils.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../../../app/responsive/layout_shell.dart';
 import '../../../../core/config/app_features.dart';
 import '../../../../core/security/secure_screen.dart';
@@ -428,6 +429,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final settings = ref.watch(appSettingsControllerProvider);
     final packageInfo = ref.watch(packageInfoProvider);
     final isChildMode = walletState.childModeEnabled;
+    final isExternalWallet = walletState.isExternalWallet;
     final hasChildAccounts = walletState.childWallets.isNotEmpty;
     final canToggleChildMode =
         walletState.isUnlocked &&
@@ -479,8 +481,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     ],
                   ),
                 ),
-              if (!isChildMode) ...[
+              if (!isChildMode && !isExternalWallet) ...[
                 _RecoveryPhraseCard(onTap: _handleRecoveryPhrase),
+                const SizedBox(height: 18),
+              ] else if (!isChildMode && isExternalWallet) ...[
+                _SeekerVaultCard(
+                  label: walletState.walletLabel,
+                  address: walletState.publicKey,
+                ),
                 const SizedBox(height: 18),
               ],
               _SettingsToggleTile(
@@ -771,6 +779,141 @@ class _SettingsToggleTile extends StatelessWidget {
             inactiveThumbColor: Colors.white,
             inactiveTrackColor: const Color(0xFFE2DBD2),
             onChanged: enabled ? onChanged : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SeekerVaultCard extends StatelessWidget {
+  const _SeekerVaultCard({required this.label, required this.address});
+
+  final String? label;
+  final String? address;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final displayLabel = label?.trim().isNotEmpty == true
+        ? label!.trim()
+        : 'Seeker Wallet';
+    final displayAddress = address == null || address!.isEmpty
+        ? null
+        : Formatters.compactAddress(address!, visibleChars: 5);
+
+    return WalletCard(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF7F1E7),
+          borderRadius: BorderRadius.circular(28),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const _SettingsIconCircle(
+                  icon: Icons.security_rounded,
+                  iconColor: Color(0xFF235E7A),
+                  backgroundColor: Colors.white,
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Seeker Vault',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: const Color(0xFF2D2A23),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 20,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        displayLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: const Color(0xFF6F6353),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (displayAddress != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      displayAddress,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: const Color(0xFF8A5B09),
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: const [
+                _SeekerStatusChip(
+                  icon: Icons.verified_user_rounded,
+                  label: 'Device-backed',
+                ),
+                _SeekerStatusChip(
+                  icon: Icons.edit_rounded,
+                  label: 'Signs in Seeker Wallet',
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SeekerStatusChip extends StatelessWidget {
+  const _SeekerStatusChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.74),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: const Color(0xFF4E7A52)),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: const Color(0xFF5E5448),
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),

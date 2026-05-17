@@ -11,10 +11,30 @@ import '../../../../core/utils/clipboard_utils.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../asset_detail/presentation/pages/asset_detail_page.dart';
+import '../../../auth/domain/wallet_controller_state.dart';
+import '../../../auth/presentation/providers/wallet_controller.dart';
+import '../../../transaction_history/domain/transaction_activity.dart';
 
 final sendHistoryProvider =
     FutureProvider.autoDispose<List<RemoteSendHistoryItem>>((ref) async {
-      return ref.read(backendApiClientProvider).getSenderHistory(limit: 50);
+      final walletState = ref.read(walletControllerProvider);
+      var backendItems = const <RemoteSendHistoryItem>[];
+      if (await _canUseBackendHistory(ref, walletState)) {
+        try {
+          backendItems = await ref
+              .read(backendApiClientProvider)
+              .getSenderHistory(limit: 50);
+        } catch (_) {
+          if (!walletState.isExternalWallet) {
+            rethrow;
+          }
+        }
+      }
+      if (backendItems.isNotEmpty) {
+        return backendItems;
+      }
+
+      return _loadChainSendHistory(ref, walletState);
     });
 
 final sendHistoryTokensProvider =
@@ -768,10 +788,8 @@ extension on RemoteSendHistoryItem {
 List<RemoteSendHistoryItem> _mergeHistoryItems(
   List<RemoteSendHistoryItem> items,
 ) {
-  final sorted = [...items]..sort(
-      (left, right) =>
-          _recordTime(right).compareTo(_recordTime(left)),
-    );
+  final sorted = [...items]
+    ..sort((left, right) => _recordTime(right).compareTo(_recordTime(left)));
   final merged = <RemoteSendHistoryItem>[];
 
   for (final item in sorted) {
@@ -785,10 +803,8 @@ List<RemoteSendHistoryItem> _mergeHistoryItems(
     merged[matchIndex] = _mergeHistoryItem(merged[matchIndex], item);
   }
 
-  return merged..sort(
-      (left, right) =>
-          _recordTime(right).compareTo(_recordTime(left)),
-    );
+  return merged
+    ..sort((left, right) => _recordTime(right).compareTo(_recordTime(left)));
 }
 
 bool _shouldMergeHistoryItem(
@@ -840,9 +856,7 @@ RemoteSendHistoryItem _mergeHistoryItem(
     status: preferred.status == 'submitted'
         ? fallback.status
         : preferred.status,
-    result: preferred.result == 'pending'
-        ? fallback.result
-        : preferred.result,
+    result: preferred.result == 'pending' ? fallback.result : preferred.result,
     statusSource: preferred.statusSource.isNotEmpty
         ? preferred.statusSource
         : fallback.statusSource,
@@ -891,6 +905,83 @@ String _earlierTimeText(String left, String right) {
     return left;
   }
   return leftTime.isBefore(rightTime) ? left : right;
+}
+
+Future<bool> _canUseBackendHistory(
+  Ref ref,
+  WalletControllerState walletState,
+) async {
+  final publicKey = walletState.publicKey;
+  if (!walletState.isExternalWallet) {
+    return true;
+  }
+  if (!walletState.isUnlocked || publicKey == null || publicKey.isEmpty) {
+    return false;
+  }
+  return ref
+      .read(backendSessionManagerProvider)
+      .hasUsableStoredSession(publicKey);
+}
+
+Future<List<RemoteSendHistoryItem>> _loadChainSendHistory(
+  Ref ref,
+  WalletControllerState walletState,
+) async {
+  final ownerAddress = walletState.publicKey;
+  if (!walletState.isUnlocked || ownerAddress == null) {
+    return const [];
+  }
+
+  final portfolio = await ref
+      .read(portfolioRepositoryProvider)
+      .loadPortfolio(ownerAddress);
+  final assetDetailRepository = ref.read(assetDetailRepositoryProvider);
+  final activities = await Future.wait(
+    portfolio.assets.map((asset) async {
+      try {
+        final items = await assetDetailRepository.loadTokenActivity(
+          ownerAddress: ownerAddress,
+          mintAddress: asset.token.mintAddress,
+          symbol: asset.token.symbol,
+          limit: 20,
+        );
+        return [
+          for (final item in items)
+            if (item.direction == TransactionDirection.sent)
+              _sendHistoryItemFromActivity(
+                item,
+                mintAddress: asset.token.mintAddress,
+              ),
+        ];
+      } catch (_) {
+        return const <RemoteSendHistoryItem>[];
+      }
+    }),
+  );
+
+  return _mergeHistoryItems(activities.expand((items) => items).toList());
+}
+
+RemoteSendHistoryItem _sendHistoryItemFromActivity(
+  TransactionActivity activity, {
+  required String mintAddress,
+}) {
+  final timestamp = activity.timestamp ?? DateTime.now();
+  final timestampText = timestamp.toUtc().toIso8601String();
+  return RemoteSendHistoryItem(
+    signature: activity.signature == '--' ? '' : activity.signature,
+    txType: activity.kind == TransactionKind.swap ? 'swap' : 'send',
+    status: activity.status == 'success' ? 'confirmed' : activity.status,
+    result: activity.status == 'success' ? 'success' : activity.status,
+    statusSource: 'chain_activity',
+    fromMint: mintAddress,
+    amount: activity.amount == '--' ? null : activity.amount,
+    destinationAddress: activity.counterparty == '--'
+        ? null
+        : activity.counterparty,
+    submittedAt: timestampText,
+    confirmedAt: timestampText,
+  );
 }
 
 const double lamportsPerSol = 1000000000;

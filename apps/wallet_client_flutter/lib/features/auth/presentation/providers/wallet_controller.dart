@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/di/providers.dart';
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
 import '../../data/wallet_repository.dart';
@@ -26,7 +25,6 @@ class WalletController extends StateNotifier<WalletControllerState> {
     final repository = ref.read(walletRepositoryProvider);
     final walletPublicKeys = await repository.listWalletPublicKeys();
     await repository.clearUnlockedSession();
-    await _clearBackendSession();
     if (walletPublicKeys.isEmpty) {
       state = WalletControllerState.noWallet;
       return;
@@ -38,6 +36,17 @@ class WalletController extends StateNotifier<WalletControllerState> {
     );
     if (record == null) {
       state = WalletControllerState.noWallet;
+      return;
+    }
+
+    if (record.custody == WalletCustody.mobileWalletAdapter) {
+      final nextState = _resolvedBiometricEnabled(record)
+          ? _lockedState(record, walletPublicKeys: walletPublicKeys)
+          : _unlockedExternalState(record, walletPublicKeys: walletPublicKeys);
+      state = nextState;
+      if (nextState.isUnlocked) {
+        unawaited(_syncPushNotificationsIfEnabled(nextState));
+      }
       return;
     }
 
@@ -100,6 +109,53 @@ class WalletController extends StateNotifier<WalletControllerState> {
     unawaited(_syncPushNotificationsIfEnabled(nextState));
   }
 
+  Future<void> importMobileWalletAdapterWallet({
+    required String publicKey,
+    required String authToken,
+    required String pin,
+    String? walletLabel,
+  }) async {
+    final repository = ref.read(walletRepositoryProvider);
+    await repository.saveMobileWalletAdapterWallet(
+      publicKey: publicKey,
+      authToken: authToken,
+      pin: pin,
+      walletLabel: walletLabel,
+    );
+
+    final walletPublicKeys = await repository.listWalletPublicKeys();
+    final record = await repository.readRecord(publicKey: publicKey);
+    if (record == null) {
+      state = WalletControllerState.noWallet;
+      return;
+    }
+
+    var nextState = _unlockedExternalState(
+      record,
+      walletPublicKeys: walletPublicKeys,
+    );
+    state = nextState;
+    nextState = await _syncCloudChildSettings(nextState);
+    unawaited(
+      _registerAnonymousInstallIfNeeded(nextState, source: 'pin_setup'),
+    );
+    unawaited(_syncPushNotificationsIfEnabled(nextState));
+  }
+
+  Future<void> updateMobileWalletAdapterAuthToken(String authToken) async {
+    final publicKey = state.publicKey;
+    if (publicKey == null || !state.isExternalWallet) {
+      return;
+    }
+    await ref
+        .read(walletRepositoryProvider)
+        .updateMobileWalletAdapterAuthToken(
+          publicKey: publicKey,
+          authToken: authToken,
+        );
+    state = state.copyWith(mwaAuthToken: authToken, clearError: true);
+  }
+
   Future<void> unlock(String pin) async {
     final repository = ref.read(walletRepositoryProvider);
     final ephemeralStore = ref.read(mnemonicEphemeralStoreProvider);
@@ -114,6 +170,22 @@ class WalletController extends StateNotifier<WalletControllerState> {
     }
 
     try {
+      if (record.custody == WalletCustody.mobileWalletAdapter) {
+        if (record.biometricEnabled) {
+          state = _lockedState(
+            record,
+            walletPublicKeys: walletPublicKeys,
+            errorMessage: 'Use biometric unlock for this Seeker Vault wallet.',
+          );
+          return;
+        }
+        state = _unlockedExternalState(
+          record,
+          walletPublicKeys: walletPublicKeys,
+        );
+        return;
+      }
+
       final mnemonic = await repository.decryptMnemonic(
         pin: pin,
         record: record,
@@ -161,6 +233,15 @@ class WalletController extends StateNotifier<WalletControllerState> {
     return repository.decryptMnemonic(pin: pin, record: record);
   }
 
+  Future<void> verifyPin(String pin) async {
+    final repository = ref.read(walletRepositoryProvider);
+    final record = await repository.readRecord();
+    if (record == null) {
+      throw StateError('Wallet not found');
+    }
+    await repository.verifyPin(pin: pin, record: record);
+  }
+
   Future<void> selectWallet(String publicKey) async {
     final repository = ref.read(walletRepositoryProvider);
     await repository.selectWallet(publicKey);
@@ -176,7 +257,9 @@ class WalletController extends StateNotifier<WalletControllerState> {
       return;
     }
 
-    state = _lockedState(record, walletPublicKeys: walletPublicKeys);
+    state = record.custody == WalletCustody.mobileWalletAdapter
+        ? _unlockedExternalState(record, walletPublicKeys: walletPublicKeys)
+        : _lockedState(record, walletPublicKeys: walletPublicKeys);
   }
 
   void touch() {}
@@ -207,6 +290,24 @@ class WalletController extends StateNotifier<WalletControllerState> {
       if (!record.biometricEnabled) {
         debugPrint('[SECURITY] Biometric not enabled for the selected wallet.');
         return false;
+      }
+
+      if (record.custody == WalletCustody.mobileWalletAdapter) {
+        var nextState = _unlockedExternalState(
+          record,
+          walletPublicKeys: walletPublicKeys,
+        );
+        state = nextState;
+        nextState = await _syncCloudChildSettings(nextState);
+        unawaited(
+          _registerAnonymousInstallIfNeeded(
+            nextState,
+            source: 'biometric_unlock',
+          ),
+        );
+        unawaited(_syncPushNotificationsIfEnabled(nextState));
+        debugPrint('[SECURITY] Biometric unlock restored external wallet.');
+        return true;
       }
 
       final biometricSession = await repository.readBiometricSession();
@@ -270,13 +371,18 @@ class WalletController extends StateNotifier<WalletControllerState> {
       throw StateError('No wallet selected.');
     }
 
+    final record = await repository.readRecord(publicKey: publicKey);
+    final isExternalWallet =
+        record?.custody == WalletCustody.mobileWalletAdapter ||
+        state.isExternalWallet;
+
     if (enabled && !_supportsPersistentBiometricSessions) {
       throw StateError(
         'Persistent biometric unlock is currently supported only on Android.',
       );
     }
 
-    if (enabled) {
+    if (enabled && !isExternalWallet) {
       // 🔐 Security: Get mnemonic from ephemeral store, not from state
       final mnemonicTokenId = state.mnemonicTokenId;
       if (mnemonicTokenId == null) {
@@ -294,7 +400,7 @@ class WalletController extends StateNotifier<WalletControllerState> {
         mnemonic: mnemonic,
       );
       debugPrint('[SECURITY] Biometric session stored successfully');
-    } else {
+    } else if (!enabled && !isExternalWallet) {
       debugPrint('[SECURITY] Clearing biometric session for: $publicKey');
       await repository.clearBiometricSession();
       debugPrint('[SECURITY] Biometric session cleared');
@@ -560,7 +666,6 @@ class WalletController extends StateNotifier<WalletControllerState> {
 
   void lock() {
     unawaited(ref.read(walletRepositoryProvider).clearUnlockedSession());
-    unawaited(_clearBackendSession());
 
     // 🔐 Clear ephemeral mnemonic token
     if (state.mnemonicTokenId != null) {
@@ -570,6 +675,16 @@ class WalletController extends StateNotifier<WalletControllerState> {
 
     if (!state.hasWallet) {
       state = WalletControllerState.noWallet;
+      return;
+    }
+    if (state.isExternalWallet && !state.biometricEnabled) {
+      state = state.copyWith(
+        status: WalletStatus.unlocked,
+        clearMnemonic: true,
+        clearMnemonicToken: true,
+        clearError: true,
+        loggedOut: false,
+      );
       return;
     }
     state = state.copyWith(
@@ -587,6 +702,19 @@ class WalletController extends StateNotifier<WalletControllerState> {
 
     ref.read(portfolioCacheProvider.notifier).state = const {};
     await _clearBackendSession();
+
+    if (state.isExternalWallet) {
+      await ref.read(walletRepositoryProvider).clearUnlockedSession();
+      await ref.read(localNotificationServiceProvider).cancelAll();
+      state = state.copyWith(
+        status: WalletStatus.locked,
+        clearMnemonic: true,
+        clearMnemonicToken: true,
+        clearError: true,
+        loggedOut: true,
+      );
+      return;
+    }
 
     await ref.read(walletRepositoryProvider).clearAll();
     await ref.read(appSettingsRepositoryProvider).clearAll();
@@ -614,14 +742,16 @@ class WalletController extends StateNotifier<WalletControllerState> {
   }
 
   Future<void> _clearBackendSession() {
-    return ref
-        .read(secureStoreProvider)
-        .delete(AppConstants.backendAccessSessionKey);
+    return ref.read(backendSessionManagerProvider).clear();
   }
 
   Future<void> _syncPushNotificationsIfEnabled(
     WalletControllerState nextState,
   ) async {
+    if (!await _canUseBackendWithoutPrompt(nextState)) {
+      return;
+    }
+
     final settings = await ref.read(appSettingsRepositoryProvider).load();
     await ref
         .read(pushNotificationServiceProvider)
@@ -636,6 +766,9 @@ class WalletController extends StateNotifier<WalletControllerState> {
   ) async {
     final publicKey = nextState.publicKey;
     if (!nextState.isUnlocked || publicKey == null) {
+      return nextState;
+    }
+    if (!await _canUseBackendWithoutPrompt(nextState)) {
       return nextState;
     }
 
@@ -713,6 +846,19 @@ class WalletController extends StateNotifier<WalletControllerState> {
         childAddress: child.address,
       );
     }
+  }
+
+  Future<bool> _canUseBackendWithoutPrompt(WalletControllerState walletState) {
+    final publicKey = walletState.publicKey;
+    if (!walletState.isExternalWallet) {
+      return Future.value(true);
+    }
+    if (!walletState.isUnlocked || publicKey == null || publicKey.isEmpty) {
+      return Future.value(false);
+    }
+    return ref
+        .read(backendSessionManagerProvider)
+        .hasUsableStoredSession(publicKey);
   }
 
   Future<void> _pushCloudChildModeSettings(String publicKey) async {
@@ -833,12 +979,36 @@ class WalletController extends StateNotifier<WalletControllerState> {
       walletPublicKeys: walletPublicKeys,
       publicKey: record.publicKey,
       derivation: record.derivation,
+      custody: record.custody,
+      mwaAuthToken: record.mwaAuthToken.isEmpty ? null : record.mwaAuthToken,
+      walletLabel: record.walletLabel.isEmpty ? null : record.walletLabel,
       biometricEnabled: _resolvedBiometricEnabled(record),
       childModeEnabled: record.childModeEnabled,
       hasChildModePin: record.hasChildModePin,
       childWallets: childWallets,
       loggedOut: false,
       errorMessage: errorMessage,
+    );
+  }
+
+  WalletControllerState _unlockedExternalState(
+    StoredWalletRecord record, {
+    required List<String> walletPublicKeys,
+  }) {
+    final childWallets = _loadChildWallets(record);
+    return WalletControllerState(
+      status: WalletStatus.unlocked,
+      walletPublicKeys: walletPublicKeys,
+      publicKey: record.publicKey,
+      derivation: record.derivation,
+      custody: WalletCustody.mobileWalletAdapter,
+      mwaAuthToken: record.mwaAuthToken.isEmpty ? null : record.mwaAuthToken,
+      walletLabel: record.walletLabel.isEmpty ? null : record.walletLabel,
+      biometricEnabled: _resolvedBiometricEnabled(record),
+      childModeEnabled: record.childModeEnabled,
+      hasChildModePin: record.hasChildModePin,
+      childWallets: childWallets,
+      loggedOut: false,
     );
   }
 }

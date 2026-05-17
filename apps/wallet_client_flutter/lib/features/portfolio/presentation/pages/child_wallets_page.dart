@@ -38,7 +38,7 @@ class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
     }
 
     try {
-      await ref.read(walletControllerProvider.notifier).authenticate(pin);
+      await ref.read(walletControllerProvider.notifier).verifyPin(pin);
       return true;
     } catch (_) {
       if (mounted) {

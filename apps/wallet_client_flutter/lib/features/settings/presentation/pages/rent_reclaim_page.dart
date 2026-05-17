@@ -8,6 +8,7 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/error_alert_dialog.dart';
 import '../../../auth/data/solana_wallet_service.dart';
+import '../../../auth/domain/wallet_controller_state.dart';
 import '../../../auth/presentation/providers/ephemeral_store.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
@@ -190,6 +191,11 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
   Future<void> _reclaim(RentReclaimPreview preview) async {
     final walletState = ref.read(walletControllerProvider);
 
+    if (walletState.isExternalWallet) {
+      await _reclaimWithMobileWalletAdapter(preview, walletState);
+      return;
+    }
+
     String? mnemonic;
     if (walletState.mnemonicTokenId != null) {
       mnemonic = ref
@@ -254,6 +260,82 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
     }
   }
 
+  Future<void> _reclaimWithMobileWalletAdapter(
+    RentReclaimPreview preview,
+    WalletControllerState walletState,
+  ) async {
+    final ownerAddress = walletState.publicKey;
+    final authToken = walletState.mwaAuthToken;
+    if (ownerAddress == null || ownerAddress.isEmpty) {
+      await showErrorAlertDialog(
+        context,
+        title: 'Wallet Required',
+        message: 'Connect Seeker Vault again before reclaiming rent.',
+      );
+      return;
+    }
+    if (authToken == null || authToken.isEmpty) {
+      await showErrorAlertDialog(
+        context,
+        title: 'Wallet Required',
+        message: 'Connect Seeker Vault again before reclaiming rent.',
+      );
+      return;
+    }
+
+    setState(() {
+      _submitting = true;
+    });
+    await Future<void>.delayed(const Duration(milliseconds: 32));
+
+    try {
+      final solana = ref.read(solanaWalletServiceProvider);
+      final transactions = await solana.buildRentReclaimTransactions(
+        ownerAddress: ownerAddress,
+        accounts: preview.accounts,
+      );
+      final result = await ref
+          .read(mobileWalletAdapterServiceProvider)
+          .signAndSendTransactions(
+            authToken: authToken,
+            encodedTransactions: transactions,
+          );
+      await ref
+          .read(walletControllerProvider.notifier)
+          .updateMobileWalletAdapterAuthToken(result.authToken);
+      for (final signature in result.signatures) {
+        await solana.waitForConfirmation(signature);
+      }
+      ref.invalidate(portfolioProvider(ownerAddress));
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Submitted ${result.signatures.length} reclaim transaction${result.signatures.length == 1 ? '' : 's'}.',
+          ),
+        ),
+      );
+      _reloadPreview();
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      await showErrorAlertDialog(
+        context,
+        title: 'Reclaim Failed',
+        message: _normalizeError(error),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _submitting = false;
+        });
+      }
+    }
+  }
+
   String _normalizeError(Object? error) {
     final message = error?.toString().trim() ?? '';
     if (message.isEmpty) {
@@ -267,10 +349,7 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
 }
 
 class _SummaryRow extends StatelessWidget {
-  const _SummaryRow({
-    required this.label,
-    required this.value,
-  });
+  const _SummaryRow({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -316,10 +395,7 @@ class _ClosableAccountRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                account.name,
-                style: theme.textTheme.bodySmall,
-              ),
+              Text(account.name, style: theme.textTheme.bodySmall),
               const SizedBox(height: 2),
               Text(
                 Formatters.compactAddress(account.address, visibleChars: 5),

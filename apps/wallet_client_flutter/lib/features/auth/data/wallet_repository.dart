@@ -6,7 +6,15 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/crypto/local_cipher.dart';
 import '../../../core/security/biometric_session_protector.dart';
 import '../../../core/storage/key_value_store.dart';
+import '../domain/wallet_controller_state.dart';
 import '../domain/wallet_derivation.dart';
+
+WalletCustody _walletCustodyFromJson(String? value) {
+  return switch (value) {
+    'mobileWalletAdapter' => WalletCustody.mobileWalletAdapter,
+    _ => WalletCustody.localMnemonic,
+  };
+}
 
 class StoredWalletRecord {
   const StoredWalletRecord({
@@ -15,6 +23,9 @@ class StoredWalletRecord {
     required this.salt,
     required this.publicKey,
     this.derivation = WalletDerivation.legacy,
+    this.custody = WalletCustody.localMnemonic,
+    this.mwaAuthToken = '',
+    this.walletLabel = '',
     required this.biometricEnabled,
     this.childModeEnabled = false,
     this.childWalletsJson = const [],
@@ -28,6 +39,9 @@ class StoredWalletRecord {
   final String salt;
   final String publicKey;
   final WalletDerivation derivation;
+  final WalletCustody custody;
+  final String mwaAuthToken;
+  final String walletLabel;
   final bool biometricEnabled;
   final bool childModeEnabled;
   final List<Map<String, dynamic>> childWalletsJson;
@@ -46,6 +60,9 @@ class StoredWalletRecord {
     String? salt,
     String? publicKey,
     WalletDerivation? derivation,
+    WalletCustody? custody,
+    String? mwaAuthToken,
+    String? walletLabel,
     bool? biometricEnabled,
     bool? childModeEnabled,
     List<Map<String, dynamic>>? childWalletsJson,
@@ -60,6 +77,9 @@ class StoredWalletRecord {
       salt: salt ?? this.salt,
       publicKey: publicKey ?? this.publicKey,
       derivation: derivation ?? this.derivation,
+      custody: custody ?? this.custody,
+      mwaAuthToken: mwaAuthToken ?? this.mwaAuthToken,
+      walletLabel: walletLabel ?? this.walletLabel,
       biometricEnabled: biometricEnabled ?? this.biometricEnabled,
       childModeEnabled: childModeEnabled ?? this.childModeEnabled,
       childWalletsJson: childWalletsJson ?? this.childWalletsJson,
@@ -82,6 +102,9 @@ class StoredWalletRecord {
       'salt': salt,
       'publicKey': publicKey,
       'derivation': derivation.toJson(),
+      'custody': custody.name,
+      'mwaAuthToken': mwaAuthToken,
+      'walletLabel': walletLabel,
       'biometricEnabled': biometricEnabled,
       'childModeEnabled': childModeEnabled,
       'childWalletsJson': childWalletsJson,
@@ -102,6 +125,9 @@ class StoredWalletRecord {
           json['derivation'] as Map<String, dynamic>? ?? const {},
         ),
       ),
+      custody: _walletCustodyFromJson(json['custody'] as String?),
+      mwaAuthToken: json['mwaAuthToken'] as String? ?? '',
+      walletLabel: json['walletLabel'] as String? ?? '',
       biometricEnabled: json['biometricEnabled'] as bool? ?? false,
       childModeEnabled: json['childModeEnabled'] as bool? ?? false,
       childWalletsJson:
@@ -122,6 +148,9 @@ class StoredWalletRecord {
       salt: '',
       publicKey: '',
       derivation: WalletDerivation.legacy,
+      custody: WalletCustody.localMnemonic,
+      mwaAuthToken: '',
+      walletLabel: '',
       biometricEnabled: false,
       childModeEnabled: false,
       childWalletsJson: const [],
@@ -153,6 +182,7 @@ class BiometricWalletSession {
 }
 
 class WalletRepository {
+  static const _externalWalletPinMarker = 'benny-external-wallet-pin';
   static const _childModePinMarker = 'benny-child-mode-pin';
 
   WalletRepository(this._store, this._cipher, this._biometricSessionProtector);
@@ -230,10 +260,85 @@ class WalletRepository {
     await _clearLegacyKeys();
   }
 
+  Future<void> saveMobileWalletAdapterWallet({
+    required String publicKey,
+    required String authToken,
+    required String pin,
+    String? walletLabel,
+  }) async {
+    final encrypted = await _cipher.encryptText(_externalWalletPinMarker, pin);
+    final existingRecords = await readRecords();
+    final existingRecord = _findRecord(existingRecords, publicKey);
+    final newRecord = (existingRecord ?? StoredWalletRecord.empty()).copyWith(
+      cipherText: encrypted.cipherText,
+      nonce: encrypted.nonce,
+      salt: encrypted.salt,
+      publicKey: publicKey,
+      derivation: WalletDerivation.legacy,
+      custody: WalletCustody.mobileWalletAdapter,
+      mwaAuthToken: authToken,
+      walletLabel: walletLabel ?? '',
+      biometricEnabled: existingRecord?.biometricEnabled ?? false,
+    );
+
+    final updatedRecords = existingRecord == null
+        ? [...existingRecords, newRecord]
+        : [
+            for (final record in existingRecords)
+              if (record.publicKey == publicKey) newRecord else record,
+          ];
+    await _persistRecords(updatedRecords, selectedPublicKey: publicKey);
+    await _clearLegacyKeys();
+  }
+
+  Future<void> verifyPin({
+    required String pin,
+    required StoredWalletRecord record,
+  }) async {
+    if (record.custody == WalletCustody.mobileWalletAdapter) {
+      if (record.cipherText.isEmpty ||
+          record.nonce.isEmpty ||
+          record.salt.isEmpty) {
+        throw StateError('Set a Benny PIN for this Seeker Vault wallet first.');
+      }
+
+      final marker = await _cipher.decryptText(
+        cipherText: record.cipherText,
+        nonce: record.nonce,
+        salt: record.salt,
+        pin: pin,
+      );
+      if (marker != _externalWalletPinMarker) {
+        throw const FormatException('Invalid PIN.');
+      }
+      return;
+    }
+
+    await decryptMnemonic(pin: pin, record: record);
+  }
+
+  Future<void> updateMobileWalletAdapterAuthToken({
+    required String publicKey,
+    required String authToken,
+  }) async {
+    final records = await readRecords();
+    final updatedRecords = [
+      for (final record in records)
+        if (record.publicKey == publicKey)
+          record.copyWith(mwaAuthToken: authToken)
+        else
+          record,
+    ];
+    await _persistRecords(updatedRecords, selectedPublicKey: publicKey);
+  }
+
   Future<String> decryptMnemonic({
     required String pin,
     required StoredWalletRecord record,
   }) {
+    if (record.custody == WalletCustody.mobileWalletAdapter) {
+      throw StateError('This wallet is connected through Seeker Vault.');
+    }
     return _cipher.decryptText(
       cipherText: record.cipherText,
       nonce: record.nonce,

@@ -131,6 +131,8 @@ class AppRouter {
                   returnHomeOnSuccess: extra.returnHomeOnSuccess,
                   derivation: extra.derivation,
                   publicKey: extra.publicKey,
+                  mobileWalletAuthToken: extra.mobileWalletAuthToken,
+                  walletLabel: extra.walletLabel,
                 )
               : PinSetupPage(mnemonic: extra as String);
 

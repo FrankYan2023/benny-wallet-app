@@ -64,7 +64,10 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
 
       if (!mounted) return;
 
-      setState(() => _submitting = false);
+      setState(() {
+        _submitting = false;
+        _biometricAttempting = false;
+      });
 
       if (unlocked) {
         debugPrint('[SECURITY] OK Biometric unlock successful');
@@ -73,7 +76,13 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
         debugPrint(
           '[SECURITY] ERROR Biometric unlock failed (invalid session)',
         );
-        setState(() => _biometricError = 'Session expired, use PIN');
+        final walletState = ref.read(walletControllerProvider);
+        setState(() {
+          _biometricError =
+              walletState.isExternalWallet && walletState.biometricEnabled
+              ? 'Biometric unlock failed. Try again.'
+              : 'Session expired, use PIN';
+        });
       }
     } catch (e) {
       debugPrint('[SECURITY] ERROR Biometric error: $e');

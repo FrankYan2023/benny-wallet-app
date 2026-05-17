@@ -9,6 +9,7 @@ import '../../core/security/biometric_session_protector.dart';
 import '../../core/services/app_badge_service.dart';
 import '../../core/services/biometric_auth_service.dart';
 import '../../core/services/local_notification_service.dart';
+import '../../core/services/mobile_wallet_adapter_service.dart';
 import '../../core/services/push_notification_service.dart';
 import '../../core/storage/key_value_store.dart';
 import '../../core/storage/secure_store.dart';
@@ -46,6 +47,7 @@ final backendSessionManagerProvider = Provider<BackendSessionManager>((ref) {
     ref: ref,
     store: ref.read(secureStoreProvider),
     authApiClient: ref.read(walletAuthApiClientProvider),
+    mobileWalletAdapterService: ref.read(mobileWalletAdapterServiceProvider),
   );
 });
 
@@ -78,6 +80,14 @@ final pushNotificationServiceProvider = Provider<PushNotificationService>((
   );
   ref.onDispose(service.dispose);
   return service;
+});
+
+final mobileWalletAdapterServiceProvider = Provider<MobileWalletAdapterService>(
+  (ref) => MobileWalletAdapterService(),
+);
+
+final seekerVaultAvailableProvider = FutureProvider<bool>((ref) {
+  return ref.read(mobileWalletAdapterServiceProvider).isSeekerVaultSupported();
 });
 
 final walletRepositoryProvider = Provider<WalletRepository>((ref) {

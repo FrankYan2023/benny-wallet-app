@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../app/di/providers.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../auth/domain/wallet_controller_state.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../auth/presentation/providers/ephemeral_store.dart';
 import '../../../portfolio/presentation/pages/portfolio_page.dart';
@@ -152,43 +153,15 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
   Future<void> _send() async {
     final walletState = ref.read(walletControllerProvider);
 
-    // 🔐 Get mnemonic from ephemeral store using token
-    String? mnemonic;
-    if (walletState.mnemonicTokenId != null) {
-      final ephemeralStore = ref.read(mnemonicEphemeralStoreProvider);
-      mnemonic = ephemeralStore.retrieveTemporary(walletState.mnemonicTokenId!);
-    } else if (walletState.mnemonic != null) {
-      // Fallback for legacy code path
-      mnemonic = walletState.mnemonic;
-    }
-
-    if (mnemonic == null) {
-      _finishWithResult(
-        SendResultData(
-          success: false,
-          signature: null,
-          amountDisplay: widget.draft.amountDisplay,
-          symbol: Formatters.tokenSymbol(widget.draft.token.symbol),
-          destinationAddress: widget.draft.destinationAddress,
-          message: 'Unlock the wallet again before sending.',
-        ),
-      );
-      return;
-    }
-
     try {
-      final portfolio = ref.read(activePortfolioProvider).valueOrNull;
       final solana = ref.read(solanaWalletServiceProvider);
       final currentAddress = walletState.publicKey;
-      final solBalance = currentAddress == null
-          ? portfolio?.assets
-                    .where((item) => item.token.isNative)
-                    .firstOrNull
-                    ?.balance ??
-                0
-          : solana.lamportsToSol(
-              await solana.getSolBalanceLamports(ownerAddress: currentAddress),
-            );
+      if (currentAddress == null) {
+        throw StateError('Wallet address is unavailable.');
+      }
+      final solBalance = solana.lamportsToSol(
+        await solana.getSolBalanceLamports(ownerAddress: currentAddress),
+      );
       final reservedRentSol = widget.draft.token.isNative
           ? solana.lamportsToSol(
               await solana.getSystemAccountRentExemptMinimumLamports(),
@@ -222,31 +195,17 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
         throw StateError('Not enough SOL after reserving the network fee.');
       }
 
-      final signature = widget.draft.token.isNative
-          ? await solana.sendSol(
-              mnemonic: mnemonic,
-              destinationAddress: widget.draft.destinationAddress,
-              lamports: solana.solToLamports(amountToSend),
-              derivation: walletState.derivation,
-              submissionAmount:
-                  '${Formatters.amount(amountToSend)} ${Formatters.tokenSymbol(widget.draft.token.symbol)}',
+      final signature = walletState.isExternalWallet
+          ? await _sendWithMobileWalletAdapter(
+              ownerAddress: currentAddress,
+              amountToSend: amountToSend,
             )
-          : await solana.sendSplToken(
-              mnemonic: mnemonic,
-              token: widget.draft.token,
-              destinationAddress: widget.draft.destinationAddress,
-              amount: solana.tokenUiToAmount(
-                widget.draft.amount,
-                widget.draft.token.decimals,
-              ),
-              derivation: walletState.derivation,
-              submissionAmount:
-                  '${Formatters.amount(widget.draft.amount)} ${Formatters.tokenSymbol(widget.draft.token.symbol)}',
+          : await _sendWithLocalMnemonic(
+              walletState: walletState,
+              amountToSend: amountToSend,
             );
 
-      if (currentAddress != null) {
-        ref.invalidate(portfolioProvider(currentAddress));
-      }
+      ref.invalidate(portfolioProvider(currentAddress));
       _finishWithResult(
         SendResultData(
           success: true,
@@ -269,6 +228,85 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
         ),
       );
     }
+  }
+
+  Future<String> _sendWithLocalMnemonic({
+    required WalletControllerState walletState,
+    required double amountToSend,
+  }) async {
+    String? mnemonic;
+    if (walletState.mnemonicTokenId != null) {
+      final ephemeralStore = ref.read(mnemonicEphemeralStoreProvider);
+      mnemonic = ephemeralStore.retrieveTemporary(walletState.mnemonicTokenId!);
+    } else if (walletState.mnemonic != null) {
+      mnemonic = walletState.mnemonic;
+    }
+
+    if (mnemonic == null) {
+      throw StateError('Unlock the wallet again before sending.');
+    }
+
+    final solana = ref.read(solanaWalletServiceProvider);
+    return widget.draft.token.isNative
+        ? solana.sendSol(
+            mnemonic: mnemonic,
+            destinationAddress: widget.draft.destinationAddress,
+            lamports: solana.solToLamports(amountToSend),
+            derivation: walletState.derivation,
+            submissionAmount:
+                '${Formatters.amount(amountToSend)} ${Formatters.tokenSymbol(widget.draft.token.symbol)}',
+          )
+        : solana.sendSplToken(
+            mnemonic: mnemonic,
+            token: widget.draft.token,
+            destinationAddress: widget.draft.destinationAddress,
+            amount: solana.tokenUiToAmount(
+              widget.draft.amount,
+              widget.draft.token.decimals,
+            ),
+            derivation: walletState.derivation,
+            submissionAmount:
+                '${Formatters.amount(widget.draft.amount)} ${Formatters.tokenSymbol(widget.draft.token.symbol)}',
+          );
+  }
+
+  Future<String> _sendWithMobileWalletAdapter({
+    required String ownerAddress,
+    required double amountToSend,
+  }) async {
+    final authToken = ref.read(walletControllerProvider).mwaAuthToken;
+    if (authToken == null || authToken.isEmpty) {
+      throw StateError('Connect Seeker Vault again before sending.');
+    }
+
+    final solana = ref.read(solanaWalletServiceProvider);
+    final encodedTransaction = widget.draft.token.isNative
+        ? await solana.buildSolTransferTransaction(
+            ownerAddress: ownerAddress,
+            destinationAddress: widget.draft.destinationAddress,
+            lamports: solana.solToLamports(amountToSend),
+          )
+        : await solana.buildSplTokenTransferTransaction(
+            ownerAddress: ownerAddress,
+            token: widget.draft.token,
+            destinationAddress: widget.draft.destinationAddress,
+            amount: solana.tokenUiToAmount(
+              widget.draft.amount,
+              widget.draft.token.decimals,
+            ),
+          );
+    final result = await ref
+        .read(mobileWalletAdapterServiceProvider)
+        .signAndSendTransactions(
+          authToken: authToken,
+          encodedTransactions: [encodedTransaction],
+        );
+    await ref
+        .read(walletControllerProvider.notifier)
+        .updateMobileWalletAdapterAuthToken(result.authToken);
+    final signature = result.signatures.first;
+    await solana.waitForConfirmation(signature);
+    return signature;
   }
 
   void _finishWithResult(SendResultData result) {

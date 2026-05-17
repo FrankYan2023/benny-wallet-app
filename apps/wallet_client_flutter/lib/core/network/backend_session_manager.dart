@@ -6,9 +6,11 @@ import 'package:solana/base58.dart';
 import 'package:solana/solana.dart';
 
 import '../../features/auth/domain/wallet_derivation.dart';
+import '../../features/auth/domain/wallet_controller_state.dart';
 import '../../features/auth/presentation/providers/ephemeral_store.dart';
 import '../../features/auth/presentation/providers/wallet_controller.dart';
 import '../constants/app_constants.dart';
+import '../services/mobile_wallet_adapter_service.dart';
 import '../storage/key_value_store.dart';
 import 'wallet_auth_api_client.dart';
 
@@ -42,15 +44,27 @@ class BackendAccessSession {
   }
 }
 
+class MobileWalletBackendAuthentication {
+  const MobileWalletBackendAuthentication({
+    required this.authToken,
+    required this.session,
+  });
+
+  final String authToken;
+  final BackendAccessSession session;
+}
+
 class BackendSessionManager {
   BackendSessionManager({
     required Ref ref,
     required KeyValueStore store,
     required WalletAuthApiClient authApiClient,
+    required MobileWalletAdapterService mobileWalletAdapterService,
     DateTime Function()? clock,
   }) : _ref = ref,
        _store = store,
        _authApiClient = authApiClient,
+       _mobileWalletAdapterService = mobileWalletAdapterService,
        _clock = clock ?? DateTime.now;
 
   static const _refreshSkew = Duration(minutes: 5);
@@ -58,6 +72,7 @@ class BackendSessionManager {
   final Ref _ref;
   final KeyValueStore _store;
   final WalletAuthApiClient _authApiClient;
+  final MobileWalletAdapterService _mobileWalletAdapterService;
   final DateTime Function() _clock;
 
   BackendAccessSession? _cachedSession;
@@ -112,22 +127,62 @@ class BackendSessionManager {
     await _store.delete(AppConstants.backendAccessSessionKey);
   }
 
-  Future<BackendAccessSession> _authenticate(String ownerAddress) async {
-    final mnemonic = _readCurrentMnemonic();
-    final derivation = _readCurrentDerivation();
+  Future<MobileWalletBackendAuthentication> authenticateMobileWallet({
+    required String ownerAddress,
+    required String authToken,
+  }) async {
     final challenge = await _authApiClient.createChallenge(ownerAddress);
-    final keyPair = await Ed25519HDKeyPair.fromMnemonic(
-      mnemonic,
-      account: derivation.accountIndex,
-      change: derivation.changeIndex,
+    final result = await _mobileWalletAdapterService.signMessages(
+      authToken: authToken,
+      messages: [utf8.encode(challenge.message)],
+      addresses: [base58decode(ownerAddress)],
     );
-    final signature = await keyPair.sign(utf8.encode(challenge.message));
     final session = await _authApiClient.verifyChallenge(
       ownerAddress: ownerAddress,
       challenge: challenge.challenge,
-      signature: base58encode(signature.bytes.toList(growable: false)),
+      signature: result.signatures.first,
+    );
+    final backendSession = await _storeSession(session);
+    return MobileWalletBackendAuthentication(
+      authToken: result.authToken,
+      session: backendSession,
+    );
+  }
+
+  Future<bool> hasUsableStoredSession(String ownerAddress) async {
+    final cachedSession = _cachedSession ?? await _readStoredSession();
+    if (cachedSession == null) {
+      return false;
+    }
+    if (cachedSession.ownerAddress != ownerAddress) {
+      await clear();
+      return false;
+    }
+    if (_isExpiringSoon(cachedSession.expiresAt)) {
+      await clear();
+      return false;
+    }
+
+    _cachedSession = cachedSession;
+    return true;
+  }
+
+  Future<BackendAccessSession> _authenticate(String ownerAddress) async {
+    final challenge = await _authApiClient.createChallenge(ownerAddress);
+    final signature = await _signChallengeMessage(
+      ownerAddress: ownerAddress,
+      message: challenge.message,
+    );
+    final session = await _authApiClient.verifyChallenge(
+      ownerAddress: ownerAddress,
+      challenge: challenge.challenge,
+      signature: signature,
     );
 
+    return _storeSession(session);
+  }
+
+  Future<BackendAccessSession> _storeSession(WalletAuthSession session) async {
     final backendSession = BackendAccessSession(
       accessToken: session.accessToken,
       expiresAt: session.expiresAt,
@@ -139,6 +194,39 @@ class BackendSessionManager {
       jsonEncode(backendSession.toJson()),
     );
     return backendSession;
+  }
+
+  Future<String> _signChallengeMessage({
+    required String ownerAddress,
+    required String message,
+  }) async {
+    final walletState = _ref.read(walletControllerProvider);
+    if (walletState.custody == WalletCustody.mobileWalletAdapter) {
+      final authToken = walletState.mwaAuthToken;
+      if (authToken == null || authToken.isEmpty) {
+        throw StateError('Connect Seeker Vault again to continue.');
+      }
+
+      final result = await _mobileWalletAdapterService.signMessages(
+        authToken: authToken,
+        messages: [utf8.encode(message)],
+        addresses: [base58decode(ownerAddress)],
+      );
+      await _ref
+          .read(walletControllerProvider.notifier)
+          .updateMobileWalletAdapterAuthToken(result.authToken);
+      return result.signatures.first;
+    }
+
+    final mnemonic = _readCurrentMnemonic();
+    final derivation = _readCurrentDerivation();
+    final keyPair = await Ed25519HDKeyPair.fromMnemonic(
+      mnemonic,
+      account: derivation.accountIndex,
+      change: derivation.changeIndex,
+    );
+    final signature = await keyPair.sign(utf8.encode(message));
+    return base58encode(signature.bytes.toList(growable: false));
   }
 
   String _readCurrentMnemonic() {

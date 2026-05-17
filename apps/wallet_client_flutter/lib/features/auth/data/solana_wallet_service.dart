@@ -605,6 +605,33 @@ class SolanaWalletService {
     return signature;
   }
 
+  Future<String> buildSolTransferTransaction({
+    required String ownerAddress,
+    required String destinationAddress,
+    required int lamports,
+  }) async {
+    final rpcClient = await _getRpcClient();
+    final owner = Ed25519HDPublicKey.fromBase58(ownerAddress);
+    final destination = Ed25519HDPublicKey.fromBase58(destinationAddress);
+    final message = Message(
+      instructions: _buildSenderInstructions(
+        owner: owner,
+        instructions: [
+          SystemInstruction.transfer(
+            fundingAccount: owner,
+            recipientAccount: destination,
+            lamports: lamports,
+          ),
+        ],
+      ),
+    );
+    return _compileUnsignedTransaction(
+      rpcClient: rpcClient,
+      message: message,
+      feePayer: owner,
+    );
+  }
+
   Future<String> sendSplToken({
     required String mnemonic,
     required TokenInfo token,
@@ -682,6 +709,75 @@ class SolanaWalletService {
     return signature;
   }
 
+  Future<String> buildSplTokenTransferTransaction({
+    required String ownerAddress,
+    required TokenInfo token,
+    required String destinationAddress,
+    required int amount,
+  }) async {
+    final rpcClient = await _getRpcClient();
+    final owner = Ed25519HDPublicKey.fromBase58(ownerAddress);
+    final destination = Ed25519HDPublicKey.fromBase58(destinationAddress);
+    final mint = Ed25519HDPublicKey.fromBase58(token.mintAddress);
+    final tokenProgramType = await _resolveTokenProgramType(
+      rpcClient: rpcClient,
+      owner: owner,
+      mint: mint,
+      fallback: token.tokenProgramType,
+    );
+    final senderAta = await _getAssociatedTokenAccount(
+      rpcClient: rpcClient,
+      owner: owner,
+      mint: mint,
+      tokenProgramType: tokenProgramType,
+      commitment: Commitment.confirmed,
+    );
+    final recipientAta = await _getAssociatedTokenAccount(
+      rpcClient: rpcClient,
+      owner: destination,
+      mint: mint,
+      tokenProgramType: tokenProgramType,
+      commitment: Commitment.confirmed,
+    );
+
+    if (senderAta == null) {
+      throw StateError('Wallet has no token account for ${token.symbol}.');
+    }
+
+    final instructions = <Instruction>[];
+    final recipientTokenAddress = await _resolveRecipientTokenAccountAddress(
+      recipientAccount: recipientAta,
+      owner: destination,
+      mint: mint,
+      tokenProgramType: tokenProgramType,
+      instructions: instructions,
+      funder: owner,
+    );
+
+    final message = Message(
+      instructions: _buildSenderInstructions(
+        owner: owner,
+        instructions: [
+          ...instructions,
+          TokenInstruction.transferChecked(
+            source: Ed25519HDPublicKey.fromBase58(senderAta.pubkey),
+            mint: mint,
+            destination: recipientTokenAddress,
+            owner: owner,
+            amount: amount,
+            decimals: token.decimals,
+            tokenProgram: tokenProgramType,
+          ),
+        ],
+      ),
+    );
+    return _compileUnsignedTransaction(
+      rpcClient: rpcClient,
+      message: message,
+      feePayer: owner,
+    );
+  }
+
   Future<String> signAndSendPreparedTransaction({
     required String mnemonic,
     required String encodedTransaction,
@@ -699,6 +795,10 @@ class SolanaWalletService {
     );
     await _waitForConfirmation(signature);
     return signature;
+  }
+
+  Future<void> waitForConfirmation(String signature) {
+    return _waitForConfirmation(signature);
   }
 
   Future<List<String>> reclaimAllTokenAccountRent({
@@ -741,6 +841,47 @@ class SolanaWalletService {
     }
 
     return signatures;
+  }
+
+  Future<List<String>> buildRentReclaimTransactions({
+    required String ownerAddress,
+    required List<ReclaimableTokenAccount> accounts,
+  }) async {
+    if (accounts.isEmpty) {
+      return const [];
+    }
+
+    final rpcClient = await _getRpcClient();
+    final owner = Ed25519HDPublicKey.fromBase58(ownerAddress);
+    final transactions = <String>[];
+
+    for (var start = 0; start < accounts.length; start += 8) {
+      final chunk = accounts.skip(start).take(8);
+      final instructions = <Instruction>[
+        for (final account in chunk)
+          TokenInstruction.closeAccount(
+            accountToClose: Ed25519HDPublicKey.fromBase58(account.address),
+            destination: owner,
+            owner: owner,
+            tokenProgram: _toSolanaTokenProgramType(account.tokenProgramKind),
+          ),
+      ];
+      final message = Message(
+        instructions: _buildSenderInstructions(
+          owner: owner,
+          instructions: instructions,
+        ),
+      );
+      transactions.add(
+        await _compileUnsignedTransaction(
+          rpcClient: rpcClient,
+          message: message,
+          feePayer: owner,
+        ),
+      );
+    }
+
+    return transactions;
   }
 
   Future<List<TransactionActivity>> getRecentTransactions({
@@ -1208,6 +1349,24 @@ class SolanaWalletService {
       referenceId: referenceId,
       destinationAddress: destinationAddress,
     );
+  }
+
+  Future<String> _compileUnsignedTransaction({
+    required RpcClient rpcClient,
+    required Message message,
+    required Ed25519HDPublicKey feePayer,
+  }) async {
+    final blockhash = await rpcClient.getLatestBlockhash(
+      commitment: Commitment.confirmed,
+    );
+    final compiled = message.compile(
+      recentBlockhash: blockhash.value.blockhash,
+      feePayer: feePayer,
+    );
+    return SignedTx(
+      signatures: [Signature(List.filled(64, 0), publicKey: feePayer)],
+      compiledMessage: compiled,
+    ).encode();
   }
 
   Future<SignedTx> _signPreparedTransaction({

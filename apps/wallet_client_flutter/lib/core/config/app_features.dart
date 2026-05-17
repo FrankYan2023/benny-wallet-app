@@ -51,6 +51,11 @@ abstract final class AppFeatures {
     defaultValue: true,
   );
 
+  static const seekerVaultEnabled = bool.fromEnvironment(
+    'FEATURE_SEEKER_VAULT_ENABLED',
+    defaultValue: true,
+  );
+
   static bool get isLiteStore => storeMode == StoreMode.lite;
 
   static bool get canOpenSwap =>
@@ -65,6 +70,8 @@ abstract final class AppFeatures {
 
   static bool get canOpenWebView => !isLiteStore && webviewEnabled;
 
+  static bool get canConnectSeekerVault => seekerVaultEnabled;
+
   static String get storeModeLabel =>
       isLiteStore ? 'Lite store review build' : 'Full feature build';
 
@@ -78,6 +85,13 @@ abstract final class AppFeatures {
       label: 'Private key storage and local signing',
       enabled: true,
       reviewNote: 'Keys stay on device; transactions are signed natively.',
+    ),
+    FeatureReviewItem(
+      label: 'Seeker Vault',
+      enabled: canConnectSeekerVault,
+      reviewNote: canConnectSeekerVault
+          ? 'Enabled in packages, then gated by Seeker device detection at runtime.'
+          : 'Disabled only when the build flag is explicitly false.',
     ),
     const FeatureReviewItem(
       label: 'Biometric unlock',

@@ -12,28 +12,37 @@ import '../providers/wallet_controller.dart';
 
 class PinSetupFlowData {
   const PinSetupFlowData({
-    required this.mnemonic,
+    this.mnemonic,
     this.returnHomeOnSuccess = false,
     this.derivation = WalletDerivation.standard,
     this.publicKey,
+    this.mobileWalletAuthToken,
+    this.walletLabel,
   });
 
-  final String mnemonic;
+  final String? mnemonic;
   final bool returnHomeOnSuccess;
   final WalletDerivation derivation;
   final String? publicKey;
+  final String? mobileWalletAuthToken;
+  final String? walletLabel;
 
   PinSetupFlowData copyWith({
     String? mnemonic,
     bool? returnHomeOnSuccess,
     WalletDerivation? derivation,
     String? publicKey,
+    String? mobileWalletAuthToken,
+    String? walletLabel,
   }) {
     return PinSetupFlowData(
       mnemonic: mnemonic ?? this.mnemonic,
       returnHomeOnSuccess: returnHomeOnSuccess ?? this.returnHomeOnSuccess,
       derivation: derivation ?? this.derivation,
       publicKey: publicKey ?? this.publicKey,
+      mobileWalletAuthToken:
+          mobileWalletAuthToken ?? this.mobileWalletAuthToken,
+      walletLabel: walletLabel ?? this.walletLabel,
     );
   }
 }
@@ -41,18 +50,25 @@ class PinSetupFlowData {
 class PinSetupPage extends ConsumerStatefulWidget {
   const PinSetupPage({
     super.key,
-    required this.mnemonic,
+    this.mnemonic,
     this.returnHomeOnSuccess = false,
     this.derivation = WalletDerivation.standard,
     this.publicKey,
+    this.mobileWalletAuthToken,
+    this.walletLabel,
   });
 
   static const routeName = 'pinSetup';
   static const routePath = '/pin-setup';
-  final String mnemonic;
+  final String? mnemonic;
   final bool returnHomeOnSuccess;
   final WalletDerivation derivation;
   final String? publicKey;
+  final String? mobileWalletAuthToken;
+  final String? walletLabel;
+
+  bool get isMobileWalletAdapterSetup =>
+      mobileWalletAuthToken != null && mobileWalletAuthToken!.isNotEmpty;
 
   @override
   ConsumerState<PinSetupPage> createState() => _PinSetupPageState();
@@ -114,15 +130,26 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
     }
 
     setState(() => _submitting = true);
-    await ref
-        .read(walletControllerProvider.notifier)
-        .importWallet(
-          mnemonic: widget.mnemonic,
-          pin: _pin,
-          biometricEnabled: false,
-          derivation: widget.derivation,
-          publicKey: widget.publicKey,
-        );
+    if (widget.isMobileWalletAdapterSetup) {
+      await ref
+          .read(walletControllerProvider.notifier)
+          .importMobileWalletAdapterWallet(
+            publicKey: widget.publicKey!,
+            authToken: widget.mobileWalletAuthToken!,
+            pin: _pin,
+            walletLabel: widget.walletLabel,
+          );
+    } else {
+      await ref
+          .read(walletControllerProvider.notifier)
+          .importWallet(
+            mnemonic: widget.mnemonic!,
+            pin: _pin,
+            biometricEnabled: false,
+            derivation: widget.derivation,
+            publicKey: widget.publicKey,
+          );
+    }
     if (!mounted) {
       return;
     }
@@ -191,9 +218,20 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
                 ),
                 const Spacer(),
                 Text(
-                  _confirming ? 'Confirm PIN' : 'Set PIN',
+                  _confirming ? 'Confirm PIN' : 'Set Benny PIN',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
+                if (widget.isMobileWalletAdapterSetup) ...[
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      'This protects Benny settings and child accounts. Seeker keeps signing keys in Seeker Wallet.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 20),
                 PinDots(filledCount: _activePin.length),
                 const SizedBox(height: 30),

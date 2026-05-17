@@ -10,6 +10,9 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/utils/clipboard_utils.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../asset_detail/presentation/pages/asset_detail_page.dart';
+import '../../../auth/domain/wallet_controller_state.dart';
+import '../../../auth/presentation/providers/wallet_controller.dart';
+import '../../../transaction_history/domain/transaction_activity.dart';
 import '../../domain/notification_message.dart';
 import '../providers/notification_inbox_provider.dart';
 
@@ -19,8 +22,25 @@ final receivedTransferDetailProvider = FutureProvider.autoDispose
     });
 
 final receivedTransfersProvider =
-    FutureProvider.autoDispose<List<RemoteReceivedTransferItem>>((ref) {
-      return ref.read(backendApiClientProvider).getReceivedTransfers(limit: 50);
+    FutureProvider.autoDispose<List<RemoteReceivedTransferItem>>((ref) async {
+      final walletState = ref.read(walletControllerProvider);
+      var backendItems = const <RemoteReceivedTransferItem>[];
+      if (await _canUseBackendHistory(ref, walletState)) {
+        try {
+          backendItems = await ref
+              .read(backendApiClientProvider)
+              .getReceivedTransfers(limit: 50);
+        } catch (_) {
+          if (!walletState.isExternalWallet) {
+            rethrow;
+          }
+        }
+      }
+      if (backendItems.isNotEmpty) {
+        return backendItems;
+      }
+
+      return _loadChainReceivedHistory(ref, walletState);
     });
 
 class NotificationsPage extends ConsumerWidget {
@@ -297,17 +317,26 @@ class _ReceivedHistoryTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(28),
       child: InkWell(
         borderRadius: BorderRadius.circular(28),
-        onTap: () => context.push(
-          ReceivedNotificationDetailPage.routePath,
-          extra: NotificationMessage(
-            id: 'received:${item.id}',
-            title: 'Funds received',
-            body: 'You received ${item.displayAmount}',
-            receivedAt: timestamp,
-            type: 'incoming_funds',
-            eventId: item.id,
-          ),
-        ),
+        onTap: () {
+          if (item.id.startsWith('chain:') && item.signature.isNotEmpty) {
+            launchUrl(
+              Uri.parse('https://solscan.io/tx/${item.signature}'),
+              mode: LaunchMode.externalApplication,
+            );
+            return;
+          }
+          context.push(
+            ReceivedNotificationDetailPage.routePath,
+            extra: NotificationMessage(
+              id: 'received:${item.id}',
+              title: 'Funds received',
+              body: 'You received ${item.displayAmount}',
+              receivedAt: timestamp,
+              type: 'incoming_funds',
+              eventId: item.id,
+            ),
+          );
+        },
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -1009,4 +1038,102 @@ DateTime? _parseTimestamp(String? value) {
     return null;
   }
   return DateTime.tryParse(value);
+}
+
+Future<bool> _canUseBackendHistory(
+  Ref ref,
+  WalletControllerState walletState,
+) async {
+  final publicKey = walletState.publicKey;
+  if (!walletState.isExternalWallet) {
+    return true;
+  }
+  if (!walletState.isUnlocked || publicKey == null || publicKey.isEmpty) {
+    return false;
+  }
+  return ref
+      .read(backendSessionManagerProvider)
+      .hasUsableStoredSession(publicKey);
+}
+
+Future<List<RemoteReceivedTransferItem>> _loadChainReceivedHistory(
+  Ref ref,
+  WalletControllerState walletState,
+) async {
+  final ownerAddress = walletState.publicKey;
+  if (!walletState.isUnlocked || ownerAddress == null) {
+    return const [];
+  }
+
+  final portfolio = await ref
+      .read(portfolioRepositoryProvider)
+      .loadPortfolio(ownerAddress);
+  final assetDetailRepository = ref.read(assetDetailRepositoryProvider);
+  final transfers = await Future.wait(
+    portfolio.assets.map((asset) async {
+      try {
+        final items = await assetDetailRepository.loadTokenActivity(
+          ownerAddress: ownerAddress,
+          mintAddress: asset.token.mintAddress,
+          symbol: asset.token.symbol,
+          limit: 20,
+        );
+        return [
+          for (final item in items)
+            if (item.direction == TransactionDirection.received)
+              _receivedTransferFromActivity(
+                item,
+                ownerAddress: ownerAddress,
+                mintAddress: asset.token.mintAddress,
+                symbol: asset.token.symbol,
+                name: asset.token.name,
+                logoUrl: asset.logoUrl ?? '',
+              ),
+        ];
+      } catch (_) {
+        return const <RemoteReceivedTransferItem>[];
+      }
+    }),
+  );
+
+  final items = transfers.expand((items) => items).toList();
+  items.sort((left, right) {
+    final leftTime =
+        _parseTimestamp(left.confirmedAt) ?? _parseTimestamp(left.createdAt);
+    final rightTime =
+        _parseTimestamp(right.confirmedAt) ?? _parseTimestamp(right.createdAt);
+    return (rightTime ?? DateTime.fromMillisecondsSinceEpoch(0)).compareTo(
+      leftTime ?? DateTime.fromMillisecondsSinceEpoch(0),
+    );
+  });
+  return items;
+}
+
+RemoteReceivedTransferItem _receivedTransferFromActivity(
+  TransactionActivity activity, {
+  required String ownerAddress,
+  required String mintAddress,
+  required String symbol,
+  required String name,
+  required String logoUrl,
+}) {
+  final timestamp = activity.timestamp ?? DateTime.now();
+  final timestampText = timestamp.toUtc().toIso8601String();
+  final signature = activity.signature == '--' ? '' : activity.signature;
+  return RemoteReceivedTransferItem(
+    id: signature.isEmpty
+        ? 'chain:$mintAddress:$timestampText'
+        : 'chain:$signature',
+    signature: signature,
+    recipientAddress: ownerAddress,
+    senderAddress: activity.counterparty == '--' ? null : activity.counterparty,
+    mintAddress: mintAddress,
+    symbol: symbol,
+    name: name,
+    logoUrl: logoUrl,
+    amountText: activity.amount == '--' ? '' : activity.amount,
+    status: activity.status,
+    createdAt: timestampText,
+    confirmedAt: timestampText,
+  );
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/di/providers.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/brand_logo.dart';
 import '../../../auth/domain/wallet_controller_state.dart';
@@ -42,7 +43,9 @@ class WelcomePage extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Confirm again'),
-        content: const Text('After deletion you may lose access to the phrase. Save it first.'),
+        content: const Text(
+          'After deletion you may lose access to the phrase. Save it first.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -66,7 +69,7 @@ class WelcomePage extends ConsumerWidget {
     required String routePath,
   }) async {
     final walletState = ref.read(walletControllerProvider);
-    if (walletState.hasWallet) {
+    if (walletState.hasWallet && !walletState.loggedOut) {
       final confirmed = await _confirmReplace(context);
       if (!confirmed || !context.mounted) {
         return;
@@ -88,6 +91,8 @@ class WelcomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final walletState = ref.watch(walletControllerProvider);
+    final seekerVaultAvailable =
+        ref.watch(seekerVaultAvailableProvider).valueOrNull ?? false;
 
     return AppScaffold(
       title: '',
@@ -99,7 +104,9 @@ class WelcomePage extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.fromLTRB(22, 22, 22, 22),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
+              color: Theme.of(
+                context,
+              ).colorScheme.surface.withValues(alpha: 0.95),
               borderRadius: BorderRadius.circular(34),
             ),
             child: Column(
@@ -125,8 +132,12 @@ class WelcomePage extends ConsumerWidget {
               children: [
                 Expanded(
                   child: _WarmActionCard(
-                    backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                    foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.secondaryContainer,
+                    foregroundColor: Theme.of(
+                      context,
+                    ).colorScheme.onSecondaryContainer,
                     icon: Icons.auto_awesome_rounded,
                     title: 'New wallet',
                     subtitle: 'Start a fresh default wallet',
@@ -140,11 +151,17 @@ class WelcomePage extends ConsumerWidget {
                 const SizedBox(width: 14),
                 Expanded(
                   child: _WarmActionCard(
-                    backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
-                    foregroundColor: Theme.of(context).colorScheme.onTertiaryContainer,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.tertiaryContainer,
+                    foregroundColor: Theme.of(
+                      context,
+                    ).colorScheme.onTertiaryContainer,
                     icon: Icons.download_rounded,
                     title: 'Import wallet',
-                    subtitle: 'Restore from recovery phrase',
+                    subtitle: seekerVaultAvailable
+                        ? 'Phrase or Seeker Vault'
+                        : 'Restore from recovery phrase',
                     onTap: () => _startFlow(
                       context,
                       ref,

@@ -149,21 +149,7 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
   Future<void> _executeSwap() async {
     final walletState = ref.read(walletControllerProvider);
 
-    // 🔐 Get mnemonic from ephemeral store using token
-    String? mnemonic;
-    if (walletState.mnemonicTokenId != null) {
-      final ephemeralStore = ref.read(mnemonicEphemeralStoreProvider);
-      mnemonic = ephemeralStore.retrieveTemporary(walletState.mnemonicTokenId!);
-    } else if (walletState.mnemonic != null) {
-      // Fallback for legacy code path
-      mnemonic = walletState.mnemonic;
-    }
-
     final publicKey = walletState.publicKey;
-    if (mnemonic == null) {
-      _finish(errorMessage: 'Unlock the wallet again before swapping.');
-      return;
-    }
     if (publicKey == null) {
       _finish(errorMessage: 'Wallet address is unavailable.');
       return;
@@ -187,19 +173,63 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
             slippageBps: widget.review.slippageBps,
             priorityPreset: widget.review.priorityPreset.apiValue,
           );
-      final signature = await ref
-          .read(solanaWalletServiceProvider)
-          .signAndSendPreparedTransaction(
-            mnemonic: mnemonic,
-            encodedTransaction: refreshedBuild.swapTransaction,
-            derivation: walletState.derivation,
-          );
+      final signature = walletState.isExternalWallet
+          ? await _signAndSendSwapWithMobileWalletAdapter(
+              refreshedBuild.swapTransaction,
+            )
+          : await _signAndSendSwapWithLocalMnemonic(
+              encodedTransaction: refreshedBuild.swapTransaction,
+            );
       ref.invalidate(portfolioProvider(publicKey));
       _finish(signature: signature);
     } catch (error) {
       debugPrint('Swap execute failed: $error');
       _finish(errorMessage: _friendlyError(error));
     }
+  }
+
+  Future<String> _signAndSendSwapWithLocalMnemonic({
+    required String encodedTransaction,
+  }) {
+    final walletState = ref.read(walletControllerProvider);
+    String? mnemonic;
+    if (walletState.mnemonicTokenId != null) {
+      final ephemeralStore = ref.read(mnemonicEphemeralStoreProvider);
+      mnemonic = ephemeralStore.retrieveTemporary(walletState.mnemonicTokenId!);
+    } else if (walletState.mnemonic != null) {
+      mnemonic = walletState.mnemonic;
+    }
+
+    if (mnemonic == null) {
+      throw StateError('Unlock the wallet again before swapping.');
+    }
+
+    return ref.read(solanaWalletServiceProvider).signAndSendPreparedTransaction(
+          mnemonic: mnemonic,
+          encodedTransaction: encodedTransaction,
+          derivation: walletState.derivation,
+        );
+  }
+
+  Future<String> _signAndSendSwapWithMobileWalletAdapter(
+    String encodedTransaction,
+  ) async {
+    final authToken = ref.read(walletControllerProvider).mwaAuthToken;
+    if (authToken == null || authToken.isEmpty) {
+      throw StateError('Connect Seeker Vault again before swapping.');
+    }
+    final result = await ref
+        .read(mobileWalletAdapterServiceProvider)
+        .signAndSendTransactions(
+          authToken: authToken,
+          encodedTransactions: [encodedTransaction],
+        );
+    await ref
+        .read(walletControllerProvider.notifier)
+        .updateMobileWalletAdapterAuthToken(result.authToken);
+    final signature = result.signatures.first;
+    await ref.read(solanaWalletServiceProvider).waitForConfirmation(signature);
+    return signature;
   }
 
   void _finish({String? signature, String? errorMessage}) {

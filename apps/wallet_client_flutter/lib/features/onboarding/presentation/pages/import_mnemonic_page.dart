@@ -1,30 +1,35 @@
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/di/providers.dart';
+import '../../../../core/config/app_features.dart';
 import '../../../../core/platform/platform_capabilities.dart';
 import '../../../../core/security/secure_screen.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/responsive_action_group.dart';
+import '../../../auth/presentation/pages/pin_setup_page.dart';
 import 'import_wallet_loading_page.dart';
 
-class ImportMnemonicPage extends StatefulWidget {
+class ImportMnemonicPage extends ConsumerStatefulWidget {
   const ImportMnemonicPage({super.key});
 
   static const routeName = 'importMnemonic';
   static const routePath = '/import';
 
   @override
-  State<ImportMnemonicPage> createState() => _ImportMnemonicPageState();
+  ConsumerState<ImportMnemonicPage> createState() => _ImportMnemonicPageState();
 }
 
-class _ImportMnemonicPageState extends State<ImportMnemonicPage> {
+class _ImportMnemonicPageState extends ConsumerState<ImportMnemonicPage> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   final _scrollController = ScrollController();
   String? _lastAutoDismissedMnemonic;
   bool _submitting = false;
+  bool _connectingVault = false;
 
   String get _normalizedMnemonic =>
       Validators.normalizeMnemonic(_controller.text);
@@ -112,6 +117,47 @@ class _ImportMnemonicPageState extends State<ImportMnemonicPage> {
     setState(() => _submitting = false);
   }
 
+  Future<void> _connectSeekerVault() async {
+    if (_connectingVault) {
+      return;
+    }
+
+    setState(() => _connectingVault = true);
+    try {
+      final connection = await ref
+          .read(mobileWalletAdapterServiceProvider)
+          .connect();
+      final authentication = await ref
+          .read(backendSessionManagerProvider)
+          .authenticateMobileWallet(
+            ownerAddress: connection.publicKey,
+            authToken: connection.authToken,
+          );
+      if (!mounted) {
+        return;
+      }
+      await context.push(
+        PinSetupPage.routePath,
+        extra: PinSetupFlowData(
+          publicKey: connection.publicKey,
+          mobileWalletAuthToken: authentication.authToken,
+          walletLabel: connection.accountLabel,
+        ),
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_friendlyVaultError(error))));
+    } finally {
+      if (mounted) {
+        setState(() => _connectingVault = false);
+      }
+    }
+  }
+
   void _clearMnemonic() {
     _controller.clear();
     _lastAutoDismissedMnemonic = null;
@@ -125,6 +171,8 @@ class _ImportMnemonicPageState extends State<ImportMnemonicPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final seekerVaultAvailable =
+        ref.watch(seekerVaultAvailableProvider).valueOrNull ?? false;
 
     return SecureScreen(
       child: AppScaffold(
@@ -189,6 +237,14 @@ class _ImportMnemonicPageState extends State<ImportMnemonicPage> {
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ),
+                    if (AppFeatures.canConnectSeekerVault &&
+                        seekerVaultAvailable) ...[
+                      _SeekerVaultCard(
+                        connecting: _connectingVault,
+                        onConnect: _connectSeekerVault,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                     WalletCard(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,6 +301,78 @@ class _ImportMnemonicPageState extends State<ImportMnemonicPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  String _friendlyVaultError(Object error) {
+    final message = error.toString().toLowerCase();
+    if (message.contains('mwa_no_wallet') ||
+        message.contains('no compatible wallet')) {
+      return 'Install or enable Seeker Wallet, then try again.';
+    }
+    if (message.contains('unsupported')) {
+      return 'Seeker Vault import is available on Android only.';
+    }
+    if (message.contains('cancel') || message.contains('interrupted')) {
+      return 'Seeker Vault connection was cancelled.';
+    }
+    return 'Unable to connect Seeker Vault right now.';
+  }
+}
+
+class _SeekerVaultCard extends StatelessWidget {
+  const _SeekerVaultCard({required this.connecting, required this.onConnect});
+
+  final bool connecting;
+  final VoidCallback onConnect;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return WalletCard(
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Icon(
+              Icons.security_rounded,
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Seeker Vault', style: theme.textTheme.titleMedium),
+                const SizedBox(height: 4),
+                Text(
+                  'Connect the hardware-backed wallet on this Seeker.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          FilledButton.tonal(
+            onPressed: connecting ? null : onConnect,
+            child: connecting
+                ? const SizedBox.square(
+                    dimension: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Connect'),
+          ),
+        ],
       ),
     );
   }
