@@ -26,6 +26,7 @@ class WalletController extends StateNotifier<WalletControllerState> {
     final walletPublicKeys = await repository.listWalletPublicKeys();
     await repository.clearUnlockedSession();
     if (walletPublicKeys.isEmpty) {
+      await _clearNoWalletCaches(repository);
       state = WalletControllerState.noWallet;
       return;
     }
@@ -35,11 +36,12 @@ class WalletController extends StateNotifier<WalletControllerState> {
       await repository.readRecord(),
     );
     if (record == null) {
+      await _clearNoWalletCaches(repository);
       state = WalletControllerState.noWallet;
       return;
     }
 
-    if (record.custody == WalletCustody.mobileWalletAdapter) {
+    if (record.custody != WalletCustody.localMnemonic) {
       final nextState = _resolvedBiometricEnabled(record)
           ? _lockedState(record, walletPublicKeys: walletPublicKeys)
           : _unlockedExternalState(record, walletPublicKeys: walletPublicKeys);
@@ -51,6 +53,19 @@ class WalletController extends StateNotifier<WalletControllerState> {
     }
 
     state = _lockedState(record, walletPublicKeys: walletPublicKeys);
+  }
+
+  Future<void> _clearNoWalletCaches(WalletRepository repository) async {
+    await _deauthorizeSeedVaultRecords(await repository.readRecords());
+
+    final ephemeralStore = ref.read(mnemonicEphemeralStoreProvider);
+    ephemeralStore.clearAll();
+
+    ref.read(portfolioCacheProvider.notifier).state = const {};
+    await _clearBackendSession();
+    await repository.clearAll();
+    await ref.read(appSettingsRepositoryProvider).clearAll();
+    await ref.read(localNotificationServiceProvider).cancelAll();
   }
 
   Future<void> importWallet({
@@ -135,6 +150,43 @@ class WalletController extends StateNotifier<WalletControllerState> {
       walletPublicKeys: walletPublicKeys,
     );
     state = nextState;
+    await _ensureBackendSessionForExternalWallet(nextState);
+    nextState = await _syncCloudChildSettings(nextState);
+    unawaited(
+      _registerAnonymousInstallIfNeeded(nextState, source: 'pin_setup'),
+    );
+    unawaited(_syncPushNotificationsIfEnabled(nextState));
+  }
+
+  Future<void> importSeedVaultWallet({
+    required String publicKey,
+    required String authToken,
+    required String derivationPath,
+    required String pin,
+    String? walletLabel,
+  }) async {
+    final repository = ref.read(walletRepositoryProvider);
+    await repository.saveSeedVaultWallet(
+      publicKey: publicKey,
+      authToken: authToken,
+      derivationPath: derivationPath,
+      pin: pin,
+      walletLabel: walletLabel,
+    );
+
+    final walletPublicKeys = await repository.listWalletPublicKeys();
+    final record = await repository.readRecord(publicKey: publicKey);
+    if (record == null) {
+      state = WalletControllerState.noWallet;
+      return;
+    }
+
+    var nextState = _unlockedExternalState(
+      record,
+      walletPublicKeys: walletPublicKeys,
+    );
+    state = nextState;
+    await _ensureBackendSessionForExternalWallet(nextState);
     nextState = await _syncCloudChildSettings(nextState);
     unawaited(
       _registerAnonymousInstallIfNeeded(nextState, source: 'pin_setup'),
@@ -170,7 +222,7 @@ class WalletController extends StateNotifier<WalletControllerState> {
     }
 
     try {
-      if (record.custody == WalletCustody.mobileWalletAdapter) {
+      if (record.custody != WalletCustody.localMnemonic) {
         if (record.biometricEnabled) {
           state = _lockedState(
             record,
@@ -257,7 +309,7 @@ class WalletController extends StateNotifier<WalletControllerState> {
       return;
     }
 
-    state = record.custody == WalletCustody.mobileWalletAdapter
+    state = record.custody != WalletCustody.localMnemonic
         ? _unlockedExternalState(record, walletPublicKeys: walletPublicKeys)
         : _lockedState(record, walletPublicKeys: walletPublicKeys);
   }
@@ -292,7 +344,7 @@ class WalletController extends StateNotifier<WalletControllerState> {
         return false;
       }
 
-      if (record.custody == WalletCustody.mobileWalletAdapter) {
+      if (record.custody != WalletCustody.localMnemonic) {
         var nextState = _unlockedExternalState(
           record,
           walletPublicKeys: walletPublicKeys,
@@ -373,12 +425,12 @@ class WalletController extends StateNotifier<WalletControllerState> {
 
     final record = await repository.readRecord(publicKey: publicKey);
     final isExternalWallet =
-        record?.custody == WalletCustody.mobileWalletAdapter ||
+        (record != null && record.custody != WalletCustody.localMnemonic) ||
         state.isExternalWallet;
 
     if (enabled && !_supportsPersistentBiometricSessions) {
       throw StateError(
-        'Persistent biometric unlock is currently supported only on Android.',
+        'Persistent biometric unlock is not supported on this device.',
       );
     }
 
@@ -491,7 +543,7 @@ class WalletController extends StateNotifier<WalletControllerState> {
       hasChildModePin: false,
       clearError: true,
     );
-    unawaited(_pushCloudChildModeSettings(publicKey));
+    unawaited(_clearCloudChildModeSettings(publicKey));
     debugPrint('[SECURITY] Child mode disabled');
   }
 
@@ -697,26 +749,16 @@ class WalletController extends StateNotifier<WalletControllerState> {
   }
 
   Future<void> logOut() async {
+    final repository = ref.read(walletRepositoryProvider);
+    await _deauthorizeSeedVaultRecords(await repository.readRecords());
+
     final ephemeralStore = ref.read(mnemonicEphemeralStoreProvider);
     ephemeralStore.clearAll();
 
     ref.read(portfolioCacheProvider.notifier).state = const {};
     await _clearBackendSession();
 
-    if (state.isExternalWallet) {
-      await ref.read(walletRepositoryProvider).clearUnlockedSession();
-      await ref.read(localNotificationServiceProvider).cancelAll();
-      state = state.copyWith(
-        status: WalletStatus.locked,
-        clearMnemonic: true,
-        clearMnemonicToken: true,
-        clearError: true,
-        loggedOut: true,
-      );
-      return;
-    }
-
-    await ref.read(walletRepositoryProvider).clearAll();
+    await repository.clearAll();
     await ref.read(appSettingsRepositoryProvider).clearAll();
     await ref.read(localNotificationServiceProvider).cancelAll();
 
@@ -736,13 +778,34 @@ class WalletController extends StateNotifier<WalletControllerState> {
   }
 
   Future<void> removeWallet(String publicKey) async {
+    final repository = ref.read(walletRepositoryProvider);
+    final record = await repository.readRecord(publicKey: publicKey);
+    await _deauthorizeSeedVaultRecords([if (record != null) record]);
     await _clearBackendSession();
-    await ref.read(walletRepositoryProvider).removeWallet(publicKey);
+    await repository.removeWallet(publicKey);
     await _bootstrap();
   }
 
   Future<void> _clearBackendSession() {
     return ref.read(backendSessionManagerProvider).clear();
+  }
+
+  Future<void> _deauthorizeSeedVaultRecords(
+    List<StoredWalletRecord> records,
+  ) async {
+    final tokens = records
+        .where((record) => record.custody == WalletCustody.seedVault)
+        .map((record) => record.mwaAuthToken)
+        .where((token) => token.isNotEmpty)
+        .toSet();
+    if (tokens.isEmpty) {
+      return;
+    }
+
+    final service = ref.read(mobileWalletAdapterServiceProvider);
+    for (final token in tokens) {
+      await service.deauthorizeSeedVaultSeed(token);
+    }
   }
 
   Future<void> _syncPushNotificationsIfEnabled(
@@ -759,6 +822,24 @@ class WalletController extends StateNotifier<WalletControllerState> {
           walletState: nextState,
           notificationsEnabled: settings.notificationsEnabled,
         );
+  }
+
+  Future<void> _ensureBackendSessionForExternalWallet(
+    WalletControllerState nextState,
+  ) async {
+    final publicKey = nextState.publicKey;
+    if (!nextState.isExternalWallet ||
+        !nextState.isUnlocked ||
+        publicKey == null ||
+        publicKey.isEmpty) {
+      return;
+    }
+    try {
+      await ref.read(backendSessionManagerProvider).currentSession();
+    } catch (error, stack) {
+      debugPrint('[PUSH] External wallet backend session setup failed: $error');
+      debugPrintStack(stackTrace: stack, label: '[PUSH] Stack');
+    }
   }
 
   Future<WalletControllerState> _syncCloudChildSettings(
@@ -883,6 +964,16 @@ class WalletController extends StateNotifier<WalletControllerState> {
     }
   }
 
+  Future<void> _clearCloudChildModeSettings(String publicKey) async {
+    try {
+      await ref.read(backendApiClientProvider).clearWalletChildMode();
+    } catch (error, stack) {
+      debugPrint('[SYNC] Child mode cloud clear failed: $error');
+      debugPrintStack(stackTrace: stack, label: '[SYNC] Stack');
+      await _pushCloudChildModeSettings(publicKey);
+    }
+  }
+
   Future<void> _pushCloudChildAccount({
     required String childName,
     required String childAddress,
@@ -981,6 +1072,9 @@ class WalletController extends StateNotifier<WalletControllerState> {
       derivation: record.derivation,
       custody: record.custody,
       mwaAuthToken: record.mwaAuthToken.isEmpty ? null : record.mwaAuthToken,
+      seedVaultDerivationPath: record.seedVaultDerivationPath.isEmpty
+          ? null
+          : record.seedVaultDerivationPath,
       walletLabel: record.walletLabel.isEmpty ? null : record.walletLabel,
       biometricEnabled: _resolvedBiometricEnabled(record),
       childModeEnabled: record.childModeEnabled,
@@ -1001,8 +1095,11 @@ class WalletController extends StateNotifier<WalletControllerState> {
       walletPublicKeys: walletPublicKeys,
       publicKey: record.publicKey,
       derivation: record.derivation,
-      custody: WalletCustody.mobileWalletAdapter,
+      custody: record.custody,
       mwaAuthToken: record.mwaAuthToken.isEmpty ? null : record.mwaAuthToken,
+      seedVaultDerivationPath: record.seedVaultDerivationPath.isEmpty
+          ? null
+          : record.seedVaultDerivationPath,
       walletLabel: record.walletLabel.isEmpty ? null : record.walletLabel,
       biometricEnabled: _resolvedBiometricEnabled(record),
       childModeEnabled: record.childModeEnabled,

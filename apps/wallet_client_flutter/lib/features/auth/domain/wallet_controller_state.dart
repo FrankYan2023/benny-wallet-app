@@ -2,7 +2,7 @@ import 'wallet_derivation.dart';
 
 enum WalletStatus { loading, noWallet, locked, unlocked, error }
 
-enum WalletCustody { localMnemonic, mobileWalletAdapter }
+enum WalletCustody { localMnemonic, mobileWalletAdapter, seedVault }
 
 /// 👶 Child wallet information for parent monitoring
 class ChildWallet {
@@ -47,6 +47,7 @@ class WalletControllerState {
     this.mnemonic,
     this.mnemonicTokenId,
     this.mwaAuthToken,
+    this.seedVaultDerivationPath,
     this.walletLabel,
     this.biometricEnabled = false,
     this.loggedOut = false,
@@ -74,6 +75,8 @@ class WalletControllerState {
   /// This is not a private key; it only lets the app request wallet approval.
   final String? mwaAuthToken;
 
+  final String? seedVaultDerivationPath;
+
   final String? walletLabel;
 
   final bool biometricEnabled;
@@ -88,7 +91,9 @@ class WalletControllerState {
   final List<ChildWallet> childWallets;
 
   bool get hasWallet => walletPublicKeys.isNotEmpty;
-  bool get isExternalWallet => custody == WalletCustody.mobileWalletAdapter;
+  bool get isExternalWallet =>
+      custody == WalletCustody.mobileWalletAdapter ||
+      custody == WalletCustody.seedVault;
   bool get isUnlocked =>
       status == WalletStatus.unlocked &&
       (isExternalWallet || mnemonicTokenId != null || mnemonic != null);
@@ -102,6 +107,7 @@ class WalletControllerState {
     String? mnemonic,
     String? mnemonicTokenId,
     String? mwaAuthToken,
+    String? seedVaultDerivationPath,
     String? walletLabel,
     bool? biometricEnabled,
     bool? loggedOut,
@@ -124,6 +130,8 @@ class WalletControllerState {
           ? null
           : mnemonicTokenId ?? this.mnemonicTokenId,
       mwaAuthToken: mwaAuthToken ?? this.mwaAuthToken,
+      seedVaultDerivationPath:
+          seedVaultDerivationPath ?? this.seedVaultDerivationPath,
       walletLabel: walletLabel ?? this.walletLabel,
       biometricEnabled: biometricEnabled ?? this.biometricEnabled,
       loggedOut: loggedOut ?? this.loggedOut,

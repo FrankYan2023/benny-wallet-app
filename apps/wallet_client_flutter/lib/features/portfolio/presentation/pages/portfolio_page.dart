@@ -142,7 +142,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
               onPressed: () => context.push(AirdropPage.routePath),
               icon: const Icon(Icons.card_giftcard_rounded),
             ),
-          if (canOpenXStocks)
+          if (canOpenXStocks && !walletState.childModeEnabled)
             IconButton(
               tooltip: 'xStocks',
               onPressed: () => context.push(XStocksSwapPage.routePath),

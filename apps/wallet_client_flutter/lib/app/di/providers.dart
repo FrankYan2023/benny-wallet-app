@@ -87,7 +87,7 @@ final mobileWalletAdapterServiceProvider = Provider<MobileWalletAdapterService>(
 );
 
 final seekerVaultAvailableProvider = FutureProvider<bool>((ref) {
-  return ref.read(mobileWalletAdapterServiceProvider).isSeekerVaultSupported();
+  return ref.read(mobileWalletAdapterServiceProvider).isSeedVaultAvailable();
 });
 
 final walletRepositoryProvider = Provider<WalletRepository>((ref) {

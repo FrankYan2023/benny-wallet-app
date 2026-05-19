@@ -7,6 +7,7 @@ import '../../../../app/di/providers.dart';
 import '../../../../core/config/app_features.dart';
 import '../../../../core/platform/platform_capabilities.dart';
 import '../../../../core/security/secure_screen.dart';
+import '../../../../core/services/mobile_wallet_adapter_service.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/responsive_action_group.dart';
@@ -124,24 +125,28 @@ class _ImportMnemonicPageState extends ConsumerState<ImportMnemonicPage> {
 
     setState(() => _connectingVault = true);
     try {
-      final connection = await ref
-          .read(mobileWalletAdapterServiceProvider)
-          .connect();
-      final authentication = await ref
-          .read(backendSessionManagerProvider)
-          .authenticateMobileWallet(
-            ownerAddress: connection.publicKey,
-            authToken: connection.authToken,
-          );
+      final service = ref.read(mobileWalletAdapterServiceProvider);
+      final snapshot = await service.authorizeSeedVaultSeed();
       if (!mounted) {
         return;
       }
+      if (!snapshot.available) {
+        throw StateError('seed_vault_unavailable');
+      }
+      final selectedAccount = await _selectSeekerAccount(snapshot.accounts);
+      if (selectedAccount == null) {
+        throw StateError('seed_vault_no_accounts');
+      }
+      debugPrint('Seeker Vault import selected ${selectedAccount.publicKey}');
+      await service.markSeedVaultAccountAsUserWallet(selectedAccount);
+
       await context.push(
         PinSetupPage.routePath,
         extra: PinSetupFlowData(
-          publicKey: connection.publicKey,
-          mobileWalletAuthToken: authentication.authToken,
-          walletLabel: connection.accountLabel,
+          publicKey: selectedAccount.publicKey,
+          seedVaultAuthToken: selectedAccount.seedAuthToken,
+          seedVaultDerivationPath: selectedAccount.derivationPath,
+          walletLabel: selectedAccount.label,
         ),
       );
     } catch (error) {
@@ -156,6 +161,77 @@ class _ImportMnemonicPageState extends ConsumerState<ImportMnemonicPage> {
         setState(() => _connectingVault = false);
       }
     }
+  }
+
+  Future<SeedVaultAccount?> _selectSeekerAccount(
+    List<SeedVaultAccount> accounts,
+  ) async {
+    if (accounts.isEmpty) {
+      return null;
+    }
+
+    final assetCounts = {for (final account in accounts) account.publicKey: 0};
+
+    try {
+      final scanItems = await ref
+          .read(backendApiClientProvider)
+          .scanImportWalletAddresses(
+            accounts
+                .map((account) => account.publicKey)
+                .toList(growable: false),
+            fallbackAddresses: accounts
+                .map((account) => account.publicKey)
+                .toList(growable: false),
+          );
+      for (final item in scanItems) {
+        if (assetCounts.containsKey(item.address)) {
+          assetCounts[item.address] = item.assetCount;
+        }
+      }
+      if (scanItems.isNotEmpty) {
+        debugPrint(
+          'Seeker Vault scan results: ${scanItems.map((item) => '${item.address} active=${item.assetCount > 0}').join(' | ')}',
+        );
+      }
+    } catch (error) {
+      debugPrint('Seeker Vault account scan failed: $error');
+    }
+
+    final scannedAccounts =
+        accounts
+            .map(
+              (account) => _ScannedSeedVaultAccount(
+                account: account,
+                assetCount: assetCounts[account.publicKey] ?? 0,
+              ),
+            )
+            .toList(growable: false)
+          ..sort((left, right) {
+            final assetComparison = right.assetCount.compareTo(left.assetCount);
+            if (assetComparison != 0) {
+              return assetComparison;
+            }
+            return left.account.label.compareTo(right.account.label);
+          });
+    final fundedAccounts = scannedAccounts
+        .where((account) => account.hasAssets)
+        .toList(growable: false);
+    final visibleAccounts = fundedAccounts.isNotEmpty
+        ? fundedAccounts
+        : scannedAccounts;
+
+    if (!mounted) {
+      return null;
+    }
+    return showModalBottomSheet<SeedVaultAccount>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => _SeedVaultAccountPicker(
+        accounts: visibleAccounts,
+        hasFundedAccounts: fundedAccounts.isNotEmpty,
+      ),
+    );
   }
 
   void _clearMnemonic() {
@@ -314,10 +390,16 @@ class _ImportMnemonicPageState extends ConsumerState<ImportMnemonicPage> {
     if (message.contains('unsupported')) {
       return 'Seeker Vault import is available on Android only.';
     }
+    if (message.contains('seed_vault_no_accounts')) {
+      return 'No existing Seed Vault wallet accounts were returned for this seed.';
+    }
+    if (message.contains('seed_vault_unavailable')) {
+      return 'Seed Vault is not available on this device.';
+    }
     if (message.contains('cancel') || message.contains('interrupted')) {
       return 'Seeker Vault connection was cancelled.';
     }
-    return 'Unable to connect Seeker Vault right now.';
+    return 'Unable to connect Seeker Vault right now. Please try again.';
   }
 }
 
@@ -373,6 +455,149 @@ class _SeekerVaultCard extends StatelessWidget {
                 : const Text('Connect'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ScannedSeedVaultAccount {
+  const _ScannedSeedVaultAccount({
+    required this.account,
+    required this.assetCount,
+  });
+
+  final SeedVaultAccount account;
+  final int assetCount;
+
+  bool get hasAssets => assetCount > 0;
+}
+
+class _SeedVaultAccountPicker extends StatefulWidget {
+  const _SeedVaultAccountPicker({
+    required this.accounts,
+    required this.hasFundedAccounts,
+  });
+
+  final List<_ScannedSeedVaultAccount> accounts;
+  final bool hasFundedAccounts;
+
+  @override
+  State<_SeedVaultAccountPicker> createState() =>
+      _SeedVaultAccountPickerState();
+}
+
+class _SeedVaultAccountPickerState extends State<_SeedVaultAccountPicker> {
+  late _ScannedSeedVaultAccount _selectedAccount = widget.accounts.first;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.72,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.hasFundedAccounts
+                        ? 'Choose funded account'
+                        : 'Choose account',
+                    style: theme.textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.hasFundedAccounts
+                        ? 'Benny found account activity under this Seed Vault wallet.'
+                        : 'No funded account was found. These are the accounts returned by Seed Vault.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                itemCount: widget.accounts.length,
+                separatorBuilder: (_, _) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final scannedAccount = widget.accounts[index];
+                  final account = scannedAccount.account;
+                  final selected =
+                      account.publicKey == _selectedAccount.account.publicKey;
+                  return ListTile(
+                    leading: Icon(
+                      scannedAccount.hasAssets
+                          ? Icons.account_balance_wallet_rounded
+                          : Icons.account_balance_wallet_outlined,
+                      color: scannedAccount.hasAssets
+                          ? theme.colorScheme.primary
+                          : null,
+                    ),
+                    title: Text(account.label),
+                    subtitle: Text(
+                      '${account.publicKey}\n${account.derivationPath}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          scannedAccount.hasAssets
+                              ? '${scannedAccount.assetCount} assets'
+                              : 'No assets',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: scannedAccount.hasAssets
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          selected
+                              ? Icons.radio_button_checked_rounded
+                              : Icons.radio_button_unchecked_rounded,
+                          color: selected
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ],
+                    ),
+                    isThreeLine: true,
+                    selected: selected,
+                    onTap: () => setState(() {
+                      _selectedAccount = scannedAccount;
+                    }),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () =>
+                      Navigator.of(context).pop(_selectedAccount.account),
+                  child: const Text('Add'),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -48,6 +48,11 @@ val hasReleaseSigning =
         !releaseKeyAlias.isNullOrBlank() &&
         !releaseKeyPassword.isNullOrBlank()
 
+val liteSeekerApplicationId =
+    System.getenv("BENNY_LITE_SEEKER_APPLICATION_ID")
+        ?: localProperties.getProperty("LITE_SEEKER_APPLICATION_ID")
+        ?: "com.benny.wallet.lite.seeker"
+
 val requestedTasks = gradle.startParameter.taskNames.joinToString(" ")
 val buildingRelease = requestedTasks.contains("Release", ignoreCase = true)
 
@@ -113,6 +118,11 @@ android {
             applicationId = "com.benny.wallet.lite"
             resValue("string", "app_name", "Benny Wallet Lite")
         }
+        create("liteSeeker") {
+            dimension = "distribution"
+            applicationId = liteSeekerApplicationId
+            resValue("string", "app_name", "Benny Wallet Lite Seeker")
+        }
         create("full") {
             dimension = "distribution"
             applicationId = "com.benny.wallet"
@@ -153,4 +163,5 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("com.solanamobile:mobile-wallet-adapter-clientlib-ktx:2.1.0")
+    implementation("com.solanamobile:seedvault-wallet-sdk:0.4.0")
 }

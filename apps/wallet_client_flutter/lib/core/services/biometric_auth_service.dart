@@ -11,8 +11,8 @@ class BiometricAuthService {
   Future<bool> isSupported() async {
     try {
       final canCheck = await _auth.canCheckBiometrics;
-      final isSupported = await _auth.isDeviceSupported();
-      final result = canCheck || isSupported;
+      final biometrics = await _auth.getAvailableBiometrics();
+      final result = canCheck && biometrics.isNotEmpty;
       debugPrint('[SECURITY] Biometric supported: $result');
       return result;
     } catch (e) {
@@ -51,7 +51,7 @@ class BiometricAuthService {
           useErrorDialogs: true,
         ),
       );
-      
+
       if (authenticated) {
         debugPrint('[SECURITY] Biometric unlock approved');
       } else {
@@ -75,14 +75,15 @@ class BiometricAuthService {
 
     try {
       final authenticated = await _auth.authenticate(
-        localizedReason: 'Verify with biometrics to enable this security feature.',
+        localizedReason:
+            'Verify with biometrics to enable this security feature.',
         options: const AuthenticationOptions(
           biometricOnly: true,
-          stickyAuth: false,  // No sticky auth for setup (more secure)
+          stickyAuth: false, // No sticky auth for setup (more secure)
           useErrorDialogs: true,
         ),
       );
-      
+
       if (authenticated) {
         debugPrint('[SECURITY] Biometric setup approved');
       } else {

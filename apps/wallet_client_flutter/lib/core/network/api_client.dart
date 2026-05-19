@@ -634,6 +634,16 @@ class BackendApiClient {
     );
   }
 
+  Future<void> clearWalletChildMode() async {
+    await _requestJsonMapAuthenticated(
+      (options) => _dio.delete<Map<String, dynamic>>(
+        '/v1/wallet-profile/child-mode',
+        options: options,
+      ),
+      fallback: 'Unable to clear child mode settings right now.',
+    );
+  }
+
   Future<void> upsertChildAccount({
     required String childName,
     required String childAddress,

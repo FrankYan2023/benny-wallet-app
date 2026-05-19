@@ -2,6 +2,8 @@
 
 This note documents how to build and launch the iOS simulator version with the
 same Benny Wallet Lite business configuration used by the Android Lite package.
+For the full release artifact matrix, see
+[`release-build-matrix.md`](release-build-matrix.md).
 
 ## Purpose
 
@@ -52,20 +54,17 @@ destinations.
 ## Build Command
 
 This command aligns iOS with the Android Benny Wallet Lite feature/API
-configuration while producing a debug simulator app:
+configuration while producing a debug simulator app. Lite means swap and xStocks
+are disabled; all other business configuration should match Full:
 
 ```bash
 cd /Volumes/Data/workspace/benny-wallet/benny-wallet-app/apps/wallet_client_flutter
 
 flutter build ios --simulator --debug \
   --dart-define=STORE_MODE=lite \
-  --dart-define=FEATURE_WEBVIEW_ENABLED=false \
   --dart-define=FEATURE_SWAP_ENABLED=false \
   --dart-define=FEATURE_SWAP_XSTOCK_ENABLED=false \
   --dart-define=FEATURE_SWAP_TOKEN_EXCHANGE_ENABLED=false \
-  --dart-define=FEATURE_AIRDROP_ENABLED=true \
-  --dart-define=FEATURE_APP_UPDATES_ENABLED=false \
-  --dart-define=FEATURE_SEEKER_VAULT_ENABLED=true \
   --dart-define=API_BASE_URL=https://api.gobennyapp.com \
   --dart-define=SOLANA_RPC_URL=https://api.gobennyapp.com/v1/solana-rpc
 ```
@@ -77,13 +76,9 @@ flutter devices
 
 flutter build ios --simulator --debug -d <SIMULATOR_UDID> \
   --dart-define=STORE_MODE=lite \
-  --dart-define=FEATURE_WEBVIEW_ENABLED=false \
   --dart-define=FEATURE_SWAP_ENABLED=false \
   --dart-define=FEATURE_SWAP_XSTOCK_ENABLED=false \
   --dart-define=FEATURE_SWAP_TOKEN_EXCHANGE_ENABLED=false \
-  --dart-define=FEATURE_AIRDROP_ENABLED=true \
-  --dart-define=FEATURE_APP_UPDATES_ENABLED=false \
-  --dart-define=FEATURE_SEEKER_VAULT_ENABLED=true \
   --dart-define=API_BASE_URL=https://api.gobennyapp.com \
   --dart-define=SOLANA_RPC_URL=https://api.gobennyapp.com/v1/solana-rpc
 ```
@@ -106,11 +101,13 @@ xcrun simctl launch <SIMULATOR_UDID> com.benny.wallet.walletClientFlutter
 
 ## Firebase Notes
 
-Do not pass the Android Lite Firebase app id to iOS.
+Do not pass an Android Firebase app id to iOS, and do not pass an iOS Firebase
+app id to Android.
 
-The Android Lite build uses the Firebase client for package
-`com.benny.wallet.lite`, but that `FIREBASE_APP_ID` is an Android app id. Passing
-it into an iOS simulator build can crash Firebase Core with:
+Android and iOS receive-transfer notifications use different Firebase app
+records, even when they share the same Firebase project. Passing the wrong
+platform `FIREBASE_APP_ID` can break Firebase initialization or FCM token
+registration. On iOS, an invalid `GOOGLE_APP_ID` can crash Firebase Core with:
 
 ```text
 Configuration fails. It may be caused by an invalid GOOGLE_APP_ID
@@ -118,7 +115,8 @@ Configuration fails. It may be caused by an invalid GOOGLE_APP_ID
 
 For this simulator validation flow, omit Firebase `--dart-define` values unless
 an iOS Firebase app has been created and its iOS-specific values are available.
-The app can still validate wallet import and API connectivity without Firebase.
+The app can still validate wallet import and API connectivity without Firebase,
+but receive-transfer notifications require the correct iOS Firebase config.
 
 ## API Verification
 

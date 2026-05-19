@@ -27,10 +27,7 @@ import 'swap_execute_page.dart';
 enum SwapExperience { general, xstocks }
 
 class SwapPage extends ConsumerStatefulWidget {
-  const SwapPage({
-    super.key,
-    this.mode = SwapExperience.general,
-  });
+  const SwapPage({super.key, this.mode = SwapExperience.general});
 
   static const routeName = 'swap';
   static const routePath = '/swap';
@@ -54,9 +51,10 @@ class XStocksSwapPage extends StatelessWidget {
 }
 
 class _SwapPageState extends ConsumerState<SwapPage> {
+  static const _solMintAddress = 'So11111111111111111111111111111111111111112';
   static const _presetSlippageBps = [5, 50, 100, 300];
   static const _xStocksInputMints = {
-    'So11111111111111111111111111111111111111112',
+    _solMintAddress,
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
     'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
   };
@@ -64,6 +62,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   final _amountController = TextEditingController();
   final _customSlippageController = TextEditingController(text: '1.0');
   Timer? _quoteDebounce;
+  Timer? _quoteRefreshTimer;
 
   List<SwapTokenOption> _tokenOptions = const [];
   String? _optionsSignature;
@@ -73,6 +72,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   String? _quoteError;
   bool _loadingOptions = false;
   bool _loadingQuote = false;
+  bool _refreshingQuote = false;
   bool _buildingSwap = false;
   int _slippagePresetIndex = 1;
   bool _usingCustomSlippage = false;
@@ -93,6 +93,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   @override
   void dispose() {
     _quoteDebounce?.cancel();
+    _quoteRefreshTimer?.cancel();
     _amountController.dispose();
     _customSlippageController.dispose();
     super.dispose();
@@ -119,7 +120,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       );
     }
 
-    if (walletState.childModeEnabled && !_isXStocksMode) {
+    if (walletState.childModeEnabled) {
       return AppScaffold(
         title: _pageTitle,
         child: Center(
@@ -131,7 +132,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                 const Icon(Icons.lock_rounded, size: 40),
                 const SizedBox(height: 12),
                 const Text(
-                  'Swap is unavailable in child mode.',
+                  'Trading is unavailable in child mode.',
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -439,6 +440,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                     _SwapSettingsPanel(
                       rateText: _rateSummary,
                       slippageText: _slippageSummary,
+                      networkFeeText: _networkFeeSummary,
                       priorityText: _priorityPreset.label,
 
                       onTapSlippage: _editSlippage,
@@ -629,24 +631,30 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', // USDT
     ];
     if (_isXStocksMode) {
-      final options = _tokenOptions
-          .where(
-            (token) =>
-                token.category == 'xstock' ||
-                _xStocksInputMints.contains(token.token.mintAddress),
-          )
-          .where(
-            (token) => token.token.mintAddress != _inputToken?.token.mintAddress,
-          )
-          .toList()
-        ..sort((left, right) {
-          final leftIsBase = _xStocksInputMints.contains(left.token.mintAddress);
-          final rightIsBase = _xStocksInputMints.contains(right.token.mintAddress);
-          if (leftIsBase != rightIsBase) {
-            return leftIsBase ? -1 : 1;
-          }
-          return left.token.symbol.compareTo(right.token.symbol);
-        });
+      final options =
+          _tokenOptions
+              .where(
+                (token) =>
+                    token.category == 'xstock' ||
+                    _xStocksInputMints.contains(token.token.mintAddress),
+              )
+              .where(
+                (token) =>
+                    token.token.mintAddress != _inputToken?.token.mintAddress,
+              )
+              .toList()
+            ..sort((left, right) {
+              final leftIsBase = _xStocksInputMints.contains(
+                left.token.mintAddress,
+              );
+              final rightIsBase = _xStocksInputMints.contains(
+                right.token.mintAddress,
+              );
+              if (leftIsBase != rightIsBase) {
+                return leftIsBase ? -1 : 1;
+              }
+              return left.token.symbol.compareTo(right.token.symbol);
+            });
       return options;
     }
     return _tokenOptions
@@ -669,20 +677,25 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       }
     }
     if (_isXStocksMode) {
-      final preferredBaseOptions = options
-          .where((item) => _xStocksInputMints.contains(item.token.mintAddress))
-          .toList()
-        ..sort((left, right) {
-          final byValue = right.totalValueUsd.compareTo(left.totalValueUsd);
-          if (byValue != 0) {
-            return byValue;
-          }
-          final byBalance = right.availableBalance.compareTo(left.availableBalance);
-          if (byBalance != 0) {
-            return byBalance;
-          }
-          return left.token.symbol.compareTo(right.token.symbol);
-        });
+      final preferredBaseOptions =
+          options
+              .where(
+                (item) => _xStocksInputMints.contains(item.token.mintAddress),
+              )
+              .toList()
+            ..sort((left, right) {
+              final byValue = right.totalValueUsd.compareTo(left.totalValueUsd);
+              if (byValue != 0) {
+                return byValue;
+              }
+              final byBalance = right.availableBalance.compareTo(
+                left.availableBalance,
+              );
+              if (byBalance != 0) {
+                return byBalance;
+              }
+              return left.token.symbol.compareTo(right.token.symbol);
+            });
       if (preferredBaseOptions.isNotEmpty) {
         return preferredBaseOptions.first;
       }
@@ -759,15 +772,25 @@ class _SwapPageState extends ConsumerState<SwapPage> {
 
   void _scheduleQuote() {
     _quoteDebounce?.cancel();
+    _quoteRefreshTimer?.cancel();
     if (!_canQuote) {
       setState(() {
         _quote = null;
         _quoteError = null;
+        _loadingQuote = false;
       });
       return;
     }
 
-    _quoteDebounce = Timer(const Duration(milliseconds: 350), _fetchQuote);
+    _quoteDebounce = Timer(const Duration(milliseconds: 350), () {
+      _fetchQuote();
+      _quoteRefreshTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+        if (!_canQuote || _loadingQuote || _refreshingQuote) {
+          return;
+        }
+        _fetchQuote(showLoading: false);
+      });
+    });
   }
 
   bool get _canQuote {
@@ -911,6 +934,40 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     return _usingCustomSlippage ? 'Custom · $value' : value;
   }
 
+  String get _networkFeeSummary {
+    if (!_canQuote || _quote == null) {
+      return '--';
+    }
+
+    final priorityLamports = _estimatedPriorityLamports;
+    if (priorityLamports == null) {
+      return 'Auto';
+    }
+
+    final solAmount = (5000 + priorityLamports) / 1000000000;
+    final solPrice = _solUnitPrice;
+    if (solPrice == null || solPrice <= 0) {
+      return '≤ ${Formatters.amount(solAmount, maxDecimals: 8)} SOL';
+    }
+    return '≤ ${Formatters.usdPrice(solAmount * solPrice)}';
+  }
+
+  int? get _estimatedPriorityLamports {
+    return switch (_priorityPreset) {
+      SwapPriorityPreset.auto => null,
+      SwapPriorityPreset.normal => 200000,
+      SwapPriorityPreset.fast => 500000,
+      SwapPriorityPreset.turbo => 1000000,
+    };
+  }
+
+  double? get _solUnitPrice {
+    final sol = _tokenOptions
+        .where((token) => token.token.mintAddress == _solMintAddress)
+        .firstOrNull;
+    return _tokenUnitPrice(sol);
+  }
+
   String get _payAmountUsdText {
     final amount = double.tryParse(_amountController.text.trim());
     final price = _tokenUnitPrice(_inputToken);
@@ -947,7 +1004,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     return token.totalValueUsd / token.availableBalance;
   }
 
-  Future<void> _fetchQuote() async {
+  Future<void> _fetchQuote({bool showLoading = true}) async {
     final inputToken = _inputToken;
     final outputToken = _outputToken;
     final amount = double.tryParse(_amountController.text.trim());
@@ -959,10 +1016,13 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     }
 
     final requestId = ++_quoteRequestId;
-    setState(() {
-      _loadingQuote = true;
-      _quoteError = null;
-    });
+    _refreshingQuote = true;
+    if (showLoading) {
+      setState(() {
+        _loadingQuote = true;
+        _quoteError = null;
+      });
+    }
 
     try {
       final rawAmount = _toRawAmount(amount, inputToken.token.decimals);
@@ -980,6 +1040,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       setState(() {
         _quote = quote;
         _loadingQuote = false;
+        _quoteError = null;
       });
     } catch (error) {
       if (!mounted || requestId != _quoteRequestId) {
@@ -987,8 +1048,14 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       }
       setState(() {
         _loadingQuote = false;
-        _quoteError = _friendlyQuoteError(error);
+        if (showLoading || _quote == null) {
+          _quoteError = _friendlyQuoteError(error);
+        }
       });
+    } finally {
+      if (mounted && requestId == _quoteRequestId) {
+        _refreshingQuote = false;
+      }
     }
   }
 
@@ -1459,6 +1526,20 @@ class _SwapPageState extends ConsumerState<SwapPage> {
 
     setState(() => _buildingSwap = true);
     try {
+      final balanceError = await _validateLiveBalances(
+        ownerAddress: walletAddress,
+        inputToken: inputToken,
+        outputToken: outputToken,
+        amount: amount,
+      );
+      if (balanceError != null) {
+        if (!mounted) {
+          return;
+        }
+        await _showDialog(message: balanceError);
+        return;
+      }
+
       final buildResult = await ref
           .read(swapRepositoryProvider)
           .buildSwap(
@@ -1485,8 +1566,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         priorityPreset: _priorityPreset,
         slippageBps: _slippageBps,
       );
-      final confirmed = await _showSwapConfirmDialog(review);
-      if (!mounted || confirmed != true) {
+      if (!mounted) {
         return;
       }
       context.push(SwapExecutePage.routePath, extra: review);
@@ -1500,76 +1580,6 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         setState(() => _buildingSwap = false);
       }
     }
-  }
-
-  Future<bool?> _showSwapConfirmDialog(SwapReviewData review) {
-    return showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        final theme = Theme.of(dialogContext);
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
-          ),
-          contentPadding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Input token summary.
-              Row(
-                children: [
-                  _SwapTokenAvatar(option: review.inputToken, size: 40),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      Formatters.amount(review.inputAmountUi),
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              // Direction indicator.
-              Icon(
-                Icons.arrow_downward_rounded,
-                color: AppColors.primary,
-                size: 24,
-              ),
-              const SizedBox(height: 16),
-              // Output token summary.
-              Row(
-                children: [
-                  _SwapTokenAvatar(option: review.outputToken, size: 40),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      Formatters.amount(review.outputAmountUi),
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Swap'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   Future<void> _showDialog({required String message}) {
@@ -1586,6 +1596,68 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         ],
       ),
     );
+  }
+
+  Future<String?> _validateLiveBalances({
+    required String ownerAddress,
+    required SwapTokenOption inputToken,
+    required SwapTokenOption outputToken,
+    required double amount,
+  }) async {
+    final balances = await ref
+        .read(solanaWalletServiceProvider)
+        .loadPortfolioBalances(ownerAddress: ownerAddress);
+    final inputBalance =
+        _liveBalanceForMint(balances, inputToken.token.mintAddress) ??
+        inputToken.availableBalance;
+    if (amount > inputBalance + 0.000000001) {
+      return 'Insufficient balance.';
+    }
+
+    final solBalance =
+        _liveBalanceForMint(balances, _solMintAddress) ??
+        _tokenOptions
+            .where((token) => token.token.mintAddress == _solMintAddress)
+            .firstOrNull
+            ?.availableBalance ??
+        0;
+    final outputAccountExists =
+        outputToken.token.mintAddress == _solMintAddress ||
+        balances.any(
+          (item) =>
+              item.token.mintAddress == outputToken.token.mintAddress &&
+              item.existsOnChain,
+        );
+    final requiredSol = _estimatedRequiredSol(outputAccountExists);
+    final inputSolAmount = inputToken.token.mintAddress == _solMintAddress
+        ? amount
+        : 0.0;
+    if (solBalance + 0.000000001 < inputSolAmount + requiredSol) {
+      final reason = outputAccountExists
+          ? 'network fees'
+          : 'network fees and token account rent';
+      return 'Not enough SOL to cover $reason. Add a small amount of SOL and try again.';
+    }
+
+    return null;
+  }
+
+  double? _liveBalanceForMint(
+    List<AssetBalanceSnapshot> balances,
+    String mintAddress,
+  ) {
+    return balances
+        .where((item) => item.token.mintAddress == mintAddress)
+        .firstOrNull
+        ?.balance;
+  }
+
+  double _estimatedRequiredSol(bool outputAccountExists) {
+    final priorityLamports = _estimatedPriorityLamports ?? 0;
+    final feeLamports = 5000 + priorityLamports;
+    final tokenAccountRent = outputAccountExists ? 0.0 : 0.0021;
+    const safetyBuffer = 0.0002;
+    return feeLamports / 1000000000 + tokenAccountRent + safetyBuffer;
   }
 
   String _friendlyQuoteError(Object error) {
@@ -2007,6 +2079,7 @@ class _SwapSettingsPanel extends StatelessWidget {
   const _SwapSettingsPanel({
     required this.rateText,
     required this.slippageText,
+    required this.networkFeeText,
     required this.priorityText,
     required this.onTapSlippage,
     required this.onTapPriority,
@@ -2014,6 +2087,7 @@ class _SwapSettingsPanel extends StatelessWidget {
 
   final String rateText;
   final String slippageText;
+  final String networkFeeText;
   final String priorityText;
   final VoidCallback onTapSlippage;
   final VoidCallback onTapPriority;
@@ -2026,6 +2100,12 @@ class _SwapSettingsPanel extends StatelessWidget {
         label: 'Slippage',
         value: slippageText,
         onTap: onTapSlippage,
+      ),
+      _CompactSettingRowData(label: 'Network fee', value: networkFeeText),
+      const _CompactSettingRowData(
+        label: 'Platform fee',
+        value: '',
+        valueWidget: _PlatformFeeValue(),
       ),
       _CompactSettingRowData(
         label: 'Priority fee',
@@ -2066,11 +2146,13 @@ class _CompactSettingRowData {
   const _CompactSettingRowData({
     required this.label,
     required this.value,
+    this.valueWidget,
     this.onTap,
   });
 
   final String label;
   final String value;
+  final Widget? valueWidget;
   final VoidCallback? onTap;
 }
 
@@ -2105,16 +2187,21 @@ class _CompactSettingRow extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              data.value,
-              textAlign: TextAlign.end,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: 12.5,
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w700,
-              ),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child:
+                  data.valueWidget ??
+                  Text(
+                    data.value,
+                    textAlign: TextAlign.end,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: 12.5,
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
             ),
           ),
           if (data.onTap != null) ...[
@@ -2130,6 +2217,41 @@ class _CompactSettingRow extends StatelessWidget {
     }
 
     return InkWell(onTap: data.onTap, child: content);
+  }
+}
+
+class _PlatformFeeValue extends StatelessWidget {
+  const _PlatformFeeValue();
+
+  @override
+  Widget build(BuildContext context) {
+    final style = Theme.of(context).textTheme.bodyMedium?.copyWith(
+      fontSize: 12.5,
+      color: AppColors.textPrimary,
+      fontWeight: FontWeight.w700,
+    );
+
+    return RichText(
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: '0.02%',
+            style: style?.copyWith(
+              color: AppColors.textSecondary,
+              decoration: TextDecoration.lineThrough,
+              decorationColor: AppColors.textSecondary,
+              decorationThickness: 1.5,
+            ),
+          ),
+          TextSpan(
+            text: '  0.00%',
+            style: style?.copyWith(color: AppColors.success),
+          ),
+        ],
+      ),
+    );
   }
 }
 

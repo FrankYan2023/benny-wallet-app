@@ -14,6 +14,11 @@ Benny Wallet is a non-custodial Solana wallet mobile client.
 - BYC airdrop, check-in, and points views
 - In-app notifications and support flow
 
+## Deployment Notes
+
+- Release artifact/version matrix: [docs/deployment/release-build-matrix.md](docs/deployment/release-build-matrix.md)
+- iOS Lite simulator validation: [docs/deployment/ios-lite-simulator-build.md](docs/deployment/ios-lite-simulator-build.md)
+
 ## License
 
 MIT

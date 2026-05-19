@@ -17,6 +17,8 @@ class PinSetupFlowData {
     this.derivation = WalletDerivation.standard,
     this.publicKey,
     this.mobileWalletAuthToken,
+    this.seedVaultAuthToken,
+    this.seedVaultDerivationPath,
     this.walletLabel,
   });
 
@@ -25,6 +27,8 @@ class PinSetupFlowData {
   final WalletDerivation derivation;
   final String? publicKey;
   final String? mobileWalletAuthToken;
+  final String? seedVaultAuthToken;
+  final String? seedVaultDerivationPath;
   final String? walletLabel;
 
   PinSetupFlowData copyWith({
@@ -33,6 +37,8 @@ class PinSetupFlowData {
     WalletDerivation? derivation,
     String? publicKey,
     String? mobileWalletAuthToken,
+    String? seedVaultAuthToken,
+    String? seedVaultDerivationPath,
     String? walletLabel,
   }) {
     return PinSetupFlowData(
@@ -42,6 +48,9 @@ class PinSetupFlowData {
       publicKey: publicKey ?? this.publicKey,
       mobileWalletAuthToken:
           mobileWalletAuthToken ?? this.mobileWalletAuthToken,
+      seedVaultAuthToken: seedVaultAuthToken ?? this.seedVaultAuthToken,
+      seedVaultDerivationPath:
+          seedVaultDerivationPath ?? this.seedVaultDerivationPath,
       walletLabel: walletLabel ?? this.walletLabel,
     );
   }
@@ -55,6 +64,8 @@ class PinSetupPage extends ConsumerStatefulWidget {
     this.derivation = WalletDerivation.standard,
     this.publicKey,
     this.mobileWalletAuthToken,
+    this.seedVaultAuthToken,
+    this.seedVaultDerivationPath,
     this.walletLabel,
   });
 
@@ -65,10 +76,17 @@ class PinSetupPage extends ConsumerStatefulWidget {
   final WalletDerivation derivation;
   final String? publicKey;
   final String? mobileWalletAuthToken;
+  final String? seedVaultAuthToken;
+  final String? seedVaultDerivationPath;
   final String? walletLabel;
 
   bool get isMobileWalletAdapterSetup =>
       mobileWalletAuthToken != null && mobileWalletAuthToken!.isNotEmpty;
+  bool get isSeedVaultSetup =>
+      seedVaultAuthToken != null &&
+      seedVaultAuthToken!.isNotEmpty &&
+      seedVaultDerivationPath != null &&
+      seedVaultDerivationPath!.isNotEmpty;
 
   @override
   ConsumerState<PinSetupPage> createState() => _PinSetupPageState();
@@ -130,7 +148,17 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
     }
 
     setState(() => _submitting = true);
-    if (widget.isMobileWalletAdapterSetup) {
+    if (widget.isSeedVaultSetup) {
+      await ref
+          .read(walletControllerProvider.notifier)
+          .importSeedVaultWallet(
+            publicKey: widget.publicKey!,
+            authToken: widget.seedVaultAuthToken!,
+            derivationPath: widget.seedVaultDerivationPath!,
+            pin: _pin,
+            walletLabel: widget.walletLabel,
+          );
+    } else if (widget.isMobileWalletAdapterSetup) {
       await ref
           .read(walletControllerProvider.notifier)
           .importMobileWalletAdapterWallet(

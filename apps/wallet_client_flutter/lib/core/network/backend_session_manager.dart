@@ -54,6 +54,12 @@ class MobileWalletBackendAuthentication {
   final BackendAccessSession session;
 }
 
+class SeedVaultBackendAuthentication {
+  const SeedVaultBackendAuthentication({required this.session});
+
+  final BackendAccessSession session;
+}
+
 class BackendSessionManager {
   BackendSessionManager({
     required Ref ref,
@@ -149,6 +155,26 @@ class BackendSessionManager {
     );
   }
 
+  Future<SeedVaultBackendAuthentication> authenticateSeedVault({
+    required String ownerAddress,
+    required String authToken,
+    required String derivationPath,
+  }) async {
+    final challenge = await _authApiClient.createChallenge(ownerAddress);
+    final result = await _mobileWalletAdapterService.signSeedVaultMessages(
+      authToken: authToken,
+      derivationPath: derivationPath,
+      messages: [utf8.encode(challenge.message)],
+    );
+    final session = await _authApiClient.verifyChallenge(
+      ownerAddress: ownerAddress,
+      challenge: challenge.challenge,
+      signature: result.signatures.first,
+    );
+    final backendSession = await _storeSession(session);
+    return SeedVaultBackendAuthentication(session: backendSession);
+  }
+
   Future<bool> hasUsableStoredSession(String ownerAddress) async {
     final cachedSession = _cachedSession ?? await _readStoredSession();
     if (cachedSession == null) {
@@ -215,6 +241,23 @@ class BackendSessionManager {
       await _ref
           .read(walletControllerProvider.notifier)
           .updateMobileWalletAdapterAuthToken(result.authToken);
+      return result.signatures.first;
+    }
+    if (walletState.custody == WalletCustody.seedVault) {
+      final authToken = walletState.mwaAuthToken;
+      final derivationPath = walletState.seedVaultDerivationPath;
+      if (authToken == null ||
+          authToken.isEmpty ||
+          derivationPath == null ||
+          derivationPath.isEmpty) {
+        throw StateError('Connect Seed Vault again to continue.');
+      }
+
+      final result = await _mobileWalletAdapterService.signSeedVaultMessages(
+        authToken: authToken,
+        derivationPath: derivationPath,
+        messages: [utf8.encode(message)],
+      );
       return result.signatures.first;
     }
 

@@ -12,6 +12,7 @@ import '../domain/wallet_derivation.dart';
 WalletCustody _walletCustodyFromJson(String? value) {
   return switch (value) {
     'mobileWalletAdapter' => WalletCustody.mobileWalletAdapter,
+    'seedVault' => WalletCustody.seedVault,
     _ => WalletCustody.localMnemonic,
   };
 }
@@ -25,6 +26,7 @@ class StoredWalletRecord {
     this.derivation = WalletDerivation.legacy,
     this.custody = WalletCustody.localMnemonic,
     this.mwaAuthToken = '',
+    this.seedVaultDerivationPath = '',
     this.walletLabel = '',
     required this.biometricEnabled,
     this.childModeEnabled = false,
@@ -41,6 +43,7 @@ class StoredWalletRecord {
   final WalletDerivation derivation;
   final WalletCustody custody;
   final String mwaAuthToken;
+  final String seedVaultDerivationPath;
   final String walletLabel;
   final bool biometricEnabled;
   final bool childModeEnabled;
@@ -62,6 +65,7 @@ class StoredWalletRecord {
     WalletDerivation? derivation,
     WalletCustody? custody,
     String? mwaAuthToken,
+    String? seedVaultDerivationPath,
     String? walletLabel,
     bool? biometricEnabled,
     bool? childModeEnabled,
@@ -79,6 +83,8 @@ class StoredWalletRecord {
       derivation: derivation ?? this.derivation,
       custody: custody ?? this.custody,
       mwaAuthToken: mwaAuthToken ?? this.mwaAuthToken,
+      seedVaultDerivationPath:
+          seedVaultDerivationPath ?? this.seedVaultDerivationPath,
       walletLabel: walletLabel ?? this.walletLabel,
       biometricEnabled: biometricEnabled ?? this.biometricEnabled,
       childModeEnabled: childModeEnabled ?? this.childModeEnabled,
@@ -104,6 +110,7 @@ class StoredWalletRecord {
       'derivation': derivation.toJson(),
       'custody': custody.name,
       'mwaAuthToken': mwaAuthToken,
+      'seedVaultDerivationPath': seedVaultDerivationPath,
       'walletLabel': walletLabel,
       'biometricEnabled': biometricEnabled,
       'childModeEnabled': childModeEnabled,
@@ -127,6 +134,7 @@ class StoredWalletRecord {
       ),
       custody: _walletCustodyFromJson(json['custody'] as String?),
       mwaAuthToken: json['mwaAuthToken'] as String? ?? '',
+      seedVaultDerivationPath: json['seedVaultDerivationPath'] as String? ?? '',
       walletLabel: json['walletLabel'] as String? ?? '',
       biometricEnabled: json['biometricEnabled'] as bool? ?? false,
       childModeEnabled: json['childModeEnabled'] as bool? ?? false,
@@ -150,6 +158,7 @@ class StoredWalletRecord {
       derivation: WalletDerivation.legacy,
       custody: WalletCustody.localMnemonic,
       mwaAuthToken: '',
+      seedVaultDerivationPath: '',
       walletLabel: '',
       biometricEnabled: false,
       childModeEnabled: false,
@@ -291,11 +300,44 @@ class WalletRepository {
     await _clearLegacyKeys();
   }
 
+  Future<void> saveSeedVaultWallet({
+    required String publicKey,
+    required String authToken,
+    required String derivationPath,
+    required String pin,
+    String? walletLabel,
+  }) async {
+    final encrypted = await _cipher.encryptText(_externalWalletPinMarker, pin);
+    final existingRecords = await readRecords();
+    final existingRecord = _findRecord(existingRecords, publicKey);
+    final newRecord = (existingRecord ?? StoredWalletRecord.empty()).copyWith(
+      cipherText: encrypted.cipherText,
+      nonce: encrypted.nonce,
+      salt: encrypted.salt,
+      publicKey: publicKey,
+      derivation: WalletDerivation.legacy,
+      custody: WalletCustody.seedVault,
+      mwaAuthToken: authToken,
+      seedVaultDerivationPath: derivationPath,
+      walletLabel: walletLabel ?? '',
+      biometricEnabled: existingRecord?.biometricEnabled ?? false,
+    );
+
+    final updatedRecords = existingRecord == null
+        ? [...existingRecords, newRecord]
+        : [
+            for (final record in existingRecords)
+              if (record.publicKey == publicKey) newRecord else record,
+          ];
+    await _persistRecords(updatedRecords, selectedPublicKey: publicKey);
+    await _clearLegacyKeys();
+  }
+
   Future<void> verifyPin({
     required String pin,
     required StoredWalletRecord record,
   }) async {
-    if (record.custody == WalletCustody.mobileWalletAdapter) {
+    if (record.custody != WalletCustody.localMnemonic) {
       if (record.cipherText.isEmpty ||
           record.nonce.isEmpty ||
           record.salt.isEmpty) {
@@ -336,7 +378,7 @@ class WalletRepository {
     required String pin,
     required StoredWalletRecord record,
   }) {
-    if (record.custody == WalletCustody.mobileWalletAdapter) {
+    if (record.custody != WalletCustody.localMnemonic) {
       throw StateError('This wallet is connected through Seeker Vault.');
     }
     return _cipher.decryptText(

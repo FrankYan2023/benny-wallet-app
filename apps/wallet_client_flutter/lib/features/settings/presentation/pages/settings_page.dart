@@ -176,7 +176,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'Persistent biometric unlock is currently supported only on Android.',
+              'Persistent biometric unlock is not supported on this device.',
             ),
           ),
         );
@@ -800,122 +800,54 @@ class _SeekerVaultCard extends StatelessWidget {
         : 'Seeker Wallet';
     final displayAddress = address == null || address!.isEmpty
         ? null
-        : Formatters.compactAddress(address!, visibleChars: 5);
+        : Formatters.compactAddress(address!, visibleChars: 6);
 
     return WalletCard(
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: const Color(0xFFF7F1E7),
           borderRadius: BorderRadius.circular(28),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              children: [
-                const _SettingsIconCircle(
-                  icon: Icons.security_rounded,
-                  iconColor: Color(0xFF235E7A),
-                  backgroundColor: Colors.white,
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Seeker Vault',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: const Color(0xFF2D2A23),
-                          fontWeight: FontWeight.w900,
-                          fontSize: 20,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        displayLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: const Color(0xFF6F6353),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (displayAddress != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      displayAddress,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: const Color(0xFF8A5B09),
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-              ],
+            const _SettingsIconCircle(
+              icon: Icons.security_rounded,
+              iconColor: Color(0xFF235E7A),
+              backgroundColor: Colors.white,
             ),
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: const [
-                _SeekerStatusChip(
-                  icon: Icons.verified_user_rounded,
-                  label: 'Device-backed',
-                ),
-                _SeekerStatusChip(
-                  icon: Icons.edit_rounded,
-                  label: 'Signs in Seeker Wallet',
-                ),
-              ],
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    displayLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: const Color(0xFF2D2A23),
+                      fontWeight: FontWeight.w900,
+                      fontSize: 19,
+                    ),
+                  ),
+                  if (displayAddress != null) ...[
+                    const SizedBox(height: 3),
+                    Text(
+                      displayAddress,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFF6F6353),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SeekerStatusChip extends StatelessWidget {
-  const _SeekerStatusChip({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.74),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: const Color(0xFF4E7A52)),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: const Color(0xFF5E5448),
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
       ),
     );
   }

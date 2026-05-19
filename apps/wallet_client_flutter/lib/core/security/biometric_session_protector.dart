@@ -11,12 +11,14 @@ class BiometricSessionProtector {
   );
 
   bool get supportsPersistentSessionProtection =>
-      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
 
   Future<EncryptedPayload> encrypt(String clearText) async {
     if (!supportsPersistentSessionProtection) {
       throw StateError(
-        'Persistent biometric unlock is currently supported only on Android.',
+        'Persistent biometric unlock is not supported on this device.',
       );
     }
 
@@ -27,7 +29,7 @@ class BiometricSessionProtector {
     final cipherText = payload?['cipherText'] as String?;
     final nonce = payload?['nonce'] as String?;
     if (cipherText == null || nonce == null) {
-      throw StateError('Android Keystore encryption did not return a payload.');
+      throw StateError('Biometric encryption did not return a payload.');
     }
 
     return EncryptedPayload(
@@ -44,7 +46,7 @@ class BiometricSessionProtector {
   }) async {
     if (!supportsPersistentSessionProtection) {
       throw StateError(
-        'Persistent biometric unlock is currently supported only on Android.',
+        'Persistent biometric unlock is not supported on this device.',
       );
     }
 
@@ -53,7 +55,7 @@ class BiometricSessionProtector {
       'nonce': nonce,
     });
     if (clearText == null || clearText.isEmpty) {
-      throw StateError('Android Keystore decryption did not return plaintext.');
+      throw StateError('Biometric decryption did not return plaintext.');
     }
 
     return clearText;

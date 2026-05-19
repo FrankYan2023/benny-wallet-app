@@ -191,8 +191,12 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
   Future<void> _reclaim(RentReclaimPreview preview) async {
     final walletState = ref.read(walletControllerProvider);
 
-    if (walletState.isExternalWallet) {
+    if (walletState.custody == WalletCustody.mobileWalletAdapter) {
       await _reclaimWithMobileWalletAdapter(preview, walletState);
+      return;
+    }
+    if (walletState.custody == WalletCustody.seedVault) {
+      await _reclaimWithSeedVault(preview, walletState);
       return;
     }
 
@@ -314,6 +318,84 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
         SnackBar(
           content: Text(
             'Submitted ${result.signatures.length} reclaim transaction${result.signatures.length == 1 ? '' : 's'}.',
+          ),
+        ),
+      );
+      _reloadPreview();
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      await showErrorAlertDialog(
+        context,
+        title: 'Reclaim Failed',
+        message: _normalizeError(error),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _submitting = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _reclaimWithSeedVault(
+    RentReclaimPreview preview,
+    WalletControllerState walletState,
+  ) async {
+    final ownerAddress = walletState.publicKey;
+    final authToken = walletState.mwaAuthToken;
+    final derivationPath = walletState.seedVaultDerivationPath;
+    if (ownerAddress == null ||
+        ownerAddress.isEmpty ||
+        authToken == null ||
+        authToken.isEmpty ||
+        derivationPath == null ||
+        derivationPath.isEmpty) {
+      await showErrorAlertDialog(
+        context,
+        title: 'Wallet Required',
+        message: 'Connect Seed Vault again before reclaiming rent.',
+      );
+      return;
+    }
+
+    setState(() {
+      _submitting = true;
+    });
+    await Future<void>.delayed(const Duration(milliseconds: 32));
+
+    try {
+      final solana = ref.read(solanaWalletServiceProvider);
+      final transactions = await solana.buildRentReclaimTransactions(
+        ownerAddress: ownerAddress,
+        accounts: preview.accounts,
+      );
+      final signatures = <String>[];
+      for (final transaction in transactions) {
+        final result = await ref
+            .read(mobileWalletAdapterServiceProvider)
+            .signSeedVaultTransactions(
+              authToken: authToken,
+              derivationPath: derivationPath,
+              encodedTransactions: [transaction],
+            );
+        signatures.add(
+          await solana.sendExternallySignedTransaction(
+            encodedTransaction: transaction,
+            signature: result.signatures.first,
+          ),
+        );
+      }
+      ref.invalidate(portfolioProvider(ownerAddress));
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Submitted ${signatures.length} reclaim transaction${signatures.length == 1 ? '' : 's'}.',
           ),
         ),
       );

@@ -132,6 +132,8 @@ class AppRouter {
                   derivation: extra.derivation,
                   publicKey: extra.publicKey,
                   mobileWalletAuthToken: extra.mobileWalletAuthToken,
+                  seedVaultAuthToken: extra.seedVaultAuthToken,
+                  seedVaultDerivationPath: extra.seedVaultDerivationPath,
                   walletLabel: extra.walletLabel,
                 )
               : PinSetupPage(mnemonic: extra as String);
@@ -278,7 +280,7 @@ class AppRouter {
           }
           return _RouteAccessGuard(
             currentLocation: state.matchedLocation,
-            allowInChildMode: true,
+            allowInChildMode: false,
             child: const XStocksSwapPage(),
           );
         },
@@ -295,7 +297,7 @@ class AppRouter {
           }
           return _RouteAccessGuard(
             currentLocation: state.matchedLocation,
-            allowInChildMode: true,
+            allowInChildMode: false,
             child: SwapReviewPage(review: state.extra as SwapReviewData),
           );
         },

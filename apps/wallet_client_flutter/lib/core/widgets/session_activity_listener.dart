@@ -128,7 +128,11 @@ class _SessionActivityListenerState
 
   bool _hasTimedOut(AutoLockOption autoLockOption) {
     if (autoLockOption == AutoLockOption.immediate) {
-      return true;
+      // The biometric prompt can transiently move the app through lifecycle
+      // states and then back to resumed. Immediate lock is handled when the app
+      // actually enters hidden/paused/detached above; treating every resume as
+      // timed out causes a biometric unlock loop.
+      return false;
     }
 
     final duration = autoLockOption.duration;

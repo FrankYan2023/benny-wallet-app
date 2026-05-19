@@ -797,6 +797,34 @@ class SolanaWalletService {
     return signature;
   }
 
+  Future<String> sendExternallySignedTransaction({
+    required String encodedTransaction,
+    required String signature,
+  }) async {
+    final transaction = SignedTx.decode(encodedTransaction);
+    if (transaction.signatures.isEmpty) {
+      throw StateError('Prepared transaction has no signature slot.');
+    }
+    final primaryPublicKey = transaction.signatures.first.publicKey;
+    final signedTransaction = SignedTx(
+      signatures: _injectPrimarySignature(
+        existing: transaction.signatures,
+        primary: Signature(
+          base58decode(signature),
+          publicKey: primaryPublicKey,
+        ),
+      ),
+      compiledMessage: transaction.compiledMessage,
+    );
+    final rpcClient = await _getRpcClient();
+    final transactionSignature = await _broadcastEncodedTransaction(
+      rpcClient: rpcClient,
+      encodedTransaction: signedTransaction.encode(),
+    );
+    await _waitForConfirmation(transactionSignature);
+    return transactionSignature;
+  }
+
   Future<void> waitForConfirmation(String signature) {
     return _waitForConfirmation(signature);
   }

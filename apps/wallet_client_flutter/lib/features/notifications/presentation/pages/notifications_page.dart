@@ -212,9 +212,21 @@ class ReceivedNotificationDetailPage extends ConsumerWidget {
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Text(
-              'Unable to load this received transfer: $error',
-              textAlign: TextAlign.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Unable to load this received transfer: $error',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: () =>
+                      ref.invalidate(receivedTransferDetailProvider(eventId)),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text('Retry'),
+                ),
+              ],
             ),
           ),
         ),
@@ -397,14 +409,8 @@ class _MessageCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final eventId = message.eventId;
-    final receivedDetail = eventId == null || eventId.isEmpty
-        ? null
-        : ref.watch(receivedTransferDetailProvider(eventId)).valueOrNull;
     final isReceived = message.isIncomingFunds;
-    final body = receivedDetail == null
-        ? message.body
-        : 'You received ${receivedDetail.displayAmount}';
+    final body = message.body;
 
     return Dismissible(
       key: ValueKey(message.id),
@@ -454,9 +460,7 @@ class _MessageCard extends ConsumerWidget {
                 width: 42,
                 height: 42,
                 alignment: Alignment.center,
-                child: receivedDetail == null
-                    ? _NotificationAvatar(isRead: message.isRead)
-                    : _CoinAvatar(item: receivedDetail, size: 42),
+                child: _NotificationAvatar(isRead: message.isRead),
               ),
               const SizedBox(width: 12),
               Expanded(

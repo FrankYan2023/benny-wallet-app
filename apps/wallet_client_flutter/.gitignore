@@ -48,6 +48,8 @@ app.*.map.json
 /android/key.properties
 /.env.config
 /.env.config.local
+/.env.config.*.local
+/ios/Runner/GoogleService-Info.plist
 /flutter_*.log
 /.gradle-user-home/
 *.jks

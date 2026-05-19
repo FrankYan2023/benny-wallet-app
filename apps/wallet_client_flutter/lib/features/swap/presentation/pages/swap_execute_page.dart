@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../app/di/providers.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../auth/domain/wallet_controller_state.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../auth/presentation/providers/ephemeral_store.dart';
 import '../../../portfolio/presentation/pages/portfolio_page.dart';
@@ -156,29 +157,16 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
     }
 
     try {
-      final rawAmount = ref
-          .read(solanaWalletServiceProvider)
-          .tokenUiToAmount(
-            widget.review.inputAmountUi,
-            widget.review.inputToken.token.decimals,
-          )
-          .toString();
-      final refreshedBuild = await ref
-          .read(swapRepositoryProvider)
-          .buildSwap(
-            ownerAddress: publicKey,
-            inputMint: widget.review.inputToken.token.mintAddress,
-            outputMint: widget.review.outputToken.token.mintAddress,
-            rawAmount: rawAmount,
-            slippageBps: widget.review.slippageBps,
-            priorityPreset: widget.review.priorityPreset.apiValue,
-          );
-      final signature = walletState.isExternalWallet
+      final signature = walletState.custody == WalletCustody.mobileWalletAdapter
           ? await _signAndSendSwapWithMobileWalletAdapter(
-              refreshedBuild.swapTransaction,
+              widget.review.buildResult.swapTransaction,
+            )
+          : walletState.custody == WalletCustody.seedVault
+          ? await _signAndSendSwapWithSeedVault(
+              widget.review.buildResult.swapTransaction,
             )
           : await _signAndSendSwapWithLocalMnemonic(
-              encodedTransaction: refreshedBuild.swapTransaction,
+              encodedTransaction: widget.review.buildResult.swapTransaction,
             );
       ref.invalidate(portfolioProvider(publicKey));
       _finish(signature: signature);
@@ -204,7 +192,9 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
       throw StateError('Unlock the wallet again before swapping.');
     }
 
-    return ref.read(solanaWalletServiceProvider).signAndSendPreparedTransaction(
+    return ref
+        .read(solanaWalletServiceProvider)
+        .signAndSendPreparedTransaction(
           mnemonic: mnemonic,
           encodedTransaction: encodedTransaction,
           derivation: walletState.derivation,
@@ -232,6 +222,33 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
     return signature;
   }
 
+  Future<String> _signAndSendSwapWithSeedVault(
+    String encodedTransaction,
+  ) async {
+    final walletState = ref.read(walletControllerProvider);
+    final authToken = walletState.mwaAuthToken;
+    final derivationPath = walletState.seedVaultDerivationPath;
+    if (authToken == null ||
+        authToken.isEmpty ||
+        derivationPath == null ||
+        derivationPath.isEmpty) {
+      throw StateError('Connect Seed Vault again before swapping.');
+    }
+    final result = await ref
+        .read(mobileWalletAdapterServiceProvider)
+        .signSeedVaultTransactions(
+          authToken: authToken,
+          derivationPath: derivationPath,
+          encodedTransactions: [encodedTransaction],
+        );
+    return ref
+        .read(solanaWalletServiceProvider)
+        .sendExternallySignedTransaction(
+          encodedTransaction: encodedTransaction,
+          signature: result.signatures.first,
+        );
+  }
+
   void _finish({String? signature, String? errorMessage}) {
     if (!mounted) {
       return;
@@ -257,6 +274,10 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
     }
     if (lower.contains('block height') || lower.contains('blockhash')) {
       return 'This quote expired. Review the swap again.';
+    }
+    if (lower.contains('custom program error: 0x1') ||
+        lower.contains('{custom: 1}')) {
+      return 'Insufficient balance to complete this trade. Keep enough SOL for network fees and token account rent, then try again.';
     }
     if (message.startsWith('Exception: ')) {
       return message.substring('Exception: '.length);

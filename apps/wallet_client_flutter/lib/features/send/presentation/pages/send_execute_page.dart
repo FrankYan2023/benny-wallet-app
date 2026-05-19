@@ -195,8 +195,13 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
         throw StateError('Not enough SOL after reserving the network fee.');
       }
 
-      final signature = walletState.isExternalWallet
+      final signature = walletState.custody == WalletCustody.mobileWalletAdapter
           ? await _sendWithMobileWalletAdapter(
+              ownerAddress: currentAddress,
+              amountToSend: amountToSend,
+            )
+          : walletState.custody == WalletCustody.seedVault
+          ? await _sendWithSeedVault(
               ownerAddress: currentAddress,
               amountToSend: amountToSend,
             )
@@ -307,6 +312,49 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
     final signature = result.signatures.first;
     await solana.waitForConfirmation(signature);
     return signature;
+  }
+
+  Future<String> _sendWithSeedVault({
+    required String ownerAddress,
+    required double amountToSend,
+  }) async {
+    final walletState = ref.read(walletControllerProvider);
+    final authToken = walletState.mwaAuthToken;
+    final derivationPath = walletState.seedVaultDerivationPath;
+    if (authToken == null ||
+        authToken.isEmpty ||
+        derivationPath == null ||
+        derivationPath.isEmpty) {
+      throw StateError('Connect Seed Vault again before sending.');
+    }
+
+    final solana = ref.read(solanaWalletServiceProvider);
+    final encodedTransaction = widget.draft.token.isNative
+        ? await solana.buildSolTransferTransaction(
+            ownerAddress: ownerAddress,
+            destinationAddress: widget.draft.destinationAddress,
+            lamports: solana.solToLamports(amountToSend),
+          )
+        : await solana.buildSplTokenTransferTransaction(
+            ownerAddress: ownerAddress,
+            token: widget.draft.token,
+            destinationAddress: widget.draft.destinationAddress,
+            amount: solana.tokenUiToAmount(
+              widget.draft.amount,
+              widget.draft.token.decimals,
+            ),
+          );
+    final result = await ref
+        .read(mobileWalletAdapterServiceProvider)
+        .signSeedVaultTransactions(
+          authToken: authToken,
+          derivationPath: derivationPath,
+          encodedTransactions: [encodedTransaction],
+        );
+    return solana.sendExternallySignedTransaction(
+      encodedTransaction: encodedTransaction,
+      signature: result.signatures.first,
+    );
   }
 
   void _finishWithResult(SendResultData result) {

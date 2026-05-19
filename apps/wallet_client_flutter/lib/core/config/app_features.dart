@@ -66,9 +66,9 @@ abstract final class AppFeatures {
 
   static bool get canOpenAirdrop => airdropEnabled;
 
-  static bool get canCheckForUpdates => !isLiteStore && appUpdatesEnabled;
+  static bool get canCheckForUpdates => appUpdatesEnabled;
 
-  static bool get canOpenWebView => !isLiteStore && webviewEnabled;
+  static bool get canOpenWebView => webviewEnabled;
 
   static bool get canConnectSeekerVault => seekerVaultEnabled;
 
@@ -112,14 +112,14 @@ abstract final class AppFeatures {
       label: 'Swap',
       enabled: canOpenSwap,
       reviewNote: isLiteStore
-          ? 'Disabled for Google Play first submission.'
+          ? 'Disabled in Lite builds.'
           : 'Enabled in full builds.',
     ),
     FeatureReviewItem(
       label: 'xStocks',
       enabled: canOpenXStocks,
       reviewNote: isLiteStore
-          ? 'Disabled for Google Play first submission.'
+          ? 'Disabled in Lite builds.'
           : 'Enabled in full builds.',
     ),
     FeatureReviewItem(
@@ -131,16 +131,12 @@ abstract final class AppFeatures {
     FeatureReviewItem(
       label: 'WebView trading UI',
       enabled: canOpenWebView,
-      reviewNote: isLiteStore
-          ? 'Disabled for the first store package.'
-          : 'Controlled by feature flag.',
+      reviewNote: 'Controlled by feature flag.',
     ),
     FeatureReviewItem(
       label: 'External app update flow',
       enabled: canCheckForUpdates,
-      reviewNote: isLiteStore
-          ? 'Disabled; Google Play manages app updates.'
-          : 'Enabled for direct APK distribution builds.',
+      reviewNote: 'Controlled by feature flag.',
     ),
   ];
 }
