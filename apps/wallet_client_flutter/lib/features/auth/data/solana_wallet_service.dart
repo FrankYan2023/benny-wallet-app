@@ -863,6 +863,12 @@ class SolanaWalletService {
     );
   }
 
+  List<int> signableTransactionMessageBytes(String encodedTransaction) {
+    return SignedTx.decode(
+      encodedTransaction,
+    ).compiledMessage.toByteArray().toList();
+  }
+
   Future<void> waitForConfirmation(String signature) {
     return _waitForConfirmation(signature);
   }

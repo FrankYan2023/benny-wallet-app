@@ -346,11 +346,11 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
           );
     final result = await ref
         .read(mobileWalletAdapterServiceProvider)
-        .signSeedVaultTransactions(
+        .signSeedVaultMessages(
           authToken: authToken,
           derivationPath: derivationPath,
-          encodedTransactions: [
-            solana.signableTransactionMessage(encodedTransaction),
+          messages: [
+            solana.signableTransactionMessageBytes(encodedTransaction),
           ],
         );
     return solana.sendExternallySignedTransaction(

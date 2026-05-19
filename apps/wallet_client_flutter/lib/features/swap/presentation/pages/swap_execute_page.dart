@@ -239,11 +239,7 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
         .signSeedVaultTransactions(
           authToken: authToken,
           derivationPath: derivationPath,
-          encodedTransactions: [
-            ref
-                .read(solanaWalletServiceProvider)
-                .signableTransactionMessage(encodedTransaction),
-          ],
+          encodedTransactions: [encodedTransaction],
         );
     return ref
         .read(solanaWalletServiceProvider)

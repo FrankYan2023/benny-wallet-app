@@ -379,9 +379,7 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
             .signSeedVaultTransactions(
               authToken: authToken,
               derivationPath: derivationPath,
-              encodedTransactions: [
-                solana.signableTransactionMessage(transaction),
-              ],
+              encodedTransactions: [transaction],
             );
         signatures.add(
           await solana.sendExternallySignedTransaction(
