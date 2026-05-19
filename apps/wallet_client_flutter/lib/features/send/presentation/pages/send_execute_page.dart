@@ -349,11 +349,20 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
         .signSeedVaultTransactions(
           authToken: authToken,
           derivationPath: derivationPath,
-          encodedTransactions: [encodedTransaction],
+          encodedTransactions: [
+            solana.signableTransactionMessage(encodedTransaction),
+          ],
         );
     return solana.sendExternallySignedTransaction(
       encodedTransaction: encodedTransaction,
       signature: result.signatures.first,
+      submitViaSender: true,
+      txType: 'send',
+      fromMint: widget.draft.token.mintAddress,
+      toMint: widget.draft.token.mintAddress,
+      amount:
+          '${Formatters.amount(amountToSend)} ${Formatters.tokenSymbol(widget.draft.token.symbol)}',
+      destinationAddress: widget.draft.destinationAddress,
     );
   }
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -19,22 +21,29 @@ final sendHistoryProvider =
     FutureProvider.autoDispose<List<RemoteSendHistoryItem>>((ref) async {
       final walletState = ref.read(walletControllerProvider);
       var backendItems = const <RemoteSendHistoryItem>[];
+      Object? backendError;
       if (await _canUseBackendHistory(ref, walletState)) {
         try {
           backendItems = await ref
               .read(backendApiClientProvider)
               .getSenderHistory(limit: 50);
-        } catch (_) {
-          if (!walletState.isExternalWallet) {
-            rethrow;
-          }
+        } catch (error) {
+          backendError = error;
         }
       }
-      if (backendItems.isNotEmpty) {
-        return backendItems;
-      }
 
-      return _loadChainSendHistory(ref, walletState);
+      try {
+        final chainItems = await _loadChainSendHistory(ref, walletState);
+        return _mergeHistoryItems([...backendItems, ...chainItems]);
+      } catch (_) {
+        if (backendItems.isNotEmpty) {
+          return _mergeHistoryItems(backendItems);
+        }
+        if (backendError != null && !walletState.isExternalWallet) {
+          throw backendError;
+        }
+        rethrow;
+      }
     });
 
 final sendHistoryTokensProvider =
@@ -49,14 +58,27 @@ class SendHistoryDetailData {
   final RemoteTokenCatalogItem? token;
 }
 
-class SendHistoryPage extends ConsumerWidget {
+class SendHistoryPage extends ConsumerStatefulWidget {
   const SendHistoryPage({super.key});
 
   static const routeName = 'sendHistory';
   static const routePath = '/send/history';
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SendHistoryPage> createState() => _SendHistoryPageState();
+}
+
+class _SendHistoryPageState extends ConsumerState<SendHistoryPage> {
+  Timer? _pendingRefreshTimer;
+
+  @override
+  void dispose() {
+    _pendingRefreshTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final history = ref.watch(sendHistoryProvider);
     final tokens = ref.watch(sendHistoryTokensProvider).valueOrNull ?? const [];
 
@@ -71,6 +93,7 @@ class SendHistoryPage extends ConsumerWidget {
         child: history.when(
           data: (items) {
             final mergedItems = _mergeHistoryItems(items);
+            _syncPendingRefresh(mergedItems);
             if (mergedItems.isEmpty) {
               return ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -111,6 +134,21 @@ class SendHistoryPage extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  void _syncPendingRefresh(List<RemoteSendHistoryItem> items) {
+    final hasPending = items.any(_isPendingHistoryItem);
+    if (!hasPending) {
+      _pendingRefreshTimer?.cancel();
+      _pendingRefreshTimer = null;
+      return;
+    }
+    _pendingRefreshTimer ??= Timer.periodic(const Duration(seconds: 8), (_) {
+      if (!mounted) {
+        return;
+      }
+      ref.invalidate(sendHistoryProvider);
+    });
   }
 }
 
@@ -838,6 +876,12 @@ bool _isSubmittedPlaceholder(RemoteSendHistoryItem item) {
           item.destinationAddress!.trim().isEmpty) &&
       (item.fromMint == null || item.fromMint!.trim().isEmpty) &&
       (item.toMint == null || item.toMint!.trim().isEmpty);
+}
+
+bool _isPendingHistoryItem(RemoteSendHistoryItem item) {
+  final confirmedAt = item.confirmedAt ?? item.finalizedAt;
+  return (item.status == 'submitted' || item.result == 'pending') &&
+      (confirmedAt == null || confirmedAt.isEmpty);
 }
 
 RemoteSendHistoryItem _mergeHistoryItem(

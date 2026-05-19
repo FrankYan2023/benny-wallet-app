@@ -800,29 +800,67 @@ class SolanaWalletService {
   Future<String> sendExternallySignedTransaction({
     required String encodedTransaction,
     required String signature,
+    bool submitViaSender = false,
+    String? txType,
+    String? fromMint,
+    String? toMint,
+    String? amount,
+    String? referenceId,
+    String? destinationAddress,
   }) async {
     final transaction = SignedTx.decode(encodedTransaction);
     if (transaction.signatures.isEmpty) {
       throw StateError('Prepared transaction has no signature slot.');
     }
     final primaryPublicKey = transaction.signatures.first.publicKey;
+    if (primaryPublicKey is! Ed25519HDPublicKey) {
+      throw StateError('Prepared transaction uses an unsupported signer key.');
+    }
+    final signatureBytes = base58decode(signature);
+    final validSignature = await verifySignature(
+      message: transaction.compiledMessage.toByteArray().toList(),
+      signature: signatureBytes,
+      publicKey: primaryPublicKey,
+    );
+    if (!validSignature) {
+      throw StateError('Seed Vault returned an invalid transaction signature.');
+    }
     final signedTransaction = SignedTx(
       signatures: _injectPrimarySignature(
         existing: transaction.signatures,
-        primary: Signature(
-          base58decode(signature),
-          publicKey: primaryPublicKey,
-        ),
+        primary: Signature(signatureBytes, publicKey: primaryPublicKey),
       ),
       compiledMessage: transaction.compiledMessage,
     );
+    final encodedSignedTransaction = signedTransaction.encode();
+    final backendApiClient = _backendApiClient;
+    if (submitViaSender && backendApiClient != null) {
+      return backendApiClient.submitSenderTransaction(
+        encodedTransaction: encodedSignedTransaction,
+        txType: txType,
+        fromMint: fromMint,
+        toMint: toMint,
+        amount: amount,
+        referenceId: referenceId,
+        destinationAddress: destinationAddress,
+      );
+    }
+
     final rpcClient = await _getRpcClient();
     final transactionSignature = await _broadcastEncodedTransaction(
       rpcClient: rpcClient,
-      encodedTransaction: signedTransaction.encode(),
+      encodedTransaction: encodedSignedTransaction,
     );
     await _waitForConfirmation(transactionSignature);
     return transactionSignature;
+  }
+
+  String signableTransactionMessage(String encodedTransaction) {
+    return base64Encode(
+      SignedTx.decode(
+        encodedTransaction,
+      ).compiledMessage.toByteArray().toList(),
+    );
   }
 
   Future<void> waitForConfirmation(String signature) {
