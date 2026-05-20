@@ -26,6 +26,9 @@ class SwapExecutePage extends ConsumerStatefulWidget {
 }
 
 class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
+  static const _insufficientSwapBalanceMessage =
+      'Not enough SOL.\nNeed 0.01 SOL reserve.';
+
   String? _signature;
   String? _errorMessage;
   bool _processing = true;
@@ -119,7 +122,14 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
           success
               ? '${Formatters.amount(widget.review.outputAmountUi)} ${widget.review.outputToken.token.symbol} received'
               : (_errorMessage ?? 'The swap could not be completed.'),
-          style: theme.textTheme.titleLarge,
+          style: success
+              ? theme.textTheme.titleLarge
+              : theme.textTheme.bodyLarge?.copyWith(
+                  fontSize: 18,
+                  height: 1.35,
+                  fontWeight: FontWeight.w600,
+                ),
+          textScaler: success ? null : TextScaler.noScaling,
           textAlign: TextAlign.center,
         ),
         if (success) ...[
@@ -234,12 +244,15 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
         derivationPath.isEmpty) {
       throw StateError('Connect Seed Vault again before swapping.');
     }
+    final solana = ref.read(solanaWalletServiceProvider);
     final result = await ref
         .read(mobileWalletAdapterServiceProvider)
-        .signSeedVaultTransactions(
+        .signSeedVaultMessages(
           authToken: authToken,
           derivationPath: derivationPath,
-          encodedTransactions: [encodedTransaction],
+          messages: [
+            solana.signableTransactionMessageBytes(encodedTransaction),
+          ],
         );
     return ref
         .read(solanaWalletServiceProvider)
@@ -275,14 +288,26 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
     if (lower.contains('block height') || lower.contains('blockhash')) {
       return 'This quote expired. Review the swap again.';
     }
-    if (lower.contains('custom program error: 0x1') ||
-        lower.contains('{custom: 1}')) {
-      return 'Insufficient balance to complete this trade. Keep enough SOL for network fees and token account rent, then try again.';
+    if (_isInsufficientSwapBalanceError(lower)) {
+      return _insufficientSwapBalanceMessage;
     }
     if (message.startsWith('Exception: ')) {
       return message.substring('Exception: '.length);
     }
     return message;
+  }
+
+  bool _isInsufficientSwapBalanceError(String lower) {
+    return lower.contains('custom program error: 0x1') ||
+        lower.contains('{custom: 1}') ||
+        lower.contains('{custom:1}') ||
+        lower.contains('custom: 1') ||
+        lower.contains('insufficient funds') ||
+        lower.contains('insufficient lamports') ||
+        lower.contains('insufficient balance') ||
+        lower.contains('insufficient account balance') ||
+        lower.contains('attempt to debit an account') ||
+        (lower.contains('insufficient') && lower.contains('rent'));
   }
 
   Future<void> _openTransaction(String signature) async {

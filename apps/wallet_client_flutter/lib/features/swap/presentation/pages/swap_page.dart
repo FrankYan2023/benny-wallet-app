@@ -53,6 +53,11 @@ class XStocksSwapPage extends StatelessWidget {
 class _SwapPageState extends ConsumerState<SwapPage> {
   static const _solMintAddress = 'So11111111111111111111111111111111111111112';
   static const _presetSlippageBps = [5, 50, 100, 300];
+  static const _balanceTolerance = 0.000000001;
+  static const _minimumSwapFeeReserveSol = 0.0015;
+  static const _minimumSwapSetupReserveSol = 0.01;
+  static const _insufficientSwapBalanceMessage =
+      'Not enough SOL.\nNeed 0.01 SOL reserve.';
   static const _xStocksInputMints = {
     _solMintAddress,
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
@@ -1585,15 +1590,33 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   Future<void> _showDialog({required String message}) {
     return showDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
-        content: Text(message, textAlign: TextAlign.center),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Close'),
+      builder: (dialogContext) => MediaQuery.withNoTextScaling(
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(26),
           ),
-        ],
+          contentPadding: const EdgeInsets.fromLTRB(28, 30, 28, 8),
+          actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
+          content: Text(
+            message,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontSize: 18,
+              height: 1.35,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text(
+                'Close',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1604,13 +1627,14 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     required SwapTokenOption outputToken,
     required double amount,
   }) async {
-    final balances = await ref
-        .read(solanaWalletServiceProvider)
-        .loadPortfolioBalances(ownerAddress: ownerAddress);
+    final solana = ref.read(solanaWalletServiceProvider);
+    final balances = await solana.loadPortfolioBalances(
+      ownerAddress: ownerAddress,
+    );
     final inputBalance =
         _liveBalanceForMint(balances, inputToken.token.mintAddress) ??
         inputToken.availableBalance;
-    if (amount > inputBalance + 0.000000001) {
+    if (amount > inputBalance + _balanceTolerance) {
       return 'Insufficient balance.';
     }
 
@@ -1621,22 +1645,23 @@ class _SwapPageState extends ConsumerState<SwapPage> {
             .firstOrNull
             ?.availableBalance ??
         0;
-    final outputAccountExists =
-        outputToken.token.mintAddress == _solMintAddress ||
-        balances.any(
-          (item) =>
-              item.token.mintAddress == outputToken.token.mintAddress &&
-              item.existsOnChain,
-        );
-    final requiredSol = _estimatedRequiredSol(outputAccountExists);
+    final outputAccountExists = await _outputAccountExists(
+      ownerAddress: ownerAddress,
+      outputToken: outputToken,
+      portfolioBalances: balances,
+    );
+    final involvesNativeSol =
+        inputToken.token.mintAddress == _solMintAddress ||
+        outputToken.token.mintAddress == _solMintAddress;
+    final requiredSol = _estimatedRequiredSol(
+      outputAccountExists: outputAccountExists,
+      involvesNativeSol: involvesNativeSol,
+    );
     final inputSolAmount = inputToken.token.mintAddress == _solMintAddress
         ? amount
         : 0.0;
-    if (solBalance + 0.000000001 < inputSolAmount + requiredSol) {
-      final reason = outputAccountExists
-          ? 'network fees'
-          : 'network fees and token account rent';
-      return 'Not enough SOL to cover $reason. Add a small amount of SOL and try again.';
+    if (solBalance + _balanceTolerance < inputSolAmount + requiredSol) {
+      return _insufficientSolForSwapMessage(requiredSol: requiredSol);
     }
 
     return null;
@@ -1652,12 +1677,51 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         ?.balance;
   }
 
-  double _estimatedRequiredSol(bool outputAccountExists) {
-    final priorityLamports = _estimatedPriorityLamports ?? 0;
+  Future<bool> _outputAccountExists({
+    required String ownerAddress,
+    required SwapTokenOption outputToken,
+    required List<AssetBalanceSnapshot> portfolioBalances,
+  }) async {
+    if (outputToken.token.mintAddress == _solMintAddress) {
+      return true;
+    }
+    if (portfolioBalances.any(
+      (item) =>
+          item.token.mintAddress == outputToken.token.mintAddress &&
+          item.existsOnChain,
+    )) {
+      return true;
+    }
+
+    try {
+      final outputBalance = await ref
+          .read(solanaWalletServiceProvider)
+          .loadBalances(
+            ownerAddress: ownerAddress,
+            tokens: [outputToken.token],
+          );
+      return outputBalance.firstOrNull?.existsOnChain ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  double _estimatedRequiredSol({
+    required bool outputAccountExists,
+    required bool involvesNativeSol,
+  }) {
+    final priorityLamports = _estimatedPriorityLamports ?? 1000000;
     final feeLamports = 5000 + priorityLamports;
-    final tokenAccountRent = outputAccountExists ? 0.0 : 0.0021;
-    const safetyBuffer = 0.0002;
-    return feeLamports / 1000000000 + tokenAccountRent + safetyBuffer;
+    final feeReserve = feeLamports / 1000000000 + _minimumSwapFeeReserveSol;
+    if (!outputAccountExists || involvesNativeSol) {
+      return max(feeReserve, _minimumSwapSetupReserveSol);
+    }
+    return feeReserve;
+  }
+
+  String _insufficientSolForSwapMessage({required double requiredSol}) {
+    final reserve = Formatters.amount(requiredSol, maxDecimals: 4);
+    return 'Not enough SOL.\nNeed $reserve SOL reserve.';
   }
 
   String _friendlyQuoteError(Object error) {
@@ -1677,6 +1741,9 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     if (lower.contains('insufficient') && lower.contains('liquidity')) {
       return 'This amount is too small for a valid route.';
     }
+    if (_isInsufficientSwapBalanceError(lower)) {
+      return _insufficientSwapBalanceMessage;
+    }
     if (lower.contains('could not find any route')) {
       return 'No route available for this pair right now.';
     }
@@ -1686,6 +1753,19 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       return 'Quotes are busy right now. Try again in a moment.';
     }
     return message;
+  }
+
+  bool _isInsufficientSwapBalanceError(String lower) {
+    return lower.contains('custom program error: 0x1') ||
+        lower.contains('{custom: 1}') ||
+        lower.contains('{custom:1}') ||
+        lower.contains('custom: 1') ||
+        lower.contains('insufficient funds') ||
+        lower.contains('insufficient lamports') ||
+        lower.contains('insufficient balance') ||
+        lower.contains('insufficient account balance') ||
+        lower.contains('attempt to debit an account') ||
+        (lower.contains('insufficient') && lower.contains('rent'));
   }
 }
 
