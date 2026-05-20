@@ -20,6 +20,9 @@ import com.solana.mobilewalletadapter.clientlib.ConnectionIdentity
 import com.solana.mobilewalletadapter.clientlib.MobileWalletAdapter
 import com.solana.mobilewalletadapter.clientlib.Solana
 import com.solana.mobilewalletadapter.clientlib.TransactionResult
+import com.solanamobile.seedvault.Bip44DerivationPath
+import com.solanamobile.seedvault.BipLevel
+import com.solanamobile.seedvault.PublicKeyResponse
 import com.solanamobile.seedvault.SeedVault
 import com.solanamobile.seedvault.SigningRequest
 import com.solanamobile.seedvault.Wallet
@@ -530,7 +533,13 @@ class MainActivity : FlutterFragmentActivity() {
 			launchSeedVaultIntent(intent, result) { resultCode, data ->
 				try {
 					val authToken = Wallet.onAuthorizeSeedResult(resultCode, data)
-					result.success(seedVaultAccountSnapshot(authTokenFilter = authToken))
+					val snapshot = seedVaultAccountSnapshot(authTokenFilter = authToken)
+					val accounts = snapshot["accounts"] as? List<*> ?: emptyList<Any>()
+					if (accounts.isNotEmpty()) {
+						result.success(snapshot)
+					} else {
+						requestSeedVaultDiscoveryAccounts(authToken, result)
+					}
 				} catch (error: Exception) {
 					result.error(
 						"seed_vault_authorize_failed",
@@ -953,6 +962,143 @@ class MainActivity : FlutterFragmentActivity() {
 		}
 		Log.d(TAG, "Seed Vault provider returned $count account(s) for token $authToken seed=$seedName")
 	}
+
+	private fun requestSeedVaultDiscoveryAccounts(
+		authToken: Long,
+		result: MethodChannel.Result,
+	) {
+		try {
+			val discoveryPaths = seedVaultDiscoveryDerivationPaths()
+			val paths = discoveryPaths.map { it.uri }
+			Log.d(
+				TAG,
+				"Seed Vault provider returned no known accounts; requesting public keys for " +
+					"${paths.size} candidate path(s) token=$authToken",
+			)
+			Log.d(
+				TAG,
+				"Seed Vault discovery paths: ${
+					discoveryPaths.joinToString(" | ") { "${it.label}=${it.uri}" }
+				}",
+			)
+			val intent = Wallet.requestPublicKeys(this, authToken, ArrayList(paths))
+			launchSeedVaultIntent(intent, result) { resultCode, data ->
+				try {
+					val seedName = seedVaultName(authToken)
+					val isBackedUp = seedVaultIsBackedUp(authToken)
+					val responses = Wallet.onRequestPublicKeysResult(resultCode, data)
+					val fallbackAccounts = responses.mapIndexedNotNull { index, response ->
+						val discoveryPath = discoveryPaths.getOrNull(index)
+						seedVaultAccountFromPublicKeyResponse(
+							authToken = authToken,
+							seedName = seedName,
+							isBackedUp = isBackedUp,
+							response = response,
+							label = discoveryPath?.label,
+						)
+					}
+					Log.d(
+						TAG,
+						"Seed Vault public key discovery returned ${fallbackAccounts.size} account(s) " +
+							"for token $authToken seed=$seedName",
+					)
+					result.success(
+						seedVaultAccountSnapshot(
+							fallbackAccounts = fallbackAccounts,
+							authTokenFilter = authToken,
+						),
+					)
+				} catch (error: Exception) {
+					result.error(
+						"seed_vault_account_discovery_failed",
+						error.message ?: "Seed Vault account discovery failed.",
+						error.javaClass.name,
+					)
+				}
+			}
+		} catch (error: Exception) {
+			result.error(
+				"seed_vault_account_discovery_failed",
+				error.message ?: "Unable to start Seed Vault account discovery.",
+				error.javaClass.name,
+			)
+		}
+	}
+
+	private fun seedVaultDiscoveryDerivationPaths(): List<SeedVaultDiscoveryPath> {
+		return listOf(
+			SeedVaultDiscoveryPath(seedVaultBip44Uri(account = 0, change = 0), "Wallet 1"),
+		)
+	}
+
+	private fun seedVaultBip44Uri(
+		account: Int,
+		change: Int? = null,
+		addressIndex: Int? = null,
+	): Uri {
+		return Bip44DerivationPath(
+			BipLevel(account, true),
+			change?.let { BipLevel(it, true) },
+			addressIndex?.let { BipLevel(it, true) },
+		).toUri()
+	}
+
+	private fun seedVaultAccountFromPublicKeyResponse(
+		authToken: Long,
+		seedName: String?,
+		isBackedUp: Boolean?,
+		response: PublicKeyResponse,
+		label: String?,
+	): Map<String, Any?>? {
+		val publicKeyEncoded = try {
+			response.getPublicKeyEncoded()
+		} catch (_: Exception) {
+			null
+		}
+		val publicKeyBase64 = try {
+			Base64.encodeToString(response.getPublicKey(), Base64.NO_WRAP)
+		} catch (_: Exception) {
+			null
+		}
+		val derivationPath = response.resolvedDerivationPath?.toString()
+		if (
+			(publicKeyEncoded.isNullOrBlank() && publicKeyBase64.isNullOrBlank()) ||
+			derivationPath.isNullOrBlank()
+		) {
+			return null
+		}
+
+		val trimmedSeedName = seedName?.trim()?.takeIf { it.isNotEmpty() }
+		val accountLabel = if (trimmedSeedName != null && !label.isNullOrBlank()) {
+			"$trimmedSeedName $label"
+		} else if (!label.isNullOrBlank()) {
+			label
+		} else {
+			"Seed Vault Account"
+		}
+		Log.d(
+			TAG,
+			"Seed Vault discovered account label=$accountLabel path=$derivationPath publicKey=$publicKeyEncoded",
+		)
+
+		return mapOf(
+			"seedAuthToken" to authToken.toString(),
+			"seedName" to seedName,
+			"isBackedUp" to isBackedUp,
+			"accountId" to null,
+			"accountName" to accountLabel,
+			"derivationPath" to derivationPath,
+			"publicKeyBase64" to publicKeyBase64,
+			"publicKeyEncoded" to publicKeyEncoded,
+			"isUserWallet" to false,
+			"isValid" to true,
+		)
+	}
+
+	private data class SeedVaultDiscoveryPath(
+		val uri: Uri,
+		val label: String,
+	)
 
 	private fun seedVaultName(authToken: Long): String? {
 		return try {
