@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/di/providers.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/utils/amount_parser.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../auth/data/solana_wallet_service.dart';
@@ -224,8 +225,12 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                         child: Column(
                           children: [
                             _SwapSectionCard(
+                              tokenSelectorKey: const ValueKey(
+                                'androidQaSwapPayToken',
+                              ),
                               title: 'Pay',
                               amountField: _AmountDisplayButton(
+                                key: const ValueKey('androidQaSwapPayAmount'),
                                 value: _displayAmountText,
                                 onTap: _editAmount,
                               ),
@@ -353,6 +358,9 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                               ),
                             ),
                             _SwapSectionCard(
+                              tokenSelectorKey: const ValueKey(
+                                'androidQaSwapReceiveToken',
+                              ),
                               title: _receiveTitle,
                               amountField: SizedBox(
                                 height: 54,
@@ -570,6 +578,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
           token: existing.token,
           category: existing.category,
           balance: snapshot.balance,
+          rawAmount: snapshot.rawAmount,
           priceQuote: existing.priceQuote,
           totalValueUsd: existing.totalValueUsd,
           existsOnChain: snapshot.existsOnChain,
@@ -582,6 +591,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         token: snapshot.token,
         category: 'core',
         balance: snapshot.balance,
+        rawAmount: snapshot.rawAmount,
         priceQuote: null,
         totalValueUsd: 0,
         existsOnChain: snapshot.existsOnChain,
@@ -799,7 +809,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   }
 
   bool get _canQuote {
-    final amount = double.tryParse(_amountController.text.trim());
+    final amount = AmountParser.parse(_amountController.text);
     return _inputToken != null &&
         _outputToken != null &&
         _inputToken!.token.mintAddress != _outputToken!.token.mintAddress &&
@@ -816,7 +826,10 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     }
 
     try {
-      final rawAmount = _toRawAmount(1.0, inputToken.token.decimals);
+      final rawAmount = _decimalTextToRawAmount('1', inputToken.token.decimals);
+      if (rawAmount == null || rawAmount == '0') {
+        return;
+      }
       final quote = await ref
           .read(swapRepositoryProvider)
           .quoteSwap(
@@ -935,7 +948,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   String get _slippageSummary {
     final value = !_usingCustomSlippage
         ? _slippageLabel(_presetSlippageBps[_slippagePresetIndex])
-        : '${double.tryParse(_customSlippageController.text.trim())?.toStringAsFixed(1) ?? '1.0'}%';
+        : '${AmountParser.parse(_customSlippageController.text)?.toStringAsFixed(1) ?? '1.0'}%';
     return _usingCustomSlippage ? 'Custom · $value' : value;
   }
 
@@ -974,7 +987,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   }
 
   String get _payAmountUsdText {
-    final amount = double.tryParse(_amountController.text.trim());
+    final amount = AmountParser.parse(_amountController.text);
     final price = _tokenUnitPrice(_inputToken);
     if (amount == null || amount <= 0 || price == null || price <= 0) {
       return '--';
@@ -985,7 +998,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   String _receiveMetaText(double? minReceivePreview) {
     final outputAmount = _outputAmountUi;
     final outputPrice = _tokenUnitPrice(_outputToken);
-    final inputAmount = double.tryParse(_amountController.text.trim());
+    final inputAmount = AmountParser.parse(_amountController.text);
     final inputPrice = _tokenUnitPrice(_inputToken);
     final inputValue = inputAmount == null || inputPrice == null
         ? null
@@ -1012,7 +1025,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   Future<void> _fetchQuote({bool showLoading = true}) async {
     final inputToken = _inputToken;
     final outputToken = _outputToken;
-    final amount = double.tryParse(_amountController.text.trim());
+    final amount = AmountParser.parse(_amountController.text);
     if (inputToken == null ||
         outputToken == null ||
         amount == null ||
@@ -1030,7 +1043,16 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     }
 
     try {
-      final rawAmount = _toRawAmount(amount, inputToken.token.decimals);
+      final rawAmount = _rawAmountForCurrentInput(inputToken);
+      if (rawAmount == null || rawAmount == '0') {
+        if (showLoading) {
+          setState(() {
+            _loadingQuote = false;
+            _quoteError = 'This amount is too small for a valid route.';
+          });
+        }
+        return;
+      }
       final quote = await ref
           .read(swapRepositoryProvider)
           .quoteSwap(
@@ -1067,7 +1089,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   double? get _outputAmountUi {
     final output = _outputToken;
     final quote = _quote;
-    final inputAmount = double.tryParse(_amountController.text.trim());
+    final inputAmount = AmountParser.parse(_amountController.text);
 
     // Only show an estimated output after the user enters an amount.
     if (output == null ||
@@ -1093,7 +1115,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       return _presetSlippageBps[_slippagePresetIndex];
     }
 
-    final value = double.tryParse(_customSlippageController.text.trim());
+    final value = AmountParser.parse(_customSlippageController.text);
     if (value == null || value <= 0) {
       return 100;
     }
@@ -1105,11 +1127,16 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     return '${(bps / 100).toStringAsFixed(decimals)}%';
   }
 
-  String _toRawAmount(double amount, int decimals) {
-    return ref
-        .read(solanaWalletServiceProvider)
-        .tokenUiToAmount(amount, decimals)
-        .toString();
+  String? _rawAmountForCurrentInput(SwapTokenOption inputToken) {
+    return _decimalTextToRawAmount(
+      _amountController.text,
+      inputToken.token.decimals,
+    );
+  }
+
+  String? _decimalTextToRawAmount(String amountText, int decimals) {
+    final rawAmount = AmountParser.toRawUnits(amountText, decimals);
+    return rawAmount?.toString();
   }
 
   double _rawToUiAmount(String rawAmount, int decimals) {
@@ -1133,8 +1160,33 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     if (inputToken == null) {
       return;
     }
+    final rawBalance = BigInt.tryParse(inputToken.rawAvailableAmount ?? '');
+    if (rawBalance != null && rawBalance > BigInt.zero) {
+      final rawAmount = _rawShareAmount(rawBalance, share);
+      _amountController.text = AmountParser.formatRawUnits(
+        rawAmount,
+        inputToken.token.decimals,
+      );
+      return;
+    }
     final amount = inputToken.availableBalance * share;
-    _amountController.text = Formatters.amount(amount, maxDecimals: 6);
+    _amountController.text = Formatters.amount(
+      amount,
+      maxDecimals: min(inputToken.token.decimals, 9),
+    );
+  }
+
+  BigInt _rawShareAmount(BigInt rawBalance, double share) {
+    if (share >= 1) {
+      return rawBalance;
+    }
+    if ((share - 0.5).abs() < 0.000001) {
+      return rawBalance ~/ BigInt.from(2);
+    }
+    if ((share - 0.25).abs() < 0.000001) {
+      return rawBalance ~/ BigInt.from(4);
+    }
+    return BigInt.from((rawBalance.toDouble() * share).floor());
   }
 
   Future<void> _editAmount() async {
@@ -1252,7 +1304,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   }
 
   String _modalReceivePreview(String inputText) {
-    final inputAmount = double.tryParse(inputText);
+    final inputAmount = AmountParser.parse(inputText);
     final quote = _quote;
     final inputToken = _inputToken;
     final outputToken = _outputToken;
@@ -1505,7 +1557,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     final inputToken = _inputToken;
     final outputToken = _outputToken;
     final quote = _quote;
-    final amount = double.tryParse(_amountController.text.trim());
+    final amount = AmountParser.parse(_amountController.text);
 
     if (walletAddress == null ||
         inputToken == null ||
@@ -1524,6 +1576,12 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       return;
     }
 
+    final rawAmount = _rawAmountForCurrentInput(inputToken);
+    if (rawAmount == null || rawAmount == '0') {
+      await _showDialog(message: 'This amount is too small for a valid route.');
+      return;
+    }
+
     if (quote == null) {
       await _showDialog(message: 'Wait for a valid quote before continuing.');
       return;
@@ -1536,6 +1594,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         inputToken: inputToken,
         outputToken: outputToken,
         amount: amount,
+        rawAmount: rawAmount,
       );
       if (balanceError != null) {
         if (!mounted) {
@@ -1551,7 +1610,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
             ownerAddress: walletAddress,
             inputMint: inputToken.token.mintAddress,
             outputMint: outputToken.token.mintAddress,
-            rawAmount: _toRawAmount(amount, inputToken.token.decimals),
+            rawAmount: rawAmount,
             slippageBps: _slippageBps,
             priorityPreset: _priorityPreset.apiValue,
           );
@@ -1626,6 +1685,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     required SwapTokenOption inputToken,
     required SwapTokenOption outputToken,
     required double amount,
+    required String rawAmount,
   }) async {
     final solana = ref.read(solanaWalletServiceProvider);
     final balances = await solana.loadPortfolioBalances(
@@ -1634,6 +1694,15 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     final inputBalance =
         _liveBalanceForMint(balances, inputToken.token.mintAddress) ??
         inputToken.availableBalance;
+    final requestedRawAmount = BigInt.tryParse(rawAmount);
+    final inputRawBalance =
+        _liveRawBalanceForMint(balances, inputToken.token.mintAddress) ??
+        BigInt.tryParse(inputToken.rawAvailableAmount ?? '');
+    if (requestedRawAmount != null &&
+        inputRawBalance != null &&
+        requestedRawAmount > inputRawBalance) {
+      return 'Insufficient balance.';
+    }
     if (amount > inputBalance + _balanceTolerance) {
       return 'Insufficient balance.';
     }
@@ -1675,6 +1744,17 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         .where((item) => item.token.mintAddress == mintAddress)
         .firstOrNull
         ?.balance;
+  }
+
+  BigInt? _liveRawBalanceForMint(
+    List<AssetBalanceSnapshot> balances,
+    String mintAddress,
+  ) {
+    final rawAmount = balances
+        .where((item) => item.token.mintAddress == mintAddress)
+        .firstOrNull
+        ?.rawAmount;
+    return rawAmount == null ? null : BigInt.tryParse(rawAmount);
   }
 
   Future<bool> _outputAccountExists({
@@ -1741,6 +1821,9 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     if (lower.contains('insufficient') && lower.contains('liquidity')) {
       return 'This amount is too small for a valid route.';
     }
+    if (_isJupiterInsufficientFundsError(lower)) {
+      return 'Not enough token balance. Tap Max again and retry.';
+    }
     if (_isInsufficientSwapBalanceError(lower)) {
       return _insufficientSwapBalanceMessage;
     }
@@ -1760,17 +1843,25 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         lower.contains('{custom: 1}') ||
         lower.contains('{custom:1}') ||
         lower.contains('custom: 1') ||
-        lower.contains('insufficient funds') ||
         lower.contains('insufficient lamports') ||
         lower.contains('insufficient balance') ||
         lower.contains('insufficient account balance') ||
         lower.contains('attempt to debit an account') ||
         (lower.contains('insufficient') && lower.contains('rent'));
   }
+
+  bool _isJupiterInsufficientFundsError(String lower) {
+    return lower.contains('custom program error: 0x1788') ||
+        lower.contains('{custom: 6024}') ||
+        lower.contains('{custom:6024}') ||
+        lower.contains('custom: 6024') ||
+        lower.contains('insufficient funds');
+  }
 }
 
 class _SwapSectionCard extends StatelessWidget {
   const _SwapSectionCard({
+    this.tokenSelectorKey,
     required this.title,
     required this.amountField,
     required this.token,
@@ -1778,6 +1869,7 @@ class _SwapSectionCard extends StatelessWidget {
     required this.footer,
   });
 
+  final Key? tokenSelectorKey;
   final String title;
   final Widget amountField;
   final SwapTokenOption? token;
@@ -1807,7 +1899,11 @@ class _SwapSectionCard extends StatelessWidget {
             children: [
               Expanded(child: amountField),
               const SizedBox(width: 12),
-              _TokenSelectorPill(token: token, onTap: onChooseToken),
+              _TokenSelectorPill(
+                key: tokenSelectorKey,
+                token: token,
+                onTap: onChooseToken,
+              ),
             ],
           ),
           const SizedBox(height: 18),
@@ -1819,7 +1915,11 @@ class _SwapSectionCard extends StatelessWidget {
 }
 
 class _TokenSelectorPill extends StatelessWidget {
-  const _TokenSelectorPill({required this.token, required this.onTap});
+  const _TokenSelectorPill({
+    super.key,
+    required this.token,
+    required this.onTap,
+  });
 
   final SwapTokenOption? token;
   final VoidCallback onTap;
@@ -1956,7 +2056,11 @@ class _QuickAmountChip extends StatelessWidget {
 }
 
 class _AmountDisplayButton extends StatelessWidget {
-  const _AmountDisplayButton({required this.value, required this.onTap});
+  const _AmountDisplayButton({
+    super.key,
+    required this.value,
+    required this.onTap,
+  });
 
   final String value;
   final VoidCallback onTap;

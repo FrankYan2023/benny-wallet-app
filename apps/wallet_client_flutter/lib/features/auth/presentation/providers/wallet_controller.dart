@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/di/providers.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
+import '../../../settings/presentation/providers/app_settings_controller.dart';
 import '../../data/wallet_repository.dart';
 import '../../domain/wallet_derivation.dart';
 import '../../domain/wallet_controller_state.dart';
@@ -23,21 +24,24 @@ class WalletController extends StateNotifier<WalletControllerState> {
 
   Future<void> _bootstrap() async {
     final repository = ref.read(walletRepositoryProvider);
-    final walletPublicKeys = await repository.listWalletPublicKeys();
-    await repository.clearUnlockedSession();
-    if (walletPublicKeys.isEmpty) {
-      await _clearNoWalletCaches(repository);
+    final records = await repository.readRecords();
+    final walletPublicKeys = records
+        .map((record) => record.publicKey)
+        .toList(growable: false);
+    unawaited(repository.clearUnlockedSession());
+    if (records.isEmpty) {
       state = WalletControllerState.noWallet;
+      unawaited(_clearNoWalletCaches(repository));
       return;
     }
 
     final record = await _sanitizeBiometricRecord(
       repository,
-      await repository.readRecord(),
+      await repository.readSelectedRecordFrom(records),
     );
     if (record == null) {
-      await _clearNoWalletCaches(repository);
       state = WalletControllerState.noWallet;
+      unawaited(_clearNoWalletCaches(repository));
       return;
     }
 
@@ -121,7 +125,7 @@ class WalletController extends StateNotifier<WalletControllerState> {
     unawaited(
       _registerAnonymousInstallIfNeeded(nextState, source: 'pin_setup'),
     );
-    unawaited(_syncPushNotificationsIfEnabled(nextState));
+    await _enablePushNotificationsForNewWallet(nextState);
   }
 
   Future<void> importMobileWalletAdapterWallet({
@@ -155,7 +159,7 @@ class WalletController extends StateNotifier<WalletControllerState> {
     unawaited(
       _registerAnonymousInstallIfNeeded(nextState, source: 'pin_setup'),
     );
-    unawaited(_syncPushNotificationsIfEnabled(nextState));
+    await _enablePushNotificationsForNewWallet(nextState);
   }
 
   Future<void> importSeedVaultWallet({
@@ -191,7 +195,7 @@ class WalletController extends StateNotifier<WalletControllerState> {
     unawaited(
       _registerAnonymousInstallIfNeeded(nextState, source: 'pin_setup'),
     );
-    unawaited(_syncPushNotificationsIfEnabled(nextState));
+    await _enablePushNotificationsForNewWallet(nextState);
   }
 
   Future<void> updateMobileWalletAdapterAuthToken(String authToken) async {
@@ -822,6 +826,21 @@ class WalletController extends StateNotifier<WalletControllerState> {
           walletState: nextState,
           notificationsEnabled: settings.notificationsEnabled,
         );
+  }
+
+  Future<void> _enablePushNotificationsForNewWallet(
+    WalletControllerState nextState,
+  ) async {
+    await ref
+        .read(appSettingsControllerProvider.notifier)
+        .setNotificationsEnabled(true);
+    if (!await _canUseBackendWithoutPrompt(nextState)) {
+      return;
+    }
+
+    await ref
+        .read(pushNotificationServiceProvider)
+        .syncEnabledDevice(walletState: nextState, notificationsEnabled: true);
   }
 
   Future<void> _ensureBackendSessionForExternalWallet(

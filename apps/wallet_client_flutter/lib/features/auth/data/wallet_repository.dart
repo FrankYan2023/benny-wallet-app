@@ -226,8 +226,10 @@ class WalletRepository {
     return records.map((record) => record.publicKey).toList(growable: false);
   }
 
-  Future<StoredWalletRecord?> readRecord({String? publicKey}) async {
-    final records = await readRecords();
+  Future<StoredWalletRecord?> readSelectedRecordFrom(
+    List<StoredWalletRecord> records, {
+    String? publicKey,
+  }) async {
     if (records.isEmpty) {
       return null;
     }
@@ -246,6 +248,11 @@ class WalletRepository {
     }
 
     return record;
+  }
+
+  Future<StoredWalletRecord?> readRecord({String? publicKey}) async {
+    final records = await readRecords();
+    return readSelectedRecordFrom(records, publicKey: publicKey);
   }
 
   Future<void> saveWallet({

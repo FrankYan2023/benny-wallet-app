@@ -9,6 +9,7 @@ class AssetHolding {
     required this.totalValueUsd,
     required this.existsOnChain,
     this.logoUrl,
+    this.rawAmount,
   });
 
   final TokenInfo token;
@@ -18,6 +19,7 @@ class AssetHolding {
   final double totalValueUsd;
   final bool existsOnChain;
   final String? logoUrl;
+  final String? rawAmount;
 }
 
 class PortfolioViewData {

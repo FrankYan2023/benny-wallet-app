@@ -31,14 +31,13 @@ final sendHistoryProvider =
           backendError = error;
         }
       }
+      if (backendItems.isNotEmpty) {
+        return _mergeHistoryItems(backendItems);
+      }
 
       try {
-        final chainItems = await _loadChainSendHistory(ref, walletState);
-        return _mergeHistoryItems([...backendItems, ...chainItems]);
+        return await _loadChainSendHistory(ref, walletState);
       } catch (_) {
-        if (backendItems.isNotEmpty) {
-          return _mergeHistoryItems(backendItems);
-        }
         if (backendError != null && !walletState.isExternalWallet) {
           throw backendError;
         }
@@ -50,6 +49,8 @@ final sendHistoryTokensProvider =
     FutureProvider.autoDispose<List<RemoteTokenCatalogItem>>((ref) async {
       return ref.read(backendApiClientProvider).getTokens();
     });
+
+const _chainHistoryRequestTimeout = Duration(seconds: 3);
 
 class SendHistoryDetailData {
   const SendHistoryDetailData({required this.item, this.token});
@@ -983,12 +984,17 @@ Future<List<RemoteSendHistoryItem>> _loadChainSendHistory(
   final activities = await Future.wait(
     portfolio.assets.map((asset) async {
       try {
-        final items = await assetDetailRepository.loadTokenActivity(
-          ownerAddress: ownerAddress,
-          mintAddress: asset.token.mintAddress,
-          symbol: asset.token.symbol,
-          limit: 20,
-        );
+        final items = await assetDetailRepository
+            .loadTokenActivity(
+              ownerAddress: ownerAddress,
+              mintAddress: asset.token.mintAddress,
+              symbol: asset.token.symbol,
+              limit: 20,
+            )
+            .timeout(
+              _chainHistoryRequestTimeout,
+              onTimeout: () => const <TransactionActivity>[],
+            );
         return [
           for (final item in items)
             if (item.direction == TransactionDirection.sent)

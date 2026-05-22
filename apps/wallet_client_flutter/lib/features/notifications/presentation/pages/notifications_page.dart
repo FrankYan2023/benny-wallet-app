@@ -17,8 +17,26 @@ import '../../domain/notification_message.dart';
 import '../providers/notification_inbox_provider.dart';
 
 final receivedTransferDetailProvider = FutureProvider.autoDispose
-    .family<RemoteReceivedTransferItem, String>((ref, id) {
-      return ref.read(backendApiClientProvider).getReceivedTransfer(id);
+    .family<RemoteReceivedTransferItem, String>((ref, id) async {
+      final walletState = ref.read(walletControllerProvider);
+      if (await _canUseBackendHistory(ref, walletState)) {
+        try {
+          return await ref
+              .read(backendApiClientProvider)
+              .getReceivedTransfer(id);
+        } catch (_) {
+          // Fall back to the chain-derived list below without asking Seed Vault
+          // for another backend authentication signature.
+        }
+      }
+
+      final items = await _loadChainReceivedHistory(ref, walletState);
+      for (final item in items) {
+        if (item.id == id || item.signature == id || item.id == 'chain:$id') {
+          return item;
+        }
+      }
+      throw StateError('Received transfer details are not available yet.');
     });
 
 final receivedTransfersProvider =
@@ -42,6 +60,8 @@ final receivedTransfersProvider =
 
       return _loadChainReceivedHistory(ref, walletState);
     });
+
+const _chainHistoryRequestTimeout = Duration(seconds: 3);
 
 class NotificationsPage extends ConsumerWidget {
   const NotificationsPage({super.key});
@@ -1076,12 +1096,17 @@ Future<List<RemoteReceivedTransferItem>> _loadChainReceivedHistory(
   final transfers = await Future.wait(
     portfolio.assets.map((asset) async {
       try {
-        final items = await assetDetailRepository.loadTokenActivity(
-          ownerAddress: ownerAddress,
-          mintAddress: asset.token.mintAddress,
-          symbol: asset.token.symbol,
-          limit: 20,
-        );
+        final items = await assetDetailRepository
+            .loadTokenActivity(
+              ownerAddress: ownerAddress,
+              mintAddress: asset.token.mintAddress,
+              symbol: asset.token.symbol,
+              limit: 20,
+            )
+            .timeout(
+              _chainHistoryRequestTimeout,
+              onTimeout: () => const <TransactionActivity>[],
+            );
         return [
           for (final item in items)
             if (item.direction == TransactionDirection.received)

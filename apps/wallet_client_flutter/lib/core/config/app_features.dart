@@ -46,6 +46,16 @@ abstract final class AppFeatures {
     defaultValue: true,
   );
 
+  static const defiPortfolioEnabled = bool.fromEnvironment(
+    'FEATURE_DEFI_PORTFOLIO_ENABLED',
+    defaultValue: true,
+  );
+
+  static const defiActionsEnabled = bool.fromEnvironment(
+    'FEATURE_DEFI_ACTIONS_ENABLED',
+    defaultValue: false,
+  );
+
   static const appUpdatesEnabled = bool.fromEnvironment(
     'FEATURE_APP_UPDATES_ENABLED',
     defaultValue: true,
@@ -65,6 +75,11 @@ abstract final class AppFeatures {
       !isLiteStore && swapEnabled && xstocksEnabled;
 
   static bool get canOpenAirdrop => airdropEnabled;
+
+  static bool get canOpenDefiPortfolio => defiPortfolioEnabled;
+
+  static bool get canUseDefiActions =>
+      defiPortfolioEnabled && defiActionsEnabled;
 
   static bool get canCheckForUpdates => appUpdatesEnabled;
 
@@ -127,6 +142,13 @@ abstract final class AppFeatures {
       enabled: canOpenAirdrop,
       reviewNote:
           'Enabled so users can check in and collect BYC points. Buying is disabled in Lite.',
+    ),
+    FeatureReviewItem(
+      label: 'DeFi portfolio',
+      enabled: canOpenDefiPortfolio,
+      reviewNote: canOpenDefiPortfolio
+          ? 'Read-only protocol position display. DeFi actions stay disabled unless explicitly enabled.'
+          : 'Disabled by feature flag.',
     ),
     FeatureReviewItem(
       label: 'WebView trading UI',

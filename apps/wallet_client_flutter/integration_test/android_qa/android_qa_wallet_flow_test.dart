@@ -27,8 +27,16 @@ void main() {
     'ANDROID_QA_SEND_TOKEN_AMOUNT',
     defaultValue: '100',
   );
+  const swapTokenSymbol = String.fromEnvironment(
+    'ANDROID_QA_SWAP_TOKEN_SYMBOL',
+    defaultValue: 'SOL',
+  );
+  const swapAmount = String.fromEnvironment(
+    'ANDROID_QA_SWAP_AMOUNT',
+    defaultValue: '0.0001',
+  );
 
-  testWidgets('QA import wallet, history screens, and send BYC', (
+  testWidgets('QA full import wallet, history screens, send BYC, and swap', (
     tester,
   ) async {
     _require(mnemonic.isNotEmpty, 'ANDROID_QA_IMPORT_MNEMONIC is required.');
@@ -50,9 +58,18 @@ void main() {
       find.text('Benny'),
       find.text('Set Benny PIN'),
     ]);
+    await tester.pump(const Duration(seconds: 2));
 
     if (find.text('Benny').evaluate().isEmpty) {
-      await _tapVisible(tester, find.text('Import wallet'));
+      await _tapVisible(
+        tester,
+        find
+            .ancestor(
+              of: find.text('Import wallet'),
+              matching: find.byType(InkWell),
+            )
+            .last,
+      );
       await _waitFor(tester, find.text('Import recovery phrase'));
 
       await tester.enterText(find.byType(TextField).first, mnemonic);
@@ -164,7 +181,136 @@ void main() {
     ], timeout: const Duration(seconds: 180));
     expect(find.text('Send failed'), findsNothing);
     expect(find.text('Submitted'), findsOneWidget);
+
+    await _tapVisible(tester, find.text('Close'));
+    await _waitFor(
+      tester,
+      find.text('Benny'),
+      timeout: const Duration(seconds: 90),
+    );
+    await _waitFor(
+      tester,
+      find.text('Swap'),
+      timeout: const Duration(seconds: 90),
+    );
+    await _tapVisible(tester, find.text('Swap'));
+    await _waitFor(
+      tester,
+      find.byKey(const ValueKey('androidQaSwapPayToken')),
+      timeout: const Duration(seconds: 90),
+    );
+
+    await _selectSwapInputToken(tester, swapTokenSymbol);
+    await _enterSwapAmount(tester, swapAmount);
+    await _tapEnabledButtonWithText(
+      tester,
+      'Swap',
+      timeout: const Duration(seconds: 120),
+    );
+
+    await _waitForAny(tester, [
+      find.text('Swapping...'),
+      find.text('Swap complete'),
+      find.text('Swap failed'),
+      find.text('Enter a valid amount.'),
+      find.text('Insufficient balance.'),
+      find.text('This amount is too small for a valid route.'),
+      find.text('Wait for a valid quote before continuing.'),
+      find.text('Not enough token balance. Tap Max again and retry.'),
+      find.textContaining('Not enough SOL'),
+    ], timeout: const Duration(seconds: 180));
+    if (find.text('Swapping...').evaluate().isNotEmpty) {
+      await _waitForAny(tester, [
+        find.text('Swap complete'),
+        find.text('Swap failed'),
+      ], timeout: const Duration(seconds: 180));
+    }
+    expect(find.text('Swap failed'), findsNothing);
+    expect(find.text('Enter a valid amount.'), findsNothing);
+    expect(find.text('Insufficient balance.'), findsNothing);
+    expect(
+      find.text('This amount is too small for a valid route.'),
+      findsNothing,
+    );
+    expect(
+      find.text('Wait for a valid quote before continuing.'),
+      findsNothing,
+    );
+    expect(
+      find.text('Not enough token balance. Tap Max again and retry.'),
+      findsNothing,
+    );
+    expect(find.textContaining('Not enough SOL'), findsNothing);
+    expect(find.text('Swap complete'), findsOneWidget);
   });
+}
+
+Future<void> _selectSwapInputToken(
+  WidgetTester tester,
+  String tokenSymbol,
+) async {
+  await _tapVisible(
+    tester,
+    find.byKey(const ValueKey('androidQaSwapPayToken')),
+  );
+  await _waitFor(tester, find.text('Pay with'));
+
+  await tester.enterText(find.byType(TextField).first, tokenSymbol);
+  await tester.testTextInput.receiveAction(TextInputAction.done);
+  await tester.pump(const Duration(milliseconds: 750));
+  await _waitFor(tester, find.text(tokenSymbol));
+
+  await _tapVisible(
+    tester,
+    find
+        .ancestor(
+          of: find.text(tokenSymbol).last,
+          matching: find.byType(InkWell),
+        )
+        .last,
+  );
+  await _waitFor(tester, find.byKey(const ValueKey('androidQaSwapPayAmount')));
+}
+
+Future<void> _enterSwapAmount(WidgetTester tester, String amount) async {
+  _require(amount.isNotEmpty, 'ANDROID_QA_SWAP_AMOUNT must not be empty.');
+  await _tapVisible(
+    tester,
+    find.byKey(const ValueKey('androidQaSwapPayAmount')),
+  );
+  await _waitFor(tester, find.text('Done'));
+
+  for (final character in amount.split('')) {
+    await _tapVisible(tester, find.text(character).last);
+    await tester.pump(const Duration(milliseconds: 80));
+  }
+
+  await _tapVisible(tester, find.text('Done'));
+  await _waitFor(tester, find.byKey(const ValueKey('androidQaSwapPayAmount')));
+}
+
+Future<void> _tapEnabledButtonWithText(
+  WidgetTester tester,
+  String label, {
+  Duration timeout = const Duration(seconds: 45),
+}) async {
+  final deadline = DateTime.now().add(timeout);
+  final finder = find.widgetWithText(FilledButton, label);
+  while (DateTime.now().isBefore(deadline)) {
+    await tester.pump(const Duration(milliseconds: 500));
+    final elements = finder.evaluate().toList(growable: false);
+    for (var i = 0; i < elements.length; i++) {
+      final widget = elements[i].widget;
+      if (widget is FilledButton && widget.onPressed != null) {
+        final candidate = finder.at(i);
+        await tester.ensureVisible(candidate);
+        await tester.tap(candidate);
+        await tester.pump(const Duration(milliseconds: 350));
+        return;
+      }
+    }
+  }
+  fail('Timed out waiting for enabled $label button');
 }
 
 Future<void> _enterPin(WidgetTester tester, String pin) async {

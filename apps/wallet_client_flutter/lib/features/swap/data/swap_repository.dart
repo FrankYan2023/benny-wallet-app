@@ -39,6 +39,7 @@ class SwapRepository {
                   ? null
                   : catalogItem.logoUrl),
         availableBalance: asset.balance,
+        rawAvailableAmount: asset.rawAmount,
         isOwned: true,
         totalValueUsd: asset.totalValueUsd,
       );
@@ -59,6 +60,7 @@ class SwapRepository {
           category: item.category,
           logoUrl: item.logoUrl.isEmpty ? null : item.logoUrl,
           availableBalance: 0,
+          rawAvailableAmount: '0',
           isOwned: false,
           totalValueUsd: 0,
         ),
@@ -88,9 +90,9 @@ class SwapRepository {
 
   Future<List<SwapTokenOption>> searchTokens(
     String query,
-    List<AssetHolding> portfolioAssets,
-    {Set<String> excludedCategories = const {}}
-  ) async {
+    List<AssetHolding> portfolioAssets, {
+    Set<String> excludedCategories = const {},
+  }) async {
     if (query.isEmpty) {
       return const [];
     }
@@ -106,25 +108,27 @@ class SwapRepository {
     return results
         .where((item) => !excludedCategories.contains(item.category))
         .map((item) {
-      final isOwned = ownedMints.contains(item.mintAddress);
-      final ownedAsset = ownedAssetsMap[item.mintAddress];
+          final isOwned = ownedMints.contains(item.mintAddress);
+          final ownedAsset = ownedAssetsMap[item.mintAddress];
 
-      return SwapTokenOption(
-        token: TokenInfo(
-          mintAddress: item.mintAddress,
-          symbol: item.symbol,
-          name: item.name,
-          decimals: item.decimals,
-          isNative: item.isNative,
-          isVisible: item.isVisible,
-        ),
-        category: item.category,
-        logoUrl: item.logoUrl.isEmpty ? null : item.logoUrl,
-        availableBalance: isOwned ? ownedAsset?.balance ?? 0 : 0,
-        isOwned: isOwned,
-        totalValueUsd: isOwned ? ownedAsset?.totalValueUsd ?? 0 : 0,
-      );
-    }).toList();
+          return SwapTokenOption(
+            token: TokenInfo(
+              mintAddress: item.mintAddress,
+              symbol: item.symbol,
+              name: item.name,
+              decimals: item.decimals,
+              isNative: item.isNative,
+              isVisible: item.isVisible,
+            ),
+            category: item.category,
+            logoUrl: item.logoUrl.isEmpty ? null : item.logoUrl,
+            availableBalance: isOwned ? ownedAsset?.balance ?? 0 : 0,
+            rawAvailableAmount: isOwned ? ownedAsset?.rawAmount : '0',
+            isOwned: isOwned,
+            totalValueUsd: isOwned ? ownedAsset?.totalValueUsd ?? 0 : 0,
+          );
+        })
+        .toList();
   }
 
   Future<SwapQuoteResult> quoteSwap({

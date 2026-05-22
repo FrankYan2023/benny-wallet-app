@@ -294,20 +294,40 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
 
     try {
       final solana = ref.read(solanaWalletServiceProvider);
-      final transactions = await solana.buildRentReclaimTransactions(
-        ownerAddress: ownerAddress,
-        accounts: preview.accounts,
-      );
-      final result = await ref
-          .read(mobileWalletAdapterServiceProvider)
-          .signAndSendTransactions(
-            authToken: authToken,
-            encodedTransactions: transactions,
+      final signatures = <String>[];
+      final failures = <Object>[];
+      var nextAuthToken = authToken;
+      for (final account in preview.accounts) {
+        try {
+          final transactions = await solana.buildRentReclaimTransactions(
+            ownerAddress: ownerAddress,
+            accounts: [account],
+            chunkSize: 1,
+            includeSenderInstructions: false,
           );
+          final result = await ref
+              .read(mobileWalletAdapterServiceProvider)
+              .signAndSendTransactions(
+                authToken: nextAuthToken,
+                encodedTransactions: transactions,
+              );
+          nextAuthToken = result.authToken;
+          signatures.addAll(result.signatures);
+        } catch (error) {
+          debugPrint('Rent reclaim MWA failed for ${account.address}: $error');
+          if (_isUserCancelled(error)) {
+            rethrow;
+          }
+          failures.add(error);
+        }
+      }
       await ref
           .read(walletControllerProvider.notifier)
-          .updateMobileWalletAdapterAuthToken(result.authToken);
-      for (final signature in result.signatures) {
+          .updateMobileWalletAdapterAuthToken(nextAuthToken);
+      if (signatures.isEmpty && failures.isNotEmpty) {
+        throw failures.first;
+      }
+      for (final signature in signatures) {
         await solana.waitForConfirmation(signature);
       }
       ref.invalidate(portfolioProvider(ownerAddress));
@@ -317,12 +337,15 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Submitted ${result.signatures.length} reclaim transaction${result.signatures.length == 1 ? '' : 's'}.',
+            failures.isEmpty
+                ? 'Submitted ${signatures.length} reclaim transaction${signatures.length == 1 ? '' : 's'}.'
+                : 'Submitted ${signatures.length} reclaim transaction${signatures.length == 1 ? '' : 's'}; ${failures.length} account${failures.length == 1 ? '' : 's'} skipped.',
           ),
         ),
       );
       _reloadPreview();
     } catch (error) {
+      debugPrint('Rent reclaim MWA failed: $error');
       if (!mounted) {
         return;
       }
@@ -371,15 +394,16 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
       final transactions = await solana.buildRentReclaimTransactions(
         ownerAddress: ownerAddress,
         accounts: preview.accounts,
+        includeSenderInstructions: false,
       );
       final signatures = <String>[];
       for (final transaction in transactions) {
         final result = await ref
             .read(mobileWalletAdapterServiceProvider)
-            .signSeedVaultTransactions(
+            .signSeedVaultMessages(
               authToken: authToken,
               derivationPath: derivationPath,
-              encodedTransactions: [transaction],
+              messages: [solana.signableTransactionMessageBytes(transaction)],
             );
         signatures.add(
           await solana.sendExternallySignedTransaction(
@@ -401,6 +425,7 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
       );
       _reloadPreview();
     } catch (error) {
+      debugPrint('Rent reclaim Seed Vault failed: $error');
       if (!mounted) {
         return;
       }
@@ -427,6 +452,14 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
       return 'Unlock the wallet again before reclaiming rent.';
     }
     return message;
+  }
+
+  bool _isUserCancelled(Object error) {
+    final lower = error.toString().toLowerCase();
+    return lower.contains('cancel') ||
+        lower.contains('reject') ||
+        lower.contains('declin') ||
+        lower.contains('user denied');
   }
 }
 

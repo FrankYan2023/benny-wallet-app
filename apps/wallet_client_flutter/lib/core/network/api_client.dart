@@ -400,6 +400,16 @@ class BackendApiClient {
     );
   }
 
+  Future<Map<String, dynamic>> getDefiPositions(String ownerAddress) async {
+    return _requestJsonMap(
+      () => _dio.post<Map<String, dynamic>>(
+        '/v1/defi-positions',
+        data: {'ownerAddress': ownerAddress},
+      ),
+      fallback: 'Unable to load DeFi positions right now.',
+    );
+  }
+
   Future<List<RemoteImportWalletScanItem>> scanImportWalletAddresses(
     List<String> addresses, {
     List<String> fallbackAddresses = const [],

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/di/providers.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/utils/amount_parser.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_scaffold.dart';
@@ -52,7 +53,8 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
   void initState() {
     super.initState();
     // Pre-fill recipient address if provided
-    if (widget.recipientAddress != null && widget.recipientAddress!.isNotEmpty) {
+    if (widget.recipientAddress != null &&
+        widget.recipientAddress!.isNotEmpty) {
       _addressController.text = widget.recipientAddress!;
     }
   }
@@ -79,7 +81,7 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
         }
 
         final symbol = Formatters.tokenSymbol(asset.token.symbol);
-    final amountValue = double.tryParse(_amountController.text.trim()) ?? 0;
+        final amountValue = AmountParser.parse(_amountController.text) ?? 0;
         final approximateUsd = amountValue * _priceOf(asset);
 
         return AppScaffold(
@@ -132,7 +134,8 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
                       },
                       onMax: () => _fillMaxAmount(
                         asset: asset,
-                        availableSolBalance: data.assets
+                        availableSolBalance:
+                            data.assets
                                 .where((holding) => holding.token.isNative)
                                 .firstOrNull
                                 ?.balance ??
@@ -145,18 +148,16 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
                         Expanded(
                           child: Text(
                             '~${Formatters.usd(approximateUsd)}',
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(color: AppColors.textSecondary),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             'Available ${Formatters.compactNumber(asset.balance)} $symbol',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppColors.textSecondary),
                             textAlign: TextAlign.end,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -169,20 +170,21 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
               ),
               const SizedBox(height: 12),
               _BottomActionRow(
-                        leadingLabel: 'Cancel',
-                        trailingLabel: _submitting ? 'Loading...' : 'Next',
-                        onLeading: _submitting ? null : () => context.pop(),
-                        onTrailing: _submitting
-                            ? null
-                            : () => _continueToConfirm(
-                                  context: context,
-                                  asset: asset,
-                                  availableSolBalance: data.assets
-                                          .where((holding) => holding.token.isNative)
-                                          .firstOrNull
-                                          ?.balance ??
-                                      0,
-                                ),
+                leadingLabel: 'Cancel',
+                trailingLabel: _submitting ? 'Loading...' : 'Next',
+                onLeading: _submitting ? null : () => context.pop(),
+                onTrailing: _submitting
+                    ? null
+                    : () => _continueToConfirm(
+                        context: context,
+                        asset: asset,
+                        availableSolBalance:
+                            data.assets
+                                .where((holding) => holding.token.isNative)
+                                .firstOrNull
+                                ?.balance ??
+                            0,
+                      ),
               ),
             ],
           ),
@@ -217,7 +219,9 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
       return;
     }
 
-    final scannedAddress = await context.push<String>(ScanAddressPage.routePath);
+    final scannedAddress = await context.push<String>(
+      ScanAddressPage.routePath,
+    );
     if (!mounted || scannedAddress == null || scannedAddress.isEmpty) {
       return;
     }
@@ -238,7 +242,7 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
 
     FocusScope.of(context).unfocus();
     final destination = _addressController.text.trim();
-    final amountValue = double.tryParse(_amountController.text.trim());
+    final amountValue = AmountParser.parse(_amountController.text);
 
     if (!Validators.isValidPublicAddress(destination)) {
       await _showValidationDialog(
@@ -249,18 +253,12 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
     }
 
     if (amountValue == null || amountValue <= 0) {
-      await _showValidationDialog(
-        context,
-        message: 'Enter a valid amount.',
-      );
+      await _showValidationDialog(context, message: 'Enter a valid amount.');
       return;
     }
 
     if (amountValue > asset.balance) {
-      await _showValidationDialog(
-        context,
-        message: 'Insufficient balance.',
-      );
+      await _showValidationDialog(context, message: 'Insufficient balance.');
       return;
     }
 
@@ -287,7 +285,8 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
             );
 
       if (asset.token.isNative &&
-          amountValue + estimatedNetworkFeeSol > asset.balance + _balanceTolerance) {
+          amountValue + estimatedNetworkFeeSol >
+              asset.balance + _balanceTolerance) {
         if (!context.mounted) {
           return;
         }
@@ -370,10 +369,10 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
         asset.balance > 0) {
       try {
         estimatedFeeSol = await solana.estimateSolFee(
-              ownerAddress: ownerAddress,
-              destinationAddress: destination,
-              lamports: solana.solToLamports(asset.balance),
-            );
+          ownerAddress: ownerAddress,
+          destinationAddress: destination,
+          lamports: solana.solToLamports(asset.balance),
+        );
         reservedRentSol = solana.lamportsToSol(
           await solana.getSystemAccountRentExemptMinimumLamports(),
         );
@@ -450,14 +449,10 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
 
     return _genericSendFailure;
   }
-
 }
 
 class _SendInputCard extends StatelessWidget {
-  const _SendInputCard({
-    required this.child,
-    this.trailing,
-  });
+  const _SendInputCard({required this.child, this.trailing});
 
   final Widget child;
   final Widget? trailing;
@@ -470,16 +465,15 @@ class _SendInputCard extends StatelessWidget {
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.6),
+          color: Theme.of(
+            context,
+          ).colorScheme.outlineVariant.withValues(alpha: 0.6),
         ),
       ),
       child: Row(
         children: [
           Expanded(child: child),
-          if (trailing != null) ...[
-            const SizedBox(width: 8),
-            trailing!,
-          ],
+          if (trailing != null) ...[const SizedBox(width: 8), trailing!],
         ],
       ),
     );
@@ -512,7 +506,9 @@ class _AmountCard extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: amountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               onChanged: (_) {
                 onChanged();
               },
@@ -523,15 +519,9 @@ class _AmountCard extends StatelessWidget {
               ),
             ),
           ),
-          Text(
-            symbol,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+          Text(symbol, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(width: 10),
-          TextButton(
-            onPressed: onMax,
-            child: const Text('MAX'),
-          ),
+          TextButton(onPressed: onMax, child: const Text('MAX')),
         ],
       ),
     );
@@ -539,10 +529,7 @@ class _AmountCard extends StatelessWidget {
 }
 
 class _TokenAvatar extends StatelessWidget {
-  const _TokenAvatar({
-    required this.symbol,
-    this.iconUrl,
-  });
+  const _TokenAvatar({required this.symbol, this.iconUrl});
 
   final String symbol;
   final String? iconUrl;

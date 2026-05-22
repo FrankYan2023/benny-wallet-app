@@ -1,29 +1,32 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/widgets/brand_logo.dart';
+import '../../../auth/domain/wallet_controller_state.dart';
+import '../../../auth/presentation/pages/unlock_page.dart';
+import '../../../auth/presentation/providers/wallet_controller.dart';
+import '../../../portfolio/presentation/pages/portfolio_page.dart';
 
 import 'welcome_page.dart';
 
-class SplashPage extends StatefulWidget {
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
   static const routeName = 'splash';
   static const routePath = '/splash';
 
   @override
-  State<SplashPage> createState() => _SplashPageState();
+  ConsumerState<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage>
+class _SplashPageState extends ConsumerState<SplashPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _opacity;
   late final Animation<double> _scale;
-  Timer? _timer;
+  bool _redirected = false;
 
   @override
   void initState() {
@@ -32,31 +35,31 @@ class _SplashPageState extends State<SplashPage>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
-    _opacity = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    );
+    _opacity = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
     _scale = Tween<double>(
       begin: 0.92,
       end: 1,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
     _controller.forward();
-    _timer = Timer(const Duration(milliseconds: 1150), () {
-      if (mounted) {
-        context.go(WelcomePage.routePath);
-      }
-    });
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
     _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final walletState = ref.watch(walletControllerProvider);
+    final targetPath = _targetPath(walletState);
+    if (!_redirected && targetPath != null) {
+      _redirected = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _goAfterSplash(targetPath);
+      });
+    }
+
     return Scaffold(
       body: Stack(
         children: [
@@ -102,9 +105,7 @@ class _SplashPageState extends State<SplashPage>
                     shape: BoxShape.circle,
                     color: Color(0xFFFBD7B6),
                   ),
-                  child: const Center(
-                    child: BrandLogo(size: 138),
-                  ),
+                  child: const Center(child: BrandLogo(size: 138)),
                 ),
               ),
             ),
@@ -112,6 +113,29 @@ class _SplashPageState extends State<SplashPage>
         ],
       ),
     );
+  }
+
+  Future<void> _goAfterSplash(String targetPath) async {
+    if (targetPath == WelcomePage.routePath) {
+      await _controller.forward();
+      await Future<void>.delayed(const Duration(milliseconds: 80));
+    }
+
+    if (mounted) {
+      context.go(targetPath);
+    }
+  }
+
+  String? _targetPath(WalletControllerState walletState) {
+    if (walletState.status == WalletStatus.loading) {
+      return null;
+    }
+    if (walletState.hasWallet && !walletState.loggedOut) {
+      return walletState.isUnlocked
+          ? PortfolioPage.routePath
+          : UnlockPage.routePath;
+    }
+    return WelcomePage.routePath;
   }
 }
 

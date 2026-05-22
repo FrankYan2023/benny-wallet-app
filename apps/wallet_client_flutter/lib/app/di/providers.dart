@@ -19,6 +19,7 @@ import '../../features/asset_detail/data/asset_detail_repository.dart';
 import '../../features/auth/data/solana_wallet_service.dart';
 import '../../features/auth/data/wallet_repository.dart';
 import '../../features/portfolio/data/portfolio_repository.dart';
+import '../../features/portfolio/data/defi_position_repository.dart';
 import '../../features/notifications/presentation/providers/notification_inbox_provider.dart';
 import '../../features/settings/data/app_settings_repository.dart';
 import '../../features/swap/data/swap_repository.dart';
@@ -72,6 +73,10 @@ final pushNotificationServiceProvider = Provider<PushNotificationService>((
     store: ref.read(secureStoreProvider),
     apiClient: ref.read(backendApiClientProvider),
     localNotificationService: ref.read(localNotificationServiceProvider),
+    notificationsEnabledReader: () async {
+      return (await ref.read(appSettingsRepositoryProvider).load())
+          .notificationsEnabled;
+    },
     onRemoteMessageReceived: (message) {
       return ref
           .read(notificationInboxProvider.notifier)
@@ -113,6 +118,10 @@ final solanaWalletServiceProvider = Provider<SolanaWalletService>((ref) {
 
 final portfolioRepositoryProvider = Provider<PortfolioRepository>((ref) {
   return PortfolioRepository(ref.read(backendApiClientProvider));
+});
+
+final defiPositionRepositoryProvider = Provider<DefiPositionRepository>((ref) {
+  return DefiPositionRepository(ref.read(backendApiClientProvider));
 });
 
 final assetDetailRepositoryProvider = Provider<AssetDetailRepository>((ref) {

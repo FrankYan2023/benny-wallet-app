@@ -8,6 +8,7 @@ class SwapTokenOption {
     required this.availableBalance,
     required this.isOwned,
     required this.totalValueUsd,
+    this.rawAvailableAmount,
   });
 
   final TokenInfo token;
@@ -16,4 +17,5 @@ class SwapTokenOption {
   final double availableBalance;
   final bool isOwned;
   final double totalValueUsd;
+  final String? rawAvailableAmount;
 }

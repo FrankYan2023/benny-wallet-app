@@ -22,6 +22,7 @@ import '../../../send/presentation/pages/send_page.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
 import '../../../swap/presentation/pages/swap_page.dart';
 import '../../domain/entities/portfolio_view_data.dart';
+import '../../domain/entities/defi_position_view_data.dart';
 import '../pages/child_wallets_page.dart';
 import '../providers/portfolio_provider.dart';
 
@@ -37,6 +38,8 @@ class PortfolioPage extends ConsumerStatefulWidget {
 }
 
 class _PortfolioPageState extends ConsumerState<PortfolioPage> {
+  _PortfolioAssetTab _selectedTab = _PortfolioAssetTab.tokens;
+
   @override
   Widget build(BuildContext context) {
     final walletState = ref.watch(walletControllerProvider);
@@ -101,17 +104,57 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
         _showRefreshErrorDialog(context, nextError);
       });
     });
+    ref.listen<AsyncValue<DefiPortfolioViewData>>(activeDefiPortfolioProvider, (
+      previous,
+      next,
+    ) {
+      final nextData = next.valueOrNull;
+      if (nextData != null) {
+        final cache = ref.read(defiPortfolioCacheProvider);
+        ref.read(defiPortfolioCacheProvider.notifier).state = {
+          ...cache,
+          ownerAddress: nextData,
+        };
+      }
+    });
 
     final state = ref.watch(activePortfolioProvider);
+    final defiState = ref.watch(activeDefiPortfolioProvider);
     final cachedData = ref.watch(
       portfolioCacheProvider.select((cache) => cache[ownerAddress]),
     );
+    final cachedDefiData = ref.watch(
+      defiPortfolioCacheProvider.select((cache) => cache[ownerAddress]),
+    );
     final displayData = state.valueOrNull ?? cachedData;
+    final displayDefiData = defiState.valueOrNull ?? cachedDefiData;
+    final hasDefiPositions = _hasDefiPositions(displayDefiData);
+
+    if (!hasDefiPositions && _selectedTab == _PortfolioAssetTab.defi) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _selectedTab == _PortfolioAssetTab.defi) {
+          setState(() => _selectedTab = _PortfolioAssetTab.tokens);
+        }
+      });
+    }
 
     Future<void> refreshPortfolio() async {
       try {
         ref.invalidate(portfolioProvider(ownerAddress));
-        await ref.read(portfolioProvider(ownerAddress).future);
+        ref.invalidate(defiPortfolioProvider(ownerAddress));
+        await Future.wait([
+          ref.read(portfolioProvider(ownerAddress).future),
+          ref
+              .read(defiPortfolioProvider(ownerAddress).future)
+              .catchError(
+                (_) => DefiPortfolioViewData(
+                  address: ownerAddress,
+                  totalValueUsd: 0,
+                  positions: const [],
+                  lastUpdatedAt: DateTime.now(),
+                ),
+              ),
+        ]);
         ref.invalidate(receivedTransfersProvider);
         final receivedTransfers = await ref.read(
           receivedTransfersProvider.future,
@@ -167,10 +210,20 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                     context: context,
                     theme: theme,
                     data: displayData,
+                    defiData: displayDefiData,
+                    hasDefiPositions: hasDefiPositions,
                     isRefreshing: state.isLoading && displayData != null,
+                    isDefiRefreshing:
+                        defiState.isLoading && displayDefiData != null,
                     hasLoadError: state.hasError && displayData == null,
+                    hasDefiLoadError:
+                        defiState.hasError && displayDefiData == null,
                     walletState: walletState,
                     canOpenSwap: canOpenSwap,
+                    selectedTab: _selectedTab,
+                    onSelectedTabChanged: (tab) {
+                      setState(() => _selectedTab = tab);
+                    },
                   ),
                 ),
               ),
@@ -189,10 +242,16 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
     required BuildContext context,
     required ThemeData theme,
     required PortfolioViewData? data,
+    required DefiPortfolioViewData? defiData,
+    required bool hasDefiPositions,
     required bool isRefreshing,
+    required bool isDefiRefreshing,
     required bool hasLoadError,
+    required bool hasDefiLoadError,
     required WalletControllerState walletState,
     required bool canOpenSwap,
+    required _PortfolioAssetTab selectedTab,
+    required ValueChanged<_PortfolioAssetTab> onSelectedTabChanged,
   }) {
     final assets = [...(data?.assets ?? const <AssetHolding>[])]
       ..sort((a, b) {
@@ -212,7 +271,6 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
         .where((asset) => !_isXStockAsset(asset))
         .toList();
     final stockAssets = assets.where(_isXStockAsset).toList();
-    final totalValueUsd = data?.totalValueUsd ?? 0;
     final cryptoValueUsd = cryptoAssets.fold<double>(
       0,
       (sum, asset) => sum + asset.totalValueUsd,
@@ -221,9 +279,16 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
       0,
       (sum, asset) => sum + asset.totalValueUsd,
     );
-    final totalPerformance = _totalPerformance(assets);
+    final defiValueUsd = hasDefiPositions
+        ? defiData?.totalValueUsd ?? 0.0
+        : 0.0;
+    final totalValueUsd = (data?.totalValueUsd ?? 0) + defiValueUsd;
     final cryptoPerformance = _totalPerformance(cryptoAssets);
     final stockPerformance = _totalPerformance(stockAssets);
+    final totalPerformance = _totalPerformanceWithDefi(
+      assets,
+      hasDefiPositions ? defiData : null,
+    );
     return [
       if (!walletState.childModeEnabled &&
           walletState.childWallets.isNotEmpty) ...[
@@ -375,6 +440,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                     label: 'Crypto',
                     value: Formatters.usd(cryptoValueUsd),
                     performance: cryptoPerformance,
+                    showPerformance: true,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -383,8 +449,21 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                     label: 'Stocks',
                     value: Formatters.usd(stockValueUsd),
                     performance: stockPerformance,
+                    showPerformance: true,
                   ),
                 ),
+                if (hasDefiPositions) ...[
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _ValueBreakdownChip(
+                      label: 'DeFi',
+                      value: Formatters.usd(defiValueUsd),
+                      reservePerformanceSpace: true,
+                      onTap: () =>
+                          onSelectedTabChanged(_PortfolioAssetTab.defi),
+                    ),
+                  ),
+                ],
               ],
             ),
             const SizedBox(height: 26),
@@ -483,7 +562,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
             ),
           ),
         )
-      else if (assets.isEmpty)
+      else if (assets.isEmpty && !hasDefiPositions)
         WalletCard(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 18),
@@ -503,24 +582,118 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
           ),
         )
       else ...[
-        for (final asset in assets) ...[
-          TokenRow(
-            name: asset.token.name,
-            symbol: Formatters.tokenSymbol(asset.token.symbol),
-            balanceLine:
-                '${Formatters.compactNumber(asset.balance)} ${Formatters.tokenSymbol(asset.token.symbol)}',
-            value: asset.priceQuote == null
-                ? '--'
-                : Formatters.usd(asset.totalValueUsd),
-            secondaryValue: _assetPriceLine(asset),
-            change: _assetChangePctLine(asset),
-            isPositiveChange: _assetChangeDirection(asset),
-            iconUrl: asset.logoUrl,
-            onTap: () =>
-                context.push(AssetDetailPage.pathFor(asset.token.mintAddress)),
+        if (hasDefiPositions) ...[
+          _PortfolioAssetTabs(
+            selectedTab: selectedTab,
+            onChanged: onSelectedTabChanged,
           ),
           const SizedBox(height: 12),
         ],
+        if (!hasDefiPositions || selectedTab == _PortfolioAssetTab.tokens)
+          ..._buildTokenRows(context, assets)
+        else
+          ..._buildDefiRows(
+            context: context,
+            defiData: defiData,
+            hasDefiLoadError: hasDefiLoadError,
+            isDefiRefreshing: isDefiRefreshing,
+            walletState: walletState,
+          ),
+      ],
+    ];
+  }
+
+  List<Widget> _buildTokenRows(
+    BuildContext context,
+    List<AssetHolding> assets,
+  ) {
+    if (assets.isEmpty) {
+      return const [
+        _DefiStateCard(
+          icon: Icons.account_balance_wallet_outlined,
+          title: 'No tokens yet',
+          message: 'Pull down to refresh after funds arrive.',
+        ),
+      ];
+    }
+
+    return [
+      for (final asset in assets) ...[
+        TokenRow(
+          name: asset.token.name,
+          symbol: Formatters.tokenSymbol(asset.token.symbol),
+          balanceLine:
+              '${Formatters.compactNumber(asset.balance)} ${Formatters.tokenSymbol(asset.token.symbol)}',
+          value: asset.priceQuote == null
+              ? '--'
+              : Formatters.usd(asset.totalValueUsd),
+          secondaryValue: _assetPriceLine(asset),
+          change: _assetChangePctLine(asset),
+          isPositiveChange: _assetChangeDirection(asset),
+          iconUrl: asset.logoUrl,
+          onTap: () =>
+              context.push(AssetDetailPage.pathFor(asset.token.mintAddress)),
+        ),
+        const SizedBox(height: 12),
+      ],
+    ];
+  }
+
+  bool _hasDefiPositions(DefiPortfolioViewData? data) {
+    if (data == null) {
+      return false;
+    }
+    return data.totalValueUsd > 0 || data.positions.isNotEmpty;
+  }
+
+  List<Widget> _buildDefiRows({
+    required BuildContext context,
+    required DefiPortfolioViewData? defiData,
+    required bool hasDefiLoadError,
+    required bool isDefiRefreshing,
+    required WalletControllerState walletState,
+  }) {
+    final positions = defiData?.positions ?? const <DefiPosition>[];
+    if (walletState.childModeEnabled) {
+      return [
+        _DefiStateCard(
+          icon: Icons.lock_outline_rounded,
+          title: 'DeFi is parent-only',
+          message: 'Switch back to parent mode to review protocol positions.',
+        ),
+      ];
+    }
+
+    if (hasDefiLoadError) {
+      return const [
+        _DefiStateCard(
+          icon: Icons.cloud_off_rounded,
+          title: 'DeFi data is temporarily unavailable',
+          message: 'Tokens are still up to date.',
+        ),
+      ];
+    }
+
+    if (positions.isEmpty) {
+      return [
+        _DefiStateCard(
+          icon: Icons.account_tree_rounded,
+          title: 'No DeFi positions yet',
+          message: isDefiRefreshing
+              ? 'Refreshing protocol positions...'
+              : 'Your wallet has no active DeFi positions.',
+        ),
+      ];
+    }
+
+    return [
+      if (isDefiRefreshing) ...[
+        const LinearProgressIndicator(minHeight: 3),
+        const SizedBox(height: 12),
+      ],
+      for (final position in positions) ...[
+        _DefiPositionRow(position: position),
+        const SizedBox(height: 12),
       ],
     ];
   }
@@ -611,11 +784,12 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
         continue;
       }
 
-      knownCurrent += asset.totalValueUsd;
       final divisor = 1 + (changePct / 100);
       if (divisor <= 0) {
         continue;
       }
+
+      knownCurrent += asset.totalValueUsd;
       knownPrevious += asset.totalValueUsd / divisor;
     }
 
@@ -624,9 +798,65 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
     }
 
     final deltaUsd = knownCurrent - knownPrevious;
-    final changePct = (deltaUsd / knownPrevious) * 100;
-    return _TotalPerformance(deltaUsd: deltaUsd, changePct: changePct);
+    return _TotalPerformance(
+      deltaUsd: deltaUsd,
+      changePct: (deltaUsd / knownPrevious) * 100,
+    );
   }
+
+  _TotalPerformance? _totalPerformanceWithDefi(
+    List<AssetHolding> assets,
+    DefiPortfolioViewData? defiData,
+  ) {
+    var knownCurrent = 0.0;
+    var knownPrevious = 0.0;
+
+    for (final asset in assets) {
+      final changePct = double.tryParse(asset.priceQuote?.change24hPct ?? '');
+      if (changePct == null) {
+        continue;
+      }
+
+      final divisor = 1 + (changePct / 100);
+      if (divisor <= 0) {
+        continue;
+      }
+
+      knownCurrent += asset.totalValueUsd;
+      knownPrevious += asset.totalValueUsd / divisor;
+    }
+
+    if (defiData != null && defiData.totalValueUsd > 0) {
+      knownCurrent += defiData.totalValueUsd;
+      if (defiData.change24hPct == null) {
+        knownPrevious += defiData.totalValueUsd;
+      } else {
+        final divisor = 1 + (defiData.change24hPct! / 100);
+        if (divisor > 0) {
+          knownPrevious += defiData.totalValueUsd / divisor;
+        }
+      }
+    }
+
+    if (knownCurrent <= 0 || knownPrevious <= 0) {
+      return null;
+    }
+
+    final deltaUsd = knownCurrent - knownPrevious;
+    return _TotalPerformance(
+      deltaUsd: deltaUsd,
+      changePct: (deltaUsd / knownPrevious) * 100,
+    );
+  }
+}
+
+enum _PortfolioAssetTab { tokens, defi }
+
+class _TotalPerformance {
+  const _TotalPerformance({required this.deltaUsd, required this.changePct});
+
+  final double deltaUsd;
+  final double changePct;
 }
 
 class _MessageButton extends StatelessWidget {
@@ -675,11 +905,270 @@ class _MessageButton extends StatelessWidget {
   }
 }
 
-class _TotalPerformance {
-  const _TotalPerformance({required this.deltaUsd, required this.changePct});
+class _PortfolioAssetTabs extends StatelessWidget {
+  const _PortfolioAssetTabs({
+    required this.selectedTab,
+    required this.onChanged,
+  });
 
-  final double deltaUsd;
-  final double changePct;
+  final _PortfolioAssetTab selectedTab;
+  final ValueChanged<_PortfolioAssetTab> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.08),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _PortfolioAssetTabButton(
+              label: 'Tokens',
+              selected: selectedTab == _PortfolioAssetTab.tokens,
+              onTap: () => onChanged(_PortfolioAssetTab.tokens),
+            ),
+          ),
+          Expanded(
+            child: _PortfolioAssetTabButton(
+              label: 'DeFi',
+              selected: selectedTab == _PortfolioAssetTab.defi,
+              onTap: () => onChanged(_PortfolioAssetTab.defi),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PortfolioAssetTabButton extends StatelessWidget {
+  const _PortfolioAssetTabButton({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? theme.colorScheme.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: selected
+                ? theme.colorScheme.onPrimary
+                : theme.colorScheme.onSurface.withValues(alpha: 0.58),
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DefiPositionRow extends StatelessWidget {
+  const _DefiPositionRow({required this.position});
+
+  final DefiPosition position;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryText = theme.colorScheme.onSurface;
+    final secondaryText = theme.colorScheme.onSurface.withValues(alpha: 0.58);
+    final apyText = position.apyPct == null
+        ? null
+        : '${Formatters.percent(position.apyPct)} APY';
+    final assetText = position.assets.isEmpty
+        ? _defiTypeLabel(position.type)
+        : '${position.assets.join(' / ')} ${_defiTypeLabel(position.type)}';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.96),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.035),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF1DA),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Text(
+              _protocolInitials(position.protocol),
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: const Color(0xFF9B5C00),
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  position.protocol,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: primaryText,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(text: position.label),
+                      if (apyText != null)
+                        TextSpan(
+                          text: '  $apyText',
+                          style: TextStyle(
+                            color: const Color(0xFF30A46C),
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                    ],
+                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: secondaryText,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  assetText,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: secondaryText,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            Formatters.usd(position.valueUsd),
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: primaryText,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static String _protocolInitials(String value) {
+    final words = value
+        .split(RegExp(r'\s+'))
+        .where((item) => item.trim().isNotEmpty)
+        .toList();
+    if (words.isEmpty) return 'D';
+    if (words.length == 1) {
+      final word = words.first;
+      return word.substring(0, word.length < 2 ? word.length : 2).toUpperCase();
+    }
+    return words
+        .take(2)
+        .map((word) => word.substring(0, 1))
+        .join()
+        .toUpperCase();
+  }
+
+  static String _defiTypeLabel(DefiPositionType type) {
+    return switch (type) {
+      DefiPositionType.deposit => 'deposit',
+      DefiPositionType.borrow => 'borrow',
+      DefiPositionType.staking => 'staking',
+      DefiPositionType.liquidity => 'liquidity',
+      DefiPositionType.yield => 'yield',
+      DefiPositionType.perps => 'perps',
+      DefiPositionType.rewards => 'rewards',
+      DefiPositionType.unknown => 'position',
+    };
+  }
+}
+
+class _DefiStateCard extends StatelessWidget {
+  const _DefiStateCard({
+    required this.icon,
+    required this.title,
+    required this.message,
+  });
+
+  final IconData icon;
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return WalletCard(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 4),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              size: 32,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.48),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: theme.textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              message,
+              style: theme.textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _BalanceActionButton extends StatelessWidget {
@@ -751,29 +1240,40 @@ class _ValueBreakdownChip extends StatelessWidget {
   const _ValueBreakdownChip({
     required this.label,
     required this.value,
-    required this.performance,
+    this.onTap,
+    this.performance,
+    this.showPerformance = false,
+    this.reservePerformanceSpace = false,
   });
 
   final String label;
   final String value;
+  final VoidCallback? onTap;
   final _TotalPerformance? performance;
+  final bool showPerformance;
+  final bool reservePerformanceSpace;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+    final content = Container(
+      constraints: const BoxConstraints(minHeight: 88),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onPrimary.withValues(alpha: 0.76),
               fontWeight: FontWeight.w700,
+              fontSize: 11,
             ),
           ),
           const SizedBox(height: 4),
@@ -786,24 +1286,41 @@ class _ValueBreakdownChip extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            performance == null
-                ? '--'
-                : Formatters.percent(performance!.changePct, signed: true),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: performance == null
-                  ? theme.colorScheme.onPrimary.withValues(alpha: 0.72)
-                  : performance!.deltaUsd >= 0
-                  ? const Color(0xFFE9FFF1)
-                  : const Color(0xFFFFE6DE),
+          if (showPerformance || reservePerformanceSpace) ...[
+            const SizedBox(height: 4),
+            Text(
+              showPerformance
+                  ? performance == null
+                        ? '--'
+                        : Formatters.percent(performance!.changePct, signed: true)
+                  : '  ',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                fontSize: 11,
+                color: !showPerformance
+                    ? Colors.transparent
+                    : performance == null
+                    ? theme.colorScheme.onPrimary.withValues(alpha: 0.72)
+                    : performance!.deltaUsd >= 0
+                    ? const Color(0xFFE9FFF1)
+                    : const Color(0xFFFFE6DE),
+              ),
             ),
-          ),
+          ],
         ],
       ),
+    );
+
+    if (onTap == null) {
+      return content;
+    }
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: onTap,
+      child: content,
     );
   }
 }

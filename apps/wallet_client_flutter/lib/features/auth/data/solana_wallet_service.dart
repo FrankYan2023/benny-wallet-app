@@ -33,11 +33,13 @@ class AssetBalanceSnapshot {
   const AssetBalanceSnapshot({
     required this.token,
     required this.balance,
+    required this.rawAmount,
     required this.existsOnChain,
   });
 
   final TokenInfo token;
   final double balance;
+  final String rawAmount;
   final bool existsOnChain;
 }
 
@@ -240,6 +242,7 @@ class SolanaWalletService {
         AssetBalanceSnapshot(
           token: solToken,
           balance: lamports / lamportsPerSol,
+          rawAmount: lamports.toString(),
           existsOnChain: true,
         ),
       );
@@ -288,6 +291,7 @@ class SolanaWalletService {
         AssetBalanceSnapshot(
           token: token,
           balance: balance,
+          rawAmount: rawAmount.toString(),
           existsOnChain: true,
         ),
       );
@@ -319,6 +323,7 @@ class SolanaWalletService {
           AssetBalanceSnapshot(
             token: token,
             balance: lamports / lamportsPerSol,
+            rawAmount: lamports.toString(),
             existsOnChain: lamports > 0,
           ),
         );
@@ -338,6 +343,7 @@ class SolanaWalletService {
             AssetBalanceSnapshot(
               token: token,
               balance: 0,
+              rawAmount: '0',
               existsOnChain: false,
             ),
           );
@@ -355,6 +361,7 @@ class SolanaWalletService {
             token: token,
             balance:
                 double.tryParse(amount.uiAmountString ?? amount.amount) ?? 0,
+            rawAmount: amount.amount,
             existsOnChain: true,
           ),
         );
@@ -366,6 +373,7 @@ class SolanaWalletService {
             AssetBalanceSnapshot(
               token: token,
               balance: 0,
+              rawAmount: '0',
               existsOnChain: false,
             ),
           );
@@ -918,17 +926,22 @@ class SolanaWalletService {
   Future<List<String>> buildRentReclaimTransactions({
     required String ownerAddress,
     required List<ReclaimableTokenAccount> accounts,
+    int chunkSize = 8,
+    bool includeSenderInstructions = true,
   }) async {
     if (accounts.isEmpty) {
       return const [];
+    }
+    if (chunkSize < 1) {
+      throw ArgumentError.value(chunkSize, 'chunkSize', 'Must be positive.');
     }
 
     final rpcClient = await _getRpcClient();
     final owner = Ed25519HDPublicKey.fromBase58(ownerAddress);
     final transactions = <String>[];
 
-    for (var start = 0; start < accounts.length; start += 8) {
-      final chunk = accounts.skip(start).take(8);
+    for (var start = 0; start < accounts.length; start += chunkSize) {
+      final chunk = accounts.skip(start).take(chunkSize);
       final instructions = <Instruction>[
         for (final account in chunk)
           TokenInstruction.closeAccount(
@@ -939,10 +952,9 @@ class SolanaWalletService {
           ),
       ];
       final message = Message(
-        instructions: _buildSenderInstructions(
-          owner: owner,
-          instructions: instructions,
-        ),
+        instructions: includeSenderInstructions
+            ? _buildSenderInstructions(owner: owner, instructions: instructions)
+            : instructions,
       );
       transactions.add(
         await _compileUnsignedTransaction(

@@ -13,25 +13,40 @@ import '../network/api_client.dart';
 import '../storage/key_value_store.dart';
 import 'local_notification_service.dart';
 
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  final options = FirebaseRuntimeOptions.currentPlatform;
+  if (options == null) {
+    return;
+  }
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(options: options);
+  }
+}
+
 class PushNotificationService {
   PushNotificationService({
     required KeyValueStore store,
     required BackendApiClient apiClient,
     required LocalNotificationService localNotificationService,
+    Future<bool> Function()? notificationsEnabledReader,
     Future<void> Function(RemoteMessage message)? onRemoteMessageReceived,
   }) : _store = store,
        _apiClient = apiClient,
        _localNotificationService = localNotificationService,
+       _notificationsEnabledReader = notificationsEnabledReader,
        _onRemoteMessageReceived = onRemoteMessageReceived;
 
   final KeyValueStore _store;
   final BackendApiClient _apiClient;
   final LocalNotificationService _localNotificationService;
+  final Future<bool> Function()? _notificationsEnabledReader;
   final Future<void> Function(RemoteMessage message)? _onRemoteMessageReceived;
 
   bool _initialized = false;
   StreamSubscription<RemoteMessage>? _foregroundSubscription;
   StreamSubscription<RemoteMessage>? _openedSubscription;
+  StreamSubscription<String>? _tokenRefreshSubscription;
 
   bool get isConfigured => FirebaseRuntimeOptions.isConfigured;
 
@@ -53,6 +68,7 @@ class PushNotificationService {
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(options: options);
     }
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
@@ -67,6 +83,8 @@ class PushNotificationService {
     _openedSubscription ??= FirebaseMessaging.onMessageOpenedApp.listen(
       _handleOpenedMessage,
     );
+    _tokenRefreshSubscription ??= FirebaseMessaging.instance.onTokenRefresh
+        .listen(_handleTokenRefresh);
 
     final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage != null) {
@@ -109,22 +127,13 @@ class PushNotificationService {
       }
     }
 
-    final token = await FirebaseMessaging.instance.getToken();
+    final token = await _readMessagingToken();
     if (token == null || token.isEmpty) {
       debugPrint('[PUSH] Register skipped: FCM token is empty.');
       return false;
     }
 
-    final installId = await _readOrCreateInstallId();
-    final packageInfo = await PackageInfo.fromPlatform();
-    await _apiClient.registerNotificationDevice(
-      appVersion: packageInfo.version,
-      buildNumber: packageInfo.buildNumber,
-      fcmToken: token,
-      installId: installId,
-      notificationsEnabled: enabled,
-      platform: _platformName(),
-    );
+    await _registerDeviceToken(token: token, enabled: enabled);
     debugPrint('[PUSH] Notification device registered.');
 
     return true;
@@ -157,9 +166,70 @@ class PushNotificationService {
   void dispose() {
     unawaited(_foregroundSubscription?.cancel());
     unawaited(_openedSubscription?.cancel());
+    unawaited(_tokenRefreshSubscription?.cancel());
     _foregroundSubscription = null;
     _openedSubscription = null;
+    _tokenRefreshSubscription = null;
     _initialized = false;
+  }
+
+  Future<void> _handleTokenRefresh(String token) async {
+    if (token.isEmpty) {
+      return;
+    }
+
+    try {
+      final notificationsEnabled =
+          await _notificationsEnabledReader?.call() ?? false;
+      if (!notificationsEnabled) {
+        debugPrint('[PUSH] Token refresh skipped: notifications disabled.');
+        return;
+      }
+
+      await _registerDeviceToken(token: token, enabled: true);
+      debugPrint('[PUSH] Notification device refreshed.');
+    } catch (error, stack) {
+      debugPrint('[PUSH] Token refresh registration failed: $error');
+      debugPrintStack(stackTrace: stack, label: '[PUSH] Stack');
+    }
+  }
+
+  Future<String?> _readMessagingToken() async {
+    const retryDelays = [
+      Duration.zero,
+      Duration(milliseconds: 500),
+      Duration(seconds: 1),
+      Duration(seconds: 2),
+    ];
+
+    for (final delay in retryDelays) {
+      if (delay > Duration.zero) {
+        await Future<void>.delayed(delay);
+      }
+
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token != null && token.isNotEmpty) {
+        return token;
+      }
+    }
+
+    return null;
+  }
+
+  Future<void> _registerDeviceToken({
+    required String token,
+    required bool enabled,
+  }) async {
+    final installId = await _readOrCreateInstallId();
+    final packageInfo = await PackageInfo.fromPlatform();
+    await _apiClient.registerNotificationDevice(
+      appVersion: packageInfo.version,
+      buildNumber: packageInfo.buildNumber,
+      fcmToken: token,
+      installId: installId,
+      notificationsEnabled: enabled,
+      platform: _platformName(),
+    );
   }
 
   Future<void> _handleForegroundMessage(RemoteMessage message) async {

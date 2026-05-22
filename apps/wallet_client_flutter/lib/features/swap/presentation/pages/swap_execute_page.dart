@@ -288,6 +288,9 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
     if (lower.contains('block height') || lower.contains('blockhash')) {
       return 'This quote expired. Review the swap again.';
     }
+    if (_isJupiterInsufficientFundsError(lower)) {
+      return 'Not enough token balance. Tap Max again and retry.';
+    }
     if (_isInsufficientSwapBalanceError(lower)) {
       return _insufficientSwapBalanceMessage;
     }
@@ -302,12 +305,19 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
         lower.contains('{custom: 1}') ||
         lower.contains('{custom:1}') ||
         lower.contains('custom: 1') ||
-        lower.contains('insufficient funds') ||
         lower.contains('insufficient lamports') ||
         lower.contains('insufficient balance') ||
         lower.contains('insufficient account balance') ||
         lower.contains('attempt to debit an account') ||
         (lower.contains('insufficient') && lower.contains('rent'));
+  }
+
+  bool _isJupiterInsufficientFundsError(String lower) {
+    return lower.contains('custom program error: 0x1788') ||
+        lower.contains('{custom: 6024}') ||
+        lower.contains('{custom:6024}') ||
+        lower.contains('custom: 6024') ||
+        lower.contains('insufficient funds');
   }
 
   Future<void> _openTransaction(String signature) async {
