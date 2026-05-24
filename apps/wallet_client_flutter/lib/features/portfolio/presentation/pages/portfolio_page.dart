@@ -5,10 +5,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/responsive/layout_shell.dart';
 import '../../../../core/config/app_features.dart';
+import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/app_update_gate.dart';
-import '../../../../core/widgets/brand_logo.dart';
 import '../../../airdrop/presentation/pages/airdrop_page.dart';
 import '../../../asset_detail/presentation/pages/asset_detail_page.dart';
 import '../../../auth/presentation/pages/unlock_page.dart';
@@ -93,6 +93,14 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
       final nextError = next.asError?.error;
       final previousError = previous?.asError?.error;
       if (nextError == null || identical(nextError, previousError)) {
+        return;
+      }
+
+      final hasVisibleData =
+          next.valueOrNull != null ||
+          previous?.valueOrNull != null ||
+          ref.read(portfolioCacheProvider)[ownerAddress] != null;
+      if (!hasVisibleData) {
         return;
       }
 
@@ -563,24 +571,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
           ),
         )
       else if (assets.isEmpty && !hasDefiPositions)
-        WalletCard(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 18),
-            child: Column(
-              children: [
-                const BrandLogo(size: 56, radius: 18),
-                const SizedBox(height: 12),
-                Text('No assets yet', style: theme.textTheme.titleLarge),
-                const SizedBox(height: 6),
-                Text(
-                  'Pull down to refresh after funds arrive.',
-                  style: theme.textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        )
+        _ReceiveSolPromptCard(onTap: () => context.push(ReceivePage.routePath))
       else ...[
         if (hasDefiPositions) ...[
           _PortfolioAssetTabs(
@@ -608,12 +599,8 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
     List<AssetHolding> assets,
   ) {
     if (assets.isEmpty) {
-      return const [
-        _DefiStateCard(
-          icon: Icons.account_balance_wallet_outlined,
-          title: 'No tokens yet',
-          message: 'Pull down to refresh after funds arrive.',
-        ),
+      return [
+        _ReceiveSolPromptCard(onTap: () => context.push(ReceivePage.routePath)),
       ];
     }
 
@@ -729,20 +716,38 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
   }
 
   String _formatError(Object error) {
-    final raw = error.toString();
-    if (raw.contains('429')) {
+    var raw = error.toString().trim();
+    while (raw.startsWith('Exception: ')) {
+      raw = raw.substring('Exception: '.length).trim();
+    }
+
+    final lower = raw.toLowerCase();
+    if (lower.contains('429') || lower.contains('too many requests')) {
       return 'The network is busy right now. Pull down to try again.';
     }
 
-    if (raw.startsWith('Exception: ')) {
-      return raw.substring('Exception: '.length);
+    if (_looksLikeTransportError(lower)) {
+      return 'Couldn\'t reach the server. Check your connection and pull down to try again.';
     }
 
-    if (raw.startsWith('DioException ')) {
-      return 'Couldn\'t reach the server. Pull down to try again.';
-    }
+    return raw.isEmpty
+        ? 'Couldn\'t refresh assets. Pull down to try again.'
+        : raw;
+  }
 
-    return raw;
+  bool _looksLikeTransportError(String lower) {
+    return lower.contains('dioexception') ||
+        lower.contains('requestoptions') ||
+        lower.contains('socketexception') ||
+        lower.contains('failed host lookup') ||
+        lower.contains('network is unreachable') ||
+        lower.contains('connection error') ||
+        lower.contains('connection took longer') ||
+        lower.contains('connection timeout') ||
+        lower.contains('receivetimeout') ||
+        lower.contains('sendtimeout') ||
+        lower.contains('timed out') ||
+        lower.contains('timeout');
   }
 
   String _assetPriceLine(AssetHolding asset) {
@@ -1171,6 +1176,152 @@ class _DefiStateCard extends StatelessWidget {
   }
 }
 
+class _ReceiveSolPromptCard extends StatelessWidget {
+  const _ReceiveSolPromptCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    const promptText = Color(0xFF7A5B2D);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 22, 18, 18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFFFFBF2), Color(0xFFFFF4DC)],
+        ),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: AppColors.tertiary.withValues(alpha: 0.28)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryBright.withValues(alpha: 0.06),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 74,
+            height: 74,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.primaryStrong.withValues(alpha: 0.42),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            child: SizedBox(
+              width: 40,
+              height: 30,
+              child: _SolanaMark(
+                color: AppColors.tertiary.withValues(alpha: 0.68),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Receive SOL',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: AppColors.primaryStrong.withValues(alpha: 0.72),
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 7),
+          Text(
+            'Receive SOL to get started with Benny Wallet.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: promptText.withValues(alpha: 0.72),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 18),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFA46708),
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(58),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              onPressed: onTap,
+              child: const Text('Receive SOL'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SolanaMark extends StatelessWidget {
+  const _SolanaMark({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(painter: _SolanaMarkPainter(color));
+  }
+}
+
+class _SolanaMarkPainter extends CustomPainter {
+  const _SolanaMarkPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    final barHeight = size.height * 0.22;
+    final gap = size.height * 0.17;
+    final slant = size.width * 0.18;
+
+    void drawBar(double top, {required bool reversed}) {
+      final path = Path();
+      if (reversed) {
+        path
+          ..moveTo(0, top)
+          ..lineTo(size.width - slant, top)
+          ..lineTo(size.width, top + barHeight)
+          ..lineTo(slant, top + barHeight);
+      } else {
+        path
+          ..moveTo(slant, top)
+          ..lineTo(size.width, top)
+          ..lineTo(size.width - slant, top + barHeight)
+          ..lineTo(0, top + barHeight);
+      }
+      canvas.drawPath(path..close(), paint);
+    }
+
+    drawBar(0, reversed: false);
+    drawBar(barHeight + gap, reversed: true);
+    drawBar((barHeight + gap) * 2, reversed: false);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SolanaMarkPainter oldDelegate) {
+    return oldDelegate.color != color;
+  }
+}
+
 class _BalanceActionButton extends StatelessWidget {
   const _BalanceActionButton({
     required this.backgroundColor,
@@ -1292,7 +1443,10 @@ class _ValueBreakdownChip extends StatelessWidget {
               showPerformance
                   ? performance == null
                         ? '--'
-                        : Formatters.percent(performance!.changePct, signed: true)
+                        : Formatters.percent(
+                            performance!.changePct,
+                            signed: true,
+                          )
                   : '  ',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

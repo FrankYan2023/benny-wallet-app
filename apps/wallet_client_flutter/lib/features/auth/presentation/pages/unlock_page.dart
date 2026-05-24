@@ -229,6 +229,14 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
                 else
                   Column(
                     children: [
+                      Text(
+                        'Enter PIN',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
                       PinDots(filledCount: _pin.length),
                       if (_biometricError != null)
                         Padding(

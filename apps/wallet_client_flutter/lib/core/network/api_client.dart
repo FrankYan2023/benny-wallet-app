@@ -3,6 +3,7 @@ import 'package:shared_types/shared_types.dart';
 
 import '../constants/app_constants.dart';
 import 'backend_session_manager.dart';
+import 'backend_endpoint_fallback.dart';
 
 class RemoteAppConfig {
   const RemoteAppConfig({
@@ -374,25 +375,33 @@ String? _readNonEmptyString(Object? value) {
   return value.trim();
 }
 
+const _defaultBackendTimeout = Duration(seconds: 20);
+
 class BackendApiClient {
-  BackendApiClient({BackendSessionManager? sessionManager, Dio? dio})
-    : _sessionManager = sessionManager,
-      _dio =
-          dio ??
-          Dio(
-            BaseOptions(
-              baseUrl: AppConstants.apiBaseUrl,
-              connectTimeout: const Duration(seconds: 10),
-              receiveTimeout: const Duration(seconds: 10),
-            ),
-          );
+  BackendApiClient({
+    BackendSessionManager? sessionManager,
+    Dio? dio,
+    List<Dio>? fallbackDios,
+  }) : _sessionManager = sessionManager,
+       _dio =
+           dio ??
+           createBackendDio(
+             baseUrl: AppConstants.apiBaseUrl,
+             timeout: _defaultBackendTimeout,
+           ),
+       _fallbackDios =
+           fallbackDios ??
+           (dio == null
+               ? buildBackendFallbackDios(timeout: _defaultBackendTimeout)
+               : const []);
 
   final Dio _dio;
+  final List<Dio> _fallbackDios;
   final BackendSessionManager? _sessionManager;
 
   Future<Map<String, dynamic>> getPortfolio(String ownerAddress) async {
     return _requestJsonMap(
-      () => _dio.post<Map<String, dynamic>>(
+      (dio) => dio.post<Map<String, dynamic>>(
         '/v1/portfolio',
         data: {'ownerAddress': ownerAddress},
       ),
@@ -402,7 +411,7 @@ class BackendApiClient {
 
   Future<Map<String, dynamic>> getDefiPositions(String ownerAddress) async {
     return _requestJsonMap(
-      () => _dio.post<Map<String, dynamic>>(
+      (dio) => dio.post<Map<String, dynamic>>(
         '/v1/defi-positions',
         data: {'ownerAddress': ownerAddress},
       ),
@@ -415,7 +424,7 @@ class BackendApiClient {
     List<String> fallbackAddresses = const [],
   }) async {
     final payload = await _requestJsonMap(
-      () => _dio.post<Map<String, dynamic>>(
+      (dio) => dio.post<Map<String, dynamic>>(
         '/v1/import-wallet/scan',
         data: {'addresses': addresses, 'fallbackAddresses': fallbackAddresses},
         options: Options(
@@ -437,7 +446,7 @@ class BackendApiClient {
 
   Future<Map<String, dynamic>> getTokenDetail(String mintAddress) async {
     return _requestJsonMap(
-      () => _dio.post<Map<String, dynamic>>(
+      (dio) => dio.post<Map<String, dynamic>>(
         '/v1/token-detail',
         data: {'mintAddress': mintAddress},
       ),
@@ -451,7 +460,7 @@ class BackendApiClient {
     int limit = 10,
   }) async {
     return _requestJsonMap(
-      () => _dio.post<Map<String, dynamic>>(
+      (dio) => dio.post<Map<String, dynamic>>(
         '/v1/asset-activity',
         data: {
           'ownerAddress': ownerAddress,
@@ -465,7 +474,7 @@ class BackendApiClient {
 
   Future<List<RemoteTokenCatalogItem>> getTokens() async {
     final payload = await _requestJsonMap(
-      () => _dio.get<Map<String, dynamic>>('/v1/tokens'),
+      (dio) => dio.get<Map<String, dynamic>>('/v1/tokens'),
       fallback: 'Unable to load the token list right now.',
     );
     final items = (payload['items'] as List<dynamic>? ?? const []);
@@ -479,7 +488,7 @@ class BackendApiClient {
 
   Future<List<RemoteTokenCatalogItem>> searchTokens(String query) async {
     final payload = await _requestJsonMap(
-      () => _dio.get<Map<String, dynamic>>(
+      (dio) => dio.get<Map<String, dynamic>>(
         '/v1/tokens/search',
         queryParameters: {'q': query},
       ),
@@ -496,7 +505,7 @@ class BackendApiClient {
 
   Future<RemoteAppConfig> getConfig() async {
     final payload = await _requestJsonMap(
-      () => _dio.get<Map<String, dynamic>>('/v1/config'),
+      (dio) => dio.get<Map<String, dynamic>>('/v1/config'),
       fallback: 'Unable to load app configuration right now.',
     );
     return RemoteAppConfig.fromJson(payload);
@@ -507,7 +516,7 @@ class BackendApiClient {
     required String platform,
   }) async {
     final payload = await _requestJsonMap(
-      () => _dio.get<Map<String, dynamic>>(
+      (dio) => dio.get<Map<String, dynamic>>(
         '/v1/app-update/check',
         queryParameters: {'build': buildNumber, 'platform': platform},
       ),
@@ -529,7 +538,7 @@ class BackendApiClient {
     String source = 'app',
   }) async {
     await _requestJsonMap(
-      () => _dio.post<Map<String, dynamic>>(
+      (dio) => dio.post<Map<String, dynamic>>(
         '/v1/contact',
         data: {
           'email': email,
@@ -540,12 +549,13 @@ class BackendApiClient {
       ),
       fallback:
           'Unable to send your message right now. Please try again shortly.',
+      allowBackendFallback: false,
     );
   }
 
   Future<List<PriceQuote>> getPrices(List<String> symbols) async {
     final payload = await _requestJsonMap(
-      () => _dio.post<Map<String, dynamic>>(
+      (dio) => dio.post<Map<String, dynamic>>(
         '/v1/prices',
         data: {'symbols': symbols},
       ),
@@ -564,7 +574,7 @@ class BackendApiClient {
     required int slippageBps,
   }) async {
     return _requestJsonMap(
-      () => _dio.post<Map<String, dynamic>>(
+      (dio) => dio.post<Map<String, dynamic>>(
         '/v1/swap/quote',
         data: {
           'inputMint': inputMint,
@@ -586,7 +596,7 @@ class BackendApiClient {
     required String priorityPreset,
   }) async {
     return _requestJsonMapAuthenticated(
-      (options) => _dio.post<Map<String, dynamic>>(
+      (dio, options) => dio.post<Map<String, dynamic>>(
         '/v1/swap/build',
         data: {
           'ownerAddress': ownerAddress,
@@ -604,7 +614,7 @@ class BackendApiClient {
 
   Future<Map<String, dynamic>> getAirdropProfile() async {
     return _requestJsonMapAuthenticated(
-      (options) => _dio.get<Map<String, dynamic>>(
+      (dio, options) => dio.get<Map<String, dynamic>>(
         '/v1/airdrop/profile',
         options: options,
       ),
@@ -614,10 +624,8 @@ class BackendApiClient {
 
   Future<RemoteWalletProfileSnapshot> getWalletProfile() async {
     final payload = await _requestJsonMapAuthenticated(
-      (options) => _dio.get<Map<String, dynamic>>(
-        '/v1/wallet-profile',
-        options: options,
-      ),
+      (dio, options) =>
+          dio.get<Map<String, dynamic>>('/v1/wallet-profile', options: options),
       fallback: 'Unable to load wallet account cloud settings right now.',
     );
     return RemoteWalletProfileSnapshot.fromJson(payload);
@@ -630,7 +638,7 @@ class BackendApiClient {
     required String childModePinSalt,
   }) async {
     await _requestJsonMapAuthenticated(
-      (options) => _dio.put<Map<String, dynamic>>(
+      (dio, options) => dio.put<Map<String, dynamic>>(
         '/v1/wallet-profile/child-mode',
         data: {
           'childModeEnabled': childModeEnabled,
@@ -641,16 +649,18 @@ class BackendApiClient {
         options: options,
       ),
       fallback: 'Unable to sync child mode settings right now.',
+      allowBackendFallback: false,
     );
   }
 
   Future<void> clearWalletChildMode() async {
     await _requestJsonMapAuthenticated(
-      (options) => _dio.delete<Map<String, dynamic>>(
+      (dio, options) => dio.delete<Map<String, dynamic>>(
         '/v1/wallet-profile/child-mode',
         options: options,
       ),
       fallback: 'Unable to clear child mode settings right now.',
+      allowBackendFallback: false,
     );
   }
 
@@ -659,12 +669,13 @@ class BackendApiClient {
     required String childAddress,
   }) async {
     await _requestJsonMapAuthenticated(
-      (options) => _dio.post<Map<String, dynamic>>(
+      (dio, options) => dio.post<Map<String, dynamic>>(
         '/v1/child-accounts',
         data: {'childName': childName, 'childAddress': childAddress},
         options: options,
       ),
       fallback: 'Unable to sync child account right now.',
+      allowBackendFallback: false,
     );
   }
 
@@ -674,22 +685,24 @@ class BackendApiClient {
     required String childAddress,
   }) async {
     await _requestJsonMapAuthenticated(
-      (options) => _dio.patch<Map<String, dynamic>>(
+      (dio, options) => dio.patch<Map<String, dynamic>>(
         '/v1/child-accounts/by-address/$currentChildAddress',
         data: {'childName': childName, 'childAddress': childAddress},
         options: options,
       ),
       fallback: 'Unable to sync child account right now.',
+      allowBackendFallback: false,
     );
   }
 
   Future<void> removeChildAccountByAddress(String childAddress) async {
     await _requestJsonMapAuthenticated(
-      (options) => _dio.delete<Map<String, dynamic>>(
+      (dio, options) => dio.delete<Map<String, dynamic>>(
         '/v1/child-accounts/by-address/$childAddress',
         options: options,
       ),
       fallback: 'Unable to remove child account from cloud right now.',
+      allowBackendFallback: false,
     );
   }
 
@@ -697,12 +710,13 @@ class BackendApiClient {
     required String ownerAddress,
   }) async {
     return _requestJsonMapAuthenticated(
-      (options) => _dio.post<Map<String, dynamic>>(
+      (dio, options) => dio.post<Map<String, dynamic>>(
         '/v1/airdrop/join',
         data: {'ownerAddress': ownerAddress},
         options: options,
       ),
       fallback: 'Unable to join the BYC airdrop right now.',
+      allowBackendFallback: false,
     );
   }
 
@@ -710,12 +724,13 @@ class BackendApiClient {
     required String ownerAddress,
   }) async {
     return _requestJsonMapAuthenticated(
-      (options) => _dio.post<Map<String, dynamic>>(
+      (dio, options) => dio.post<Map<String, dynamic>>(
         '/v1/airdrop/check-in',
         data: {'ownerAddress': ownerAddress},
         options: options,
       ),
       fallback: 'Unable to complete the BYC reward claim right now.',
+      allowBackendFallback: false,
     );
   }
 
@@ -734,7 +749,7 @@ class BackendApiClient {
     required int walletCount,
   }) async {
     await _requestJsonMap(
-      () => _dio.post<Map<String, dynamic>>(
+      (dio) => dio.post<Map<String, dynamic>>(
         '/v1/install-analytics',
         data: {
           'appVersion': appVersion,
@@ -752,6 +767,7 @@ class BackendApiClient {
         },
       ),
       fallback: 'Unable to record install analytics right now.',
+      allowBackendFallback: false,
     );
   }
 
@@ -765,7 +781,7 @@ class BackendApiClient {
     String? destinationAddress,
   }) async {
     final payload = await _requestJsonMapAuthenticated(
-      (options) => _dio.post<Map<String, dynamic>>(
+      (dio, options) => dio.post<Map<String, dynamic>>(
         '/v1/solana-sender/send',
         data: {
           'encodedTransaction': encodedTransaction,
@@ -786,6 +802,7 @@ class BackendApiClient {
         options: options,
       ),
       fallback: 'Unable to submit the transaction right now.',
+      allowBackendFallback: false,
     );
 
     final signature = payload['signature'];
@@ -807,7 +824,7 @@ class BackendApiClient {
     required String platform,
   }) async {
     await _requestJsonMapAuthenticated(
-      (options) => _dio.post<Map<String, dynamic>>(
+      (dio, options) => dio.post<Map<String, dynamic>>(
         '/v1/notifications/register-device',
         data: {
           'appVersion': appVersion,
@@ -820,6 +837,7 @@ class BackendApiClient {
         options: options,
       ),
       fallback: 'Unable to register this device for wallet notifications.',
+      allowBackendFallback: false,
     );
   }
 
@@ -827,7 +845,7 @@ class BackendApiClient {
     int limit = 50,
   }) async {
     final payload = await _requestJsonMapAuthenticated(
-      (options) => _dio.get<Map<String, dynamic>>(
+      (dio, options) => dio.get<Map<String, dynamic>>(
         '/v1/notifications/received',
         queryParameters: {'limit': limit},
         options: options,
@@ -845,7 +863,7 @@ class BackendApiClient {
 
   Future<RemoteReceivedTransferItem> getReceivedTransfer(String id) async {
     final payload = await _requestJsonMapAuthenticated(
-      (options) => _dio.get<Map<String, dynamic>>(
+      (dio, options) => dio.get<Map<String, dynamic>>(
         '/v1/notifications/received/$id',
         options: options,
       ),
@@ -860,7 +878,7 @@ class BackendApiClient {
 
   Future<List<RemoteSendHistoryItem>> getSenderHistory({int limit = 50}) async {
     final payload = await _requestJsonMapAuthenticated(
-      (options) => _dio.get<Map<String, dynamic>>(
+      (dio, options) => dio.get<Map<String, dynamic>>(
         '/v1/solana-sender/history',
         queryParameters: {'limit': limit},
         options: options,
@@ -877,8 +895,10 @@ class BackendApiClient {
   }
 
   Future<Map<String, dynamic>> _requestJsonMapAuthenticated(
-    Future<Response<Map<String, dynamic>>> Function(Options options) request, {
+    Future<Response<Map<String, dynamic>>> Function(Dio dio, Options options)
+    request, {
     required String fallback,
+    bool allowBackendFallback = true,
   }) async {
     try {
       final sessionManager = _sessionManager;
@@ -888,7 +908,10 @@ class BackendApiClient {
         );
       }
       final headers = await sessionManager.currentHeaders();
-      final response = await request(Options(headers: headers));
+      final response = await _requestWithFallback(
+        (dio) => request(dio, Options(headers: headers)),
+        allowBackendFallback: allowBackendFallback,
+      );
       return response.data ?? const {};
     } on DioException catch (error) {
       throw Exception(_messageFromDio(error, fallback: fallback));
@@ -900,11 +923,15 @@ class BackendApiClient {
   }
 
   Future<Map<String, dynamic>> _requestJsonMap(
-    Future<Response<Map<String, dynamic>>> Function() request, {
+    Future<Response<Map<String, dynamic>>> Function(Dio dio) request, {
     required String fallback,
+    bool allowBackendFallback = true,
   }) async {
     try {
-      final response = await request();
+      final response = await _requestWithFallback(
+        request,
+        allowBackendFallback: allowBackendFallback,
+      );
       return response.data ?? const {};
     } on DioException catch (error) {
       throw Exception(_messageFromDio(error, fallback: fallback));
@@ -915,7 +942,33 @@ class BackendApiClient {
     }
   }
 
+  Future<Response<Map<String, dynamic>>> _requestWithFallback(
+    Future<Response<Map<String, dynamic>>> Function(Dio dio) request, {
+    required bool allowBackendFallback,
+  }) {
+    if (!allowBackendFallback) {
+      return request(_dio);
+    }
+
+    return requestWithBackendFallback<Map<String, dynamic>>(
+      primary: _dio,
+      fallbacks: _fallbackDios,
+      request: request,
+    );
+  }
+
   String _messageFromDio(DioException error, {required String fallback}) {
+    final statusCode = error.response?.statusCode;
+    if (statusCode == 401 || statusCode == 403) {
+      return 'Backend authorization failed. Re-authenticate the wallet session and try again.';
+    }
+    if (statusCode == 429) {
+      return 'The network is busy right now. Please try again.';
+    }
+    if (statusCode != null && statusCode >= 500) {
+      return fallback;
+    }
+
     final data = error.response?.data;
     if (data is Map<String, dynamic>) {
       final message = data['message'];
@@ -932,14 +985,20 @@ class BackendApiClient {
       return data;
     }
 
-    final statusCode = error.response?.statusCode;
-    if (statusCode == 401 || statusCode == 403) {
-      return 'Backend authorization failed. Re-authenticate the wallet session and try again.';
-    }
-
-    final message = error.message;
-    if (message != null && message.isNotEmpty) {
-      return message;
+    switch (error.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.connectionError:
+        return 'Couldn\'t reach the server. Check your connection and try again.';
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        return 'The server is taking longer than expected. Please try again.';
+      case DioExceptionType.badCertificate:
+        return 'Couldn\'t verify the server connection. Please try again later.';
+      case DioExceptionType.cancel:
+        return 'The request was cancelled. Please try again.';
+      case DioExceptionType.badResponse:
+      case DioExceptionType.unknown:
+        break;
     }
     return fallback;
   }

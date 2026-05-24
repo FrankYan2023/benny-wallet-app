@@ -1,5 +1,8 @@
 abstract final class AppConstants {
   static const _defaultApiBaseUrl = 'https://api.example.invalid';
+  static const productionApiBaseUrl = 'https://api.gobennyapp.com';
+  static const productionApiFallbackBaseUrl =
+      'https://benny-wallet-api-production.up.railway.app';
 
   static const appName = 'Benny Wallet';
   static const supportedNetwork = 'Solana Mainnet';
@@ -9,6 +12,10 @@ abstract final class AppConstants {
   static const apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: _defaultApiBaseUrl,
+  );
+  static const apiFallbackBaseUrls = String.fromEnvironment(
+    'API_FALLBACK_BASE_URLS',
+    defaultValue: '',
   );
   static const solanaRpcUrl = String.fromEnvironment(
     'SOLANA_RPC_URL',

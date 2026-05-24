@@ -103,21 +103,7 @@ class AppScaffold extends StatelessWidget {
                             ),
                             const SizedBox(width: 12),
                             actions == null || actions!.isEmpty
-                                ? SizedBox(
-                                    width: 44,
-                                    height: 44,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: AppColors.surface.withValues(alpha: 0.72),
-                                        borderRadius: BorderRadius.circular(22),
-                                      ),
-                                      child: Icon(
-                                        Icons.shield_outlined,
-                                        color: AppColors.primary,
-                                        size: 18,
-                                      ),
-                                    ),
-                                  )
+                                ? const SizedBox(width: 44, height: 44)
                                 : Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [

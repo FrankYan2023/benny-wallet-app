@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/di/providers.dart';
@@ -664,29 +665,27 @@ class _BycDetailCard extends StatelessWidget {
               ),
               const SizedBox(width: 22),
               Expanded(
-                child: SizedBox(
-                  height: 118,
-                  child: Center(
-                    child: Text(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
                       _bycDisplayName,
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.displaySmall?.copyWith(
+                      style: theme.textTheme.headlineLarge?.copyWith(
                         color: AppColors.primaryStrong,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                  ),
+                    if (showBuyButton) ...[
+                      const SizedBox(height: 12),
+                      _PumpFunButton(onPressed: () => _openPumpFun(context)),
+                    ],
+                  ],
                 ),
               ),
             ],
           ),
-          if (showBuyButton) ...[
-            const SizedBox(height: 18),
-            PrimaryButton(
-              label: 'Buy BYC On Pump.fun',
-              onPressed: () => _openPumpFun(context),
-            ),
-          ],
         ],
       ),
     );
@@ -694,13 +693,94 @@ class _BycDetailCard extends StatelessWidget {
 
   Future<void> _openPumpFun(BuildContext context) async {
     final uri = Uri.parse(_bycPumpFunUrl);
-    final didLaunch = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!context.mounted || didLaunch) {
+    final didOpenApp = await _tryLaunchPumpFun(
+      uri,
+      LaunchMode.externalNonBrowserApplication,
+    );
+    if (!context.mounted || didOpenApp) {
+      return;
+    }
+
+    final didOpenBrowser = await _tryLaunchPumpFun(
+      uri,
+      LaunchMode.externalApplication,
+    );
+    if (!context.mounted || didOpenBrowser) {
       return;
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Unable to open Pump.fun right now.')),
+    );
+  }
+
+  Future<bool> _tryLaunchPumpFun(Uri uri, LaunchMode mode) async {
+    try {
+      return await launchUrl(uri, mode: mode);
+    } catch (_) {
+      return false;
+    }
+  }
+}
+
+class _PumpFunButton extends StatelessWidget {
+  const _PumpFunButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      height: 50,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(999),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(999),
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(999),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFC88400), Color(0xFFA96600)],
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/brand/pump_mark.svg',
+                      width: 30,
+                      height: 30,
+                      excludeFromSemantics: true,
+                    ),
+                    const SizedBox(width: 10),
+                    Flexible(
+                      child: Text(
+                        'View on Pump.fun',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -185,6 +185,17 @@ class _ChildModePinPageState extends State<ChildModePinPage> {
                         ),
                       ),
                       const SizedBox(height: 24),
+                      if (widget.mode == ChildModePinPageMode.verify) ...[
+                        Text(
+                          'Enter PIN',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: const Color(0xFF16364D),
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                      ],
                       PinDots(
                         filledCount: _activePin.length,
                         length: _pinLength,

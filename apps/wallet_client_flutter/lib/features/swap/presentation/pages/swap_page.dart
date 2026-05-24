@@ -59,6 +59,18 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   static const _minimumSwapSetupReserveSol = 0.01;
   static const _insufficientSwapBalanceMessage =
       'Not enough SOL.\nNeed 0.01 SOL reserve.';
+  static const _suggestedOutputMints = [
+    'So11111111111111111111111111111111111111112', // SOL
+    'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC
+    'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', // USDT
+    'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN', // JUP
+    'jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL', // JTO
+    '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R', // RAY
+    'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE', // ORCA
+    'HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3', // PYTH
+    'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263', // BONK
+    'rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof', // RENDER
+  ];
   static const _xStocksInputMints = {
     _solMintAddress,
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
@@ -640,11 +652,6 @@ class _SwapPageState extends ConsumerState<SwapPage> {
 
   /// Default output choices shown before broader token selection.
   List<SwapTokenOption> get _availableOutputOptionsDefault {
-    const defaultMints = [
-      'So11111111111111111111111111111111111111112', // SOL
-      'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC
-      'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', // USDT
-    ];
     if (_isXStocksMode) {
       final options =
           _tokenOptions
@@ -672,13 +679,41 @@ class _SwapPageState extends ConsumerState<SwapPage> {
             });
       return options;
     }
-    return _tokenOptions
-        .where(
-          (token) =>
-              token.token.mintAddress != _inputToken?.token.mintAddress &&
-              defaultMints.contains(token.token.mintAddress),
-        )
+
+    final inputMint = _inputToken?.token.mintAddress;
+    final eligibleOptions = _tokenOptions
+        .where((token) => token.category != 'xstock')
+        .where((token) => token.token.mintAddress != inputMint)
         .toList();
+    final ownedOptions =
+        eligibleOptions.where((token) => token.isOwned).toList()
+          ..sort((left, right) {
+            final byValue = right.totalValueUsd.compareTo(left.totalValueUsd);
+            if (byValue != 0) {
+              return byValue;
+            }
+            final byBalance = right.availableBalance.compareTo(
+              left.availableBalance,
+            );
+            if (byBalance != 0) {
+              return byBalance;
+            }
+            return left.token.symbol.compareTo(right.token.symbol);
+          });
+    final ownedMints = {
+      for (final token in ownedOptions) token.token.mintAddress,
+    };
+    final suggestedOptions = _suggestedOutputMints
+        .where((mint) => !ownedMints.contains(mint))
+        .map(
+          (mint) => eligibleOptions
+              .where((token) => token.token.mintAddress == mint)
+              .firstOrNull,
+        )
+        .whereType<SwapTokenOption>()
+        .toList();
+
+    return [...ownedOptions, ...suggestedOptions];
   }
 
   SwapTokenOption? _resolvedInputToken(List<SwapTokenOption> options) {
@@ -2548,6 +2583,7 @@ class _TokenPickerSheetState extends State<_TokenPickerSheet> {
     final displayOptions = query.isEmpty
         ? widget.defaultOptions
         : _searchResults;
+    final useSections = query.isEmpty;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
@@ -2606,6 +2642,11 @@ class _TokenPickerSheetState extends State<_TokenPickerSheet> {
                       ),
                     ),
                   )
+                : useSections
+                ? _SectionedTokenOptionList(
+                    options: displayOptions,
+                    currentOption: widget.currentOption,
+                  )
                 : ListView.separated(
                     itemCount: displayOptions.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 10),
@@ -2623,6 +2664,78 @@ class _TokenPickerSheetState extends State<_TokenPickerSheet> {
                   ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SectionedTokenOptionList extends StatelessWidget {
+  const _SectionedTokenOptionList({
+    required this.options,
+    required this.currentOption,
+    this.useMutedSurface = true,
+  });
+
+  final List<SwapTokenOption> options;
+  final SwapTokenOption? currentOption;
+  final bool useMutedSurface;
+
+  @override
+  Widget build(BuildContext context) {
+    final owned = options.where((item) => item.isOwned).toList();
+    final suggested = options.where((item) => !item.isOwned).toList();
+    final children = <Widget>[];
+
+    if (owned.isNotEmpty) {
+      children
+        ..add(const _TokenSectionHeader(title: 'Your assets'))
+        ..addAll(_tilesFor(context, owned));
+    }
+    if (suggested.isNotEmpty) {
+      if (children.isNotEmpty) {
+        children.add(const SizedBox(height: 10));
+      }
+      children
+        ..add(const _TokenSectionHeader(title: 'Suggested tokens'))
+        ..addAll(_tilesFor(context, suggested));
+    }
+
+    return ListView(children: children);
+  }
+
+  List<Widget> _tilesFor(BuildContext context, List<SwapTokenOption> items) {
+    return [
+      for (var index = 0; index < items.length; index++) ...[
+        if (index > 0) const SizedBox(height: 10),
+        _TokenOptionTile(
+          item: items[index],
+          isSelected:
+              items[index].token.mintAddress ==
+              currentOption?.token.mintAddress,
+          onTap: () => Navigator.of(context).pop(items[index]),
+          useMutedSurface: useMutedSurface,
+        ),
+      ],
+    ];
+  }
+}
+
+class _TokenSectionHeader extends StatelessWidget {
+  const _TokenSectionHeader({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(2, 2, 2, 10),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          fontSize: 11,
+          fontWeight: FontWeight.w900,
+          color: AppColors.textSecondary,
+        ),
       ),
     );
   }
@@ -2681,6 +2794,7 @@ class _SimpleTokenListSheetState extends State<_SimpleTokenListSheet> {
                     mintAddress.contains(query);
               })
               .toList(growable: false);
+    final useSections = query.isEmpty;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
@@ -2720,6 +2834,12 @@ class _SimpleTokenListSheetState extends State<_SimpleTokenListSheet> {
                         color: AppColors.textSecondary,
                       ),
                     ),
+                  )
+                : useSections
+                ? _SectionedTokenOptionList(
+                    options: filteredOptions,
+                    currentOption: widget.currentOption,
+                    useMutedSurface: false,
                   )
                 : ListView.separated(
                     itemCount: filteredOptions.length,
@@ -2806,6 +2926,13 @@ class _TokenOptionTile extends StatelessWidget {
                         ),
                       ),
                   ],
+                  if (!item.isOwned && item.token.name.isNotEmpty)
+                    Text(
+                      item.token.name,
+                      style: theme.textTheme.bodySmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                 ],
               ),
             ),

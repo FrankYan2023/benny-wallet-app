@@ -69,8 +69,16 @@ class _PinPromptDialogState extends State<PinPromptDialog> {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 10),
               ],
+              Text(
+                'Enter PIN',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 18),
               PinDots(filledCount: _pin.length),
               const SizedBox(height: 24),
               PinKeypad(
