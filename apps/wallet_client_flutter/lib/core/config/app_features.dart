@@ -141,7 +141,7 @@ abstract final class AppFeatures {
       label: 'BYC airdrop',
       enabled: canOpenAirdrop,
       reviewNote:
-          'Enabled so users can check in and collect BYC points. Buying is disabled in Lite.',
+          'Enabled so users can check in, collect BYC points, and open the external BYC trading page.',
     ),
     FeatureReviewItem(
       label: 'DeFi portfolio',

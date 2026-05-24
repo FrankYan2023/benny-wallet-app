@@ -10,7 +10,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/di/providers.dart';
 import '../../../../app/theme/app_colors.dart';
-import '../../../../core/config/app_features.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../asset_detail/domain/asset_detail_view_data.dart';
@@ -26,8 +25,12 @@ const _bycDisplaySymbol = 'BYC';
 const _bycLogoUrl =
     'https://ipfs.io/ipfs/bafybeicro7545d5hqnanmezlb7mrozml5yfe4xscrpc4cwiqmmun6ohxau';
 
-final bycAirdropDetailProvider = FutureProvider<AssetDetailViewData>((ref) async {
-  return ref.read(assetDetailRepositoryProvider).loadTokenDetail(_bycMintAddress);
+final bycAirdropDetailProvider = FutureProvider<AssetDetailViewData>((
+  ref,
+) async {
+  return ref
+      .read(assetDetailRepositoryProvider)
+      .loadTokenDetail(_bycMintAddress);
 });
 
 class AirdropPage extends ConsumerStatefulWidget {
@@ -55,12 +58,7 @@ class _AirdropPageState extends ConsumerState<AirdropPage> {
       title: 'BYC Airdrop',
       child: ListView(
         children: [
-          _BycDetailCard(
-            detailAsync: coinDetailAsync,
-            theme: theme,
-            showBuyButton:
-                !walletState.childModeEnabled && AppFeatures.canOpenSwap,
-          ),
+          _BycDetailCard(detailAsync: coinDetailAsync, theme: theme),
           const SizedBox(height: 16),
           _AirdropHeroCard(
             ownerAddress: walletState.publicKey ?? '',
@@ -105,14 +103,12 @@ class _AirdropPageState extends ConsumerState<AirdropPage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Text(
-                    _formatError(error),
-                    style: theme.textTheme.bodyMedium,
-                  ),
+                  Text(_formatError(error), style: theme.textTheme.bodyMedium),
                   const SizedBox(height: 18),
                   PrimaryButton(
                     label: 'Retry',
-                    onPressed: () => ref.invalidate(activeAirdropProfileProvider),
+                    onPressed: () =>
+                        ref.invalidate(activeAirdropProfileProvider),
                   ),
                 ],
               ),
@@ -235,9 +231,9 @@ class _AirdropPageState extends ConsumerState<AirdropPage> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
@@ -262,11 +258,7 @@ class _AirdropHeroCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFB06E00),
-            Color(0xFFD48B13),
-            Color(0xFFF0C562),
-          ],
+          colors: [Color(0xFFB06E00), Color(0xFFD48B13), Color(0xFFF0C562)],
         ),
         boxShadow: [
           BoxShadow(
@@ -291,7 +283,10 @@ class _AirdropHeroCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(999),
@@ -343,7 +338,10 @@ class _AirdropHeroCard extends StatelessWidget {
                   child: Text(
                     ownerAddress.isEmpty
                         ? 'Wallet unavailable'
-                        : Formatters.compactAddress(ownerAddress, visibleChars: 6),
+                        : Formatters.compactAddress(
+                            ownerAddress,
+                            visibleChars: 6,
+                          ),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -360,10 +358,7 @@ class _AirdropHeroCard extends StatelessWidget {
 }
 
 class _HeroMetric extends StatelessWidget {
-  const _HeroMetric({
-    required this.label,
-    required this.value,
-  });
+  const _HeroMetric({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -450,7 +445,10 @@ class _JoinAirdropCard extends StatelessWidget {
                   child: Text(
                     ownerAddress.isEmpty
                         ? 'Wallet unavailable'
-                        : Formatters.compactAddress(ownerAddress, visibleChars: 6),
+                        : Formatters.compactAddress(
+                            ownerAddress,
+                            visibleChars: 6,
+                          ),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -610,15 +608,10 @@ class _RuleRow extends StatelessWidget {
 }
 
 class _BycDetailCard extends StatelessWidget {
-  const _BycDetailCard({
-    required this.detailAsync,
-    required this.theme,
-    required this.showBuyButton,
-  });
+  const _BycDetailCard({required this.detailAsync, required this.theme});
 
   final AsyncValue<AssetDetailViewData> detailAsync;
   final ThemeData theme;
-  final bool showBuyButton;
 
   @override
   Widget build(BuildContext context) {
@@ -632,9 +625,7 @@ class _BycDetailCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(22, 22, 22, 22),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(32),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.72),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.72)),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -659,10 +650,7 @@ class _BycDetailCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _BycLogo(
-                logoUrl: logoUrl,
-                symbol: _bycDisplaySymbol,
-              ),
+              _BycLogo(logoUrl: logoUrl, symbol: _bycDisplaySymbol),
               const SizedBox(width: 22),
               Expanded(
                 child: Column(
@@ -677,10 +665,8 @@ class _BycDetailCard extends StatelessWidget {
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    if (showBuyButton) ...[
-                      const SizedBox(height: 12),
-                      _PumpFunButton(onPressed: () => _openPumpFun(context)),
-                    ],
+                    const SizedBox(height: 12),
+                    _PumpFunButton(onPressed: () => _openPumpFun(context)),
                   ],
                 ),
               ),
@@ -765,7 +751,7 @@ class _PumpFunButton extends StatelessWidget {
                     const SizedBox(width: 10),
                     Flexible(
                       child: Text(
-                        'View on Pump.fun',
+                        'View',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.labelLarge?.copyWith(
@@ -786,10 +772,7 @@ class _PumpFunButton extends StatelessWidget {
 }
 
 class _BycLogo extends StatelessWidget {
-  const _BycLogo({
-    required this.logoUrl,
-    required this.symbol,
-  });
+  const _BycLogo({required this.logoUrl, required this.symbol});
 
   final String? logoUrl;
   final String symbol;
@@ -1003,7 +986,9 @@ class _CelebrationBurst extends StatelessWidget {
           scale: 0.6 + ((1 - curved) * 0.8),
           child: Icon(
             progress > 0.5 ? Icons.auto_awesome_rounded : Icons.star_rounded,
-            color: progress > 0.5 ? const Color(0xFFFF8A00) : const Color(0xFFFFC44C),
+            color: progress > 0.5
+                ? const Color(0xFFFF8A00)
+                : const Color(0xFFFFC44C),
             size: 20,
           ),
         ),
