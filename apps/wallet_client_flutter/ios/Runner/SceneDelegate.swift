@@ -31,6 +31,14 @@ class SceneDelegate: FlutterSceneDelegate {
         UIApplication.shared.applicationIconBadgeNumber = 0
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
         result(nil)
+      case "openNotificationSettings":
+        guard let url = URL(string: UIApplication.openSettingsURLString) else {
+          result(nil)
+          return
+        }
+        UIApplication.shared.open(url, options: [:]) { _ in
+          result(nil)
+        }
       default:
         result(FlutterMethodNotImplemented)
       }

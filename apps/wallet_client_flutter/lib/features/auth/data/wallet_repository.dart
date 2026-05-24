@@ -693,6 +693,10 @@ class WalletRepository {
       AppConstants.walletSaltKey,
       AppConstants.walletPublicKeyKey,
       AppConstants.biometricEnabledKey,
+      AppConstants.lastPushFcmTokenKey,
+      AppConstants.lastPushWalletPublicKeyKey,
+      AppConstants.lastPushPermissionStatusKey,
+      AppConstants.lastPushRegisteredAtKey,
     ]);
   }
 

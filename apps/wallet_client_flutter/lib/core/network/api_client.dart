@@ -822,6 +822,7 @@ class BackendApiClient {
     required String installId,
     required bool notificationsEnabled,
     required String platform,
+    String? permissionStatus,
   }) async {
     await _requestJsonMapAuthenticated(
       (dio, options) => dio.post<Map<String, dynamic>>(
@@ -833,10 +834,39 @@ class BackendApiClient {
           'installId': installId,
           'notificationsEnabled': notificationsEnabled,
           'platform': platform,
+          if (permissionStatus != null && permissionStatus.isNotEmpty)
+            'permissionStatus': permissionStatus,
         },
         options: options,
       ),
       fallback: 'Unable to register this device for wallet notifications.',
+      allowBackendFallback: false,
+    );
+  }
+
+  Future<void> unregisterNotificationDevice({
+    required String appVersion,
+    required String buildNumber,
+    required String installId,
+    required String platform,
+    String? fcmToken,
+    String? permissionStatus,
+  }) async {
+    await _requestJsonMapAuthenticated(
+      (dio, options) => dio.post<Map<String, dynamic>>(
+        '/v1/notifications/unregister-device',
+        data: {
+          'appVersion': appVersion,
+          'buildNumber': buildNumber,
+          'installId': installId,
+          'platform': platform,
+          if (fcmToken != null && fcmToken.isNotEmpty) 'fcmToken': fcmToken,
+          if (permissionStatus != null && permissionStatus.isNotEmpty)
+            'permissionStatus': permissionStatus,
+        },
+        options: options,
+      ),
+      fallback: 'Unable to unregister this device for wallet notifications.',
       allowBackendFallback: false,
     );
   }

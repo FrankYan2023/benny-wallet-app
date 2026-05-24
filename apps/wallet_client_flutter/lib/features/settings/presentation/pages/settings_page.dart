@@ -252,8 +252,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           return;
         }
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Notifications are not available on this build.'),
+          SnackBar(
+            content: const Text(
+              'Notifications are disabled. Enable them in system settings.',
+            ),
+            action: SnackBarAction(
+              label: 'Settings',
+              onPressed: () {
+                ref.read(appBadgeServiceProvider).openNotificationSettings();
+              },
+            ),
           ),
         );
         return;

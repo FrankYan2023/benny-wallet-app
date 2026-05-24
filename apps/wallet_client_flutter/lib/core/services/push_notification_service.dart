@@ -106,25 +106,27 @@ class PushNotificationService {
       return false;
     }
 
+    if (!enabled) {
+      await unregisterCurrentDevice(walletState: walletState);
+      return true;
+    }
+
     final initialized = await initialize();
     if (!initialized) {
       debugPrint('[PUSH] Register skipped: Firebase initialization failed.');
       return false;
     }
 
-    if (enabled) {
-      final localGranted = await _localNotificationService.requestPermission();
-      final firebasePermission = await FirebaseMessaging.instance
-          .requestPermission(alert: true, badge: true, sound: true);
-      final firebaseGranted =
-          firebasePermission.authorizationStatus ==
-              AuthorizationStatus.authorized ||
-          firebasePermission.authorizationStatus ==
-              AuthorizationStatus.provisional;
-      if (!localGranted && !firebaseGranted) {
-        debugPrint('[PUSH] Register skipped: notification permission denied.');
-        return false;
-      }
+    final permissionStatus = await _ensureNotificationPermission();
+    if (!_canReceiveRemoteNotifications(permissionStatus)) {
+      debugPrint(
+        '[PUSH] Register skipped: notification permission is ${_permissionStatusName(permissionStatus)}.',
+      );
+      await _store.write(
+        AppConstants.lastPushPermissionStatusKey,
+        _permissionStatusName(permissionStatus),
+      );
+      return false;
     }
 
     final token = await _readMessagingToken();
@@ -133,10 +135,37 @@ class PushNotificationService {
       return false;
     }
 
-    await _registerDeviceToken(token: token, enabled: enabled);
+    await _registerDeviceToken(
+      token: token,
+      enabled: true,
+      permissionStatus: _permissionStatusName(permissionStatus),
+      walletState: walletState,
+    );
     debugPrint('[PUSH] Notification device registered.');
 
     return true;
+  }
+
+  Future<void> unregisterCurrentDevice({
+    required WalletControllerState walletState,
+  }) async {
+    if (!walletState.isUnlocked || walletState.publicKey == null) {
+      debugPrint(
+        '[PUSH] Unregister skipped: wallet is locked or missing public key.',
+      );
+      return;
+    }
+
+    final installId = await _readOrCreateInstallId();
+    final lastToken = await _store.read(AppConstants.lastPushFcmTokenKey);
+    final permissionStatus = await _readPermissionStatusName();
+    await _unregisterDeviceToken(
+      installId: installId,
+      token: lastToken,
+      permissionStatus: permissionStatus,
+    );
+    await _clearRegisteredDeviceCache();
+    debugPrint('[PUSH] Notification device unregistered.');
   }
 
   Future<void> syncEnabledDevice({
@@ -186,7 +215,24 @@ class PushNotificationService {
         return;
       }
 
-      await _registerDeviceToken(token: token, enabled: true);
+      final previousToken = await _store.read(AppConstants.lastPushFcmTokenKey);
+      final installId = await _readOrCreateInstallId();
+      final permissionStatus = await _readPermissionStatusName();
+      if (previousToken != null &&
+          previousToken.isNotEmpty &&
+          previousToken != token) {
+        await _unregisterDeviceToken(
+          installId: installId,
+          token: previousToken,
+          permissionStatus: permissionStatus,
+        );
+      }
+
+      await _registerDeviceToken(
+        token: token,
+        enabled: true,
+        permissionStatus: permissionStatus,
+      );
       debugPrint('[PUSH] Notification device refreshed.');
     } catch (error, stack) {
       debugPrint('[PUSH] Token refresh registration failed: $error');
@@ -195,6 +241,11 @@ class PushNotificationService {
   }
 
   Future<String?> _readMessagingToken() async {
+    if (_isApplePlatform && !await _waitForApnsToken()) {
+      debugPrint('[PUSH] APNs token is not ready; FCM token read skipped.');
+      return null;
+    }
+
     const retryDelays = [
       Duration.zero,
       Duration(milliseconds: 500),
@@ -219,6 +270,8 @@ class PushNotificationService {
   Future<void> _registerDeviceToken({
     required String token,
     required bool enabled,
+    required String permissionStatus,
+    WalletControllerState? walletState,
   }) async {
     final installId = await _readOrCreateInstallId();
     final packageInfo = await PackageInfo.fromPlatform();
@@ -228,6 +281,36 @@ class PushNotificationService {
       fcmToken: token,
       installId: installId,
       notificationsEnabled: enabled,
+      permissionStatus: permissionStatus,
+      platform: _platformName(),
+    );
+    await _store.write(AppConstants.lastPushFcmTokenKey, token);
+    await _store.write(
+      AppConstants.lastPushPermissionStatusKey,
+      permissionStatus,
+    );
+    await _store.write(
+      AppConstants.lastPushRegisteredAtKey,
+      DateTime.now().toUtc().toIso8601String(),
+    );
+    final publicKey = walletState?.publicKey;
+    if (publicKey != null && publicKey.isNotEmpty) {
+      await _store.write(AppConstants.lastPushWalletPublicKeyKey, publicKey);
+    }
+  }
+
+  Future<void> _unregisterDeviceToken({
+    required String installId,
+    required String? token,
+    required String permissionStatus,
+  }) async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    await _apiClient.unregisterNotificationDevice(
+      appVersion: packageInfo.version,
+      buildNumber: packageInfo.buildNumber,
+      fcmToken: token,
+      installId: installId,
+      permissionStatus: permissionStatus,
       platform: _platformName(),
     );
   }
@@ -279,6 +362,101 @@ class PushNotificationService {
     final installId = _generateUuidV4();
     await _store.write(AppConstants.installAnalyticsIdKey, installId);
     return installId;
+  }
+
+  Future<AuthorizationStatus> _ensureNotificationPermission() async {
+    var settings = await FirebaseMessaging.instance.getNotificationSettings();
+    if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
+      settings = await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    }
+
+    if (_canReceiveRemoteNotifications(settings.authorizationStatus)) {
+      await _localNotificationService.requestPermission();
+    }
+
+    return settings.authorizationStatus;
+  }
+
+  Future<String> _readPermissionStatusName() async {
+    if (!isConfigured) {
+      return 'unknown';
+    }
+
+    try {
+      if (await initialize()) {
+        final settings = await FirebaseMessaging.instance
+            .getNotificationSettings();
+        return _permissionStatusName(settings.authorizationStatus);
+      }
+    } catch (_) {
+      // Permission status is diagnostic only; keep unregister/register best-effort.
+    }
+
+    return await _store.read(AppConstants.lastPushPermissionStatusKey) ??
+        'unknown';
+  }
+
+  Future<bool> _waitForApnsToken() async {
+    const retryDelays = [
+      Duration.zero,
+      Duration(milliseconds: 500),
+      Duration(seconds: 1),
+      Duration(seconds: 2),
+      Duration(seconds: 3),
+    ];
+
+    for (final delay in retryDelays) {
+      if (delay > Duration.zero) {
+        await Future<void>.delayed(delay);
+      }
+
+      try {
+        final token = await FirebaseMessaging.instance.getAPNSToken();
+        if (token != null && token.isNotEmpty) {
+          return true;
+        }
+      } catch (error) {
+        debugPrint('[PUSH] APNs token read failed: $error');
+      }
+    }
+
+    return false;
+  }
+
+  Future<void> _clearRegisteredDeviceCache() async {
+    await _store.deleteAll(const [
+      AppConstants.lastPushFcmTokenKey,
+      AppConstants.lastPushWalletPublicKeyKey,
+      AppConstants.lastPushPermissionStatusKey,
+      AppConstants.lastPushRegisteredAtKey,
+    ]);
+  }
+
+  bool get _isApplePlatform =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS);
+
+  bool _canReceiveRemoteNotifications(AuthorizationStatus status) {
+    return status == AuthorizationStatus.authorized ||
+        status == AuthorizationStatus.provisional;
+  }
+
+  String _permissionStatusName(AuthorizationStatus status) {
+    switch (status) {
+      case AuthorizationStatus.authorized:
+        return 'authorized';
+      case AuthorizationStatus.provisional:
+        return 'provisional';
+      case AuthorizationStatus.denied:
+        return 'denied';
+      case AuthorizationStatus.notDetermined:
+        return 'not_determined';
+    }
   }
 
   String _platformName() {

@@ -8,6 +8,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
@@ -101,6 +102,19 @@ class MainActivity : FlutterFragmentActivity() {
 						Context.NOTIFICATION_SERVICE,
 					) as NotificationManager
 					notificationManager.cancelAll()
+					result.success(null)
+				}
+				"openNotificationSettings" -> {
+					val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+						Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+							putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+						}
+					} else {
+						Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+							data = Uri.parse("package:$packageName")
+						}
+					}
+					startActivity(intent)
 					result.success(null)
 				}
 				else -> result.notImplemented()

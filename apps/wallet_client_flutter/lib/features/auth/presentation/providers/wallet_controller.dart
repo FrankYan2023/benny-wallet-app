@@ -755,6 +755,7 @@ class WalletController extends StateNotifier<WalletControllerState> {
   Future<void> logOut() async {
     final repository = ref.read(walletRepositoryProvider);
     await _deauthorizeSeedVaultRecords(await repository.readRecords());
+    await _unregisterPushNotificationsBeforeLogout(state);
 
     final ephemeralStore = ref.read(mnemonicEphemeralStoreProvider);
     ephemeralStore.clearAll();
@@ -826,6 +827,26 @@ class WalletController extends StateNotifier<WalletControllerState> {
           walletState: nextState,
           notificationsEnabled: settings.notificationsEnabled,
         );
+  }
+
+  Future<void> _unregisterPushNotificationsBeforeLogout(
+    WalletControllerState currentState,
+  ) async {
+    if (!currentState.isUnlocked || currentState.publicKey == null) {
+      return;
+    }
+    if (!await _canUseBackendWithoutPrompt(currentState)) {
+      return;
+    }
+
+    try {
+      await ref
+          .read(pushNotificationServiceProvider)
+          .unregisterCurrentDevice(walletState: currentState);
+    } catch (error, stack) {
+      debugPrint('[PUSH] Logout notification unregister failed: $error');
+      debugPrintStack(stackTrace: stack, label: '[PUSH] Stack');
+    }
   }
 
   Future<void> _enablePushNotificationsForNewWallet(

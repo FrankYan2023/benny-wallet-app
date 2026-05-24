@@ -22,4 +22,18 @@ class AppBadgeService {
       // Ignore during tests and unsupported runtimes.
     }
   }
+
+  Future<void> openNotificationSettings() async {
+    if (!isSupported) {
+      return;
+    }
+
+    try {
+      await _channel.invokeMethod<void>('openNotificationSettings');
+    } on PlatformException {
+      // Opening Settings is a convenience path; do not block the calling flow.
+    } on MissingPluginException {
+      // Ignore during tests and unsupported runtimes.
+    }
+  }
 }
