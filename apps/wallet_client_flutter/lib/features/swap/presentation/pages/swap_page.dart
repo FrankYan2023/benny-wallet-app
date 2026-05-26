@@ -1845,6 +1845,9 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       message = message.substring('Exception: '.length);
     }
     final lower = message.toLowerCase();
+    if (lower == 'not_tradable') {
+      return 'NOT_TRADABLE';
+    }
     if (lower.contains('not tradable') ||
         lower.contains('token_not_tradable')) {
       return 'This token is not currently swappable.';

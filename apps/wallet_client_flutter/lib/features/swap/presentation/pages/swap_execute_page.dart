@@ -167,23 +167,63 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
     }
 
     try {
-      final signature = walletState.custody == WalletCustody.mobileWalletAdapter
-          ? await _signAndSendSwapWithMobileWalletAdapter(
-              widget.review.buildResult.swapTransaction,
-            )
-          : walletState.custody == WalletCustody.seedVault
-          ? await _signAndSendSwapWithSeedVault(
-              widget.review.buildResult.swapTransaction,
-            )
-          : await _signAndSendSwapWithLocalMnemonic(
-              encodedTransaction: widget.review.buildResult.swapTransaction,
-            );
+      final signature = await _buildSignAndSendSwap(
+        ownerAddress: publicKey,
+        custody: walletState.custody,
+      );
       ref.invalidate(portfolioProvider(publicKey));
       _finish(signature: signature);
     } catch (error) {
       debugPrint('Swap execute failed: $error');
       _finish(errorMessage: _friendlyError(error));
     }
+  }
+
+  Future<String> _buildSignAndSendSwap({
+    required String ownerAddress,
+    required WalletCustody custody,
+  }) async {
+    Object? lastError;
+
+    for (var attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        final encodedTransaction = await _buildFreshSwapTransaction(
+          ownerAddress: ownerAddress,
+        );
+        return custody == WalletCustody.mobileWalletAdapter
+            ? await _signAndSendSwapWithMobileWalletAdapter(encodedTransaction)
+            : custody == WalletCustody.seedVault
+            ? await _signAndSendSwapWithSeedVault(encodedTransaction)
+            : await _signAndSendSwapWithLocalMnemonic(
+                encodedTransaction: encodedTransaction,
+              );
+      } catch (error) {
+        lastError = error;
+        if (attempt == 0 && _isExpiredQuoteError(error)) {
+          continue;
+        }
+        rethrow;
+      }
+    }
+
+    throw lastError ?? StateError('The swap could not be completed.');
+  }
+
+  Future<String> _buildFreshSwapTransaction({
+    required String ownerAddress,
+  }) async {
+    final review = widget.review;
+    final buildResult = await ref
+        .read(swapRepositoryProvider)
+        .buildSwap(
+          ownerAddress: ownerAddress,
+          inputMint: review.inputToken.token.mintAddress,
+          outputMint: review.outputToken.token.mintAddress,
+          rawAmount: review.buildResult.inAmount,
+          slippageBps: review.slippageBps,
+          priorityPreset: review.priorityPreset.apiValue,
+        );
+    return buildResult.swapTransaction;
   }
 
   Future<String> _signAndSendSwapWithLocalMnemonic({
@@ -276,6 +316,9 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
   String _friendlyError(Object error) {
     final message = error.toString();
     final lower = message.toLowerCase();
+    if (lower == 'not_tradable' || lower == 'exception: not_tradable') {
+      return 'NOT_TRADABLE';
+    }
     if (lower.contains('429') || lower.contains('too many requests')) {
       return 'The network is busy. Please try again.';
     }
@@ -298,6 +341,11 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
       return message.substring('Exception: '.length);
     }
     return message;
+  }
+
+  bool _isExpiredQuoteError(Object error) {
+    final lower = error.toString().toLowerCase();
+    return lower.contains('block height') || lower.contains('blockhash');
   }
 
   bool _isInsufficientSwapBalanceError(String lower) {
