@@ -581,7 +581,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
           const SizedBox(height: 12),
         ],
         if (!hasDefiPositions || selectedTab == _PortfolioAssetTab.tokens)
-          ..._buildTokenRows(context, assets, walletState)
+          ..._buildTokenRows(context, assets)
         else
           ..._buildDefiRows(
             context: context,
@@ -597,7 +597,6 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
   List<Widget> _buildTokenRows(
     BuildContext context,
     List<AssetHolding> assets,
-    WalletControllerState walletState,
   ) {
     if (assets.isEmpty) {
       return [
@@ -607,75 +606,24 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
 
     return [
       for (final asset in assets) ...[
-        Builder(
-          builder: (context) {
-            final action = _assetRowAction(
-              context: context,
-              asset: asset,
-              walletState: walletState,
-            );
-            return TokenRow(
-              name: asset.token.name,
-              symbol: Formatters.tokenSymbol(asset.token.symbol),
-              balanceLine:
-                  '${Formatters.compactNumber(asset.balance)} ${Formatters.tokenSymbol(asset.token.symbol)}',
-              value: asset.priceQuote == null
-                  ? '--'
-                  : Formatters.usd(asset.totalValueUsd),
-              secondaryValue: _assetPriceLine(asset),
-              change: _assetChangePctLine(asset),
-              isPositiveChange: _assetChangeDirection(asset),
-              iconUrl: asset.logoUrl,
-              actionLabel: action.label,
-              actionIcon: action.icon,
-              onActionTap: action.onTap,
-              onTap: () => context.push(
-                AssetDetailPage.pathFor(asset.token.mintAddress),
-              ),
-            );
-          },
+        TokenRow(
+          name: asset.token.name,
+          symbol: Formatters.tokenSymbol(asset.token.symbol),
+          balanceLine:
+              '${Formatters.compactNumber(asset.balance)} ${Formatters.tokenSymbol(asset.token.symbol)}',
+          value: asset.priceQuote == null
+              ? '--'
+              : Formatters.usd(asset.totalValueUsd),
+          secondaryValue: _assetPriceLine(asset),
+          change: _assetChangePctLine(asset),
+          isPositiveChange: _assetChangeDirection(asset),
+          iconUrl: asset.logoUrl,
+          onTap: () =>
+              context.push(AssetDetailPage.pathFor(asset.token.mintAddress)),
         ),
         const SizedBox(height: 12),
       ],
     ];
-  }
-
-  _AssetRowAction _assetRowAction({
-    required BuildContext context,
-    required AssetHolding asset,
-    required WalletControllerState walletState,
-  }) {
-    if (walletState.childModeEnabled || !AppFeatures.canOpenSwap) {
-      return _AssetRowAction(
-        label: 'Receive',
-        icon: Icons.qr_code_2_rounded,
-        onTap: () => context.push(ReceivePage.routePath),
-      );
-    }
-
-    if (_isXStockAsset(asset)) {
-      if (!AppFeatures.canOpenXStocks) {
-        return _AssetRowAction(
-          label: 'Receive',
-          icon: Icons.qr_code_2_rounded,
-          onTap: () => context.push(ReceivePage.routePath),
-        );
-      }
-      return _AssetRowAction(
-        label: 'Swap',
-        icon: Icons.swap_horiz_rounded,
-        onTap: () => context.push(
-          XStocksSwapPage.pathFor(outputMint: asset.token.mintAddress),
-        ),
-      );
-    }
-
-    return _AssetRowAction(
-      label: 'Swap',
-      icon: Icons.swap_horiz_rounded,
-      onTap: () =>
-          context.push(SwapPage.pathFor(outputMint: asset.token.mintAddress)),
-    );
   }
 
   bool _hasDefiPositions(DefiPortfolioViewData? data) {
@@ -908,18 +856,6 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
 }
 
 enum _PortfolioAssetTab { tokens, defi }
-
-class _AssetRowAction {
-  const _AssetRowAction({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-}
 
 class _TotalPerformance {
   const _TotalPerformance({required this.deltaUsd, required this.changePct});

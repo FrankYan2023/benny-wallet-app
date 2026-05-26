@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/di/providers.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/config/app_features.dart';
 import '../../../../core/utils/clipboard_utils.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
@@ -14,6 +15,7 @@ import '../../../portfolio/domain/entities/portfolio_view_data.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
 import '../../../receive/presentation/pages/receive_page.dart';
 import '../../../send/presentation/pages/send_page.dart';
+import '../../../swap/presentation/pages/swap_page.dart';
 import '../../../transaction_history/domain/transaction_activity.dart';
 import '../../domain/asset_detail_view_data.dart';
 
@@ -85,6 +87,7 @@ class AssetDetailPage extends ConsumerWidget {
           final websiteUrl = _normalizeWebsiteUrl(detail?.websiteUrl);
           final showMarketStatsUnavailableNotice =
               detailError != null && priceUsd == null && priceChangePct == null;
+          final primaryAction = _primaryActionForAsset(context, asset);
 
           return ListView(
             children: [
@@ -100,7 +103,9 @@ class AssetDetailPage extends ConsumerWidget {
                 )
               else
                 _ActionRow(
-                  onReceive: () => context.push(ReceivePage.routePath),
+                  primaryIcon: primaryAction.icon,
+                  primaryLabel: primaryAction.label,
+                  onPrimaryAction: primaryAction.onTap,
                   onSend: () => context.push(SendPage.routePath),
                   onCopy: () => _copyMint(context, mintAddress),
                 ),
@@ -302,6 +307,62 @@ class AssetDetailPage extends ConsumerWidget {
     }
     return Theme.of(context).colorScheme.onSurface;
   }
+
+  static _AssetPrimaryAction _primaryActionForAsset(
+    BuildContext context,
+    AssetHolding asset,
+  ) {
+    if (!AppFeatures.canOpenSwap) {
+      return _AssetPrimaryAction.receive(
+        () => context.push(ReceivePage.routePath),
+      );
+    }
+
+    if (asset.category == 'xstock') {
+      if (!AppFeatures.canOpenXStocks) {
+        return _AssetPrimaryAction.receive(
+          () => context.push(ReceivePage.routePath),
+        );
+      }
+      return _AssetPrimaryAction.swap(
+        () => context.push(
+          XStocksSwapPage.pathFor(outputMint: asset.token.mintAddress),
+        ),
+      );
+    }
+
+    return _AssetPrimaryAction.swap(
+      () => context.push(SwapPage.pathFor(outputMint: asset.token.mintAddress)),
+    );
+  }
+}
+
+class _AssetPrimaryAction {
+  const _AssetPrimaryAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  factory _AssetPrimaryAction.receive(VoidCallback onTap) {
+    return _AssetPrimaryAction(
+      icon: Icons.call_received_rounded,
+      label: 'Receive',
+      onTap: onTap,
+    );
+  }
+
+  factory _AssetPrimaryAction.swap(VoidCallback onTap) {
+    return _AssetPrimaryAction(
+      icon: Icons.swap_horiz_rounded,
+      label: 'Swap',
+      onTap: onTap,
+    );
+  }
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
 }
 
 String? _normalizeWebsiteUrl(String? value) {
@@ -401,12 +462,16 @@ class _HeaderBar extends StatelessWidget {
 
 class _ActionRow extends StatelessWidget {
   const _ActionRow({
-    required this.onReceive,
+    required this.primaryIcon,
+    required this.primaryLabel,
+    required this.onPrimaryAction,
     required this.onSend,
     required this.onCopy,
   });
 
-  final VoidCallback onReceive;
+  final IconData primaryIcon;
+  final String primaryLabel;
+  final VoidCallback onPrimaryAction;
   final VoidCallback onSend;
   final VoidCallback onCopy;
 
@@ -418,9 +483,9 @@ class _ActionRow extends StatelessWidget {
       children: [
         Expanded(
           child: _ActionTile(
-            icon: Icons.call_received_rounded,
-            label: 'Receive',
-            onTap: onReceive,
+            icon: primaryIcon,
+            label: primaryLabel,
+            onTap: onPrimaryAction,
             tint: theme.colorScheme.secondaryContainer,
           ),
         ),
