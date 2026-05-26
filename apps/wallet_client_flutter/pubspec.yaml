@@ -1,7 +1,7 @@
 name: wallet_client_flutter
 description: Benny Wallet Flutter client for Web, iOS and Android.
 publish_to: none
-version: 0.0.48+48
+version: 0.0.49+49
 
 environment:
   sdk: "^3.8.0"

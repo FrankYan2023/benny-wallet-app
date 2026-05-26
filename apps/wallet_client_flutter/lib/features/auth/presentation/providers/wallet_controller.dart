@@ -121,7 +121,10 @@ class WalletController extends StateNotifier<WalletControllerState> {
       loggedOut: false,
     );
     state = nextState;
-    nextState = await _syncCloudChildSettings(nextState);
+    nextState = await _syncCloudChildSettings(
+      nextState,
+      activateLinkedChildMode: true,
+    );
     unawaited(
       _registerAnonymousInstallIfNeeded(nextState, source: 'pin_setup'),
     );
@@ -155,7 +158,10 @@ class WalletController extends StateNotifier<WalletControllerState> {
     );
     state = nextState;
     await _ensureBackendSessionForExternalWallet(nextState);
-    nextState = await _syncCloudChildSettings(nextState);
+    nextState = await _syncCloudChildSettings(
+      nextState,
+      activateLinkedChildMode: true,
+    );
     unawaited(
       _registerAnonymousInstallIfNeeded(nextState, source: 'pin_setup'),
     );
@@ -191,7 +197,10 @@ class WalletController extends StateNotifier<WalletControllerState> {
     );
     state = nextState;
     await _ensureBackendSessionForExternalWallet(nextState);
-    nextState = await _syncCloudChildSettings(nextState);
+    nextState = await _syncCloudChildSettings(
+      nextState,
+      activateLinkedChildMode: true,
+    );
     unawaited(
       _registerAnonymousInstallIfNeeded(nextState, source: 'pin_setup'),
     );
@@ -883,8 +892,9 @@ class WalletController extends StateNotifier<WalletControllerState> {
   }
 
   Future<WalletControllerState> _syncCloudChildSettings(
-    WalletControllerState nextState,
-  ) async {
+    WalletControllerState nextState, {
+    bool activateLinkedChildMode = false,
+  }) async {
     final publicKey = nextState.publicKey;
     if (!nextState.isUnlocked || publicKey == null) {
       return nextState;
@@ -900,9 +910,23 @@ class WalletController extends StateNotifier<WalletControllerState> {
       final snapshot = await apiClient.getWalletProfile();
 
       if (snapshot.hasCloudData) {
+        final linkedAsChild = snapshot.profile.accountRole == 'child';
+        final shouldUseCloudChildMode = activateLinkedChildMode;
         final cloudChildModeEnabled =
             snapshot.profile.childModeEnabled ||
-            snapshot.profile.accountRole == 'child';
+            (activateLinkedChildMode && linkedAsChild);
+        final childModeEnabled = shouldUseCloudChildMode
+            ? cloudChildModeEnabled
+            : localRecord?.childModeEnabled ?? nextState.childModeEnabled;
+        final childModePinCipherText = shouldUseCloudChildMode
+            ? snapshot.profile.childModePinCipherText
+            : localRecord?.childModePinCipherText ?? '';
+        final childModePinNonce = shouldUseCloudChildMode
+            ? snapshot.profile.childModePinNonce
+            : localRecord?.childModePinNonce ?? '';
+        final childModePinSalt = shouldUseCloudChildMode
+            ? snapshot.profile.childModePinSalt
+            : localRecord?.childModePinSalt ?? '';
         final childWalletsJson = [
           for (final child in snapshot.childAccounts)
             if (child.status == 'active' && child.childAddress.isNotEmpty)
@@ -915,10 +939,10 @@ class WalletController extends StateNotifier<WalletControllerState> {
 
         await repository.applyCloudChildSettings(
           publicKey: publicKey,
-          childModeEnabled: cloudChildModeEnabled,
-          childModePinCipherText: snapshot.profile.childModePinCipherText,
-          childModePinNonce: snapshot.profile.childModePinNonce,
-          childModePinSalt: snapshot.profile.childModePinSalt,
+          childModeEnabled: childModeEnabled,
+          childModePinCipherText: childModePinCipherText,
+          childModePinNonce: childModePinNonce,
+          childModePinSalt: childModePinSalt,
           childWalletsJson: childWalletsJson,
         );
 
