@@ -12,6 +12,9 @@ class TokenRow extends StatelessWidget {
     this.secondaryValue,
     this.iconUrl,
     this.onTap,
+    this.actionLabel,
+    this.actionIcon,
+    this.onActionTap,
   });
 
   final String name;
@@ -23,6 +26,9 @@ class TokenRow extends StatelessWidget {
   final String? secondaryValue;
   final String? iconUrl;
   final VoidCallback? onTap;
+  final String? actionLabel;
+  final IconData? actionIcon;
+  final VoidCallback? onActionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +38,12 @@ class TokenRow extends StatelessWidget {
     final changeColor = isPositiveChange == null
         ? secondaryText
         : isPositiveChange!
-            ? const Color(0xFF30A46C)
-            : const Color(0xFFE2562A);
+        ? const Color(0xFF30A46C)
+        : const Color(0xFFE2562A);
     final normalizedSecondaryValue = _normalizeDetailText(secondaryValue);
     final normalizedChange = _normalizeDetailText(change);
     final shouldRenderStandaloneChange =
-      normalizedSecondaryValue == null && normalizedChange != null;
+        normalizedSecondaryValue == null && normalizedChange != null;
 
     return InkWell(
       borderRadius: BorderRadius.circular(28),
@@ -120,7 +126,53 @@ class TokenRow extends StatelessWidget {
                 ],
               ],
             ),
+            if (actionLabel != null && onActionTap != null) ...[
+              const SizedBox(width: 12),
+              _TokenRowActionButton(
+                label: actionLabel!,
+                icon: actionIcon,
+                onTap: onActionTap!,
+              ),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TokenRowActionButton extends StatelessWidget {
+  const _TokenRowActionButton({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData? icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SizedBox(
+      height: 38,
+      child: FilledButton.tonalIcon(
+        onPressed: onTap,
+        icon: icon == null ? const SizedBox.shrink() : Icon(icon, size: 16),
+        label: Text(label),
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          textStyle: theme.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+            fontSize: 12,
+          ),
+          visualDensity: VisualDensity.compact,
+          minimumSize: const Size(0, 38),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(999),
+          ),
         ),
       ),
     );
@@ -236,7 +288,9 @@ class _AvatarStack extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.7),
+                color: Theme.of(
+                  context,
+                ).colorScheme.secondaryContainer.withValues(alpha: 0.7),
               ),
               child: _TokenAvatar(symbol: symbol, iconUrl: iconUrl),
             ),

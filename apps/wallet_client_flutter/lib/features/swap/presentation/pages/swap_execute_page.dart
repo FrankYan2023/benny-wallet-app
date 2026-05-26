@@ -332,7 +332,7 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
         lower.contains('toolittlesolreceived') ||
         lower.contains('slippage tolerance exceeded') ||
         lower.contains('slippage exceeded')) {
-      return 'Price moved before the swap was sent. Try again or increase slippage.';
+      return 'Price moved before the swap was sent. Increase slippage and try again.';
     }
     if (lower.contains('block height') || lower.contains('blockhash')) {
       return 'This quote expired. Review the swap again.';

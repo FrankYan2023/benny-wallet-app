@@ -28,32 +28,74 @@ import 'swap_execute_page.dart';
 enum SwapExperience { general, xstocks }
 
 class SwapPage extends ConsumerStatefulWidget {
-  const SwapPage({super.key, this.mode = SwapExperience.general});
+  const SwapPage({
+    super.key,
+    this.mode = SwapExperience.general,
+    this.initialInputMint,
+    this.initialOutputMint,
+  });
 
   static const routeName = 'swap';
   static const routePath = '/swap';
 
+  static String pathFor({String? inputMint, String? outputMint}) {
+    final queryParameters = <String, String>{
+      if (inputMint != null && inputMint.isNotEmpty) 'inputMint': inputMint,
+      if (outputMint != null && outputMint.isNotEmpty) 'outputMint': outputMint,
+    };
+    if (queryParameters.isEmpty) {
+      return routePath;
+    }
+    return Uri(path: routePath, queryParameters: queryParameters).toString();
+  }
+
   final SwapExperience mode;
+  final String? initialInputMint;
+  final String? initialOutputMint;
 
   @override
   ConsumerState<SwapPage> createState() => _SwapPageState();
 }
 
 class XStocksSwapPage extends StatelessWidget {
-  const XStocksSwapPage({super.key});
+  const XStocksSwapPage({
+    super.key,
+    this.initialInputMint,
+    this.initialOutputMint,
+  });
 
   static const routeName = 'xstocksSwap';
   static const routePath = '/xstocks';
 
+  static String pathFor({String? inputMint, String? outputMint}) {
+    final queryParameters = <String, String>{
+      if (inputMint != null && inputMint.isNotEmpty) 'inputMint': inputMint,
+      if (outputMint != null && outputMint.isNotEmpty) 'outputMint': outputMint,
+    };
+    if (queryParameters.isEmpty) {
+      return routePath;
+    }
+    return Uri(path: routePath, queryParameters: queryParameters).toString();
+  }
+
+  final String? initialInputMint;
+  final String? initialOutputMint;
+
   @override
   Widget build(BuildContext context) {
-    return const SwapPage(mode: SwapExperience.xstocks);
+    return SwapPage(
+      mode: SwapExperience.xstocks,
+      initialInputMint: initialInputMint,
+      initialOutputMint: initialOutputMint,
+    );
   }
 }
 
 class _SwapPageState extends ConsumerState<SwapPage> {
   static const _solMintAddress = 'So11111111111111111111111111111111111111112';
-  static const _presetSlippageBps = [5, 50, 100, 300];
+  static const _bennyMintAddress =
+      'AGk1gQfsSRZ8sfS16LUYuBm69iMfHTbCksLUZWJNpump';
+  static const _presetSlippageBps = [5, 50, 100, 300, 500];
   static const _balanceTolerance = 0.000000001;
   static const _minimumSwapFeeReserveSol = 0.0015;
   static const _minimumSwapSetupReserveSol = 0.01;
@@ -61,6 +103,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       'Not enough SOL.\nNeed 0.01 SOL reserve.';
   static const _suggestedOutputMints = [
     'So11111111111111111111111111111111111111112', // SOL
+    _bennyMintAddress, // BYC
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC
     'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', // USDT
     'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN', // JUP
@@ -94,6 +137,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   bool _buildingSwap = false;
   int _slippagePresetIndex = 1;
   bool _usingCustomSlippage = false;
+  bool _slippageUserSelected = false;
   SwapPriorityPreset _priorityPreset = SwapPriorityPreset.normal;
   int _quoteRequestId = 0;
 
@@ -259,6 +303,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                                         token.token.mintAddress) {
                                       _outputToken = _defaultOutputToken(token);
                                     }
+                                    _applyDefaultSlippageForPair();
                                   });
                                   _fetchInitialQuote();
                                 },
@@ -411,7 +456,10 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                                       options: _availableOutputOptionsDefault,
                                       current: _outputToken,
                                       onSelected: (token) {
-                                        setState(() => _outputToken = token);
+                                        setState(() {
+                                          _outputToken = token;
+                                          _applyDefaultSlippageForPair();
+                                        });
                                         _fetchInitialQuote();
                                       },
                                     )
@@ -423,7 +471,10 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                                       portfolioAssets: data.assets,
                                       excludedCategories: const {'xstock'},
                                       onSelected: (token) {
-                                        setState(() => _outputToken = token);
+                                        setState(() {
+                                          _outputToken = token;
+                                          _applyDefaultSlippageForPair();
+                                        });
                                         _fetchInitialQuote();
                                       },
                                     ),
@@ -557,8 +608,11 @@ class _SwapPageState extends ConsumerState<SwapPage> {
 
         setState(() {
           _tokenOptions = options;
-          _inputToken = _resolvedInputToken(options);
-          _outputToken = _resolvedOutputToken(options, _inputToken);
+          final inputToken = _resolvedInputToken(options);
+          final outputToken = _resolvedOutputToken(options, inputToken);
+          _inputToken = inputToken;
+          _outputToken = outputToken;
+          _applyDefaultSlippageForPair();
           _loadingOptions = false;
         });
         // Load an initial 1-unit quote for the preview UI.
@@ -726,6 +780,14 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         return matching.first;
       }
     }
+    final initial = _findOptionByMint(
+      options,
+      widget.initialInputMint,
+      requireAvailable: true,
+    );
+    if (initial != null) {
+      return initial;
+    }
     if (_isXStocksMode) {
       final preferredBaseOptions =
           options
@@ -750,6 +812,14 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         return preferredBaseOptions.first;
       }
     }
+    final solOption = _findOptionByMint(
+      options,
+      _solMintAddress,
+      requireAvailable: true,
+    );
+    if (solOption != null) {
+      return solOption;
+    }
     return options
             .where((item) => item.isOwned && item.availableBalance > 0)
             .firstOrNull ??
@@ -770,14 +840,23 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         return matching.first;
       }
     }
+    final initial = _findOptionByMint(options, widget.initialOutputMint);
+    if (initial != null &&
+        initial.token.mintAddress != inputToken?.token.mintAddress) {
+      return initial;
+    }
     return _defaultOutputToken(inputToken);
   }
 
   SwapTokenOption? _defaultOutputToken(SwapTokenOption? inputToken) {
     if (inputToken == null) {
-      return _isXStocksMode
-          ? _tokenOptions.where((item) => item.category == 'xstock').firstOrNull
-          : _tokenOptions.firstOrNull;
+      if (_isXStocksMode) {
+        return _tokenOptions
+            .where((item) => item.category == 'xstock')
+            .firstOrNull;
+      }
+      return _findOptionByMint(_tokenOptions, _bennyMintAddress) ??
+          _tokenOptions.firstOrNull;
     }
     final inputMint = inputToken.token.mintAddress;
     if (_isXStocksMode) {
@@ -794,6 +873,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
           .firstOrNull;
     }
     const preferredOutputOrder = [
+      _bennyMintAddress,
       'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
       'So11111111111111111111111111111111111111112',
       'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
@@ -814,6 +894,46 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     return _tokenOptions
         .where((item) => item.token.mintAddress != inputMint)
         .firstOrNull;
+  }
+
+  SwapTokenOption? _findOptionByMint(
+    List<SwapTokenOption> options,
+    String? mintAddress, {
+    bool requireAvailable = false,
+  }) {
+    if (mintAddress == null || mintAddress.isEmpty) {
+      return null;
+    }
+    return options
+        .where((item) => item.token.mintAddress == mintAddress)
+        .where(
+          (item) =>
+              !requireAvailable || (item.isOwned && item.availableBalance > 0),
+        )
+        .firstOrNull;
+  }
+
+  void _applyDefaultSlippageForPair() {
+    if (_slippageUserSelected || _usingCustomSlippage) {
+      return;
+    }
+    final defaultBps = _defaultSlippageBpsForPair();
+    final presetIndex = _presetSlippageBps.indexOf(defaultBps);
+    if (presetIndex >= 0) {
+      _slippagePresetIndex = presetIndex;
+    }
+  }
+
+  int _defaultSlippageBpsForPair() {
+    return _isMemeToken(_inputToken) || _isMemeToken(_outputToken) ? 500 : 100;
+  }
+
+  bool _isMemeToken(SwapTokenOption? token) {
+    if (token == null) {
+      return false;
+    }
+    return token.category == 'meme' ||
+        token.token.mintAddress.toLowerCase().endsWith('pump');
   }
 
   void _onSwapInputChanged() {
@@ -1387,6 +1507,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       _amountController.text = nextAmount == null || nextAmount <= 0
           ? ''
           : Formatters.amount(nextAmount, maxDecimals: 6);
+      _applyDefaultSlippageForPair();
     });
     _fetchInitialQuote();
   }
@@ -1467,6 +1588,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                           setState(() {
                             _usingCustomSlippage = selectedCustom;
                             _slippagePresetIndex = selectedIndex;
+                            _slippageUserSelected = true;
                             if (selectedCustom) {
                               _customSlippageController.text =
                                   controller.text.trim().isEmpty
@@ -1863,6 +1985,18 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     }
     if (lower.contains('insufficient') && lower.contains('liquidity')) {
       return 'This amount is too small for a valid route.';
+    }
+    if (lower.contains('0x1771') ||
+        lower.contains('0x1772') ||
+        lower.contains('0x1773') ||
+        lower.contains('6001') ||
+        lower.contains('6002') ||
+        lower.contains('6003') ||
+        lower.contains('toomuchsolrequired') ||
+        lower.contains('toolittlesolreceived') ||
+        lower.contains('slippage tolerance exceeded') ||
+        lower.contains('slippage exceeded')) {
+      return 'Price moved before the swap was sent. Increase slippage and try again.';
     }
     if (_isJupiterInsufficientFundsError(lower)) {
       return 'Not enough token balance. Tap Max again and retry.';

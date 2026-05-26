@@ -264,7 +264,10 @@ class AppRouter {
           return _RouteAccessGuard(
             currentLocation: state.matchedLocation,
             allowInChildMode: false,
-            child: const SwapPage(),
+            child: SwapPage(
+              initialInputMint: state.uri.queryParameters['inputMint'],
+              initialOutputMint: state.uri.queryParameters['outputMint'],
+            ),
           );
         },
       ),
@@ -281,7 +284,10 @@ class AppRouter {
           return _RouteAccessGuard(
             currentLocation: state.matchedLocation,
             allowInChildMode: false,
-            child: const XStocksSwapPage(),
+            child: XStocksSwapPage(
+              initialInputMint: state.uri.queryParameters['inputMint'],
+              initialOutputMint: state.uri.queryParameters['outputMint'],
+            ),
           );
         },
       ),
