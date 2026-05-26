@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert' show base64Encode, utf8;
+import 'dart:developer' as developer;
 import 'dart:isolate';
 import 'dart:math';
 
@@ -825,6 +826,14 @@ class SolanaWalletService {
       return encodedTransaction;
     }
 
+    final logMessage =
+        'Prepared swap tx blockhash refreshed '
+        'old=${transaction.compiledMessage.recentBlockhash} '
+        'new=$blockhash '
+        'lastValidBlockHeight=${latestBlockhash.value.lastValidBlockHeight}';
+    developer.log(logMessage, name: 'BennySwap');
+    // ignore: avoid_print
+    print('BennySwap: $logMessage');
     final compiledMessage = _replaceCompiledMessageBlockhash(
       transaction.compiledMessage,
       blockhash,
@@ -1521,9 +1530,10 @@ class SolanaWalletService {
     return List<Signature>.generate(compiledMessage.requiredSignatureCount, (
       index,
     ) {
-      final publicKey = index < existing.length
+      final existingPublicKey = index < existing.length
           ? existing[index].publicKey
-          : compiledMessage.accountKeys[index];
+          : null;
+      final publicKey = existingPublicKey ?? compiledMessage.accountKeys[index];
       return Signature(List<int>.filled(64, 0), publicKey: publicKey);
     }, growable: false);
   }

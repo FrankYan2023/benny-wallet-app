@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -173,8 +175,15 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
       );
       ref.invalidate(portfolioProvider(publicKey));
       _finish(signature: signature);
-    } catch (error) {
-      debugPrint('Swap execute failed: $error');
+    } catch (error, stackTrace) {
+      developer.log(
+        'Swap execute failed',
+        name: 'BennySwap',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      // ignore: avoid_print
+      print('BennySwap: Swap execute failed: $error\n$stackTrace');
       _finish(errorMessage: _friendlyError(error));
     }
   }
@@ -183,37 +192,21 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
     required String ownerAddress,
     required WalletCustody custody,
   }) async {
-    Object? lastError;
-
-    for (var attempt = 0; attempt < 2; attempt += 1) {
-      try {
-        final encodedTransaction = await _buildFreshSwapTransaction(
-          ownerAddress: ownerAddress,
+    final encodedTransaction = await _buildFreshSwapTransaction(
+      ownerAddress: ownerAddress,
+    );
+    final refreshedTransaction = await ref
+        .read(solanaWalletServiceProvider)
+        .refreshPreparedTransactionBlockhash(
+          encodedTransaction: encodedTransaction,
         );
-        final refreshedTransaction = await ref
-            .read(solanaWalletServiceProvider)
-            .refreshPreparedTransactionBlockhash(
-              encodedTransaction: encodedTransaction,
-            );
-        return custody == WalletCustody.mobileWalletAdapter
-            ? await _signAndSendSwapWithMobileWalletAdapter(
-                refreshedTransaction,
-              )
-            : custody == WalletCustody.seedVault
-            ? await _signAndSendSwapWithSeedVault(refreshedTransaction)
-            : await _signAndSendSwapWithLocalMnemonic(
-                encodedTransaction: refreshedTransaction,
-              );
-      } catch (error) {
-        lastError = error;
-        if (attempt == 0 && _isExpiredQuoteError(error)) {
-          continue;
-        }
-        rethrow;
-      }
-    }
-
-    throw lastError ?? StateError('The swap could not be completed.');
+    return custody == WalletCustody.mobileWalletAdapter
+        ? await _signAndSendSwapWithMobileWalletAdapter(refreshedTransaction)
+        : custody == WalletCustody.seedVault
+        ? await _signAndSendSwapWithSeedVault(refreshedTransaction)
+        : await _signAndSendSwapWithLocalMnemonic(
+            encodedTransaction: refreshedTransaction,
+          );
   }
 
   Future<String> _buildFreshSwapTransaction({
@@ -348,11 +341,6 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
       return message.substring('Exception: '.length);
     }
     return message;
-  }
-
-  bool _isExpiredQuoteError(Object error) {
-    final lower = error.toString().toLowerCase();
-    return lower.contains('block height') || lower.contains('blockhash');
   }
 
   bool _isInsufficientSwapBalanceError(String lower) {
