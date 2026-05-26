@@ -981,6 +981,11 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   }
 
   String get _slippageSummary {
+    final quoteSlippageBps = _quote?.slippageBps;
+    if (quoteSlippageBps != null && quoteSlippageBps > _slippageBps) {
+      return '${_slippageLabel(quoteSlippageBps)} min';
+    }
+
     final value = !_usingCustomSlippage
         ? _slippageLabel(_presetSlippageBps[_slippagePresetIndex])
         : '${AmountParser.parse(_customSlippageController.text)?.toStringAsFixed(1) ?? '1.0'}%';
@@ -1663,7 +1668,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         ),
         buildResult: buildResult,
         priorityPreset: _priorityPreset,
-        slippageBps: _slippageBps,
+        slippageBps: buildResult.slippageBps,
       );
       if (!mounted) {
         return;

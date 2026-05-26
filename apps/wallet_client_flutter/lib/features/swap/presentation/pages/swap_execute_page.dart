@@ -323,7 +323,13 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
       return 'The network is busy. Please try again.';
     }
     if (lower.contains('0x1771') ||
+        lower.contains('0x1772') ||
+        lower.contains('0x1773') ||
         lower.contains('6001') ||
+        lower.contains('6002') ||
+        lower.contains('6003') ||
+        lower.contains('toomuchsolrequired') ||
+        lower.contains('toolittlesolreceived') ||
         lower.contains('slippage tolerance exceeded') ||
         lower.contains('slippage exceeded')) {
       return 'Price moved before the swap was sent. Try again or increase slippage.';
