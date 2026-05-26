@@ -192,24 +192,28 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
     required String ownerAddress,
     required WalletCustody custody,
   }) async {
-    final encodedTransaction = await _buildFreshSwapTransaction(
+    final encodedTransactions = await _buildFreshSwapTransactions(
       ownerAddress: ownerAddress,
     );
-    final refreshedTransaction = await ref
-        .read(solanaWalletServiceProvider)
-        .refreshPreparedTransactionBlockhash(
+    final solana = ref.read(solanaWalletServiceProvider);
+    final refreshedTransactions = <String>[];
+    for (final encodedTransaction in encodedTransactions) {
+      refreshedTransactions.add(
+        await solana.refreshPreparedTransactionBlockhash(
           encodedTransaction: encodedTransaction,
-        );
+        ),
+      );
+    }
     return custody == WalletCustody.mobileWalletAdapter
-        ? await _signAndSendSwapWithMobileWalletAdapter(refreshedTransaction)
+        ? await _signAndSendSwapWithMobileWalletAdapter(refreshedTransactions)
         : custody == WalletCustody.seedVault
-        ? await _signAndSendSwapWithSeedVault(refreshedTransaction)
+        ? await _signAndSendSwapWithSeedVault(refreshedTransactions)
         : await _signAndSendSwapWithLocalMnemonic(
-            encodedTransaction: refreshedTransaction,
+            encodedTransactions: refreshedTransactions,
           );
   }
 
-  Future<String> _buildFreshSwapTransaction({
+  Future<List<String>> _buildFreshSwapTransactions({
     required String ownerAddress,
   }) async {
     final review = widget.review;
@@ -223,12 +227,15 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
           slippageBps: review.slippageBps,
           priorityPreset: review.priorityPreset.apiValue,
         );
-    return buildResult.swapTransaction;
+    if (buildResult.swapTransactions.isEmpty) {
+      throw StateError('Swap transaction is unavailable.');
+    }
+    return buildResult.swapTransactions;
   }
 
   Future<String> _signAndSendSwapWithLocalMnemonic({
-    required String encodedTransaction,
-  }) {
+    required List<String> encodedTransactions,
+  }) async {
     final walletState = ref.read(walletControllerProvider);
     String? mnemonic;
     if (walletState.mnemonicTokenId != null) {
@@ -242,17 +249,23 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
       throw StateError('Unlock the wallet again before swapping.');
     }
 
-    return ref
-        .read(solanaWalletServiceProvider)
-        .signAndSendPreparedTransaction(
-          mnemonic: mnemonic,
-          encodedTransaction: encodedTransaction,
-          derivation: walletState.derivation,
-        );
+    final solana = ref.read(solanaWalletServiceProvider);
+    String? lastSignature;
+    for (final encodedTransaction in encodedTransactions) {
+      lastSignature = await solana.signAndSendPreparedTransaction(
+        mnemonic: mnemonic,
+        encodedTransaction: encodedTransaction,
+        derivation: walletState.derivation,
+      );
+    }
+    if (lastSignature == null) {
+      throw StateError('Swap transaction is unavailable.');
+    }
+    return lastSignature;
   }
 
   Future<String> _signAndSendSwapWithMobileWalletAdapter(
-    String encodedTransaction,
+    List<String> encodedTransactions,
   ) async {
     final authToken = ref.read(walletControllerProvider).mwaAuthToken;
     if (authToken == null || authToken.isEmpty) {
@@ -262,18 +275,23 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
         .read(mobileWalletAdapterServiceProvider)
         .signAndSendTransactions(
           authToken: authToken,
-          encodedTransactions: [encodedTransaction],
+          encodedTransactions: encodedTransactions,
         );
     await ref
         .read(walletControllerProvider.notifier)
         .updateMobileWalletAdapterAuthToken(result.authToken);
-    final signature = result.signatures.first;
-    await ref.read(solanaWalletServiceProvider).waitForConfirmation(signature);
-    return signature;
+    if (result.signatures.length != encodedTransactions.length) {
+      throw StateError('Seeker Wallet returned an unexpected signature count.');
+    }
+    final solana = ref.read(solanaWalletServiceProvider);
+    for (final signature in result.signatures) {
+      await solana.waitForConfirmation(signature);
+    }
+    return result.signatures.last;
   }
 
   Future<String> _signAndSendSwapWithSeedVault(
-    String encodedTransaction,
+    List<String> encodedTransactions,
   ) async {
     final walletState = ref.read(walletControllerProvider);
     final authToken = walletState.mwaAuthToken;
@@ -290,16 +308,25 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
         .signSeedVaultMessages(
           authToken: authToken,
           derivationPath: derivationPath,
-          messages: [
-            solana.signableTransactionMessageBytes(encodedTransaction),
-          ],
+          messages: encodedTransactions
+              .map(solana.signableTransactionMessageBytes)
+              .toList(growable: false),
         );
-    return ref
-        .read(solanaWalletServiceProvider)
-        .sendExternallySignedTransaction(
-          encodedTransaction: encodedTransaction,
-          signature: result.signatures.first,
-        );
+    if (result.signatures.length != encodedTransactions.length) {
+      throw StateError('Seed Vault returned an unexpected signature count.');
+    }
+
+    String? lastSignature;
+    for (var index = 0; index < encodedTransactions.length; index += 1) {
+      lastSignature = await solana.sendExternallySignedTransaction(
+        encodedTransaction: encodedTransactions[index],
+        signature: result.signatures[index],
+      );
+    }
+    if (lastSignature == null) {
+      throw StateError('Swap transaction is unavailable.');
+    }
+    return lastSignature;
   }
 
   void _finish({String? signature, String? errorMessage}) {
@@ -316,8 +343,11 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
   String _friendlyError(Object error) {
     final message = error.toString();
     final lower = message.toLowerCase();
-    if (lower == 'not_tradable' || lower == 'exception: not_tradable') {
-      return 'NOT_TRADABLE';
+    if (lower == 'not_tradable' ||
+        lower == 'exception: not_tradable' ||
+        lower.contains('token_not_tradable') ||
+        lower.contains('not tradable')) {
+      return 'This pair is not available for swap right now. Try SOL or another token pair.';
     }
     if (lower.contains('429') || lower.contains('too many requests')) {
       return 'The network is busy. Please try again.';

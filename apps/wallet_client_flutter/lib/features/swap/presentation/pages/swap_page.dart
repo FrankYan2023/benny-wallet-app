@@ -1972,16 +1972,14 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       message = message.substring('Exception: '.length);
     }
     final lower = message.toLowerCase();
-    if (lower == 'not_tradable') {
-      return 'NOT_TRADABLE';
-    }
-    if (lower.contains('not tradable') ||
+    if (lower == 'not_tradable' ||
+        lower.contains('not tradable') ||
         lower.contains('token_not_tradable')) {
-      return 'This token is not currently swappable.';
+      return 'This pair is not available for swap right now. Try SOL or another token pair.';
     }
     if (lower.contains('no route') ||
         lower.contains('could not find any route')) {
-      return 'No route available for this pair right now.';
+      return 'No route available for this pair right now. Try SOL or another token pair.';
     }
     if (lower.contains('insufficient') && lower.contains('liquidity')) {
       return 'This amount is too small for a valid route.';
