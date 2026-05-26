@@ -190,12 +190,19 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
         final encodedTransaction = await _buildFreshSwapTransaction(
           ownerAddress: ownerAddress,
         );
+        final refreshedTransaction = await ref
+            .read(solanaWalletServiceProvider)
+            .refreshPreparedTransactionBlockhash(
+              encodedTransaction: encodedTransaction,
+            );
         return custody == WalletCustody.mobileWalletAdapter
-            ? await _signAndSendSwapWithMobileWalletAdapter(encodedTransaction)
+            ? await _signAndSendSwapWithMobileWalletAdapter(
+                refreshedTransaction,
+              )
             : custody == WalletCustody.seedVault
-            ? await _signAndSendSwapWithSeedVault(encodedTransaction)
+            ? await _signAndSendSwapWithSeedVault(refreshedTransaction)
             : await _signAndSendSwapWithLocalMnemonic(
-                encodedTransaction: encodedTransaction,
+                encodedTransaction: refreshedTransaction,
               );
       } catch (error) {
         lastError = error;

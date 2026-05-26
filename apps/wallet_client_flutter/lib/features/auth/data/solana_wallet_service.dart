@@ -6,7 +6,14 @@ import 'dart:math';
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:shared_types/shared_types.dart';
 import 'package:solana/base58.dart';
-import 'package:solana/encoder.dart' show Instruction, Signature, SignedTx;
+import 'package:solana/encoder.dart'
+    show
+        CompiledMessage,
+        CompiledMessageLegacy,
+        CompiledMessageV0,
+        Instruction,
+        Signature,
+        SignedTx;
 import 'package:solana/dto.dart'
     show
         AccountData,
@@ -805,6 +812,32 @@ class SolanaWalletService {
     return signature;
   }
 
+  Future<String> refreshPreparedTransactionBlockhash({
+    required String encodedTransaction,
+  }) async {
+    final transaction = SignedTx.decode(encodedTransaction);
+    final rpcClient = await _getRpcClient();
+    final latestBlockhash = await rpcClient.getLatestBlockhash(
+      commitment: Commitment.confirmed,
+    );
+    final blockhash = latestBlockhash.value.blockhash;
+    if (transaction.compiledMessage.recentBlockhash == blockhash) {
+      return encodedTransaction;
+    }
+
+    final compiledMessage = _replaceCompiledMessageBlockhash(
+      transaction.compiledMessage,
+      blockhash,
+    );
+    return SignedTx(
+      signatures: _placeholderSignaturesFor(
+        compiledMessage: compiledMessage,
+        existing: transaction.signatures,
+      ),
+      compiledMessage: compiledMessage,
+    ).encode();
+  }
+
   Future<String> sendExternallySignedTransaction({
     required String encodedTransaction,
     required String signature,
@@ -1469,6 +1502,30 @@ class SolanaWalletService {
       signatures: signatures,
       compiledMessage: transaction.compiledMessage,
     );
+  }
+
+  CompiledMessage _replaceCompiledMessageBlockhash(
+    CompiledMessage message,
+    String blockhash,
+  ) {
+    return switch (message) {
+      CompiledMessageLegacy() => message.copyWith(recentBlockhash: blockhash),
+      CompiledMessageV0() => message.copyWith(recentBlockhash: blockhash),
+    };
+  }
+
+  List<Signature> _placeholderSignaturesFor({
+    required CompiledMessage compiledMessage,
+    required List<Signature> existing,
+  }) {
+    return List<Signature>.generate(compiledMessage.requiredSignatureCount, (
+      index,
+    ) {
+      final publicKey = index < existing.length
+          ? existing[index].publicKey
+          : compiledMessage.accountKeys[index];
+      return Signature(List<int>.filled(64, 0), publicKey: publicKey);
+    }, growable: false);
   }
 
   List<Signature> _injectPrimarySignature({
