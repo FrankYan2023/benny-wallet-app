@@ -347,7 +347,7 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
         lower == 'exception: not_tradable' ||
         lower.contains('token_not_tradable') ||
         lower.contains('not tradable')) {
-      return 'This pair is not available for swap right now. Try SOL or another token pair.';
+      return "This swap route isn't available right now. Try swapping with SOL or choose another token pair.";
     }
     if (lower.contains('429') || lower.contains('too many requests')) {
       return 'The network is busy. Please try again.';

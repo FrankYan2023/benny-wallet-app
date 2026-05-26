@@ -1975,11 +1975,11 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     if (lower == 'not_tradable' ||
         lower.contains('not tradable') ||
         lower.contains('token_not_tradable')) {
-      return 'This pair is not available for swap right now. Try SOL or another token pair.';
+      return "This swap route isn't available right now. Try swapping with SOL or choose another token pair.";
     }
     if (lower.contains('no route') ||
         lower.contains('could not find any route')) {
-      return 'No route available for this pair right now. Try SOL or another token pair.';
+      return "This swap route isn't available right now. Try swapping with SOL or choose another token pair.";
     }
     if (lower.contains('insufficient') && lower.contains('liquidity')) {
       return 'This amount is too small for a valid route.';
@@ -2003,7 +2003,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       return _insufficientSwapBalanceMessage;
     }
     if (lower.contains('could not find any route')) {
-      return 'No route available for this pair right now.';
+      return "This swap route isn't available right now. Try swapping with SOL or choose another token pair.";
     }
     if (lower.contains('429') ||
         lower.contains('too many requests') ||
