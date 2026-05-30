@@ -8,6 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../app/di/providers.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../auth/domain/wallet_controller_state.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../auth/presentation/providers/ephemeral_store.dart';
@@ -28,9 +30,6 @@ class SwapExecutePage extends ConsumerStatefulWidget {
 }
 
 class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
-  static const _insufficientSwapBalanceMessage =
-      'Not enough SOL.\nNeed 0.01 SOL reserve.';
-
   String? _signature;
   String? _errorMessage;
   bool _processing = true;
@@ -75,12 +74,17 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
         ),
         const SizedBox(height: 28),
         Text(
-          'Swapping...',
+          context.l10n.swapProcessing,
           style: theme.textTheme.displayLarge?.copyWith(fontSize: 40),
         ),
         const SizedBox(height: 12),
         Text(
-          '${Formatters.amount(widget.review.inputAmountUi)} ${widget.review.inputToken.token.symbol} to ${Formatters.amount(widget.review.outputAmountUi)} ${widget.review.outputToken.token.symbol}',
+          context.l10n.swapProcessingSummary(
+            Formatters.amount(widget.review.inputAmountUi),
+            widget.review.inputToken.token.symbol,
+            Formatters.amount(widget.review.outputAmountUi),
+            widget.review.outputToken.token.symbol,
+          ),
           textAlign: TextAlign.center,
           style: theme.textTheme.titleLarge,
         ),
@@ -115,15 +119,18 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
         ),
         const SizedBox(height: 28),
         Text(
-          success ? 'Swap complete' : 'Swap failed',
+          success ? context.l10n.swapComplete : context.l10n.swapFailed,
           style: theme.textTheme.displayLarge?.copyWith(fontSize: 40),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 12),
         Text(
           success
-              ? '${Formatters.amount(widget.review.outputAmountUi)} ${widget.review.outputToken.token.symbol} received'
-              : (_errorMessage ?? 'The swap could not be completed.'),
+              ? context.l10n.swapReceivedAmount(
+                  Formatters.amount(widget.review.outputAmountUi),
+                  widget.review.outputToken.token.symbol,
+                )
+              : (_errorMessage ?? context.l10n.swapCouldNotComplete),
           style: success
               ? theme.textTheme.titleLarge
               : theme.textTheme.bodyLarge?.copyWith(
@@ -138,7 +145,7 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
           const SizedBox(height: 22),
           TextButton(
             onPressed: () => _openTransaction(_signature!),
-            child: const Text('View transaction'),
+            child: Text(context.l10n.sendViewTransaction),
           ),
         ],
         const Spacer(),
@@ -152,7 +159,7 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
                 borderRadius: BorderRadius.circular(22),
               ),
             ),
-            child: const Text('Close'),
+            child: Text(context.l10n.commonClose),
           ),
         ),
       ],
@@ -161,10 +168,11 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
 
   Future<void> _executeSwap() async {
     final walletState = ref.read(walletControllerProvider);
+    final l10n = context.l10n;
 
     final publicKey = walletState.publicKey;
     if (publicKey == null) {
-      _finish(errorMessage: 'Wallet address is unavailable.');
+      _finish(errorMessage: l10n.walletAddressUnavailable);
       return;
     }
 
@@ -184,7 +192,7 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
       );
       // ignore: avoid_print
       print('BennySwap: Swap execute failed: $error\n$stackTrace');
-      _finish(errorMessage: _friendlyError(error));
+      _finish(errorMessage: _friendlyError(error, l10n));
     }
   }
 
@@ -340,17 +348,32 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
     });
   }
 
-  String _friendlyError(Object error) {
+  String _friendlyError(Object error, AppLocalizations l10n) {
     final message = error.toString();
     final lower = message.toLowerCase();
     if (lower == 'not_tradable' ||
         lower == 'exception: not_tradable' ||
         lower.contains('token_not_tradable') ||
         lower.contains('not tradable')) {
-      return "This swap route isn't available right now. Try swapping with SOL or choose another token pair.";
+      return l10n.swapRouteUnavailable;
+    }
+    if (lower.contains('unlock the wallet')) {
+      return l10n.swapUnlockAgain;
+    }
+    if (lower.contains('swap transaction is unavailable')) {
+      return l10n.swapTransactionUnavailable;
+    }
+    if (lower.contains('connect seeker vault')) {
+      return l10n.swapConnectSeekerVaultAgain;
+    }
+    if (lower.contains('connect seed vault')) {
+      return l10n.swapConnectSeedVaultAgain;
+    }
+    if (lower.contains('unexpected signature count')) {
+      return l10n.swapUnexpectedSignatureCount;
     }
     if (lower.contains('429') || lower.contains('too many requests')) {
-      return 'The network is busy. Please try again.';
+      return l10n.sendNetworkBusy;
     }
     if (lower.contains('0x1771') ||
         lower.contains('0x1772') ||
@@ -362,16 +385,16 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
         lower.contains('toolittlesolreceived') ||
         lower.contains('slippage tolerance exceeded') ||
         lower.contains('slippage exceeded')) {
-      return 'Price moved before the swap was sent. Increase slippage and try again.';
+      return l10n.swapPriceMoved;
     }
     if (lower.contains('block height') || lower.contains('blockhash')) {
-      return 'This quote expired. Review the swap again.';
+      return l10n.swapQuoteExpired;
     }
     if (_isJupiterInsufficientFundsError(lower)) {
-      return 'Not enough token balance. Tap Max again and retry.';
+      return l10n.swapNotEnoughTokenBalance;
     }
     if (_isInsufficientSwapBalanceError(lower)) {
-      return _insufficientSwapBalanceMessage;
+      return l10n.swapNotEnoughSolReserve('0.01');
     }
     if (message.startsWith('Exception: ')) {
       return message.substring('Exception: '.length);

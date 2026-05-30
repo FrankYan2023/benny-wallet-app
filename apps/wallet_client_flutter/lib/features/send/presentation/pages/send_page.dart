@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../portfolio/domain/entities/portfolio_view_data.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
@@ -31,10 +32,11 @@ class SendPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final walletState = ref.watch(walletControllerProvider);
     final normalizedRecipient = recipientAddress?.trim();
+    final l10n = context.l10n;
 
     if (walletState.childModeEnabled) {
       return AppScaffold(
-        title: 'Send',
+        title: l10n.sendTitle,
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -43,14 +45,14 @@ class SendPage extends ConsumerWidget {
               children: [
                 const Icon(Icons.lock_rounded, size: 40),
                 const SizedBox(height: 12),
-                const Text(
-                  'Send is unavailable in child mode.',
+                Text(
+                  l10n.sendUnavailableChildMode,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () => context.go(ReceivePage.routePath),
-                  child: const Text('Open Receive'),
+                  child: Text(l10n.sendOpenReceive),
                 ),
               ],
             ),
@@ -62,7 +64,7 @@ class SendPage extends ConsumerWidget {
     final portfolio = ref.watch(activePortfolioProvider);
 
     return AppScaffold(
-      title: 'Choose asset',
+      title: l10n.sendChooseAssetTitle,
       actions: [
         Container(
           width: 44,
@@ -74,7 +76,7 @@ class SendPage extends ConsumerWidget {
             borderRadius: BorderRadius.circular(22),
           ),
           child: IconButton(
-            tooltip: 'Send history',
+            tooltip: l10n.sendHistoryTitle,
             onPressed: () => context.push(SendHistoryPage.routePath),
             icon: const Icon(Icons.history_rounded),
           ),
@@ -87,7 +89,7 @@ class SendPage extends ConsumerWidget {
               .toList();
 
           if (assets.isEmpty) {
-            return const Center(child: Text('No assets available to send.'));
+            return Center(child: Text(l10n.sendNoAssets));
           }
 
           return ListView(
@@ -99,7 +101,7 @@ class SendPage extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Recipient prefilled',
+                        l10n.sendRecipientPrefilled,
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w800),
                       ),
@@ -142,7 +144,7 @@ class SendPage extends ConsumerWidget {
           );
         },
         error: (error, _) =>
-            Center(child: Text('Failed to load assets: $error')),
+            Center(child: Text(l10n.sendLoadAssetsFailed('$error'))),
         loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );

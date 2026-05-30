@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/security/secure_screen.dart';
 import '../../../../core/widgets/pin_keypad.dart';
+import '../../../../l10n/l10n.dart';
 
 enum ChildModePinPageMode { create, verify }
 
 class ChildModePinPage extends StatefulWidget {
-  const ChildModePinPage.create({super.key}) : mode = ChildModePinPageMode.create;
+  const ChildModePinPage.create({super.key})
+    : mode = ChildModePinPageMode.create;
 
-  const ChildModePinPage.verify({super.key}) : mode = ChildModePinPageMode.verify;
+  const ChildModePinPage.verify({super.key})
+    : mode = ChildModePinPageMode.verify;
 
   final ChildModePinPageMode mode;
 
@@ -84,7 +87,7 @@ class _ChildModePinPageState extends State<ChildModePinPage> {
       setState(() => _confirmPin = '');
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('PINs do not match')));
+      ).showSnackBar(SnackBar(content: Text(context.l10n.pinMismatch)));
       return;
     }
 
@@ -93,6 +96,7 @@ class _ChildModePinPageState extends State<ChildModePinPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final baseTheme = Theme.of(context);
     final theme = baseTheme.copyWith(
       colorScheme: baseTheme.colorScheme.copyWith(
@@ -104,17 +108,16 @@ class _ChildModePinPageState extends State<ChildModePinPage> {
     );
 
     final title = switch (widget.mode) {
-      ChildModePinPageMode.create when _confirming => 'Confirm Child Mode PIN',
-      ChildModePinPageMode.create => 'Set Child Mode PIN',
-      ChildModePinPageMode.verify => 'Enter Child Mode PIN',
+      ChildModePinPageMode.create when _confirming =>
+        l10n.childModeConfirmPinTitle,
+      ChildModePinPageMode.create => l10n.childModeSetPinTitle,
+      ChildModePinPageMode.verify => l10n.childModeEnterPinTitle,
     };
     final subtitle = switch (widget.mode) {
       ChildModePinPageMode.create when _confirming =>
-        'Re-enter the 4-digit PIN used only for child mode.',
-      ChildModePinPageMode.create =>
-        'Create a 4-digit PIN used only for child mode.',
-      ChildModePinPageMode.verify =>
-        'Enter the 4-digit PIN used only for child mode to turn it off.',
+        l10n.childModeConfirmPinSubtitle,
+      ChildModePinPageMode.create => l10n.childModeSetPinSubtitle,
+      ChildModePinPageMode.verify => l10n.childModeEnterPinSubtitle,
     };
 
     return SecureScreen(
@@ -127,98 +130,98 @@ class _ChildModePinPageState extends State<ChildModePinPage> {
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
               child: Column(
                 children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    tooltip: 'Back',
-                    onPressed: _handleBack,
-                    icon: const Icon(Icons.arrow_back_rounded),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      tooltip: l10n.commonBack,
+                      onPressed: _handleBack,
+                      icon: const Icon(Icons.arrow_back_rounded),
+                    ),
                   ),
-                ),
-                const Spacer(),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(22, 28, 22, 24),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    borderRadius: BorderRadius.circular(36),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x143A6E93),
-                        blurRadius: 28,
-                        offset: Offset(0, 14),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD5EEFF),
-                          borderRadius: BorderRadius.circular(24),
+                  const Spacer(),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(22, 28, 22, 24),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(36),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x143A6E93),
+                          blurRadius: 28,
+                          offset: Offset(0, 14),
                         ),
-                        child: const Icon(
-                          Icons.child_care_rounded,
-                          color: Color(0xFF4B97D3),
-                          size: 34,
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 72,
+                          height: 72,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFD5EEFF),
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: const Icon(
+                            Icons.child_care_rounded,
+                            color: Color(0xFF4B97D3),
+                            size: 34,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        title,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          color: const Color(0xFF16364D),
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        subtitle,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: const Color(0xFF52738C),
-                          height: 1.45,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      if (widget.mode == ChildModePinPageMode.verify) ...[
+                        const SizedBox(height: 20),
                         Text(
-                          'Enter PIN',
+                          title,
                           textAlign: TextAlign.center,
-                          style: theme.textTheme.titleMedium?.copyWith(
+                          style: theme.textTheme.headlineSmall?.copyWith(
                             color: const Color(0xFF16364D),
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 10),
+                        Text(
+                          subtitle,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: const Color(0xFF52738C),
+                            height: 1.45,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        if (widget.mode == ChildModePinPageMode.verify) ...[
+                          Text(
+                            l10n.unlockEnterPin,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: const Color(0xFF16364D),
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                        ],
+                        PinDots(
+                          filledCount: _activePin.length,
+                          length: _pinLength,
+                        ),
                       ],
-                      PinDots(
-                        filledCount: _activePin.length,
-                        length: _pinLength,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 30),
-                PinKeypad(
-                  onDigit: _appendDigit,
-                  onDelete: _activePin.isEmpty ? null : _removeDigit,
-                  width: 320,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Only used for child mode',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF608099),
-                    fontWeight: FontWeight.w600,
+                  const SizedBox(height: 30),
+                  PinKeypad(
+                    onDigit: _appendDigit,
+                    onDelete: _activePin.isEmpty ? null : _removeDigit,
+                    width: 320,
                   ),
-                ),
-                const Spacer(),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.childModeOnlyUsed,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFF608099),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const Spacer(),
+                ],
               ),
             ),
           ),

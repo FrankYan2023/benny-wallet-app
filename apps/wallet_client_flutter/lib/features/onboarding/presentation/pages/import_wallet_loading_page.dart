@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/security/secure_screen.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../l10n/l10n.dart';
 import 'import_wallet_selection_page.dart';
 
 class ImportWalletLoadingFlowData {
@@ -54,10 +55,11 @@ class _ImportWalletLoadingPageState extends State<ImportWalletLoadingPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return SecureScreen(
       child: AppScaffold(
-        title: 'Import Wallet',
+        title: l10n.importWalletTitle,
         child: Center(
           child: WalletCard(
             child: Padding(
@@ -68,13 +70,13 @@ class _ImportWalletLoadingPageState extends State<ImportWalletLoadingPage> {
                   const CircularProgressIndicator(),
                   const SizedBox(height: 18),
                   Text(
-                    'Importing wallet...',
+                    l10n.importWalletLoadingTitle,
                     style: theme.textTheme.titleLarge,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Preparing your Solana wallet list.',
+                    l10n.importWalletLoadingSubtitle,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

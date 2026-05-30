@@ -6,12 +6,15 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/di/providers.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../asset_detail/domain/asset_detail_view_data.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../domain/airdrop_view_data.dart';
@@ -53,9 +56,10 @@ class _AirdropPageState extends ConsumerState<AirdropPage> {
     final walletState = ref.watch(walletControllerProvider);
     final profileAsync = ref.watch(activeAirdropProfileProvider);
     final coinDetailAsync = ref.watch(bycAirdropDetailProvider);
+    final l10n = context.l10n;
 
     return AppScaffold(
-      title: 'BYC Airdrop',
+      title: l10n.airdropTitle,
       child: ListView(
         children: [
           _BycDetailCard(detailAsync: coinDetailAsync, theme: theme),
@@ -97,7 +101,7 @@ class _AirdropPageState extends ConsumerState<AirdropPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'BYC airdrop temporarily unavailable',
+                    l10n.airdropUnavailableTitle,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -106,7 +110,7 @@ class _AirdropPageState extends ConsumerState<AirdropPage> {
                   Text(_formatError(error), style: theme.textTheme.bodyMedium),
                   const SizedBox(height: 18),
                   PrimaryButton(
-                    label: 'Retry',
+                    label: l10n.commonRetry,
                     onPressed: () =>
                         ref.invalidate(activeAirdropProfileProvider),
                   ),
@@ -123,7 +127,7 @@ class _AirdropPageState extends ConsumerState<AirdropPage> {
   Future<void> _handleJoinAirdrop() async {
     final ownerAddress = ref.read(walletControllerProvider).publicKey;
     if (ownerAddress == null || ownerAddress.isEmpty) {
-      _showSnackBar('Unlock your wallet before joining the BYC airdrop.');
+      _showSnackBar(context.l10n.airdropUnlockBeforeJoin);
       return;
     }
 
@@ -131,18 +135,20 @@ class _AirdropPageState extends ConsumerState<AirdropPage> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        title: const Text('Join the BYC airdrop?'),
+        title: Text(context.l10n.airdropJoinDialogTitle),
         content: Text(
-          'We will use your current Benny wallet address:\n\n${Formatters.compactAddress(ownerAddress, visibleChars: 6)}\n\nThis address will be sent to the Benny backend to register your airdrop profile.',
+          context.l10n.airdropJoinDialogMessage(
+            Formatters.compactAddress(ownerAddress, visibleChars: 6),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Join'),
+            child: Text(context.l10n.airdropJoin),
           ),
         ],
       ),
@@ -164,7 +170,7 @@ class _AirdropPageState extends ConsumerState<AirdropPage> {
       if (!mounted) {
         return;
       }
-      _showSnackBar('You are in. Your BYC reward profile is ready.');
+      _showSnackBar(context.l10n.airdropJoinedSnack);
     } catch (error) {
       if (!mounted) {
         return;
@@ -181,13 +187,13 @@ class _AirdropPageState extends ConsumerState<AirdropPage> {
 
   Future<void> _handleCheckIn(AirdropProfileViewData profile) async {
     if (!profile.joined) {
-      _showSnackBar('Join the BYC airdrop before checking in.');
+      _showSnackBar(context.l10n.airdropJoinBeforeCheckIn);
       return;
     }
 
     final ownerAddress = ref.read(walletControllerProvider).publicKey;
     if (ownerAddress == null || ownerAddress.isEmpty) {
-      _showSnackBar('Unlock your wallet before checking in.');
+      _showSnackBar(context.l10n.airdropUnlockBeforeCheckIn);
       return;
     }
 
@@ -275,7 +281,7 @@ class _AirdropHeroCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'BYC Airdrop',
+                  context.l10n.airdropTitle,
                   style: theme.textTheme.displaySmall?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
@@ -292,7 +298,9 @@ class _AirdropHeroCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  profile?.joined == true ? 'Joined' : 'Not joined',
+                  profile?.joined == true
+                      ? context.l10n.airdropJoined
+                      : context.l10n.airdropNotJoined,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -306,15 +314,15 @@ class _AirdropHeroCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _HeroMetric(
-                  label: 'BYC points',
+                  label: context.l10n.airdropBycPoints,
                   value: '${profile?.bycPoints ?? 0}',
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _HeroMetric(
-                  label: 'Streak',
-                  value: '${profile?.streakDays ?? 0} days',
+                  label: context.l10n.airdropStreak,
+                  value: context.l10n.airdropDays(profile?.streakDays ?? 0),
                 ),
               ),
             ],
@@ -337,7 +345,7 @@ class _AirdropHeroCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     ownerAddress.isEmpty
-                        ? 'Wallet unavailable'
+                        ? context.l10n.airdropWalletUnavailable
                         : Formatters.compactAddress(
                             ownerAddress,
                             visibleChars: 6,
@@ -417,14 +425,14 @@ class _JoinAirdropCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Join the airdrop',
+            context.l10n.airdropJoinCardTitle,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w900,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Confirm with your active Benny wallet and create your BYC reward profile.',
+            context.l10n.airdropJoinCardSubtitle,
             style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: 18),
@@ -444,7 +452,7 @@ class _JoinAirdropCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     ownerAddress.isEmpty
-                        ? 'Wallet unavailable'
+                        ? context.l10n.airdropWalletUnavailable
                         : Formatters.compactAddress(
                             ownerAddress,
                             visibleChars: 6,
@@ -459,7 +467,9 @@ class _JoinAirdropCard extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           PrimaryButton(
-            label: isJoining ? 'Joining...' : 'Join With This Wallet',
+            label: isJoining
+                ? context.l10n.airdropJoining
+                : context.l10n.airdropJoinWithThisWallet,
             onPressed: onJoinPressed,
           ),
         ],
@@ -483,11 +493,11 @@ class _CheckInCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final buttonLabel = profile.canCheckInToday
-        ? 'Check in now'
-        : 'Checked in today';
+        ? context.l10n.airdropCheckInNow
+        : context.l10n.airdropCheckedInToday;
     final helperText = profile.canCheckInToday
-        ? 'Next reward: +${profile.nextCheckInRewardPoints} BYC'
-        : 'Come back tomorrow to claim more BYC.';
+        ? context.l10n.airdropNextReward(profile.nextCheckInRewardPoints)
+        : context.l10n.airdropComeBackTomorrow;
 
     return WalletCard(
       child: Column(
@@ -502,13 +512,15 @@ class _CheckInCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           PrimaryButton(
-            label: isSubmitting ? 'Checking in...' : buttonLabel,
+            label: isSubmitting ? context.l10n.airdropCheckingIn : buttonLabel,
             onPressed: onCheckInPressed,
           ),
           if (profile.lastCheckInDate != null) ...[
             const SizedBox(height: 12),
             Text(
-              'Last claimed ${Formatters.date(profile.lastCheckInDate)}',
+              context.l10n.airdropLastClaimed(
+                _formatAirdropDate(context.l10n, profile.lastCheckInDate!),
+              ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -534,26 +546,28 @@ class _RewardsRuleCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Reward rules',
+            context.l10n.airdropRewardRules,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w900,
             ),
           ),
           const SizedBox(height: 14),
-          const _RuleRow(
-            title: 'First check-in',
+          _RuleRow(
+            title: context.l10n.airdropFirstCheckIn,
             reward: '+500 BYC',
             color: Color(0xFFFFF1CC),
           ),
           const SizedBox(height: 10),
-          const _RuleRow(
-            title: 'Next day reward',
+          _RuleRow(
+            title: context.l10n.airdropNextDayReward,
             reward: '+100 BYC',
             color: Color(0xFFF3F1FF),
           ),
           const SizedBox(height: 10),
           _RuleRow(
-            title: 'Every ${profile.streakBonusEveryDays}-day streak',
+            title: context.l10n.airdropEveryDayStreak(
+              profile.streakBonusEveryDays,
+            ),
             reward: '+500 BYC',
             color: const Color(0xFFE8F8EF),
           ),
@@ -696,7 +710,7 @@ class _BycDetailCard extends StatelessWidget {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Unable to open Pump.fun right now.')),
+      SnackBar(content: Text(context.l10n.airdropUnableOpenPumpFun)),
     );
   }
 
@@ -751,7 +765,7 @@ class _PumpFunButton extends StatelessWidget {
                     const SizedBox(width: 10),
                     Flexible(
                       child: Text(
-                        'View',
+                        context.l10n.airdropView,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.labelLarge?.copyWith(
@@ -926,7 +940,7 @@ class _CheckInCelebrationDialogState extends State<_CheckInCelebrationDialog>
                       ),
                       const SizedBox(height: 18),
                       Text(
-                        _headlineForRewardType(widget.rewardType),
+                        _headlineForRewardType(context.l10n, widget.rewardType),
                         textAlign: TextAlign.center,
                         style: theme.textTheme.displaySmall?.copyWith(
                           color: AppColors.primaryStrong,
@@ -943,7 +957,7 @@ class _CheckInCelebrationDialogState extends State<_CheckInCelebrationDialog>
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        'Your Benny points balance has been updated.',
+                        context.l10n.airdropPointsBalanceUpdated,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyLarge?.copyWith(
                           color: AppColors.textSecondary,
@@ -1008,16 +1022,20 @@ const _bursts = <(double, double)>[
   (5.15, 84),
 ];
 
-String _headlineForRewardType(String rewardType) {
+String _formatAirdropDate(AppLocalizations l10n, DateTime value) {
+  return DateFormat.yMMMd(l10n.localeName).format(value.toLocal());
+}
+
+String _headlineForRewardType(AppLocalizations l10n, String rewardType) {
   switch (rewardType) {
     case 'first_check_in':
-      return 'First check-in unlocked';
+      return l10n.airdropFirstCheckInUnlocked;
     case 'streak_bonus':
-      return 'Streak bonus landed';
+      return l10n.airdropStreakBonusLanded;
     case 'already_checked_in':
-      return 'Already claimed today';
+      return l10n.airdropAlreadyClaimedToday;
     default:
-      return 'Reward claimed';
+      return l10n.airdropRewardClaimed;
   }
 }
 

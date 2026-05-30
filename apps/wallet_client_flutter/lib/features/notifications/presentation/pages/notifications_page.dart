@@ -9,6 +9,8 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/utils/clipboard_utils.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../asset_detail/presentation/pages/asset_detail_page.dart';
 import '../../../auth/domain/wallet_controller_state.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
@@ -74,6 +76,7 @@ class NotificationsPage extends ConsumerWidget {
     final inbox = ref.watch(notificationInboxProvider);
     final receivedTransfers = ref.watch(receivedTransfersProvider);
     final unreadCount = ref.watch(unreadNotificationCountProvider);
+    final l10n = context.l10n;
 
     ref.listen<AsyncValue<List<RemoteReceivedTransferItem>>>(
       receivedTransfersProvider,
@@ -85,7 +88,7 @@ class NotificationsPage extends ConsumerWidget {
     );
 
     return AppScaffold(
-      title: 'Messages',
+      title: l10n.portfolioMessages,
       actions: [
         TextButton(
           onPressed: unreadCount == 0
@@ -99,15 +102,15 @@ class NotificationsPage extends ConsumerWidget {
                       .read(appBadgeServiceProvider)
                       .clearApplicationBadge();
                 },
-          child: const Text('Mark all read'),
+          child: Text(l10n.notificationsMarkAllRead),
         ),
       ],
       child: inbox.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) => _EmptyState(
           icon: Icons.error_outline_rounded,
-          title: 'Messages unavailable',
-          subtitle: 'Unable to load messages right now.',
+          title: l10n.notificationsUnavailableTitle,
+          subtitle: l10n.notificationsUnavailableSubtitle,
         ),
         data: (messages) {
           if (messages.isEmpty && receivedTransfers.isLoading) {
@@ -117,8 +120,8 @@ class NotificationsPage extends ConsumerWidget {
           if (messages.isEmpty) {
             return _EmptyState(
               icon: Icons.notifications_none_rounded,
-              title: 'No messages yet',
-              subtitle: 'Push messages will appear here after they arrive.',
+              title: l10n.notificationsEmptyTitle,
+              subtitle: l10n.notificationsEmptySubtitle,
             );
           }
 
@@ -146,7 +149,7 @@ class ReceivedHistoryPage extends ConsumerWidget {
     final history = ref.watch(receivedTransfersProvider);
 
     return AppScaffold(
-      title: 'Received history',
+      title: context.l10n.receivedHistoryTitle,
       child: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(receivedTransfersProvider);
@@ -160,9 +163,9 @@ class ReceivedHistoryPage extends ConsumerWidget {
             if (items.isEmpty) {
               return ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: const [
-                  SizedBox(height: 120),
-                  Center(child: Text('No received history yet.')),
+                children: [
+                  const SizedBox(height: 120),
+                  Center(child: Text(context.l10n.receivedHistoryEmpty)),
                 ],
               );
             }
@@ -185,7 +188,7 @@ class ReceivedHistoryPage extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Text(
-                    'Unable to load received history: $error',
+                    context.l10n.receivedHistoryLoadFailed('$error'),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -210,13 +213,13 @@ class ReceivedNotificationDetailPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final eventId = message.eventId;
     if (eventId == null || eventId.isEmpty) {
-      return const AppScaffold(
-        title: 'Received details',
+      return AppScaffold(
+        title: context.l10n.receivedDetailsTitle,
         child: Center(
           child: Padding(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             child: Text(
-              'This message does not include a received transfer id.',
+              context.l10n.receivedDetailsMissingId,
               textAlign: TextAlign.center,
             ),
           ),
@@ -226,7 +229,7 @@ class ReceivedNotificationDetailPage extends ConsumerWidget {
 
     final detail = ref.watch(receivedTransferDetailProvider(eventId));
     return AppScaffold(
-      title: 'Received details',
+      title: context.l10n.receivedDetailsTitle,
       child: detail.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
@@ -236,7 +239,7 @@ class ReceivedNotificationDetailPage extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Unable to load this received transfer: $error',
+                  context.l10n.receivedDetailsLoadFailed('$error'),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -244,7 +247,7 @@ class ReceivedNotificationDetailPage extends ConsumerWidget {
                   onPressed: () =>
                       ref.invalidate(receivedTransferDetailProvider(eventId)),
                   icon: const Icon(Icons.refresh_rounded),
-                  label: const Text('Retry'),
+                  label: Text(context.l10n.commonRetry),
                 ),
               ],
             ),
@@ -284,19 +287,28 @@ class _ReceivedTransferDetailBody extends StatelessWidget {
         _DetailPanel(
           rows: [
             _DetailRowData(
-              label: 'Token',
+              label: context.l10n.commonToken,
               value: item.symbol.isEmpty ? '--' : item.symbol,
             ),
-            _DetailRowData(label: 'Amount', value: item.displayAmount),
             _DetailRowData(
-              label: 'From',
+              label: context.l10n.commonAmount,
+              value: item.displayAmount,
+            ),
+            _DetailRowData(
+              label: context.l10n.commonFrom,
               value: sender == null ? '--' : _compactAddress(sender),
               copyValue: sender,
             ),
-            _DetailRowData(label: 'Network', value: 'Solana'),
-            _DetailRowData(label: 'Status', value: item.status),
             _DetailRowData(
-              label: 'Signature',
+              label: context.l10n.commonNetwork,
+              value: context.l10n.commonSolana,
+            ),
+            _DetailRowData(
+              label: context.l10n.commonStatus,
+              value: _receivedStatusLabel(context.l10n, item.status),
+            ),
+            _DetailRowData(
+              label: context.l10n.commonSignature,
               value: item.signature.isEmpty
                   ? '--'
                   : _compactAddress(item.signature),
@@ -310,7 +322,7 @@ class _ReceivedTransferDetailBody extends StatelessWidget {
             onPressed: () =>
                 context.push(AssetDetailPage.pathFor(item.mintAddress)),
             icon: const Icon(Icons.info_outline_rounded),
-            label: const Text('Open token details'),
+            label: Text(context.l10n.sendOpenTokenDetails),
           ),
         ],
         if (item.signature.isNotEmpty) ...[
@@ -321,7 +333,7 @@ class _ReceivedTransferDetailBody extends StatelessWidget {
               mode: LaunchMode.externalApplication,
             ),
             icon: const Icon(Icons.open_in_new_rounded),
-            label: const Text('View on Solscan'),
+            label: Text(context.l10n.sendViewOnSolscan),
           ),
         ],
         const SizedBox(height: 24),
@@ -361,8 +373,8 @@ class _ReceivedHistoryTile extends StatelessWidget {
             ReceivedNotificationDetailPage.routePath,
             extra: NotificationMessage(
               id: 'received:${item.id}',
-              title: 'Funds received',
-              body: 'You received ${item.displayAmount}',
+              title: context.l10n.receivedFundsTitle,
+              body: context.l10n.receivedYouReceived(item.displayAmount),
               receivedAt: timestamp,
               type: 'incoming_funds',
               eventId: item.id,
@@ -380,7 +392,7 @@ class _ReceivedHistoryTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'You received ${item.displayAmount}',
+                      context.l10n.receivedYouReceived(item.displayAmount),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -391,8 +403,10 @@ class _ReceivedHistoryTile extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       sender == null || sender.isEmpty
-                          ? 'From --'
-                          : 'From ${_compactAddress(sender)}',
+                          ? context.l10n.receivedFromEmpty
+                          : context.l10n.receivedFromAddress(
+                              _compactAddress(sender),
+                            ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium?.copyWith(
@@ -430,7 +444,8 @@ class _MessageCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isReceived = message.isIncomingFunds;
-    final body = message.body;
+    final l10n = context.l10n;
+    final body = _localizedMessageBody(l10n, message);
 
     return Dismissible(
       key: ValueKey(message.id),
@@ -457,7 +472,7 @@ class _MessageCard extends ConsumerWidget {
         ref.read(notificationInboxProvider.notifier).deleteMessage(message.id);
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Message deleted')));
+        ).showSnackBar(SnackBar(content: Text(l10n.notificationDeleted)));
       },
       child: InkWell(
         borderRadius: BorderRadius.circular(28),
@@ -492,7 +507,7 @@ class _MessageCard extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            message.title,
+                            _localizedMessageTitle(l10n, message),
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: message.isRead
                                   ? FontWeight.w700
@@ -584,7 +599,7 @@ class _RelatedTransfersPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Related changes',
+            context.l10n.receivedRelatedChanges,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w900,
             ),
@@ -597,7 +612,9 @@ class _RelatedTransfersPanel extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    items[index].symbol.isEmpty ? 'Token' : items[index].symbol,
+                    items[index].symbol.isEmpty
+                        ? context.l10n.commonToken
+                        : items[index].symbol,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -653,7 +670,7 @@ class _ReceivedStatusCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Received',
+                  context.l10n.assetReceived,
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: color,
                     fontWeight: FontWeight.w900,
@@ -686,7 +703,7 @@ class _ReceivedTokenInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final name = item.name.isEmpty ? item.symbol : item.name;
-    final symbol = item.symbol.isEmpty ? 'Token' : item.symbol;
+    final symbol = item.symbol.isEmpty ? context.l10n.commonToken : item.symbol;
     return Material(
       color: theme.colorScheme.surface.withValues(alpha: 0.96),
       borderRadius: BorderRadius.circular(28),
@@ -754,7 +771,7 @@ class _ReceivedTimelinePanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Transaction timeline',
+            context.l10n.transactionTimeline,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w900,
             ),
@@ -762,10 +779,10 @@ class _ReceivedTimelinePanel extends StatelessWidget {
           const SizedBox(height: 14),
           _TimelineEntry(
             icon: Icons.call_received_rounded,
-            title: 'Received on Solana',
+            title: context.l10n.receivedOnSolana,
             subtitle: item.status == 'failed'
-                ? 'The receive event was marked failed.'
-                : 'Funds arrived in this wallet.',
+                ? context.l10n.receivedMarkedFailed
+                : context.l10n.receivedArrived,
             time: _formatTimestamp(timestamp),
             active: item.status != 'failed',
             failed: item.status == 'failed',
@@ -1010,16 +1027,16 @@ class _DetailRow extends StatelessWidget {
           if (data.copyValue != null && data.copyValue!.isNotEmpty) ...[
             const SizedBox(width: 4),
             IconButton(
-              tooltip: 'Copy',
+              tooltip: context.l10n.commonCopy,
               onPressed: () async {
                 await ClipboardUtils.setDataWithAutoWipe(
                   data.copyValue!,
                   clearDelay: ClipboardUtils.addressClearDelay,
                 );
                 if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('Copied')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(context.l10n.commonCopied)),
+                  );
                 }
               },
               icon: const Icon(Icons.copy_rounded, size: 20),
@@ -1062,6 +1079,42 @@ DateTime? _parseTimestamp(String? value) {
     return null;
   }
   return DateTime.tryParse(value);
+}
+
+String _receivedStatusLabel(AppLocalizations l10n, String status) {
+  return switch (status) {
+    'failed' => l10n.sendStatusFailed,
+    'confirmed' => l10n.sendStatusConfirmed,
+    'finalized' => l10n.sendStatusFinalized,
+    'success' => l10n.sendStatusConfirmed,
+    _ => status.isEmpty ? '--' : status,
+  };
+}
+
+String _localizedMessageTitle(
+  AppLocalizations l10n,
+  NotificationMessage message,
+) {
+  return message.isIncomingFunds ? l10n.receivedFundsTitle : message.title;
+}
+
+String _localizedMessageBody(
+  AppLocalizations l10n,
+  NotificationMessage message,
+) {
+  if (!message.isIncomingFunds) {
+    return message.body;
+  }
+
+  const prefix = 'You received ';
+  if (message.body.startsWith(prefix)) {
+    return l10n.receivedYouReceived(message.body.substring(prefix.length));
+  }
+  if (message.body.trim().isEmpty ||
+      message.body == 'New funds arrived in your wallet.') {
+    return l10n.receivedNewFundsArrived;
+  }
+  return message.body;
 }
 
 Future<bool> _canUseBackendHistory(

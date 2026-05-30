@@ -12,6 +12,8 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/utils/clipboard_utils.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../asset_detail/presentation/pages/asset_detail_page.dart';
 import '../../../auth/domain/wallet_controller_state.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
@@ -82,9 +84,10 @@ class _SendHistoryPageState extends ConsumerState<SendHistoryPage> {
   Widget build(BuildContext context) {
     final history = ref.watch(sendHistoryProvider);
     final tokens = ref.watch(sendHistoryTokensProvider).valueOrNull ?? const [];
+    final l10n = context.l10n;
 
     return AppScaffold(
-      title: 'Send history',
+      title: l10n.sendHistoryTitle,
       child: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(sendHistoryProvider);
@@ -98,9 +101,9 @@ class _SendHistoryPageState extends ConsumerState<SendHistoryPage> {
             if (mergedItems.isEmpty) {
               return ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: const [
-                  SizedBox(height: 120),
-                  Center(child: Text('No send history yet.')),
+                children: [
+                  const SizedBox(height: 120),
+                  Center(child: Text(l10n.sendHistoryEmpty)),
                 ],
               );
             }
@@ -125,7 +128,7 @@ class _SendHistoryPageState extends ConsumerState<SendHistoryPage> {
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Text(
-                    'Unable to load send history: $error',
+                    context.l10n.sendHistoryLoadFailed('$error'),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -172,7 +175,7 @@ class SendHistoryDetailPage extends StatelessWidget {
     final confirmedAt = item.confirmedAt ?? item.finalizedAt;
 
     return AppScaffold(
-      title: 'Send details',
+      title: context.l10n.sendDetailsTitle,
       child: ListView(
         children: [
           _StatusCard(item: item, color: statusColor),
@@ -184,31 +187,40 @@ class SendHistoryDetailPage extends StatelessWidget {
           _DetailPanel(
             rows: [
               _DetailRowData(
-                label: 'To',
+                label: context.l10n.commonTo,
                 value: destination == null || destination.isEmpty
                     ? '--'
                     : _compactAddress(destination),
                 copyValue: destination,
               ),
               _DetailRowData(
-                label: 'Amount',
+                label: context.l10n.commonAmount,
                 value: item.displayAmountFor(token),
               ),
-              _DetailRowData(label: 'Network', value: 'Solana'),
-              _DetailRowData(label: 'Network fee', value: item.displayFee),
               _DetailRowData(
-                label: 'Submitted',
+                label: context.l10n.commonNetwork,
+                value: context.l10n.commonSolana,
+              ),
+              _DetailRowData(
+                label: context.l10n.commonNetworkFee,
+                value: item.displayFee,
+              ),
+              _DetailRowData(
+                label: context.l10n.commonSubmitted,
                 value: _formatTime(item.submittedAt),
               ),
               _DetailRowData(
-                label: 'Confirmed',
+                label: context.l10n.commonConfirmed,
                 value: confirmedAt == null || confirmedAt.isEmpty
-                    ? 'Not confirmed yet'
+                    ? context.l10n.sendNotConfirmedYet
                     : _formatTime(confirmedAt),
               ),
-              _DetailRowData(label: 'Status', value: _statusLabel(item)),
               _DetailRowData(
-                label: 'Signature',
+                label: context.l10n.commonStatus,
+                value: _statusLabel(context.l10n, item),
+              ),
+              _DetailRowData(
+                label: context.l10n.commonSignature,
                 value: _compactSignature(item.signature),
                 copyValue: item.signature.isEmpty ? null : item.signature,
               ),
@@ -219,7 +231,7 @@ class SendHistoryDetailPage extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: () => context.push(AssetDetailPage.pathFor(tokenMint)),
               icon: const Icon(Icons.info_outline_rounded),
-              label: const Text('Open token details'),
+              label: Text(context.l10n.sendOpenTokenDetails),
             ),
           if (item.signature.isNotEmpty) ...[
             const SizedBox(height: 10),
@@ -229,7 +241,7 @@ class SendHistoryDetailPage extends StatelessWidget {
                 mode: LaunchMode.externalApplication,
               ),
               icon: const Icon(Icons.open_in_new_rounded),
-              label: const Text('View on Solscan'),
+              label: Text(context.l10n.sendViewOnSolscan),
             ),
           ],
           const SizedBox(height: 24),
@@ -250,6 +262,7 @@ class _SendHistoryTile extends StatelessWidget {
     final theme = Theme.of(context);
     final statusColor = _statusColor(theme, item);
     final destination = item.destinationAddress;
+    final l10n = context.l10n;
 
     return Material(
       color: theme.colorScheme.surface.withValues(alpha: 0.96),
@@ -271,7 +284,7 @@ class _SendHistoryTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.displayTitleFor(token),
+                      item.displayTitleFor(token, l10n),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -281,8 +294,8 @@ class _SendHistoryTile extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       destination == null || destination.isEmpty
-                          ? 'To --'
-                          : 'To ${_compactAddress(destination)}',
+                          ? l10n.sendToEmpty
+                          : l10n.sendToAddress(_compactAddress(destination)),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium?.copyWith(
@@ -315,7 +328,7 @@ class _SendHistoryTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _statusLabel(item),
+                    _statusLabel(l10n, item),
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: statusColor,
                       fontWeight: FontWeight.w900,
@@ -342,6 +355,7 @@ class _StatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -365,7 +379,7 @@ class _StatusCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _statusLabel(item),
+                  _statusLabel(l10n, item),
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: color,
                     fontWeight: FontWeight.w900,
@@ -373,7 +387,7 @@ class _StatusCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  item.statusSource,
+                  _statusSourceLabel(l10n, item.statusSource),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -397,6 +411,7 @@ class _TimelinePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final confirmedAt = item.confirmedAt ?? item.finalizedAt;
     return Container(
       padding: const EdgeInsets.all(18),
@@ -408,7 +423,7 @@ class _TimelinePanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Transaction timeline',
+            l10n.transactionTimeline,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w900,
             ),
@@ -416,8 +431,8 @@ class _TimelinePanel extends StatelessWidget {
           const SizedBox(height: 14),
           _TimelineEntry(
             icon: Icons.outbox_rounded,
-            title: 'Submitted to sender',
-            subtitle: 'Helius Sender accepted the signed transaction.',
+            title: l10n.sendSubmittedToSender,
+            subtitle: l10n.sendSubmittedToSenderSubtitle,
             time: _formatTime(item.submittedAt),
             active: true,
           ),
@@ -427,15 +442,15 @@ class _TimelinePanel extends StatelessWidget {
                 ? Icons.error_outline_rounded
                 : Icons.done_all_rounded,
             title: item.result == 'failed'
-                ? 'Async result failed'
+                ? l10n.sendAsyncResultFailed
                 : confirmedAt == null || confirmedAt.isEmpty
-                ? 'Waiting for async confirmation'
-                : 'Async confirmation received',
+                ? l10n.sendWaitingAsyncConfirmation
+                : l10n.sendAsyncConfirmationReceived,
             subtitle: item.statusSource == 'helius_webhook'
-                ? 'Updated from Helius webhook.'
+                ? l10n.sendUpdatedFromHeliusWebhook
                 : item.statusSource == 'rpc_sync'
-                ? 'Updated from chain status sync.'
-                : 'Confirmation has not been received yet.',
+                ? l10n.sendUpdatedFromChainStatusSync
+                : l10n.sendConfirmationNotReceivedYet,
             time: confirmedAt == null || confirmedAt.isEmpty
                 ? '--'
                 : _formatTime(confirmedAt),
@@ -645,16 +660,16 @@ class _DetailRow extends StatelessWidget {
           if (data.copyValue != null && data.copyValue!.isNotEmpty) ...[
             const SizedBox(width: 4),
             IconButton(
-              tooltip: 'Copy',
+              tooltip: context.l10n.commonCopy,
               onPressed: () async {
                 await ClipboardUtils.setDataWithAutoWipe(
                   data.copyValue!,
                   clearDelay: ClipboardUtils.addressClearDelay,
                 );
                 if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('Copied')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(context.l10n.commonCopied)),
+                  );
                 }
               },
               icon: const Icon(Icons.copy_rounded, size: 20),
@@ -787,7 +802,7 @@ extension on RemoteSendHistoryItem {
     return '$value $symbol';
   }
 
-  String displayTitleFor(RemoteTokenCatalogItem? token) {
+  String displayTitleFor(RemoteTokenCatalogItem? token, AppLocalizations l10n) {
     final amount = displayAmountFor(token);
     if (amount != '--') {
       return amount;
@@ -798,7 +813,7 @@ extension on RemoteSendHistoryItem {
     }
     final normalized = fallbackSymbol.trim();
     if (normalized.isEmpty || normalized.toUpperCase() == 'SEND') {
-      return 'Send transaction';
+      return l10n.sendTransactionFallbackTitle;
     }
     return normalized;
   }
@@ -1051,17 +1066,26 @@ RemoteTokenCatalogItem? _findToken(
   return null;
 }
 
-String _statusLabel(RemoteSendHistoryItem item) {
+String _statusLabel(AppLocalizations l10n, RemoteSendHistoryItem item) {
   if (item.result == 'failed' || item.status == 'failed') {
-    return 'Failed';
+    return l10n.sendStatusFailed;
   }
   if (item.status == 'finalized') {
-    return 'Finalized';
+    return l10n.sendStatusFinalized;
   }
   if (item.status == 'confirmed') {
-    return 'Confirmed';
+    return l10n.sendStatusConfirmed;
   }
-  return 'Submitted';
+  return l10n.sendStatusSubmitted;
+}
+
+String _statusSourceLabel(AppLocalizations l10n, String source) {
+  return switch (source) {
+    'helius_webhook' => l10n.sendStatusSourceHeliusWebhook,
+    'rpc_sync' => l10n.sendStatusSourceRpcSync,
+    'chain_activity' => l10n.sendStatusSourceChainActivity,
+    _ => source.isEmpty ? '--' : source,
+  };
 }
 
 IconData _statusIcon(RemoteSendHistoryItem item) {

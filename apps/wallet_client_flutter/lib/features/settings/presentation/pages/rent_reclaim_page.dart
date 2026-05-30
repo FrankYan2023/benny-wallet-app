@@ -7,6 +7,8 @@ import '../../../../app/di/providers.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/error_alert_dialog.dart';
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../auth/data/solana_wallet_service.dart';
 import '../../../auth/domain/wallet_controller_state.dart';
 import '../../../auth/presentation/providers/ephemeral_store.dart';
@@ -52,9 +54,10 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return AppScaffold(
-      title: 'Solana Rent Reclaim',
+      title: l10n.rentTitle,
       child: Stack(
         children: [
           FutureBuilder<RentReclaimPreview>(
@@ -69,24 +72,24 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Close empty token accounts and recover their rent back to your main SOL balance.',
+                          l10n.rentDescription,
                           style: theme.textTheme.bodyLarge,
                         ),
                         const SizedBox(height: 20),
                         _SummaryRow(
-                          label: 'Wallet address',
-                          value: preview?.ownerAddress ?? 'Loading...',
+                          label: l10n.rentWalletAddress,
+                          value: preview?.ownerAddress ?? l10n.commonLoading,
                         ),
                         const SizedBox(height: 16),
                         _SummaryRow(
-                          label: 'Closable token accounts',
+                          label: l10n.rentClosableTokenAccounts,
                           value: preview == null
                               ? '...'
                               : '${preview.accounts.length}',
                         ),
                         const SizedBox(height: 16),
                         _SummaryRow(
-                          label: 'Reclaimable rent',
+                          label: l10n.rentReclaimableRent,
                           value: preview == null
                               ? '...'
                               : '${Formatters.amount(preview.reclaimableLamports / lamportsPerSol)} SOL',
@@ -99,7 +102,7 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
                         if (snapshot.hasError) ...[
                           const SizedBox(height: 20),
                           Text(
-                            _normalizeError(snapshot.error),
+                            _normalizeError(snapshot.error, l10n),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.error,
                             ),
@@ -115,7 +118,7 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Accounts to close',
+                            l10n.rentAccountsToClose,
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.w900,
                             ),
@@ -127,7 +130,9 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
                           ],
                           if (preview.accounts.length > 12)
                             Text(
-                              '+${preview.accounts.length - 12} more accounts will be reclaimed.',
+                              l10n.rentMoreAccounts(
+                                preview.accounts.length - 12,
+                              ),
                               style: theme.textTheme.bodyMedium,
                             ),
                         ],
@@ -137,10 +142,10 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
                     const SizedBox(height: 18),
                     PrimaryButton(
                       label: _submitting
-                          ? 'Reclaiming...'
+                          ? l10n.rentReclaiming
                           : (preview.accounts.isEmpty
-                                ? 'Nothing to reclaim'
-                                : 'Reclaim all rent'),
+                                ? l10n.rentNothingToReclaim
+                                : l10n.rentReclaimAll),
                       onPressed: _submitting || preview.accounts.isEmpty
                           ? null
                           : () => _reclaim(preview),
@@ -166,14 +171,14 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Reclaiming rent...',
+                          l10n.rentReclaimingRent,
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w900,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Submitting close-account transactions now.',
+                          l10n.rentSubmittingTransactions,
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodyMedium,
                         ),
@@ -212,8 +217,8 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
     if (mnemonic == null) {
       await showErrorAlertDialog(
         context,
-        title: 'Unlock Required',
-        message: 'Unlock the wallet again before reclaiming rent.',
+        title: context.l10n.rentUnlockRequiredTitle,
+        message: context.l10n.rentUnlockRequiredMessage,
       );
       return;
     }
@@ -241,7 +246,7 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Submitted ${signatures.length} reclaim transaction${signatures.length == 1 ? '' : 's'}.',
+            context.l10n.rentSubmittedTransactions(signatures.length),
           ),
         ),
       );
@@ -252,8 +257,8 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
       }
       await showErrorAlertDialog(
         context,
-        title: 'Reclaim Failed',
-        message: _normalizeError(error),
+        title: context.l10n.rentReclaimFailedTitle,
+        message: _normalizeError(error, context.l10n),
       );
     } finally {
       if (mounted) {
@@ -273,16 +278,16 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
     if (ownerAddress == null || ownerAddress.isEmpty) {
       await showErrorAlertDialog(
         context,
-        title: 'Wallet Required',
-        message: 'Connect Seeker Vault again before reclaiming rent.',
+        title: context.l10n.rentWalletRequiredTitle,
+        message: context.l10n.rentConnectSeekerVaultAgain,
       );
       return;
     }
     if (authToken == null || authToken.isEmpty) {
       await showErrorAlertDialog(
         context,
-        title: 'Wallet Required',
-        message: 'Connect Seeker Vault again before reclaiming rent.',
+        title: context.l10n.rentWalletRequiredTitle,
+        message: context.l10n.rentConnectSeekerVaultAgain,
       );
       return;
     }
@@ -338,8 +343,11 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
         SnackBar(
           content: Text(
             failures.isEmpty
-                ? 'Submitted ${signatures.length} reclaim transaction${signatures.length == 1 ? '' : 's'}.'
-                : 'Submitted ${signatures.length} reclaim transaction${signatures.length == 1 ? '' : 's'}; ${failures.length} account${failures.length == 1 ? '' : 's'} skipped.',
+                ? context.l10n.rentSubmittedTransactions(signatures.length)
+                : context.l10n.rentSubmittedTransactionsWithSkipped(
+                    failures.length,
+                    signatures.length,
+                  ),
           ),
         ),
       );
@@ -351,8 +359,8 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
       }
       await showErrorAlertDialog(
         context,
-        title: 'Reclaim Failed',
-        message: _normalizeError(error),
+        title: context.l10n.rentReclaimFailedTitle,
+        message: _normalizeError(error, context.l10n),
       );
     } finally {
       if (mounted) {
@@ -378,8 +386,8 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
         derivationPath.isEmpty) {
       await showErrorAlertDialog(
         context,
-        title: 'Wallet Required',
-        message: 'Connect Seed Vault again before reclaiming rent.',
+        title: context.l10n.rentWalletRequiredTitle,
+        message: context.l10n.rentConnectSeedVaultAgain,
       );
       return;
     }
@@ -419,7 +427,7 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Submitted ${signatures.length} reclaim transaction${signatures.length == 1 ? '' : 's'}.',
+            context.l10n.rentSubmittedTransactions(signatures.length),
           ),
         ),
       );
@@ -431,8 +439,8 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
       }
       await showErrorAlertDialog(
         context,
-        title: 'Reclaim Failed',
-        message: _normalizeError(error),
+        title: context.l10n.rentReclaimFailedTitle,
+        message: _normalizeError(error, context.l10n),
       );
     } finally {
       if (mounted) {
@@ -443,13 +451,13 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
     }
   }
 
-  String _normalizeError(Object? error) {
+  String _normalizeError(Object? error, AppLocalizations l10n) {
     final message = error?.toString().trim() ?? '';
     if (message.isEmpty) {
-      return 'Unable to scan reclaimable token accounts right now.';
+      return l10n.rentUnableScan;
     }
     if (message.toLowerCase().contains('unlock')) {
-      return 'Unlock the wallet again before reclaiming rent.';
+      return l10n.rentUnlockRequiredMessage;
     }
     return message;
   }
@@ -518,7 +526,12 @@ class _ClosableAccountRow extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                'Mint ${Formatters.compactAddress(account.mintAddress, visibleChars: 5)}',
+                context.l10n.rentMintAddress(
+                  Formatters.compactAddress(
+                    account.mintAddress,
+                    visibleChars: 5,
+                  ),
+                ),
                 style: theme.textTheme.bodySmall,
               ),
             ],

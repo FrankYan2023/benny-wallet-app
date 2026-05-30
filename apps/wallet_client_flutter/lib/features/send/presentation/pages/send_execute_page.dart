@@ -6,6 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../app/di/providers.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../auth/domain/wallet_controller_state.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../auth/presentation/providers/ephemeral_store.dart';
@@ -73,12 +75,19 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
         ),
         const SizedBox(height: 28),
         Text(
-          'Submitting...',
+          context.l10n.sendSubmitting,
           style: theme.textTheme.displayLarge?.copyWith(fontSize: 40),
         ),
         const SizedBox(height: 12),
         Text(
-          '${widget.draft.amountDisplay} ${Formatters.tokenSymbol(widget.draft.token.symbol)} to ${Formatters.compactAddress(widget.draft.destinationAddress, visibleChars: 5)}',
+          context.l10n.sendSubmittingSummary(
+            Formatters.compactAddress(
+              widget.draft.destinationAddress,
+              visibleChars: 5,
+            ),
+            widget.draft.amountDisplay,
+            Formatters.tokenSymbol(widget.draft.token.symbol),
+          ),
           textAlign: TextAlign.center,
           style: theme.textTheme.titleLarge,
         ),
@@ -114,14 +123,22 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
         ),
         const SizedBox(height: 28),
         Text(
-          success ? 'Submitted' : 'Send failed',
+          success ? context.l10n.sendSubmitted : context.l10n.sendFailed,
           style: theme.textTheme.displayLarge?.copyWith(fontSize: 42),
         ),
         const SizedBox(height: 12),
         Text(
           success
-              ? '${result.amountDisplay} ${result.symbol} was submitted to ${Formatters.compactAddress(result.destinationAddress, visibleChars: 5)}. Confirmation may take a moment.'
-              : (result.message ?? 'The transaction could not be completed.'),
+              ? context.l10n.sendSubmittedMessage(
+                  Formatters.compactAddress(
+                    result.destinationAddress,
+                    visibleChars: 5,
+                  ),
+                  result.amountDisplay,
+                  result.symbol,
+                )
+              : (result.message ??
+                    context.l10n.sendTransactionCouldNotComplete),
           textAlign: TextAlign.center,
           style: theme.textTheme.titleLarge,
         ),
@@ -129,7 +146,7 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
           const SizedBox(height: 22),
           TextButton(
             onPressed: () => _openTransaction(result.signature!),
-            child: const Text('View transaction'),
+            child: Text(context.l10n.sendViewTransaction),
           ),
         ],
         const Spacer(),
@@ -143,7 +160,7 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
                 borderRadius: BorderRadius.circular(22),
               ),
             ),
-            child: const Text('Close'),
+            child: Text(context.l10n.commonClose),
           ),
         ),
       ],
@@ -229,7 +246,7 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
           amountDisplay: widget.draft.amountDisplay,
           symbol: Formatters.tokenSymbol(widget.draft.token.symbol),
           destinationAddress: widget.draft.destinationAddress,
-          message: _friendlySendError(error),
+          message: _friendlySendError(error, context.l10n),
         ),
       );
     }
@@ -376,28 +393,28 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
     });
   }
 
-  String _friendlySendError(Object error) {
+  String _friendlySendError(Object error, AppLocalizations l10n) {
     final message = error.toString();
     final lower = message.toLowerCase();
-    const genericSendFailure = 'Send failed. Please try again.';
+    final genericSendFailure = l10n.sendGenericFailure;
 
     if (lower.contains('associated token account')) {
-      return 'The recipient wallet is not ready to receive this token yet.';
+      return l10n.sendRecipientNotReady;
     }
     if (lower.contains('429') || lower.contains('retryable error')) {
-      return 'The network is busy. Please try again.';
+      return l10n.sendNetworkBusy;
     }
     if (lower.contains('timed out') || lower.contains('timeout')) {
-      return 'The network is taking longer than expected. Please try again.';
+      return l10n.sendNetworkTakingLonger;
     }
     if (lower.contains('insufficient') ||
         lower.contains('insufficient funds') ||
         lower.contains('insufficient lamports') ||
         lower.contains('fee payer')) {
-      return 'Not enough SOL to cover the network fee.';
+      return l10n.sendNotEnoughSolForFee;
     }
     if (lower.contains('blockhash')) {
-      return 'The network is busy. Please try again.';
+      return l10n.sendNetworkBusy;
     }
     if (lower.contains('http status code') ||
         lower.contains('jsonrpc') ||

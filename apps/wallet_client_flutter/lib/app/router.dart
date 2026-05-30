@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/config/app_features.dart';
+import '../l10n/l10n.dart';
 import '../features/auth/presentation/providers/wallet_controller.dart';
 import '../features/auth/presentation/pages/pin_setup_page.dart';
 import '../features/auth/presentation/pages/unlock_page.dart';
@@ -177,9 +178,9 @@ class AppRouter {
         builder: (context, state) {
           final message = state.extra as NotificationMessage?;
           if (message == null) {
-            return const _FeatureUnavailablePage(
-              title: 'Message unavailable',
-              message: 'Open a received message from the message list first.',
+            return _FeatureUnavailablePage(
+              title: context.l10n.routerMessageUnavailableTitle,
+              message: context.l10n.routerMessageUnavailableMessage,
             );
           }
           return _RouteAccessGuard(
@@ -193,9 +194,9 @@ class AppRouter {
         name: AirdropPage.routeName,
         builder: (context, state) {
           if (!AppFeatures.canOpenAirdrop) {
-            return const _FeatureUnavailablePage(
-              title: 'Feature unavailable',
-              message: 'This feature is not available in this build.',
+            return _FeatureUnavailablePage(
+              title: context.l10n.routerFeatureUnavailableTitle,
+              message: context.l10n.routerFeatureUnavailableMessage,
             );
           }
           return _RouteAccessGuard(
@@ -239,9 +240,9 @@ class AppRouter {
         builder: (context, state) {
           final extra = state.extra;
           if (extra is! SendHistoryDetailData) {
-            return const _FeatureUnavailablePage(
-              title: 'Send details unavailable',
-              message: 'Open a transaction from send history first.',
+            return _FeatureUnavailablePage(
+              title: context.l10n.routerSendDetailsUnavailableTitle,
+              message: context.l10n.routerSendDetailsUnavailableMessage,
             );
           }
           return _RouteAccessGuard(
@@ -256,9 +257,9 @@ class AppRouter {
         name: SwapPage.routeName,
         builder: (context, state) {
           if (!AppFeatures.canOpenSwap) {
-            return const _FeatureUnavailablePage(
-              title: 'Feature unavailable',
-              message: 'This feature is not available in this build.',
+            return _FeatureUnavailablePage(
+              title: context.l10n.routerFeatureUnavailableTitle,
+              message: context.l10n.routerFeatureUnavailableMessage,
             );
           }
           return _RouteAccessGuard(
@@ -276,9 +277,9 @@ class AppRouter {
         name: XStocksSwapPage.routeName,
         builder: (context, state) {
           if (!AppFeatures.canOpenXStocks) {
-            return const _FeatureUnavailablePage(
-              title: 'Feature unavailable',
-              message: 'This feature is not available in this build.',
+            return _FeatureUnavailablePage(
+              title: context.l10n.routerFeatureUnavailableTitle,
+              message: context.l10n.routerFeatureUnavailableMessage,
             );
           }
           return _RouteAccessGuard(
@@ -296,9 +297,9 @@ class AppRouter {
         name: SwapReviewPage.routeName,
         builder: (context, state) {
           if (!AppFeatures.canOpenSwap) {
-            return const _FeatureUnavailablePage(
-              title: 'Feature unavailable',
-              message: 'This feature is not available in this build.',
+            return _FeatureUnavailablePage(
+              title: context.l10n.routerFeatureUnavailableTitle,
+              message: context.l10n.routerFeatureUnavailableMessage,
             );
           }
           return _RouteAccessGuard(
@@ -313,9 +314,9 @@ class AppRouter {
         name: SwapExecutePage.routeName,
         builder: (context, state) {
           if (!AppFeatures.canOpenSwap) {
-            return const _FeatureUnavailablePage(
-              title: 'Feature unavailable',
-              message: 'This feature is not available in this build.',
+            return _FeatureUnavailablePage(
+              title: context.l10n.routerFeatureUnavailableTitle,
+              message: context.l10n.routerFeatureUnavailableMessage,
             );
           }
           return _RouteAccessGuard(
@@ -415,8 +416,10 @@ class AppRouter {
         builder: (context, state) {
           final childId = state.extra as String?;
           if (childId == null) {
-            return const Scaffold(
-              body: Center(child: Text('Invalid child wallet ID')),
+            return Scaffold(
+              body: Center(
+                child: Text(context.l10n.routerInvalidChildWalletId),
+              ),
             );
           }
           return _RouteAccessGuard(
@@ -429,7 +432,9 @@ class AppRouter {
     ],
     errorBuilder: (context, state) {
       return Scaffold(
-        body: Center(child: Text('Route not found: ${state.uri}')),
+        body: Center(
+          child: Text(context.l10n.routerRouteNotFound('${state.uri}')),
+        ),
       );
     },
   );

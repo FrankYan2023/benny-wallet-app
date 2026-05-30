@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
 import '../security/secure_screen.dart';
 import 'pin_keypad.dart';
 
@@ -72,7 +73,7 @@ class _PinPromptDialogState extends State<PinPromptDialog> {
                 const SizedBox(height: 10),
               ],
               Text(
-                'Enter PIN',
+                context.l10n.unlockEnterPin,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w800,

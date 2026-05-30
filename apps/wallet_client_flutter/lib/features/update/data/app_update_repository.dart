@@ -3,6 +3,9 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../core/network/api_client.dart';
 
+const defaultAppUpdateMessage = 'A newer version of Benny Wallet is available.';
+const defaultAppUpdateTitle = 'Update available';
+
 class AppUpdateCheckResult {
   const AppUpdateCheckResult({
     required this.currentBuild,
@@ -60,13 +63,11 @@ class AppUpdateRepository {
       downloadUrl: _cleanUrl(remote.downloadUrl),
       latestBuild: remote.latestBuild,
       latestVersion: remote.latestVersion,
-      message:
-          _normalizeText(remote.message) ??
-          'A newer version of Benny Wallet is available.',
+      message: _normalizeText(remote.message) ?? defaultAppUpdateMessage,
       platform: remote.platform,
       required: remote.required,
       storeUrl: _cleanUrl(remote.storeUrl),
-      title: _normalizeText(remote.title) ?? 'Update available',
+      title: _normalizeText(remote.title) ?? defaultAppUpdateTitle,
       updateAvailable: remote.updateAvailable,
     );
   }

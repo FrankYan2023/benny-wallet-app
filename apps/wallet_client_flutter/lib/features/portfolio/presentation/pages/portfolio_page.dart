@@ -9,6 +9,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/app_update_gate.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../airdrop/presentation/pages/airdrop_page.dart';
 import '../../../asset_detail/presentation/pages/asset_detail_page.dart';
 import '../../../auth/presentation/pages/unlock_page.dart';
@@ -44,6 +45,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
   Widget build(BuildContext context) {
     final walletState = ref.watch(walletControllerProvider);
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final canOpenSwap = AppFeatures.canOpenSwap;
     final canOpenXStocks = AppFeatures.canOpenXStocks;
     final canOpenAirdrop = AppFeatures.canOpenAirdrop;
@@ -67,11 +69,11 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
             context.push(SettingsPage.routePath);
           }
         },
-        child: const AppScaffold(
-          title: 'Benny Wallet',
+        child: AppScaffold(
+          title: l10n.appTitle,
           showBackButton: false,
           enableTitleNavigation: false,
-          child: Center(child: CircularProgressIndicator()),
+          child: const Center(child: CircularProgressIndicator()),
         ),
       );
     }
@@ -183,13 +185,13 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
         }
       },
       child: AppScaffold(
-        title: 'Benny',
+        title: l10n.brandShortName,
         showBackButton: false,
         enableTitleNavigation: false,
         actions: [
           if (canOpenAirdrop)
             IconButton(
-              tooltip: 'BYC airdrop',
+              tooltip: l10n.airdropTitle,
               onPressed: () => context.push(AirdropPage.routePath),
               icon: const Icon(Icons.card_giftcard_rounded),
             ),
@@ -324,7 +326,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Child accounts',
+                          context.l10n.portfolioChildAccounts,
                           style: theme.textTheme.titleSmall?.copyWith(
                             color: const Color(0xFF6C63FF),
                             fontWeight: FontWeight.w700,
@@ -445,7 +447,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
               children: [
                 Expanded(
                   child: _ValueBreakdownChip(
-                    label: 'Crypto',
+                    label: context.l10n.portfolioCrypto,
                     value: Formatters.usd(cryptoValueUsd),
                     performance: cryptoPerformance,
                     showPerformance: true,
@@ -454,7 +456,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: _ValueBreakdownChip(
-                    label: 'Stocks',
+                    label: context.l10n.portfolioStocks,
                     value: Formatters.usd(stockValueUsd),
                     performance: stockPerformance,
                     showPerformance: true,
@@ -464,7 +466,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _ValueBreakdownChip(
-                      label: 'DeFi',
+                      label: context.l10n.portfolioDefi,
                       value: Formatters.usd(defiValueUsd),
                       reservePerformanceSpace: true,
                       onTap: () =>
@@ -484,7 +486,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                       foregroundColor: theme.colorScheme.primary,
                       icon: Icons.send_rounded,
                       iconSize: 24,
-                      label: 'Send',
+                      label: context.l10n.portfolioSend,
                       onTap: () => context.push(SendPage.routePath),
                     ),
                   ),
@@ -496,7 +498,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                         foregroundColor: theme.colorScheme.primary,
                         icon: Icons.swap_horiz_rounded,
                         iconSize: 24,
-                        label: 'Swap',
+                        label: context.l10n.portfolioSwap,
                         onTap: () => context.push(SwapPage.routePath),
                       ),
                     ),
@@ -508,7 +510,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                       foregroundColor: theme.colorScheme.primary,
                       icon: Icons.qr_code_2_rounded,
                       iconSize: 24,
-                      label: 'Receive',
+                      label: context.l10n.portfolioReceive,
                       onTap: () => context.push(ReceivePage.routePath),
                     ),
                   ),
@@ -523,7 +525,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                     foregroundColor: theme.colorScheme.primary,
                     icon: Icons.qr_code_2_rounded,
                     iconSize: 24,
-                    label: 'Receive',
+                    label: context.l10n.portfolioReceive,
                     onTap: () => context.push(ReceivePage.routePath),
                   ),
                 ),
@@ -556,13 +558,13 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Couldn\'t refresh assets',
+                  context.l10n.portfolioCouldNotRefreshAssets,
                   style: theme.textTheme.titleLarge,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Pull down to try again.',
+                  context.l10n.portfolioPullToRetry,
                   style: theme.textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -645,18 +647,18 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
       return [
         _DefiStateCard(
           icon: Icons.lock_outline_rounded,
-          title: 'DeFi is parent-only',
-          message: 'Switch back to parent mode to review protocol positions.',
+          title: context.l10n.portfolioDefiParentOnly,
+          message: context.l10n.portfolioDefiParentOnlyMessage,
         ),
       ];
     }
 
     if (hasDefiLoadError) {
-      return const [
+      return [
         _DefiStateCard(
           icon: Icons.cloud_off_rounded,
-          title: 'DeFi data is temporarily unavailable',
-          message: 'Tokens are still up to date.',
+          title: context.l10n.portfolioDefiUnavailable,
+          message: context.l10n.portfolioDefiUnavailableMessage,
         ),
       ];
     }
@@ -665,10 +667,10 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
       return [
         _DefiStateCard(
           icon: Icons.account_tree_rounded,
-          title: 'No DeFi positions yet',
+          title: context.l10n.portfolioNoDefi,
           message: isDefiRefreshing
-              ? 'Refreshing protocol positions...'
-              : 'Your wallet has no active DeFi positions.',
+              ? context.l10n.portfolioRefreshingDefi
+              : context.l10n.portfolioNoActiveDefi,
         ),
       ];
     }
@@ -691,7 +693,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
     BuildContext context,
     Object error,
   ) async {
-    final message = _formatError(error);
+    final message = _formatError(context, error);
     return showDialog<void>(
       context: context,
       builder: (dialogContext) {
@@ -701,12 +703,12 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),
           ),
-          title: const Text('Refresh failed'),
+          title: Text(context.l10n.portfolioRefreshFailed),
           content: Text(message),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Close'),
+              child: Text(context.l10n.commonClose),
             ),
           ],
           backgroundColor: theme.colorScheme.surface,
@@ -715,7 +717,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
     );
   }
 
-  String _formatError(Object error) {
+  String _formatError(BuildContext context, Object error) {
     var raw = error.toString().trim();
     while (raw.startsWith('Exception: ')) {
       raw = raw.substring('Exception: '.length).trim();
@@ -723,16 +725,14 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
 
     final lower = raw.toLowerCase();
     if (lower.contains('429') || lower.contains('too many requests')) {
-      return 'The network is busy right now. Pull down to try again.';
+      return context.l10n.portfolioNetworkBusy;
     }
 
     if (_looksLikeTransportError(lower)) {
-      return 'Couldn\'t reach the server. Check your connection and pull down to try again.';
+      return context.l10n.portfolioServerUnavailable;
     }
 
-    return raw.isEmpty
-        ? 'Couldn\'t refresh assets. Pull down to try again.'
-        : raw;
+    return raw.isEmpty ? context.l10n.portfolioRefreshAssetsFailed : raw;
   }
 
   bool _looksLikeTransportError(String lower) {
@@ -878,7 +878,7 @@ class _MessageButton extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         IconButton(
-          tooltip: 'Messages',
+          tooltip: context.l10n.portfolioMessages,
           onPressed: onPressed,
           icon: const Icon(Icons.notifications_none_rounded),
         ),
@@ -935,14 +935,14 @@ class _PortfolioAssetTabs extends StatelessWidget {
         children: [
           Expanded(
             child: _PortfolioAssetTabButton(
-              label: 'Tokens',
+              label: context.l10n.portfolioTokens,
               selected: selectedTab == _PortfolioAssetTab.tokens,
               onTap: () => onChanged(_PortfolioAssetTab.tokens),
             ),
           ),
           Expanded(
             child: _PortfolioAssetTabButton(
-              label: 'DeFi',
+              label: context.l10n.portfolioDefi,
               selected: selectedTab == _PortfolioAssetTab.defi,
               onTap: () => onChanged(_PortfolioAssetTab.defi),
             ),
@@ -1006,8 +1006,8 @@ class _DefiPositionRow extends StatelessWidget {
         ? null
         : '${Formatters.percent(position.apyPct)} APY';
     final assetText = position.assets.isEmpty
-        ? _defiTypeLabel(position.type)
-        : '${position.assets.join(' / ')} ${_defiTypeLabel(position.type)}';
+        ? _defiTypeLabel(context, position.type)
+        : '${position.assets.join(' / ')} ${_defiTypeLabel(context, position.type)}';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -1119,16 +1119,17 @@ class _DefiPositionRow extends StatelessWidget {
         .toUpperCase();
   }
 
-  static String _defiTypeLabel(DefiPositionType type) {
+  static String _defiTypeLabel(BuildContext context, DefiPositionType type) {
+    final l10n = context.l10n;
     return switch (type) {
-      DefiPositionType.deposit => 'deposit',
-      DefiPositionType.borrow => 'borrow',
-      DefiPositionType.staking => 'staking',
-      DefiPositionType.liquidity => 'liquidity',
-      DefiPositionType.yield => 'yield',
-      DefiPositionType.perps => 'perps',
-      DefiPositionType.rewards => 'rewards',
-      DefiPositionType.unknown => 'position',
+      DefiPositionType.deposit => l10n.defiTypeDeposit,
+      DefiPositionType.borrow => l10n.defiTypeBorrow,
+      DefiPositionType.staking => l10n.defiTypeStaking,
+      DefiPositionType.liquidity => l10n.defiTypeLiquidity,
+      DefiPositionType.yield => l10n.defiTypeYield,
+      DefiPositionType.perps => l10n.defiTypePerps,
+      DefiPositionType.rewards => l10n.defiTypeRewards,
+      DefiPositionType.unknown => l10n.defiTypePosition,
     };
   }
 }
@@ -1184,6 +1185,7 @@ class _ReceiveSolPromptCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     const promptText = Color(0xFF7A5B2D);
 
     return Container(
@@ -1232,7 +1234,7 @@ class _ReceiveSolPromptCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Receive SOL',
+            l10n.portfolioReceiveSol,
             textAlign: TextAlign.center,
             style: theme.textTheme.headlineSmall?.copyWith(
               color: AppColors.primaryStrong.withValues(alpha: 0.72),
@@ -1241,7 +1243,7 @@ class _ReceiveSolPromptCard extends StatelessWidget {
           ),
           const SizedBox(height: 7),
           Text(
-            'Receive SOL to get started with Benny Wallet.',
+            l10n.portfolioReceiveSolSubtitle,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: promptText.withValues(alpha: 0.72),
@@ -1259,7 +1261,7 @@ class _ReceiveSolPromptCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               onPressed: onTap,
-              child: const Text('Receive SOL'),
+              child: Text(l10n.portfolioReceiveSol),
             ),
           ),
         ],

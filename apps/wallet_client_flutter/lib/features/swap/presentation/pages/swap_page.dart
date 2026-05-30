@@ -11,6 +11,8 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/amount_parser.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../auth/data/solana_wallet_service.dart';
 import '../../../auth/presentation/pages/unlock_page.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
@@ -23,6 +25,7 @@ import '../../domain/swap_priority_preset.dart';
 import '../../domain/swap_quote_result.dart';
 import '../../domain/swap_review_data.dart';
 import '../../domain/swap_token_option.dart';
+import '../swap_priority_l10n.dart';
 import 'swap_execute_page.dart';
 
 enum SwapExperience { general, xstocks }
@@ -99,8 +102,6 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   static const _balanceTolerance = 0.000000001;
   static const _minimumSwapFeeReserveSol = 0.0015;
   static const _minimumSwapSetupReserveSol = 0.01;
-  static const _insufficientSwapBalanceMessage =
-      'Not enough SOL.\nNeed 0.01 SOL reserve.';
   static const _suggestedOutputMints = [
     'So11111111111111111111111111111111111111112', // SOL
     _bennyMintAddress, // BYC
@@ -142,8 +143,10 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   int _quoteRequestId = 0;
 
   bool get _isXStocksMode => widget.mode == SwapExperience.xstocks;
-  String get _pageTitle => _isXStocksMode ? 'xStocks' : 'Swap';
-  String get _receiveTitle => _isXStocksMode ? 'Buy' : 'Receive';
+  String _pageTitle(AppLocalizations l10n) =>
+      _isXStocksMode ? 'xStocks' : l10n.swapTitle;
+  String _receiveTitle(AppLocalizations l10n) =>
+      _isXStocksMode ? l10n.commonBuy : l10n.swapReceive;
 
   @override
   void initState() {
@@ -164,6 +167,8 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   @override
   Widget build(BuildContext context) {
     final walletState = ref.watch(walletControllerProvider);
+    final l10n = context.l10n;
+    final pageTitle = _pageTitle(l10n);
 
     if (!walletState.isUnlocked) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -177,14 +182,14 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       });
 
       return AppScaffold(
-        title: _pageTitle,
+        title: pageTitle,
         child: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (walletState.childModeEnabled) {
       return AppScaffold(
-        title: _pageTitle,
+        title: pageTitle,
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -193,14 +198,14 @@ class _SwapPageState extends ConsumerState<SwapPage> {
               children: [
                 const Icon(Icons.lock_rounded, size: 40),
                 const SizedBox(height: 12),
-                const Text(
-                  'Trading is unavailable in child mode.',
+                Text(
+                  l10n.swapTradingUnavailableChildMode,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () => context.go(ReceivePage.routePath),
-                  child: const Text('Open Receive'),
+                  child: Text(l10n.sendOpenReceive),
                 ),
               ],
             ),
@@ -218,20 +223,20 @@ class _SwapPageState extends ConsumerState<SwapPage> {
           _bootstrapOptions(data, ownerAddress);
         }
         if (_loadingOptions && _tokenOptions.isEmpty) {
-          return const AppScaffold(
-            title: 'Swap',
-            child: Center(child: CircularProgressIndicator()),
+          return AppScaffold(
+            title: pageTitle,
+            child: const Center(child: CircularProgressIndicator()),
           );
         }
 
         if (_availableInputOptions.isEmpty) {
           return AppScaffold(
-            title: _pageTitle,
+            title: pageTitle,
             child: Center(
               child: Text(
                 _isXStocksMode
-                    ? 'No SOL, USDC, or USDT available to buy xStocks.'
-                    : 'No assets available to swap.',
+                    ? l10n.swapNoBaseAssetsForXStocks
+                    : l10n.swapNoAssetsAvailable,
               ),
             ),
           );
@@ -241,7 +246,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         final minReceivePreview = _minReceiveAmountUi;
 
         return AppScaffold(
-          title: _pageTitle,
+          title: pageTitle,
           actions: [
             Container(
               width: 44,
@@ -284,7 +289,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                               tokenSelectorKey: const ValueKey(
                                 'androidQaSwapPayToken',
                               ),
-                              title: 'Pay',
+                              title: l10n.swapPay,
                               amountField: _AmountDisplayButton(
                                 key: const ValueKey('androidQaSwapPayAmount'),
                                 value: _displayAmountText,
@@ -293,7 +298,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                               token: _inputToken,
                               onChooseToken: () => _pickInputTokenNoSearch(
                                 context,
-                                title: 'Pay with',
+                                title: l10n.swapPayWith,
                                 options: _availableInputOptions,
                                 current: _inputToken,
                                 onSelected: (token) {
@@ -330,7 +335,13 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          'Available ${Formatters.compactNumber(_inputToken?.availableBalance ?? 0)} ${_inputToken?.token.symbol ?? ''}',
+                                          l10n.swapAvailable(
+                                            Formatters.compactNumber(
+                                              _inputToken?.availableBalance ??
+                                                  0,
+                                            ),
+                                            _inputToken?.token.symbol ?? '',
+                                          ),
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodySmall
@@ -354,7 +365,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                                         onTap: () => _setInputShare(0.50),
                                       ),
                                       _QuickAmountChip(
-                                        label: 'Max',
+                                        label: l10n.commonMax,
                                         onTap: () => _setInputShare(1),
                                       ),
                                     ],
@@ -418,7 +429,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                               tokenSelectorKey: const ValueKey(
                                 'androidQaSwapReceiveToken',
                               ),
-                              title: _receiveTitle,
+                              title: _receiveTitle(l10n),
                               amountField: SizedBox(
                                 height: 54,
                                 child: Align(
@@ -452,7 +463,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                               onChooseToken: () => _isXStocksMode
                                   ? _pickInputTokenNoSearch(
                                       context,
-                                      title: 'Buy xStock',
+                                      title: l10n.swapBuyXStock,
                                       options: _availableOutputOptionsDefault,
                                       current: _outputToken,
                                       onSelected: (token) {
@@ -465,7 +476,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                                     )
                                   : _pickToken(
                                       context,
-                                      title: 'Receive',
+                                      title: l10n.swapReceive,
                                       options: _availableOutputOptionsDefault,
                                       current: _outputToken,
                                       portfolioAssets: data.assets,
@@ -483,11 +494,13 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                                   Expanded(
                                     child: Text(
                                       _loadingQuote
-                                          ? 'Refreshing quote...'
+                                          ? l10n.swapRefreshingQuote
                                           : _quote?.routeLabels.isNotEmpty ==
                                                 true
-                                          ? 'Route: ${_quote!.routeLabels.join(' · ')}'
-                                          : 'Best route',
+                                          ? l10n.swapRouteLabel(
+                                              _quote!.routeLabels.join(' · '),
+                                            )
+                                          : l10n.swapBestRoute,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall
@@ -498,7 +511,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                                   ),
                                   const SizedBox(width: 10),
                                   Text(
-                                    _receiveMetaText(minReceivePreview),
+                                    _receiveMetaText(minReceivePreview, l10n),
                                     style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(
                                           fontSize: 10.5,
@@ -514,10 +527,10 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                     ),
                     const SizedBox(height: 14),
                     _SwapSettingsPanel(
-                      rateText: _rateSummary,
-                      slippageText: _slippageSummary,
-                      networkFeeText: _networkFeeSummary,
-                      priorityText: _priorityPreset.label,
+                      rateText: _rateSummary(l10n),
+                      slippageText: _slippageSummary(l10n),
+                      networkFeeText: _networkFeeSummary(l10n),
+                      priorityText: _priorityPreset.localizedLabel(l10n),
 
                       onTapSlippage: _editSlippage,
                       onTapPriority: _editPriority,
@@ -560,8 +573,10 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                   ),
                   child: Text(
                     _buildingSwap
-                        ? 'Loading...'
-                        : (_isXStocksMode ? 'Buy xStock' : 'Swap'),
+                        ? l10n.commonLoading
+                        : (_isXStocksMode
+                              ? l10n.swapBuyXStock
+                              : l10n.swapButton),
                   ),
                 ),
               ),
@@ -570,12 +585,12 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         );
       },
       error: (error, _) => AppScaffold(
-        title: _pageTitle,
-        child: Center(child: Text('Failed to load wallet assets: $error')),
+        title: pageTitle,
+        child: Center(child: Text(l10n.swapFailedLoadWalletAssets('$error'))),
       ),
       loading: () => AppScaffold(
-        title: _pageTitle,
-        child: Center(child: CircularProgressIndicator()),
+        title: pageTitle,
+        child: const Center(child: CircularProgressIndicator()),
       ),
     );
   }
@@ -1005,7 +1020,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         return;
       }
       setState(() {
-        _quoteError = _friendlyQuoteError(error);
+        _quoteError = _friendlyQuoteError(error, context.l10n);
       });
     }
   }
@@ -1018,7 +1033,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     return text.isEmpty ? '0' : text;
   }
 
-  String get _rateSummary {
+  String _rateSummary(AppLocalizations l10n) {
     final inputToken = _inputToken;
     final outputToken = _outputToken;
     final quote = _quote;
@@ -1038,7 +1053,11 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     }
     final rate = outputAmount / inputAmount;
     final compactRate = _formatCompactScientific(rate);
-    return '1 ${inputToken.token.symbol} ≈ $compactRate ${outputToken.token.symbol}';
+    return l10n.swapRateSummary(
+      inputToken.token.symbol,
+      outputToken.token.symbol,
+      compactRate,
+    );
   }
 
   /// Format values using a compact readable representation.
@@ -1100,26 +1119,26 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     }).join();
   }
 
-  String get _slippageSummary {
+  String _slippageSummary(AppLocalizations l10n) {
     final quoteSlippageBps = _quote?.slippageBps;
     if (quoteSlippageBps != null && quoteSlippageBps > _slippageBps) {
-      return '${_slippageLabel(quoteSlippageBps)} min';
+      return l10n.swapSlippageMin(_slippageLabel(quoteSlippageBps));
     }
 
     final value = !_usingCustomSlippage
         ? _slippageLabel(_presetSlippageBps[_slippagePresetIndex])
         : '${AmountParser.parse(_customSlippageController.text)?.toStringAsFixed(1) ?? '1.0'}%';
-    return _usingCustomSlippage ? 'Custom · $value' : value;
+    return _usingCustomSlippage ? l10n.swapCustomWithValue(value) : value;
   }
 
-  String get _networkFeeSummary {
+  String _networkFeeSummary(AppLocalizations l10n) {
     if (!_canQuote || _quote == null) {
       return '--';
     }
 
     final priorityLamports = _estimatedPriorityLamports;
     if (priorityLamports == null) {
-      return 'Auto';
+      return l10n.commonAuto;
     }
 
     final solAmount = (5000 + priorityLamports) / 1000000000;
@@ -1155,7 +1174,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     return Formatters.usdPrice(amount * price);
   }
 
-  String _receiveMetaText(double? minReceivePreview) {
+  String _receiveMetaText(double? minReceivePreview, AppLocalizations l10n) {
     final outputAmount = _outputAmountUi;
     final outputPrice = _tokenUnitPrice(_outputToken);
     final inputAmount = AmountParser.parse(_amountController.text);
@@ -1169,7 +1188,9 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         : Formatters.usdPrice(outputAmount * outputPrice);
     final minText = minReceivePreview == null
         ? '--'
-        : 'Min ${Formatters.amount(minReceivePreview, maxDecimals: 6)}';
+        : l10n.swapMinReceive(
+            Formatters.amount(minReceivePreview, maxDecimals: 6),
+          );
     return '$valueText  ·  $minText';
   }
 
@@ -1208,7 +1229,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         if (showLoading) {
           setState(() {
             _loadingQuote = false;
-            _quoteError = 'This amount is too small for a valid route.';
+            _quoteError = context.l10n.swapAmountTooSmall;
           });
         }
         return;
@@ -1236,7 +1257,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       setState(() {
         _loadingQuote = false;
         if (showLoading || _quote == null) {
-          _quoteError = _friendlyQuoteError(error);
+          _quoteError = _friendlyQuoteError(error, context.l10n);
         }
       });
     } finally {
@@ -1536,7 +1557,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Slippage',
+                      context.l10n.swapSlippage,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 14),
@@ -1560,7 +1581,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                             }),
                           ),
                         ChoiceChip(
-                          label: const Text('Custom'),
+                          label: Text(context.l10n.commonCustom),
                           selected: selectedCustom,
                           onSelected: (_) =>
                               setModalState(() => selectedCustom = true),
@@ -1574,8 +1595,8 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
-                        decoration: const InputDecoration(
-                          labelText: 'Custom slippage %',
+                        decoration: InputDecoration(
+                          labelText: context.l10n.swapCustomSlippageLabel,
                           hintText: '1.0',
                         ),
                       ),
@@ -1599,7 +1620,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                           Navigator.of(sheetContext).pop();
                           _scheduleQuote();
                         },
-                        child: const Text('Done'),
+                        child: Text(context.l10n.commonDone),
                       ),
                     ),
                   ],
@@ -1629,7 +1650,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Priority fee',
+                  context.l10n.swapPriorityFee,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 14),
@@ -1639,7 +1660,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                   children: [
                     for (final preset in SwapPriorityPreset.values)
                       ChoiceChip(
-                        label: Text(preset.label),
+                        label: Text(preset.localizedLabel(context.l10n)),
                         selected: selectedPreset == preset,
                         onSelected: (_) {
                           selectedPreset = preset;
@@ -1729,23 +1750,23 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     }
 
     if (amount <= 0) {
-      await _showDialog(message: 'Enter a valid amount.');
+      await _showDialog(message: context.l10n.sendInvalidAmount);
       return;
     }
 
     if (amount > inputToken.availableBalance) {
-      await _showDialog(message: 'Insufficient balance.');
+      await _showDialog(message: context.l10n.sendInsufficientBalance);
       return;
     }
 
     final rawAmount = _rawAmountForCurrentInput(inputToken);
     if (rawAmount == null || rawAmount == '0') {
-      await _showDialog(message: 'This amount is too small for a valid route.');
+      await _showDialog(message: context.l10n.swapAmountTooSmall);
       return;
     }
 
     if (quote == null) {
-      await _showDialog(message: 'Wait for a valid quote before continuing.');
+      await _showDialog(message: context.l10n.swapWaitValidQuote);
       return;
     }
 
@@ -1800,7 +1821,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       if (!mounted) {
         return;
       }
-      await _showDialog(message: _friendlyQuoteError(error));
+      await _showDialog(message: _friendlyQuoteError(error, context.l10n));
     } finally {
       if (mounted) {
         setState(() => _buildingSwap = false);
@@ -1831,8 +1852,8 @@ class _SwapPageState extends ConsumerState<SwapPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text(
-                'Close',
+              child: Text(
+                context.l10n.commonClose,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
               ),
             ),
@@ -1863,10 +1884,10 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     if (requestedRawAmount != null &&
         inputRawBalance != null &&
         requestedRawAmount > inputRawBalance) {
-      return 'Insufficient balance.';
+      return context.l10n.sendInsufficientBalance;
     }
     if (amount > inputBalance + _balanceTolerance) {
-      return 'Insufficient balance.';
+      return context.l10n.sendInsufficientBalance;
     }
 
     final solBalance =
@@ -1963,10 +1984,10 @@ class _SwapPageState extends ConsumerState<SwapPage> {
 
   String _insufficientSolForSwapMessage({required double requiredSol}) {
     final reserve = Formatters.amount(requiredSol, maxDecimals: 4);
-    return 'Not enough SOL.\nNeed $reserve SOL reserve.';
+    return context.l10n.swapNotEnoughSolReserve(reserve);
   }
 
-  String _friendlyQuoteError(Object error) {
+  String _friendlyQuoteError(Object error, AppLocalizations l10n) {
     var message = error.toString();
     if (message.startsWith('Exception: ')) {
       message = message.substring('Exception: '.length);
@@ -1975,14 +1996,14 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     if (lower == 'not_tradable' ||
         lower.contains('not tradable') ||
         lower.contains('token_not_tradable')) {
-      return "This swap route isn't available right now. Try swapping with SOL or choose another token pair.";
+      return l10n.swapRouteUnavailable;
     }
     if (lower.contains('no route') ||
         lower.contains('could not find any route')) {
-      return "This swap route isn't available right now. Try swapping with SOL or choose another token pair.";
+      return l10n.swapRouteUnavailable;
     }
     if (lower.contains('insufficient') && lower.contains('liquidity')) {
-      return 'This amount is too small for a valid route.';
+      return l10n.swapAmountTooSmall;
     }
     if (lower.contains('0x1771') ||
         lower.contains('0x1772') ||
@@ -1994,21 +2015,21 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         lower.contains('toolittlesolreceived') ||
         lower.contains('slippage tolerance exceeded') ||
         lower.contains('slippage exceeded')) {
-      return 'Price moved before the swap was sent. Increase slippage and try again.';
+      return l10n.swapPriceMoved;
     }
     if (_isJupiterInsufficientFundsError(lower)) {
-      return 'Not enough token balance. Tap Max again and retry.';
+      return l10n.swapNotEnoughTokenBalance;
     }
     if (_isInsufficientSwapBalanceError(lower)) {
-      return _insufficientSwapBalanceMessage;
+      return l10n.swapNotEnoughSolReserve('0.01');
     }
     if (lower.contains('could not find any route')) {
-      return "This swap route isn't available right now. Try swapping with SOL or choose another token pair.";
+      return l10n.swapRouteUnavailable;
     }
     if (lower.contains('429') ||
         lower.contains('too many requests') ||
         lower.contains('rate limit')) {
-      return 'Quotes are busy right now. Try again in a moment.';
+      return l10n.swapQuotesBusy;
     }
     return message;
   }
@@ -2120,7 +2141,7 @@ class _TokenSelectorPill extends StatelessWidget {
             _SwapTokenAvatar(option: token, size: 34),
             const SizedBox(width: 10),
             Text(
-              token?.token.symbol ?? 'Choose',
+              token?.token.symbol ?? context.l10n.swapChooseToken,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(width: 4),
@@ -2294,7 +2315,7 @@ class _ReceivePreviewCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  token?.token.name ?? 'Receive',
+                  token?.token.name ?? context.l10n.swapReceive,
                   style: Theme.of(
                     context,
                   ).textTheme.titleMedium?.copyWith(fontSize: 13),
@@ -2303,7 +2324,7 @@ class _ReceivePreviewCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Approx. you receive',
+                  context.l10n.swapApproxYouReceive,
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(fontSize: 10.5),
@@ -2388,7 +2409,7 @@ class _AmountPad extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18),
               ),
             ),
-            child: const Text('Done'),
+            child: Text(context.l10n.commonDone),
           ),
         ),
       ],
@@ -2454,20 +2475,23 @@ class _SwapSettingsPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rows = [
-      _CompactSettingRowData(label: 'Rate', value: rateText),
+      _CompactSettingRowData(label: context.l10n.swapRate, value: rateText),
       _CompactSettingRowData(
-        label: 'Slippage',
+        label: context.l10n.swapSlippage,
         value: slippageText,
         onTap: onTapSlippage,
       ),
-      _CompactSettingRowData(label: 'Network fee', value: networkFeeText),
-      const _CompactSettingRowData(
-        label: 'Platform fee',
-        value: '',
-        valueWidget: _PlatformFeeValue(),
+      _CompactSettingRowData(
+        label: context.l10n.commonNetworkFee,
+        value: networkFeeText,
       ),
       _CompactSettingRowData(
-        label: 'Priority fee',
+        label: context.l10n.swapPlatformFee,
+        value: '',
+        valueWidget: const _PlatformFeeValue(),
+      ),
+      _CompactSettingRowData(
+        label: context.l10n.swapPriorityFee,
         value: priorityText,
         onTap: onTapPriority,
       ),
@@ -2734,7 +2758,7 @@ class _TokenPickerSheetState extends State<_TokenPickerSheet> {
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: 'Search token name or symbol',
+              hintText: context.l10n.swapSearchTokenHint,
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: query.isNotEmpty
                   ? IconButton(
@@ -2775,8 +2799,8 @@ class _TokenPickerSheetState extends State<_TokenPickerSheet> {
                 ? Center(
                     child: Text(
                       query.isEmpty
-                          ? 'No tokens available'
-                          : 'No results found for "$query"',
+                          ? context.l10n.swapNoTokensAvailable
+                          : context.l10n.swapNoResultsFor(query),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -2828,7 +2852,7 @@ class _SectionedTokenOptionList extends StatelessWidget {
 
     if (owned.isNotEmpty) {
       children
-        ..add(const _TokenSectionHeader(title: 'Your assets'))
+        ..add(_TokenSectionHeader(title: context.l10n.swapYourAssets))
         ..addAll(_tilesFor(context, owned));
     }
     if (suggested.isNotEmpty) {
@@ -2836,7 +2860,7 @@ class _SectionedTokenOptionList extends StatelessWidget {
         children.add(const SizedBox(height: 10));
       }
       children
-        ..add(const _TokenSectionHeader(title: 'Suggested tokens'))
+        ..add(_TokenSectionHeader(title: context.l10n.swapSuggestedTokens))
         ..addAll(_tilesFor(context, suggested));
     }
 
@@ -2945,7 +2969,7 @@ class _SimpleTokenListSheetState extends State<_SimpleTokenListSheet> {
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: 'Search token name or symbol',
+              hintText: context.l10n.swapSearchTokenHint,
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: rawQuery.isNotEmpty
                   ? IconButton(
@@ -2968,8 +2992,8 @@ class _SimpleTokenListSheetState extends State<_SimpleTokenListSheet> {
                 ? Center(
                     child: Text(
                       rawQuery.isEmpty
-                          ? 'No tokens available'
-                          : 'No results found for "$rawQuery"',
+                          ? context.l10n.swapNoTokensAvailable
+                          : context.l10n.swapNoResultsFor(rawQuery),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -3054,7 +3078,9 @@ class _TokenOptionTile extends StatelessWidget {
                   Text(item.token.symbol, style: theme.textTheme.titleMedium),
                   if (item.isOwned) ...[
                     Text(
-                      '${Formatters.compactNumber(item.availableBalance)} available',
+                      context.l10n.swapAvailableBalance(
+                        Formatters.compactNumber(item.availableBalance),
+                      ),
                       style: theme.textTheme.bodySmall,
                     ),
                     if (item.totalValueUsd > 0)

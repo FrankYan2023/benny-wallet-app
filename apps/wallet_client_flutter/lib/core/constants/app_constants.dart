@@ -1,5 +1,4 @@
 abstract final class AppConstants {
-  static const _defaultApiBaseUrl = 'https://api.example.invalid';
   static const productionApiBaseUrl = 'https://api.gobennyapp.com';
   static const productionApiFallbackBaseUrl =
       'https://benny-wallet-api-production.up.railway.app';
@@ -11,7 +10,7 @@ abstract final class AppConstants {
   static const sessionTimeoutSec = 60;
   static const apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: _defaultApiBaseUrl,
+    defaultValue: productionApiBaseUrl,
   );
   static const apiFallbackBaseUrls = String.fromEnvironment(
     'API_FALLBACK_BASE_URLS',
@@ -41,6 +40,7 @@ abstract final class AppConstants {
   static const installAnalyticsIdKey = 'install_analytics_id_v1';
   static const installAnalyticsSentKey = 'install_analytics_sent_v1';
   static const autoLockOptionKey = 'auto_lock_option';
+  static const appLanguageOptionKey = 'app_language_option';
   static const notificationsEnabledKey = 'notifications_enabled';
   static const lastPushFcmTokenKey = 'last_push_fcm_token_v1';
   static const lastPushWalletPublicKeyKey = 'last_push_wallet_public_key_v1';

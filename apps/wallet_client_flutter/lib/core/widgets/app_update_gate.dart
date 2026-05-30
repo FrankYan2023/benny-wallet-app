@@ -9,6 +9,7 @@ import '../../app/di/providers.dart';
 import '../../app/router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../features/update/data/app_update_repository.dart';
+import '../../l10n/l10n.dart';
 import 'error_alert_dialog.dart';
 
 enum AppUpdateDialogAction { later, updated }
@@ -145,6 +146,13 @@ Future<AppUpdateDialogAction?> showAppUpdateDialog(
   BuildContext context,
   AppUpdateCheckResult result,
 ) {
+  final title = result.title == defaultAppUpdateTitle
+      ? context.l10n.updateDefaultTitle
+      : result.title;
+  final message = result.message == defaultAppUpdateMessage
+      ? context.l10n.updateDefaultMessage
+      : result.message;
+
   return showDialog<AppUpdateDialogAction>(
     context: context,
     barrierDismissible: !result.required,
@@ -155,15 +163,15 @@ Future<AppUpdateDialogAction?> showAppUpdateDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
-          title: Text(result.title),
-          content: Text(result.message),
+          title: Text(title),
+          content: Text(message),
           actions: [
             if (!result.required)
               TextButton(
                 onPressed: () => Navigator.of(
                   dialogContext,
                 ).pop(AppUpdateDialogAction.later),
-                child: const Text('Later'),
+                child: Text(context.l10n.commonLater),
               ),
             FilledButton(
               onPressed: () async {
@@ -183,13 +191,12 @@ Future<AppUpdateDialogAction?> showAppUpdateDialog(
 
                 await showErrorAlertDialog(
                   dialogContext,
-                  title: 'Update Failed',
-                  message:
-                      'Unable to open the Benny Wallet update link right now.',
+                  title: context.l10n.updateFailedTitle,
+                  message: context.l10n.updateUnableToOpen,
                 );
               },
               style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
-              child: const Text('Update'),
+              child: Text(context.l10n.commonUpdate),
             ),
           ],
         ),

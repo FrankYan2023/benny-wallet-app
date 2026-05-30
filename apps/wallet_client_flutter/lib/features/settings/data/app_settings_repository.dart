@@ -10,6 +10,9 @@ class AppSettingsRepository {
       autoLockOption: AutoLockOption.fromStorageValue(
         prefs.getString(AppConstants.autoLockOptionKey),
       ),
+      languageOption: AppLanguageOption.fromStorageValue(
+        prefs.getString(AppConstants.appLanguageOptionKey),
+      ),
       notificationsEnabled:
           prefs.getBool(AppConstants.notificationsEnabledKey) ?? true,
     );
@@ -18,6 +21,11 @@ class AppSettingsRepository {
   Future<void> setAutoLockOption(AutoLockOption option) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(AppConstants.autoLockOptionKey, option.name);
+  }
+
+  Future<void> setLanguageOption(AppLanguageOption option) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(AppConstants.appLanguageOptionKey, option.name);
   }
 
   Future<void> setNotificationsEnabled(bool enabled) async {
@@ -30,7 +38,9 @@ class AppSettingsRepository {
     required String mintAddress,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_incomingNotificationKey(walletPublicKey, mintAddress));
+    return prefs.getString(
+      _incomingNotificationKey(walletPublicKey, mintAddress),
+    );
   }
 
   Future<void> setLastIncomingNotificationSignature({

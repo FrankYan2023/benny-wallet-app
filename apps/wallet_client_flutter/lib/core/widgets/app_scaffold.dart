@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/app_colors.dart';
+import '../../l10n/l10n.dart';
 import 'brand_logo.dart';
 
 class AppScaffold extends StatelessWidget {
@@ -26,7 +27,8 @@ class AppScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final titleText = title == 'Benny Wallet' ? 'Benny' : title;
+    final l10n = context.l10n;
+    final titleText = title == l10n.appTitle ? l10n.brandShortName : title;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -55,14 +57,16 @@ class AppScaffold extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(22),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: theme.shadowColor.withValues(alpha: 0.05),
+                                      color: theme.shadowColor.withValues(
+                                        alpha: 0.05,
+                                      ),
                                       blurRadius: 18,
                                       offset: const Offset(0, 8),
                                     ),
                                   ],
                                 ),
                                 child: IconButton(
-                                  tooltip: 'Back',
+                                  tooltip: l10n.commonBack,
                                   onPressed: () {
                                     if (context.canPop()) {
                                       context.pop();
@@ -85,20 +89,22 @@ class AppScaffold extends StatelessWidget {
                                         titleText,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: theme.textTheme.titleLarge?.copyWith(
-                                          fontWeight: FontWeight.w800,
-                                          color: AppColors.primary,
-                                        ),
+                                        style: theme.textTheme.titleLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w800,
+                                              color: AppColors.primary,
+                                            ),
                                       ),
                                     )
                                   : Text(
                                       titleText,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.titleLarge?.copyWith(
-                                        fontWeight: FontWeight.w800,
-                                        color: AppColors.primary,
-                                      ),
+                                      style: theme.textTheme.titleLarge
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                            color: AppColors.primary,
+                                          ),
                                     ),
                             ),
                             const SizedBox(width: 12),
@@ -107,7 +113,11 @@ class AppScaffold extends StatelessWidget {
                                 : Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      for (var index = 0; index < actions!.length; index++) ...[
+                                      for (
+                                        var index = 0;
+                                        index < actions!.length;
+                                        index++
+                                      ) ...[
                                         if (index > 0) const SizedBox(width: 8),
                                         actions![index],
                                       ],

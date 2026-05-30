@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
 import '../../domain/send_draft_data.dart';
 import 'send_execute_page.dart';
@@ -27,9 +28,10 @@ class _SendConfirmPageState extends ConsumerState<SendConfirmPage> {
   @override
   Widget build(BuildContext context) {
     final symbol = Formatters.tokenSymbol(widget.draft.token.symbol);
+    final l10n = context.l10n;
 
     return AppScaffold(
-      title: 'Confirm send',
+      title: l10n.sendConfirmTitle,
       child: Column(
         children: [
           Expanded(
@@ -63,13 +65,13 @@ class _SendConfirmPageState extends ConsumerState<SendConfirmPage> {
                 _InfoPanel(
                   rows: [
                     _InfoRowData(
-                      'To',
+                      l10n.commonTo,
                       _compactAddress(widget.draft.destinationAddress),
                       isAddress: true,
                     ),
-                    const _InfoRowData('Network', 'Solana'),
+                    _InfoRowData(l10n.commonNetwork, l10n.commonSolana),
                     _InfoRowData(
-                      'Network fee',
+                      l10n.commonNetworkFee,
                       Formatters.usd(
                         widget.draft.estimatedNetworkFeeSol * _solUsd(ref),
                       ),
@@ -81,8 +83,10 @@ class _SendConfirmPageState extends ConsumerState<SendConfirmPage> {
           ),
           const SizedBox(height: 12),
           _BottomActionRow(
-            leadingLabel: 'Cancel',
-            trailingLabel: _transitioning ? 'Loading...' : 'Send',
+            leadingLabel: l10n.commonCancel,
+            trailingLabel: _transitioning
+                ? l10n.commonLoading
+                : l10n.commonSend,
             onLeading: _transitioning ? null : () => context.pop(),
             onTrailing: _transitioning
                 ? null

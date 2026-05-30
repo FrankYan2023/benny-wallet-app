@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/utils/clipboard_utils.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../auth/domain/wallet_controller_state.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../send/presentation/pages/send_page.dart';
@@ -34,9 +35,9 @@ class ChildWalletMonitorPage extends ConsumerWidget {
     }
 
     if (foundChild == null) {
-      return const AppScaffold(
-        title: 'Child Wallet',
-        child: Center(child: Text('Child wallet not found')),
+      return AppScaffold(
+        title: context.l10n.childWalletTitle,
+        child: Center(child: Text(context.l10n.childWalletNotFound)),
       );
     }
 
@@ -93,7 +94,7 @@ class ChildWalletMonitorPage extends ConsumerWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Child Wallet Address',
+                          context.l10n.childWalletAddress,
                           style: theme.textTheme.titleSmall?.copyWith(
                             color: theme.colorScheme.onPrimary,
                           ),
@@ -126,9 +127,9 @@ class ChildWalletMonitorPage extends ConsumerWidget {
                                 );
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text(
-                                        'Address copied to clipboard',
+                                        context.l10n.childAddressCopied,
                                       ),
                                     ),
                                   );
@@ -154,7 +155,7 @@ class ChildWalletMonitorPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Total Balance',
+                        context.l10n.childTotalBalance,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: const Color(0xFF8A7D6A),
                         ),
@@ -170,7 +171,7 @@ class ChildWalletMonitorPage extends ConsumerWidget {
                       SendPage.pathFor(recipientAddress: childWallet.address),
                     ),
                     icon: const Icon(Icons.send_rounded),
-                    label: const Text('Send to Child Wallet'),
+                    label: Text(context.l10n.childSendToChildWallet),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -179,7 +180,7 @@ class ChildWalletMonitorPage extends ConsumerWidget {
                     padding: const EdgeInsets.all(16),
                     child: Center(
                       child: Text(
-                        'No assets',
+                        context.l10n.childNoAssets,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: const Color(0xFF8A7D6A),
                         ),
@@ -193,7 +194,7 @@ class ChildWalletMonitorPage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Assets',
+                          context.l10n.childAssets,
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -213,13 +214,13 @@ class ChildWalletMonitorPage extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Error loading child wallet: $error'),
+              Text(context.l10n.childWalletLoadFailed('$error')),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () {
                   ref.invalidate(portfolioProvider(childWallet.address));
                 },
-                child: const Text('Retry'),
+                child: Text(context.l10n.commonRetry),
               ),
             ],
           ),

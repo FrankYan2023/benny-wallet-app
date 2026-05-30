@@ -1,0 +1,4 @@
+"CFBundleDisplayName" = "Benny Wallet Lite";
+"CFBundleName" = "Benny Wallet Lite";
+"NSFaceIDUsageDescription" = "使用 Face ID 更快速地解鎖 Benny Wallet。";
+"NSCameraUsageDescription" = "Benny Wallet 需要相機權限以掃描 Solana QR 碼。";

@@ -116,17 +116,14 @@ android {
         create("liteStore") {
             dimension = "distribution"
             applicationId = "com.benny.wallet.lite"
-            resValue("string", "app_name", "Benny Wallet Lite")
         }
         create("liteSeeker") {
             dimension = "distribution"
             applicationId = liteSeekerApplicationId
-            resValue("string", "app_name", "Benny Wallet Lite Seeker")
         }
         create("full") {
             dimension = "distribution"
             applicationId = "com.benny.wallet"
-            resValue("string", "app_name", "Benny Wallet Full")
         }
     }
 

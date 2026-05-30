@@ -7,6 +7,7 @@ import '../../../../core/security/secure_screen.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/error_alert_dialog.dart';
 import '../../../../core/widgets/pin_keypad.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../onboarding/presentation/pages/welcome_page.dart';
 import '../../../portfolio/presentation/pages/portfolio_page.dart';
 import '../providers/wallet_controller.dart';
@@ -44,7 +45,9 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
     try {
       final approved = await ref
           .read(biometricAuthServiceProvider)
-          .authenticateForUnlock();
+          .authenticateForUnlock(
+            localizedReason: context.l10n.biometricUnlockReason,
+          );
 
       if (!mounted) return;
 
@@ -52,7 +55,7 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
         debugPrint('[SECURITY] User cancelled biometric');
         setState(() {
           _biometricAttempting = false;
-          _biometricError = 'Biometric cancelled';
+          _biometricError = context.l10n.unlockBiometricCancelled;
         });
         return;
       }
@@ -80,8 +83,8 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
         setState(() {
           _biometricError =
               walletState.isExternalWallet && walletState.biometricEnabled
-              ? 'Biometric unlock failed. Try again.'
-              : 'Session expired, use PIN';
+              ? context.l10n.unlockBiometricFailed
+              : context.l10n.unlockSessionExpired;
         });
       }
     } catch (e) {
@@ -89,7 +92,7 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
       if (mounted) {
         setState(() {
           _biometricAttempting = false;
-          _biometricError = 'Biometric unavailable';
+          _biometricError = context.l10n.unlockBiometricUnavailable;
         });
       }
     }
@@ -125,8 +128,8 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
     setState(() => _pin = '');
     await showErrorAlertDialog(
       context,
-      title: 'Unlock Failed',
-      message: state.errorMessage ?? 'Incorrect PIN.',
+      title: context.l10n.unlockFailedTitle,
+      message: state.errorMessage ?? context.l10n.unlockIncorrectPin,
     );
   }
 
@@ -150,6 +153,7 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
   @override
   Widget build(BuildContext context) {
     final walletState = ref.watch(walletControllerProvider);
+    final l10n = context.l10n;
 
     if (walletState.biometricEnabled &&
         !walletState.loggedOut &&
@@ -195,7 +199,7 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
-                    tooltip: 'Back',
+                    tooltip: l10n.commonBack,
                     onPressed: _submitting || _biometricAttempting
                         ? null
                         : () {
@@ -215,12 +219,12 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
                 ),
                 const Spacer(),
                 if (_biometricAttempting)
-                  const Column(
+                  Column(
                     children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 16),
                       Text(
-                        'Use fingerprint',
+                        l10n.unlockUseFingerprint,
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 14),
                       ),
@@ -230,7 +234,7 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
                   Column(
                     children: [
                       Text(
-                        'Enter PIN',
+                        l10n.unlockEnterPin,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w800,
@@ -255,7 +259,7 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
                               TextButton.icon(
                                 onPressed: _retryBiometric,
                                 icon: const Icon(Icons.refresh),
-                                label: const Text('Retry'),
+                                label: Text(l10n.commonRetry),
                               ),
                             ],
                           ),

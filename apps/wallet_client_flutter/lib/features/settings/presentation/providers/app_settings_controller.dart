@@ -4,7 +4,8 @@ import '../../../../app/di/providers.dart';
 import '../../domain/app_settings.dart';
 
 class AppSettingsController extends StateNotifier<AppSettings> {
-  AppSettingsController(this.ref) : super(const AppSettings()) {
+  AppSettingsController(this.ref)
+    : super(ref.read(initialAppSettingsProvider)) {
     _bootstrap();
   }
 
@@ -19,11 +20,22 @@ class AppSettingsController extends StateNotifier<AppSettings> {
     state = state.copyWith(autoLockOption: option);
   }
 
+  Future<void> setLanguageOption(AppLanguageOption option) async {
+    await ref.read(appSettingsRepositoryProvider).setLanguageOption(option);
+    state = state.copyWith(languageOption: option);
+  }
+
   Future<void> setNotificationsEnabled(bool enabled) async {
-    await ref.read(appSettingsRepositoryProvider).setNotificationsEnabled(enabled);
+    await ref
+        .read(appSettingsRepositoryProvider)
+        .setNotificationsEnabled(enabled);
     state = state.copyWith(notificationsEnabled: enabled);
   }
 }
+
+final initialAppSettingsProvider = Provider<AppSettings>((ref) {
+  return const AppSettings();
+});
 
 final appSettingsControllerProvider =
     StateNotifierProvider<AppSettingsController, AppSettings>((ref) {

@@ -11,6 +11,7 @@ import '../../../../core/services/mobile_wallet_adapter_service.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/responsive_action_group.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../auth/presentation/pages/pin_setup_page.dart';
 import 'import_wallet_loading_page.dart';
 
@@ -246,13 +247,14 @@ class _ImportMnemonicPageState extends ConsumerState<ImportMnemonicPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     final seekerVaultAvailable =
         ref.watch(seekerVaultAvailableProvider).valueOrNull ?? false;
 
     return SecureScreen(
       child: AppScaffold(
-        title: 'Import Wallet',
+        title: l10n.importWalletTitle,
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: _focusNode.unfocus,
@@ -287,14 +289,14 @@ class _ImportMnemonicPageState extends ConsumerState<ImportMnemonicPage> {
                           ),
                           const SizedBox(height: 14),
                           Text(
-                            'Import recovery phrase',
+                            l10n.importRecoveryPhraseTitle,
                             style: theme.textTheme.displaySmall?.copyWith(
                               color: theme.colorScheme.onSecondaryContainer,
                             ),
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Use 12 or 24 English words.',
+                            l10n.importRecoveryPhraseSubtitle,
                             style: theme.textTheme.bodyLarge?.copyWith(
                               color: theme.colorScheme.onSecondaryContainer
                                   .withValues(alpha: 0.78),
@@ -309,7 +311,7 @@ class _ImportMnemonicPageState extends ConsumerState<ImportMnemonicPage> {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: Text(
-                          'Web is for testing only.',
+                          l10n.webTestingOnly,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ),
@@ -332,12 +334,12 @@ class _ImportMnemonicPageState extends ConsumerState<ImportMnemonicPage> {
                             textInputAction: TextInputAction.done,
                             keyboardType: TextInputType.multiline,
                             decoration: InputDecoration(
-                              hintText: 'Paste your recovery phrase here',
+                              hintText: l10n.importPasteHint,
                               errorText:
                                   _controller.text.isEmpty ||
                                       _isInputLikelyValid
                                   ? null
-                                  : 'Invalid recovery phrase',
+                                  : l10n.importInvalidPhrase,
                             ),
                             onChanged: _onMnemonicChanged,
                             onSubmitted: (_) => _focusNode.unfocus(),
@@ -345,8 +347,8 @@ class _ImportMnemonicPageState extends ConsumerState<ImportMnemonicPage> {
                           const SizedBox(height: 10),
                           Text(
                             _mnemonicWordCount == 0
-                                ? 'Enter or paste 12 or 24 words.'
-                                : '$_mnemonicWordCount words detected',
+                                ? l10n.importEnterWords
+                                : l10n.importWordsDetected(_mnemonicWordCount),
                             style: theme.textTheme.bodySmall,
                           ),
                         ],
@@ -365,10 +367,10 @@ class _ImportMnemonicPageState extends ConsumerState<ImportMnemonicPage> {
                       onPressed: _controller.text.isEmpty
                           ? null
                           : _clearMnemonic,
-                      child: const Text('Clear'),
+                      child: Text(l10n.importClear),
                     ),
                     PrimaryButton(
-                      label: 'Continue',
+                      label: l10n.commonContinue,
                       onPressed: _isInputLikelyValid ? _continue : null,
                     ),
                   ],
@@ -385,21 +387,21 @@ class _ImportMnemonicPageState extends ConsumerState<ImportMnemonicPage> {
     final message = error.toString().toLowerCase();
     if (message.contains('mwa_no_wallet') ||
         message.contains('no compatible wallet')) {
-      return 'Install or enable Seeker Wallet, then try again.';
+      return context.l10n.seekerVaultInstallOrEnable;
     }
     if (message.contains('unsupported')) {
-      return 'Seeker Vault import is available on Android only.';
+      return context.l10n.seekerVaultAndroidOnly;
     }
     if (message.contains('seed_vault_no_accounts')) {
-      return 'No existing Seed Vault wallet accounts were returned for this seed.';
+      return context.l10n.seekerVaultNoAccounts;
     }
     if (message.contains('seed_vault_unavailable')) {
-      return 'Seed Vault is not available on this device.';
+      return context.l10n.seekerVaultUnavailable;
     }
     if (message.contains('cancel') || message.contains('interrupted')) {
-      return 'Seeker Vault connection was cancelled.';
+      return context.l10n.seekerVaultCancelled;
     }
-    return 'Unable to connect Seeker Vault right now. Please try again.';
+    return context.l10n.seekerVaultConnectFailed;
   }
 }
 
@@ -412,6 +414,7 @@ class _SeekerVaultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return WalletCard(
       child: Row(
@@ -433,10 +436,10 @@ class _SeekerVaultCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Seeker Vault', style: theme.textTheme.titleMedium),
+                Text(l10n.seekerVaultTitle, style: theme.textTheme.titleMedium),
                 const SizedBox(height: 4),
                 Text(
-                  'Connect the hardware-backed wallet on this Seeker.',
+                  l10n.seekerVaultConnectDescription,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -452,7 +455,7 @@ class _SeekerVaultCard extends StatelessWidget {
                     dimension: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Connect'),
+                : Text(l10n.seekerVaultConnect),
           ),
         ],
       ),
@@ -492,6 +495,7 @@ class _SeedVaultAccountPickerState extends State<_SeedVaultAccountPicker> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return SafeArea(
       child: ConstrainedBox(
@@ -508,15 +512,15 @@ class _SeedVaultAccountPickerState extends State<_SeedVaultAccountPicker> {
                 children: [
                   Text(
                     widget.hasFundedAccounts
-                        ? 'Choose funded account'
-                        : 'Choose account',
+                        ? l10n.seekerVaultChooseFundedAccount
+                        : l10n.seekerVaultChooseAccount,
                     style: theme.textTheme.titleLarge,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     widget.hasFundedAccounts
-                        ? 'Benny found account activity under this Seed Vault wallet.'
-                        : 'No funded account was found. These are the accounts returned by Seed Vault.',
+                        ? l10n.seekerVaultFundedAccountFound
+                        : l10n.seekerVaultNoFundedAccountFound,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -556,8 +560,10 @@ class _SeedVaultAccountPickerState extends State<_SeedVaultAccountPicker> {
                       children: [
                         Text(
                           scannedAccount.hasAssets
-                              ? '${scannedAccount.assetCount} assets'
-                              : 'No assets',
+                              ? l10n.seekerVaultAssetCount(
+                                  scannedAccount.assetCount,
+                                )
+                              : l10n.seekerVaultNoAssets,
                           style: theme.textTheme.labelMedium?.copyWith(
                             color: scannedAccount.hasAssets
                                 ? theme.colorScheme.primary
@@ -592,7 +598,7 @@ class _SeedVaultAccountPickerState extends State<_SeedVaultAccountPicker> {
                 child: FilledButton(
                   onPressed: () =>
                       Navigator.of(context).pop(_selectedAccount.account),
-                  child: const Text('Add'),
+                  child: Text(l10n.commonAdd),
                 ),
               ),
             ),

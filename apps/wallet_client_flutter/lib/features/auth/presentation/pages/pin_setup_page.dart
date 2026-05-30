@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/security/secure_screen.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/pin_keypad.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../onboarding/presentation/pages/welcome_page.dart';
 import '../../../portfolio/presentation/pages/portfolio_page.dart';
 import '../../domain/wallet_derivation.dart';
@@ -143,7 +144,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
       setState(() => _confirmPin = '');
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('PINs do not match')));
+      ).showSnackBar(SnackBar(content: Text(context.l10n.pinMismatch)));
       return;
     }
 
@@ -188,13 +189,17 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
       context.go(PortfolioPage.routePath);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(state.errorMessage ?? 'Import failed')),
+        SnackBar(
+          content: Text(state.errorMessage ?? context.l10n.pinImportFailed),
+        ),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return PopScope<void>(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -224,7 +229,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
-                    tooltip: 'Back',
+                    tooltip: l10n.commonBack,
                     onPressed: _submitting
                         ? null
                         : () {
@@ -246,7 +251,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
                 ),
                 const Spacer(),
                 Text(
-                  _confirming ? 'Confirm PIN' : 'Set Benny PIN',
+                  _confirming ? l10n.pinConfirm : l10n.pinSet,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 if (widget.isMobileWalletAdapterSetup) ...[
@@ -254,7 +259,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Text(
-                      'This protects Benny settings and child accounts. Seeker keeps signing keys in Seeker Wallet.',
+                      l10n.pinExternalWalletSetupDescription,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),

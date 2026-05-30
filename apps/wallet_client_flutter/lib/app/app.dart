@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'di/providers.dart';
 import '../core/widgets/session_activity_listener.dart';
+import '../features/settings/presentation/providers/app_settings_controller.dart';
+import '../l10n/generated/app_localizations.dart';
+import '../l10n/l10n.dart';
 import 'router.dart';
 import 'theme/app_theme.dart';
 
@@ -42,20 +45,26 @@ class _WalletAppState extends ConsumerState<WalletApp> {
           .initialize()
           .then((_) => localNotificationService.cancelAll())
           .catchError((Object error) {}),
-      pushNotificationService.initialize().then((_) {}).catchError((
-        Object error,
-      ) {}),
+      pushNotificationService
+          .initialize()
+          .then((_) {})
+          .catchError((Object error) {}),
     ]);
   }
 
   @override
   Widget build(BuildContext context) {
+    final settings = ref.watch(appSettingsControllerProvider);
+
     return MaterialApp.router(
-      title: 'Benny Wallet',
+      onGenerateTitle: (context) => context.l10n.appTitle,
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.light,
       theme: _theme,
       darkTheme: _theme,
+      locale: settings.languageOption.locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: AppRouter.router,
       builder: (context, child) {
         return SessionActivityListener(child: child ?? const SizedBox.shrink());

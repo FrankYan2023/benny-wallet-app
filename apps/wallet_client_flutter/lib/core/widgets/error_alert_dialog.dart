@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
+
 Future<void> showErrorAlertDialog(
   BuildContext context, {
   required String title,
@@ -14,7 +16,7 @@ Future<void> showErrorAlertDialog(
       actions: [
         FilledButton(
           onPressed: () => Navigator.of(dialogContext).pop(),
-          child: const Text('OK'),
+          child: Text(context.l10n.commonOk),
         ),
       ],
     ),

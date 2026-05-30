@@ -8,6 +8,7 @@ import '../../../../core/platform/platform_capabilities.dart';
 import '../../../../core/utils/clipboard_utils.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/responsive_action_group.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../notifications/presentation/pages/notifications_page.dart';
 
@@ -22,9 +23,10 @@ class ReceivePage extends ConsumerWidget {
     final address = ref.watch(walletControllerProvider).publicKey;
     final hasAddress = address != null && address.isNotEmpty;
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return AppScaffold(
-      title: 'Receive',
+      title: l10n.receiveTitle,
       actions: [
         Container(
           width: 44,
@@ -34,7 +36,7 @@ class ReceivePage extends ConsumerWidget {
             borderRadius: BorderRadius.circular(22),
           ),
           child: IconButton(
-            tooltip: 'Received history',
+            tooltip: l10n.receivedHistoryTitle,
             onPressed: () => context.push(ReceivedHistoryPage.routePath),
             icon: const Icon(Icons.history_rounded),
           ),
@@ -51,7 +53,7 @@ class ReceivePage extends ConsumerWidget {
             child: Column(
               children: [
                 Text(
-                  'Share this address',
+                  l10n.receiveShareAddressTitle,
                   style: theme.textTheme.displaySmall?.copyWith(
                     color: theme.colorScheme.onSecondaryContainer,
                   ),
@@ -59,7 +61,7 @@ class ReceivePage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Scan or copy it.',
+                  l10n.receiveShareAddressSubtitle,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSecondaryContainer.withValues(
                       alpha: 0.78,
@@ -82,13 +84,13 @@ class ReceivePage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'No wallet address available',
+                    l10n.receiveNoAddress,
                     style: theme.textTheme.titleMedium,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Create or unlock a wallet to receive funds.',
+                    l10n.receiveNoAddressSubtitle,
                     style: theme.textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),
@@ -130,20 +132,18 @@ class ReceivePage extends ConsumerWidget {
                           );
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Address copied (will clear in 60s)',
-                                ),
+                              SnackBar(
+                                content: Text(l10n.receiveAddressCopied),
                               ),
                             );
                           }
                         },
-                        child: const Text('Copy address'),
+                        child: Text(l10n.receiveCopyAddress),
                       ),
                       PrimaryButton(
                         label: PlatformCapabilities.shouldOfferShareOnReceive
-                            ? 'Share'
-                            : 'Done',
+                            ? l10n.commonShare
+                            : l10n.commonDone,
                         onPressed: () async {
                           await ClipboardUtils.setDataWithAutoWipe(
                             address,

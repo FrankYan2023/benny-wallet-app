@@ -7,6 +7,7 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/pin_prompt_dialog.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../auth/domain/wallet_controller_state.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../send/presentation/pages/scan_address_page.dart';
@@ -27,7 +28,8 @@ class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
     return showDialog<String>(
       context: context,
       barrierDismissible: true,
-      builder: (context) => const PinPromptDialog(title: 'Verify your PIN'),
+      builder: (context) =>
+          PinPromptDialog(title: context.l10n.childVerifyPinTitle),
     );
   }
 
@@ -42,9 +44,9 @@ class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
       return true;
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Incorrect PIN')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.settingsIncorrectPin)),
+        );
       }
       return false;
     }
@@ -95,9 +97,7 @@ class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('This child wallet has already been added.'),
-      ),
+      SnackBar(content: Text(context.l10n.childWalletAlreadyAdded)),
     );
   }
 
@@ -135,15 +135,15 @@ class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${draft.name} added successfully')),
+        SnackBar(content: Text(context.l10n.childWalletAdded(draft.name))),
       );
     } catch (e) {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to add child wallet: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.childWalletAddFailed('$e'))),
+      );
     }
   }
 
@@ -171,14 +171,14 @@ class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${draft.name} updated successfully')),
+        SnackBar(content: Text(context.l10n.childWalletUpdated(draft.name))),
       );
     } catch (e) {
       if (!mounted) {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update child wallet: $e')),
+        SnackBar(content: Text(context.l10n.childWalletUpdateFailed('$e'))),
       );
     }
   }
@@ -188,18 +188,16 @@ class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Delete ${child.name}?'),
-        content: const Text(
-          'This child wallet entry will be removed from parent monitoring.',
-        ),
+        title: Text(context.l10n.childWalletDeleteTitle(child.name)),
+        content: Text(context.l10n.childWalletDeleteMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Delete'),
+            child: Text(context.l10n.commonDelete),
           ),
         ],
       ),
@@ -221,15 +219,15 @@ class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('${child.name} deleted')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.childWalletDeleted(child.name))),
+      );
     } catch (e) {
       if (!mounted) {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete child wallet: $e')),
+        SnackBar(content: Text(context.l10n.childWalletDeleteFailed('$e'))),
       );
     }
   }
@@ -242,7 +240,7 @@ class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
 
     if (walletState.childModeEnabled) {
       return AppScaffold(
-        title: 'Child Accounts',
+        title: context.l10n.childAccountsTitle,
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -252,7 +250,7 @@ class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
                 const Icon(Icons.lock_rounded, size: 40),
                 const SizedBox(height: 12),
                 Text(
-                  'Turn off child mode to manage child accounts.',
+                  context.l10n.childManageUnavailable,
                   style: theme.textTheme.titleMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -264,7 +262,7 @@ class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
     }
 
     return AppScaffold(
-      title: 'Child Accounts',
+      title: context.l10n.childAccountsTitle,
       actions: [
         IconButton(
           onPressed: _addChildWallet,
@@ -279,8 +277,8 @@ class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
               children: [
                 Text(
                   childWallets.isEmpty
-                      ? 'No child accounts yet'
-                      : '${childWallets.length} child account${childWallets.length > 1 ? 's' : ''}',
+                      ? context.l10n.childNoAccountsYet
+                      : context.l10n.childAccountCount(childWallets.length),
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
@@ -289,7 +287,7 @@ class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
                 FilledButton.icon(
                   onPressed: _addChildWallet,
                   icon: const Icon(Icons.add_rounded),
-                  label: const Text('Add Child Account'),
+                  label: Text(context.l10n.childAddAccount),
                 ),
               ],
             ),
@@ -373,12 +371,12 @@ class _ChildWalletListTile extends StatelessWidget {
               ),
             ),
             IconButton(
-              tooltip: 'Edit',
+              tooltip: context.l10n.commonEdit,
               onPressed: onEdit,
               icon: const Icon(Icons.edit_rounded),
             ),
             IconButton(
-              tooltip: 'Delete',
+              tooltip: context.l10n.commonDelete,
               onPressed: onDelete,
               icon: const Icon(Icons.delete_outline_rounded),
             ),
@@ -423,14 +421,14 @@ class _ChildWalletEditorSheetState extends State<_ChildWalletEditorSheet> {
     final address = _address.trim();
 
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a child name.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.childEnterName)));
       return;
     }
     if (!Validators.isValidPublicAddress(address)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid wallet address.')),
+        SnackBar(content: Text(context.l10n.childEnterValidWalletAddress)),
       );
       return;
     }
@@ -476,7 +474,9 @@ class _ChildWalletEditorSheetState extends State<_ChildWalletEditorSheet> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isEditing ? 'Edit Child Account' : 'Add Child Account',
+                  isEditing
+                      ? context.l10n.childEditAccount
+                      : context.l10n.childAddAccount,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
@@ -485,13 +485,16 @@ class _ChildWalletEditorSheetState extends State<_ChildWalletEditorSheet> {
                 TextField(
                   controller: _nameController,
                   textInputAction: TextInputAction.done,
-                  decoration: const InputDecoration(
-                    labelText: 'Child name',
-                    hintText: 'e.g. Alice',
+                  decoration: InputDecoration(
+                    labelText: context.l10n.childName,
+                    hintText: context.l10n.childNameHint,
                   ),
                 ),
                 const SizedBox(height: 12),
-                Text('Wallet address', style: theme.textTheme.labelLarge),
+                Text(
+                  context.l10n.childWalletAddress,
+                  style: theme.textTheme.labelLarge,
+                ),
                 const SizedBox(height: 8),
                 Container(
                   width: double.infinity,
@@ -512,7 +515,9 @@ class _ChildWalletEditorSheetState extends State<_ChildWalletEditorSheet> {
                     onPressed: _scanAddress,
                     icon: const Icon(Icons.qr_code_scanner_rounded),
                     label: Text(
-                      isEditing ? 'Scan Again' : 'Scan QR Code Again',
+                      isEditing
+                          ? context.l10n.childScanAgain
+                          : context.l10n.childScanQrAgain,
                     ),
                   ),
                 ),
@@ -522,14 +527,18 @@ class _ChildWalletEditorSheetState extends State<_ChildWalletEditorSheet> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'),
+                        child: Text(context.l10n.commonCancel),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: FilledButton(
                         onPressed: _submit,
-                        child: Text(isEditing ? 'Save' : 'Add'),
+                        child: Text(
+                          isEditing
+                              ? context.l10n.commonSave
+                              : context.l10n.commonAdd,
+                        ),
                       ),
                     ),
                   ],

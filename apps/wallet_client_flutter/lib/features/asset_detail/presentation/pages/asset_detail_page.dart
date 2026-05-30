@@ -2,6 +2,7 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/di/providers.dart';
@@ -10,6 +11,8 @@ import '../../../../core/config/app_features.dart';
 import '../../../../core/utils/clipboard_utils.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../portfolio/domain/entities/portfolio_view_data.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
@@ -58,6 +61,7 @@ class AssetDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final walletState = ref.watch(walletControllerProvider);
+    final l10n = context.l10n;
     final isChildMode = walletState.childModeEnabled;
     final portfolio = ref.watch(activePortfolioProvider);
     final tokenDetail = ref.watch(tokenDetailProvider(mintAddress));
@@ -69,7 +73,7 @@ class AssetDetailPage extends ConsumerWidget {
         data: (data) {
           final asset = _findAsset(data.assets, mintAddress);
           if (asset == null) {
-            return const Center(child: Text('Asset not found.'));
+            return Center(child: Text(l10n.assetNotFound));
           }
 
           final transactions = ref.watch(assetTransactionsProvider(asset));
@@ -110,20 +114,20 @@ class AssetDetailPage extends ConsumerWidget {
                   onCopy: () => _copyMint(context, mintAddress),
                 ),
               const SizedBox(height: 18),
-              _SectionLabel(title: 'Position'),
+              _SectionLabel(title: l10n.assetPosition),
               const SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(
                     child: _MetricCard(
-                      label: 'Value',
+                      label: l10n.assetValue,
                       value: Formatters.usd(asset.totalValueUsd),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _MetricCard(
-                      label: 'Balance',
+                      label: l10n.assetBalance,
                       value:
                           '${Formatters.compactNumber(asset.balance)} ${Formatters.tokenSymbol(detail?.symbol ?? asset.token.symbol)}',
                     ),
@@ -132,7 +136,7 @@ class AssetDetailPage extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               _MetricCard(
-                label: '24h return',
+                label: l10n.assetReturn24h,
                 value: profitLoss24h == null
                     ? '--'
                     : Formatters.signedUsd(profitLoss24h),
@@ -150,62 +154,77 @@ class AssetDetailPage extends ConsumerWidget {
                     : _deltaColor(context, priceChangePct),
               ),
               const SizedBox(height: 18),
-              _SectionLabel(title: 'Info'),
+              _SectionLabel(title: l10n.assetInfo),
               const SizedBox(height: 10),
               _InfoPanel(
                 rows: [
-                  _InfoRowData('Name', detail?.name ?? asset.token.name),
-                  _InfoRowData('Symbol', detail?.symbol ?? asset.token.symbol),
-                  _InfoRowData('Network', detail?.network ?? 'Solana'),
                   _InfoRowData(
-                    'Mint',
+                    l10n.assetName,
+                    detail?.name ?? asset.token.name,
+                  ),
+                  _InfoRowData(
+                    l10n.assetSymbol,
+                    detail?.symbol ?? asset.token.symbol,
+                  ),
+                  _InfoRowData(
+                    l10n.commonNetwork,
+                    detail?.network ?? l10n.commonSolana,
+                  ),
+                  _InfoRowData(
+                    l10n.assetMint,
                     Formatters.compactAddress(mintAddress, visibleChars: 5),
                   ),
                   if (websiteUrl != null)
                     _InfoRowData(
-                      'Website',
+                      l10n.assetWebsite,
                       _websiteDisplayText(websiteUrl),
                       linkUrl: websiteUrl,
                     ),
                   _InfoRowData(
-                    'Price',
+                    l10n.assetPrice,
                     priceUsd == null ? '--' : Formatters.usdPrice(priceUsd),
                   ),
                   _InfoRowData(
-                    'Market cap',
+                    l10n.assetMarketCap,
                     Formatters.compactUsd(detail?.marketCapUsd),
                   ),
-                  _InfoRowData('FDV', Formatters.compactUsd(detail?.fdvUsd)),
                   _InfoRowData(
-                    'Total supply',
+                    l10n.assetFdv,
+                    Formatters.compactUsd(detail?.fdvUsd),
+                  ),
+                  _InfoRowData(
+                    l10n.assetTotalSupply,
                     Formatters.compactNumber(detail?.totalSupply),
                   ),
                   _InfoRowData(
-                    'Circulating supply',
+                    l10n.assetCirculatingSupply,
                     Formatters.compactNumber(detail?.circulatingSupply),
                   ),
                   _InfoRowData(
-                    'Holders',
+                    l10n.assetHolders,
                     detail?.holderCount == null
                         ? '--'
                         : Formatters.compactNumber(
                             detail!.holderCount!.toDouble(),
                           ),
                   ),
-                  _InfoRowData('Created', Formatters.date(detail?.createdAt)),
+                  _InfoRowData(
+                    l10n.assetCreated,
+                    _formatDate(l10n, detail?.createdAt),
+                  ),
                 ],
               ),
               const SizedBox(height: 18),
-              _SectionLabel(title: '24h performance'),
+              _SectionLabel(title: l10n.assetPerformance24h),
               const SizedBox(height: 10),
               _InfoPanel(
                 rows: [
                   _InfoRowData(
-                    'Volume',
+                    l10n.assetVolume,
                     Formatters.compactUsd(detail?.volume24hUsd),
                   ),
                   _InfoRowData(
-                    'Traders',
+                    l10n.assetTraders,
                     detail?.traderCount24h == null
                         ? '--'
                         : Formatters.compactNumber(
@@ -216,12 +235,12 @@ class AssetDetailPage extends ConsumerWidget {
               ),
               if (detail?.top10HoldersPct != null) ...[
                 const SizedBox(height: 18),
-                _SectionLabel(title: 'Safety'),
+                _SectionLabel(title: l10n.assetSafety),
                 const SizedBox(height: 10),
                 _InfoPanel(
                   rows: [
                     _InfoRowData(
-                      'Top 10 holders',
+                      l10n.assetTop10Holders,
                       Formatters.percent(detail!.top10HoldersPct),
                     ),
                   ],
@@ -229,17 +248,15 @@ class AssetDetailPage extends ConsumerWidget {
               ],
               if (showMarketStatsUnavailableNotice) ...[
                 const SizedBox(height: 18),
-                _InlineNotice(
-                  message: 'Some market stats are unavailable right now.',
-                ),
+                _InlineNotice(message: l10n.assetMarketStatsUnavailable),
               ],
               const SizedBox(height: 18),
-              _SectionLabel(title: 'Activity'),
+              _SectionLabel(title: l10n.assetActivity),
               const SizedBox(height: 10),
               transactions.when(
                 data: (items) {
                   if (items.isEmpty) {
-                    return const _EmptyState(message: 'No activity yet.');
+                    return _EmptyState(message: l10n.assetNoActivity);
                   }
 
                   return Column(
@@ -251,9 +268,8 @@ class AssetDetailPage extends ConsumerWidget {
                     ],
                   );
                 },
-                error: (_, _) => const _InlineNotice(
-                  message: 'Activity could not be loaded.',
-                ),
+                error: (_, _) =>
+                    _InlineNotice(message: l10n.assetActivityLoadFailed),
                 loading: () => const Padding(
                   padding: EdgeInsets.symmetric(vertical: 18),
                   child: Center(child: CircularProgressIndicator()),
@@ -264,7 +280,7 @@ class AssetDetailPage extends ConsumerWidget {
           );
         },
         error: (error, _) =>
-            Center(child: Text('Failed to load asset details: $error')),
+            Center(child: Text(context.l10n.assetLoadDetailsFailed('$error'))),
         loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );
@@ -293,9 +309,9 @@ class AssetDetailPage extends ConsumerWidget {
     if (!context.mounted) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Mint copied (will clear in 60s)')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(context.l10n.assetMintCopied)));
   }
 
   static Color _deltaColor(BuildContext context, double value) {
@@ -314,6 +330,7 @@ class AssetDetailPage extends ConsumerWidget {
   ) {
     if (!AppFeatures.canOpenSwap) {
       return _AssetPrimaryAction.receive(
+        context.l10n.portfolioReceive,
         () => context.push(ReceivePage.routePath),
       );
     }
@@ -321,10 +338,12 @@ class AssetDetailPage extends ConsumerWidget {
     if (asset.category == 'xstock') {
       if (!AppFeatures.canOpenXStocks) {
         return _AssetPrimaryAction.receive(
+          context.l10n.portfolioReceive,
           () => context.push(ReceivePage.routePath),
         );
       }
       return _AssetPrimaryAction.swap(
+        context.l10n.portfolioSwap,
         () => context.push(
           XStocksSwapPage.pathFor(outputMint: asset.token.mintAddress),
         ),
@@ -332,6 +351,7 @@ class AssetDetailPage extends ConsumerWidget {
     }
 
     return _AssetPrimaryAction.swap(
+      context.l10n.portfolioSwap,
       () => context.push(SwapPage.pathFor(outputMint: asset.token.mintAddress)),
     );
   }
@@ -344,18 +364,18 @@ class _AssetPrimaryAction {
     required this.onTap,
   });
 
-  factory _AssetPrimaryAction.receive(VoidCallback onTap) {
+  factory _AssetPrimaryAction.receive(String label, VoidCallback onTap) {
     return _AssetPrimaryAction(
       icon: Icons.call_received_rounded,
-      label: 'Receive',
+      label: label,
       onTap: onTap,
     );
   }
 
-  factory _AssetPrimaryAction.swap(VoidCallback onTap) {
+  factory _AssetPrimaryAction.swap(String label, VoidCallback onTap) {
     return _AssetPrimaryAction(
       icon: Icons.swap_horiz_rounded,
-      label: 'Swap',
+      label: label,
       onTap: onTap,
     );
   }
@@ -400,10 +420,31 @@ Future<void> _openWebsite(BuildContext context, String url) async {
 
   final didLaunch = await launchUrl(uri, mode: LaunchMode.externalApplication);
   if (!didLaunch && context.mounted) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Could not open website.')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.assetCouldNotOpenWebsite)),
+    );
   }
+}
+
+String _formatDate(AppLocalizations l10n, DateTime? value) {
+  if (value == null) {
+    return '--';
+  }
+  return DateFormat.yMMMd(l10n.localeName).format(value.toLocal());
+}
+
+String _relativeTime(AppLocalizations l10n, DateTime time) {
+  final diff = DateTime.now().difference(time);
+  if (diff.inSeconds < 60) {
+    return l10n.relativeSecondsAgo(diff.inSeconds);
+  }
+  if (diff.inMinutes < 60) {
+    return l10n.relativeMinutesAgo(diff.inMinutes);
+  }
+  if (diff.inHours < 24) {
+    return l10n.relativeHoursAgo(diff.inHours);
+  }
+  return l10n.relativeDaysAgo(diff.inDays);
 }
 
 class _HeaderBar extends StatelessWidget {
@@ -493,7 +534,7 @@ class _ActionRow extends StatelessWidget {
         Expanded(
           child: _ActionTile(
             icon: Icons.send_rounded,
-            label: 'Send',
+            label: context.l10n.portfolioSend,
             onTap: onSend,
             tint: theme.colorScheme.tertiaryContainer,
           ),
@@ -502,7 +543,7 @@ class _ActionRow extends StatelessWidget {
         Expanded(
           child: _ActionTile(
             icon: Icons.copy_rounded,
-            label: 'Copy',
+            label: context.l10n.commonCopy,
             onTap: onCopy,
             tint: theme.colorScheme.primaryContainer,
           ),
@@ -526,7 +567,7 @@ class _ChildModeActionRow extends StatelessWidget {
         width: 140,
         child: _ActionTile(
           icon: Icons.call_received_rounded,
-          label: 'Receive',
+          label: context.l10n.portfolioReceive,
           onTap: onReceive,
           tint: theme.colorScheme.secondaryContainer,
         ),
@@ -750,18 +791,23 @@ class _ActivityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final swapTitle = switch (item.direction) {
       TransactionDirection.sent =>
-        item.relatedSymbol.isEmpty ? 'Swap Out' : 'To ${item.relatedSymbol}',
+        item.relatedSymbol.isEmpty
+            ? l10n.assetSwapOut
+            : l10n.assetToSymbol(item.relatedSymbol),
       TransactionDirection.received =>
-        item.relatedSymbol.isEmpty ? 'Swap In' : 'From ${item.relatedSymbol}',
-      TransactionDirection.unknown => 'Swap',
+        item.relatedSymbol.isEmpty
+            ? l10n.assetSwapIn
+            : l10n.assetFromSymbol(item.relatedSymbol),
+      TransactionDirection.unknown => l10n.portfolioSwap,
     };
     final title = switch ((item.kind, item.direction)) {
       (TransactionKind.swap, _) => swapTitle,
-      (_, TransactionDirection.sent) => 'Sent',
-      (_, TransactionDirection.received) => 'Received',
-      (_, TransactionDirection.unknown) => 'Activity',
+      (_, TransactionDirection.sent) => l10n.assetSent,
+      (_, TransactionDirection.received) => l10n.assetReceived,
+      (_, TransactionDirection.unknown) => l10n.assetActivity,
     };
     final amountColor = switch (item.direction) {
       TransactionDirection.sent => AppColors.danger,
@@ -777,19 +823,25 @@ class _ActivityCard extends StatelessWidget {
     final subtitle = switch (item.kind) {
       TransactionKind.swap =>
         item.timestamp == null
-            ? 'Swap'
-            : 'Swap  •  ${Formatters.relativeTime(item.timestamp!)}',
+            ? l10n.portfolioSwap
+            : l10n.assetSwapWithTime(_relativeTime(l10n, item.timestamp!)),
       TransactionKind.transfer =>
         item.counterparty.isEmpty
             ? (item.timestamp == null
-                  ? 'Transfer'
-                  : Formatters.relativeTime(item.timestamp!))
+                  ? l10n.assetTransfer
+                  : _relativeTime(l10n, item.timestamp!))
             : (item.timestamp == null
                   ? Formatters.compactAddress(
                       item.counterparty,
                       visibleChars: 5,
                     )
-                  : '${Formatters.compactAddress(item.counterparty, visibleChars: 5)}  •  ${Formatters.relativeTime(item.timestamp!)}'),
+                  : l10n.assetCounterpartyWithTime(
+                      Formatters.compactAddress(
+                        item.counterparty,
+                        visibleChars: 5,
+                      ),
+                      _relativeTime(l10n, item.timestamp!),
+                    )),
     };
 
     return WalletCard(

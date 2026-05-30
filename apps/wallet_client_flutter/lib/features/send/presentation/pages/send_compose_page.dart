@@ -8,6 +8,7 @@ import '../../../../core/utils/amount_parser.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../portfolio/domain/entities/portfolio_view_data.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
@@ -42,7 +43,6 @@ class SendComposePage extends ConsumerStatefulWidget {
 class _SendComposePageState extends ConsumerState<SendComposePage> {
   static const _displayEstimatedFeeSol = 0.00022;
   static const _balanceTolerance = 0.000000001;
-  static const _genericSendFailure = 'Send failed. Please try again.';
 
   final _addressController = TextEditingController();
   final _amountController = TextEditingController();
@@ -69,14 +69,15 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
   @override
   Widget build(BuildContext context) {
     final portfolio = ref.watch(activePortfolioProvider);
+    final l10n = context.l10n;
 
     return portfolio.when(
       data: (data) {
         final asset = _findAsset(data.assets, widget.mintAddress);
         if (asset == null) {
-          return const AppScaffold(
-            title: 'Send',
-            child: Center(child: Text('Asset not found.')),
+          return AppScaffold(
+            title: l10n.sendTitle,
+            child: Center(child: Text(l10n.sendAssetNotFound)),
           );
         }
 
@@ -85,7 +86,7 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
         final approximateUsd = amountValue * _priceOf(asset);
 
         return AppScaffold(
-          title: 'Send $symbol',
+          title: l10n.sendAssetTitle(symbol),
           child: Column(
             children: [
               Expanded(
@@ -101,7 +102,7 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
                     const SizedBox(height: 24),
                     _SendInputCard(
                       trailing: IconButton(
-                        tooltip: 'Scan QR code',
+                        tooltip: l10n.sendScanQrCode,
                         onPressed: () => _scanAddress(context),
                         icon: Icon(
                           Icons.qr_code_scanner_rounded,
@@ -117,8 +118,8 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
                         minLines: 1,
                         maxLines: 2,
                         textInputAction: TextInputAction.next,
-                        decoration: const InputDecoration(
-                          hintText: 'Recipient Solana address',
+                        decoration: InputDecoration(
+                          hintText: l10n.sendRecipientAddressHint,
                           border: InputBorder.none,
                           filled: false,
                         ),
@@ -155,7 +156,10 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Available ${Formatters.compactNumber(asset.balance)} $symbol',
+                            l10n.sendAvailableAmount(
+                              Formatters.compactNumber(asset.balance),
+                              symbol,
+                            ),
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: AppColors.textSecondary),
                             textAlign: TextAlign.end,
@@ -170,8 +174,10 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
               ),
               const SizedBox(height: 12),
               _BottomActionRow(
-                leadingLabel: 'Cancel',
-                trailingLabel: _submitting ? 'Loading...' : 'Next',
+                leadingLabel: l10n.commonCancel,
+                trailingLabel: _submitting
+                    ? l10n.commonLoading
+                    : l10n.commonNext,
                 onLeading: _submitting ? null : () => context.pop(),
                 onTrailing: _submitting
                     ? null
@@ -191,12 +197,12 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
         );
       },
       error: (error, _) => AppScaffold(
-        title: 'Send',
-        child: Center(child: Text('Failed to load send form: $error')),
+        title: l10n.sendTitle,
+        child: Center(child: Text(l10n.sendLoadFormFailed('$error'))),
       ),
-      loading: () => const AppScaffold(
-        title: 'Send',
-        child: Center(child: CircularProgressIndicator()),
+      loading: () => AppScaffold(
+        title: l10n.sendTitle,
+        child: const Center(child: CircularProgressIndicator()),
       ),
     );
   }
@@ -247,18 +253,24 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
     if (!Validators.isValidPublicAddress(destination)) {
       await _showValidationDialog(
         context,
-        message: 'Enter a valid Solana address.',
+        message: context.l10n.sendInvalidAddress,
       );
       return;
     }
 
     if (amountValue == null || amountValue <= 0) {
-      await _showValidationDialog(context, message: 'Enter a valid amount.');
+      await _showValidationDialog(
+        context,
+        message: context.l10n.sendInvalidAmount,
+      );
       return;
     }
 
     if (amountValue > asset.balance) {
-      await _showValidationDialog(context, message: 'Insufficient balance.');
+      await _showValidationDialog(
+        context,
+        message: context.l10n.sendInsufficientBalance,
+      );
       return;
     }
 
@@ -268,7 +280,7 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
       final solana = ref.read(solanaWalletServiceProvider);
       final ownerAddress = walletState.publicKey;
       if (ownerAddress == null) {
-        throw StateError('Unlock the wallet again before sending.');
+        throw StateError('unlock_wallet_again');
       }
 
       final estimatedNetworkFeeSol = asset.token.isNative
@@ -292,7 +304,7 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
         }
         await _showValidationDialog(
           context,
-          message: 'Not enough SOL after reserving the network fee.',
+          message: context.l10n.sendNotEnoughSolAfterFee,
         );
         return;
       }
@@ -304,7 +316,7 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
         }
         await _showValidationDialog(
           context,
-          message: 'Not enough SOL to cover the network fee.',
+          message: context.l10n.sendNotEnoughSolForFee,
         );
         return;
       }
@@ -333,7 +345,7 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
       }
       await _showValidationDialog(
         context,
-        message: _friendlyComposeError(error),
+        message: _friendlyComposeError(context, error),
       );
     } finally {
       if (mounted) {
@@ -416,7 +428,7 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
               width: double.infinity,
               child: FilledButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('Close'),
+                child: Text(dialogContext.l10n.commonClose),
               ),
             ),
           ],
@@ -425,18 +437,18 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
     );
   }
 
-  String _friendlyComposeError(Object error) {
+  String _friendlyComposeError(BuildContext context, Object error) {
     final message = error.toString();
     final lower = message.toLowerCase();
 
-    if (lower.contains('unlock the wallet again')) {
-      return 'Unlock the wallet again before sending.';
+    if (lower.contains('unlock_wallet_again')) {
+      return context.l10n.sendUnlockAgain;
     }
     if (lower.contains('insufficient') ||
         lower.contains('insufficient funds') ||
         lower.contains('insufficient lamports') ||
         lower.contains('fee payer')) {
-      return 'Not enough SOL to cover the network fee.';
+      return context.l10n.sendNotEnoughSolForFee;
     }
     if (lower.contains('http status code') ||
         lower.contains('jsonrpc') ||
@@ -444,10 +456,10 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
         lower.contains('the following content') ||
         lower.contains('dioexception') ||
         lower.contains('bad response')) {
-      return _genericSendFailure;
+      return context.l10n.sendGenericFailure;
     }
 
-    return _genericSendFailure;
+    return context.l10n.sendGenericFailure;
   }
 }
 
@@ -512,8 +524,8 @@ class _AmountCard extends StatelessWidget {
               onChanged: (_) {
                 onChanged();
               },
-              decoration: const InputDecoration(
-                hintText: 'Amount',
+              decoration: InputDecoration(
+                hintText: context.l10n.sendAmountHint,
                 border: InputBorder.none,
                 filled: false,
               ),
@@ -521,7 +533,7 @@ class _AmountCard extends StatelessWidget {
           ),
           Text(symbol, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(width: 10),
-          TextButton(onPressed: onMax, child: const Text('MAX')),
+          TextButton(onPressed: onMax, child: Text(context.l10n.commonMax)),
         ],
       ),
     );

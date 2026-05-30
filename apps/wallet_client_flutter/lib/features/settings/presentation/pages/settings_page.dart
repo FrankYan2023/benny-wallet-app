@@ -13,6 +13,8 @@ import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/app_update_gate.dart';
 import '../../../../core/widgets/error_alert_dialog.dart';
 import '../../../../core/widgets/pin_prompt_dialog.dart';
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../l10n/l10n.dart';
 import '../../domain/app_settings.dart';
 import '../providers/app_settings_controller.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
@@ -67,6 +69,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         final theme = Theme.of(context);
+        final l10n = context.l10n;
         final maxHeight = MediaQuery.sizeOf(context).height * 0.76;
 
         return Container(
@@ -96,13 +99,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ),
                 const SizedBox(height: 18),
                 Text(
-                  'Auto lock',
+                  l10n.settingsAutoLock,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.displaySmall,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Choose when Benny locks again.',
+                  l10n.settingsAutoLockSheetSubtitle,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium,
                 ),
@@ -117,12 +120,99 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         : theme.colorScheme.surfaceContainerHigh.withValues(
                             alpha: 0.28,
                           ),
-                    title: Text(option.label),
+                    title: Text(_autoLockLabel(l10n, option)),
                     trailing: option == selectedOption
                         ? const Icon(Icons.check_rounded)
                         : null,
                     onTap: () async {
                       await notifier.setAutoLockOption(option);
+                      if (!context.mounted) {
+                        return;
+                      }
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showLanguagePicker(
+    BuildContext context,
+    AppLanguageOption selectedOption,
+  ) async {
+    final notifier = ref.read(appSettingsControllerProvider.notifier);
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final theme = Theme.of(context);
+        final l10n = context.l10n;
+        final maxHeight = MediaQuery.sizeOf(context).height * 0.76;
+
+        return Container(
+          constraints: BoxConstraints(maxHeight: maxHeight),
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 22),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.16,
+                      ),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  l10n.settingsLanguageSheetTitle,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.displaySmall,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.settingsLanguageSheetSubtitle,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 16),
+                for (final option in AppLanguageOption.values) ...[
+                  ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    tileColor: option == selectedOption
+                        ? const Color(0xFFF8E8B8)
+                        : theme.colorScheme.surfaceContainerHigh.withValues(
+                            alpha: 0.28,
+                          ),
+                    title: Text(_languageLabel(l10n, option)),
+                    subtitle: option == AppLanguageOption.system
+                        ? Text(l10n.settingsLanguageSystemDescription)
+                        : null,
+                    trailing: option == selectedOption
+                        ? const Icon(Icons.check_rounded)
+                        : null,
+                    onTap: () async {
+                      await notifier.setLanguageOption(option);
                       if (!context.mounted) {
                         return;
                       }
@@ -160,13 +250,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Incorrect PIN')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.settingsIncorrectPin)),
+      );
     }
   }
 
   Future<void> _handleBiometricToggle(bool enabled) async {
+    final l10n = context.l10n;
     if (enabled) {
       final protector = ref.read(biometricSessionProtectorProvider);
       if (!protector.supportsPersistentSessionProtection) {
@@ -174,11 +265,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           return;
         }
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Persistent biometric unlock is not supported on this device.',
-            ),
-          ),
+          SnackBar(content: Text(l10n.settingsPersistentBiometricUnsupported)),
         );
         return;
       }
@@ -190,15 +277,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           return;
         }
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Biometrics are not available on this device.'),
-          ),
+          SnackBar(content: Text(l10n.settingsBiometricsUnavailable)),
         );
         return;
       }
 
       // Use authenticateForSetup() for enabling (more strict security)
-      final approved = await service.authenticateForSetup();
+      final approved = await service.authenticateForSetup(
+        localizedReason: l10n.biometricSetupReason,
+      );
       if (!approved) {
         debugPrint('[SECURITY] User cancelled biometric setup');
         return;
@@ -211,7 +298,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           .read(walletControllerProvider.notifier)
           .setBiometricEnabled(enabled);
       if (mounted) {
-        final message = enabled ? 'Biometric enabled' : 'Biometric disabled';
+        final message = enabled
+            ? l10n.settingsBiometricEnabled
+            : l10n.settingsBiometricDisabled;
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(message)));
@@ -223,7 +312,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       }
       final message = e is StateError
           ? e.message.toString()
-          : 'Unlock the wallet before enabling biometrics.';
+          : l10n.settingsUnlockBeforeBiometrics;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(message)));
@@ -231,6 +320,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Future<void> _handleNotificationsToggle(bool enabled) async {
+    final l10n = context.l10n;
     final notifier = ref.read(appSettingsControllerProvider.notifier);
     final previous = ref
         .read(appSettingsControllerProvider)
@@ -253,11 +343,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text(
-              'Notifications are disabled. Enable them in system settings.',
-            ),
+            content: Text(l10n.settingsNotificationsSystemDisabled),
             action: SnackBarAction(
-              label: 'Settings',
+              label: l10n.commonSettings,
               onPressed: () {
                 ref.read(appBadgeServiceProvider).openNotificationSettings();
               },
@@ -273,8 +361,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         SnackBar(
           content: Text(
             enabled
-                ? 'Receive notifications enabled'
-                : 'Receive notifications disabled',
+                ? l10n.settingsNotificationsEnabled
+                : l10n.settingsNotificationsDisabled,
           ),
         ),
       );
@@ -284,12 +372,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update notifications: $error')),
+        SnackBar(
+          content: Text(l10n.settingsNotificationsUpdateFailed('$error')),
+        ),
       );
     }
   }
 
   Future<void> _handleChildModeToggle(bool enabled) async {
+    final l10n = context.l10n;
     final walletState = ref.read(walletControllerProvider);
 
     try {
@@ -297,11 +388,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (enabled) {
         if (walletState.childWallets.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Remove all child accounts before enabling child mode.',
-              ),
-            ),
+            SnackBar(content: Text(l10n.settingsRemoveChildAccountsFirst)),
           );
           return;
         }
@@ -331,7 +418,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(enabled ? 'Child mode enabled' : 'Child mode disabled'),
+          content: Text(
+            enabled
+                ? l10n.settingsChildModeEnabled
+                : l10n.settingsChildModeDisabled,
+          ),
         ),
       );
     } catch (e) {
@@ -342,13 +433,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (_isIncorrectChildModePinError(e)) {
         await showErrorAlertDialog(
           context,
-          title: 'Unlock Failed',
-          message: 'Incorrect PIN.',
+          title: l10n.unlockFailedTitle,
+          message: l10n.unlockIncorrectPin,
         );
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update child mode: $e')),
+        SnackBar(content: Text(l10n.settingsChildModeUpdateFailed('$e'))),
       );
     }
   }
@@ -363,22 +454,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Future<bool> _confirmLogout(BuildContext context) async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Copy your recovery phrase first.'),
-        content: const Text(
-          'Logging out will clear all local app data on this device.',
-        ),
+        title: Text(l10n.settingsCopyRecoveryPhraseFirst),
+        content: Text(l10n.settingsLogOutWarning),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Log out'),
+            child: Text(l10n.settingsLogOut),
           ),
         ],
       ),
@@ -406,7 +496,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
       if (result == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Benny Wallet is up to date.')),
+          SnackBar(content: Text(context.l10n.settingsWalletUpToDate)),
         );
         return;
       }
@@ -419,8 +509,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
       await showErrorAlertDialog(
         context,
-        title: 'Update Check Failed',
-        message: 'Unable to check for updates right now.',
+        title: context.l10n.settingsUpdateCheckFailed,
+        message: context.l10n.settingsUnableToCheckUpdates,
       );
     } finally {
       if (mounted) {
@@ -436,6 +526,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final walletState = ref.watch(walletControllerProvider);
     final settings = ref.watch(appSettingsControllerProvider);
     final packageInfo = ref.watch(packageInfoProvider);
+    final l10n = context.l10n;
     final isChildMode = walletState.childModeEnabled;
     final isExternalWallet = walletState.isExternalWallet;
     final hasChildAccounts = walletState.childWallets.isNotEmpty;
@@ -467,7 +558,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           }
         },
         child: AppScaffold(
-          title: 'Benny',
+          title: l10n.settingsTitle,
           child: ListView(
             children: [
               if (isChildMode)
@@ -476,14 +567,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Child mode is active',
+                        l10n.settingsChildModeActive,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w800,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'The wallet stays in receive-only mode until the 4-digit child mode PIN is entered.',
+                        l10n.settingsChildModeActiveDescription,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
@@ -502,10 +593,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               _SettingsToggleTile(
                 icon: Icons.fingerprint_rounded,
                 iconColor: const Color(0xFF4096C9),
-                title: 'Biometric unlock',
+                title: l10n.settingsBiometricUnlock,
                 subtitle: walletState.isUnlocked
-                    ? 'Use fingerprint'
-                    : 'Unlock wallet to enable',
+                    ? l10n.settingsUseFingerprint
+                    : l10n.settingsUnlockWalletToEnable,
                 value: walletState.biometricEnabled,
                 onChanged: _handleBiometricToggle,
                 enabled: walletState.isUnlocked,
@@ -514,18 +605,28 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               _SettingsActionTile(
                 icon: Icons.lock_clock_rounded,
                 iconColor: const Color(0xFF8A5B09),
-                title: 'Auto lock',
-                subtitle: settings.autoLockOption.label,
-                trailingText: settings.autoLockOption.label,
+                title: l10n.settingsAutoLock,
+                subtitle: _autoLockLabel(l10n, settings.autoLockOption),
+                trailingText: _autoLockLabel(l10n, settings.autoLockOption),
                 onTap: () =>
                     _showAutoLockPicker(context, settings.autoLockOption),
+              ),
+              const SizedBox(height: 10),
+              _SettingsActionTile(
+                icon: Icons.language_rounded,
+                iconColor: const Color(0xFF235E7A),
+                title: l10n.settingsLanguage,
+                subtitle: l10n.settingsLanguageSubtitle,
+                trailingText: _languageLabel(l10n, settings.languageOption),
+                onTap: () =>
+                    _showLanguagePicker(context, settings.languageOption),
               ),
               const SizedBox(height: 10),
               _SettingsToggleTile(
                 icon: Icons.notifications_active_rounded,
                 iconColor: const Color(0xFF4E7A52),
-                title: 'Receive notifications',
-                subtitle: 'Get an alert when funds arrive',
+                title: l10n.settingsNotifications,
+                subtitle: l10n.settingsNotificationsSubtitle,
                 value: settings.notificationsEnabled,
                 onChanged: _handleNotificationsToggle,
                 enabled: walletState.isUnlocked,
@@ -534,12 +635,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               _SettingsToggleTile(
                 icon: Icons.child_care_rounded,
                 iconColor: const Color(0xFF6C63FF),
-                title: 'Child mode',
+                title: l10n.settingsChildMode,
                 subtitle: walletState.childModeEnabled
-                    ? 'Protected by a 4-digit child mode PIN'
+                    ? l10n.settingsChildModeProtected
                     : hasChildAccounts
-                    ? 'Remove all child accounts before enabling'
-                    : 'Set a separate 4-digit PIN for child mode',
+                    ? l10n.settingsChildModeRemoveAccounts
+                    : l10n.settingsChildModeSetPin,
                 value: walletState.childModeEnabled,
                 onChanged: _handleChildModeToggle,
                 enabled: canToggleChildMode,
@@ -550,7 +651,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   child: _SettingsActionTile(
                     icon: Icons.groups_2_rounded,
                     iconColor: const Color(0xFF6C63FF),
-                    title: 'Child accounts',
+                    title: l10n.settingsChildAccounts,
                     trailingText: walletState.childWallets.isEmpty
                         ? null
                         : '${walletState.childWallets.length}',
@@ -563,8 +664,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   child: _SettingsActionTile(
                     icon: Icons.savings_rounded,
                     iconColor: const Color(0xFF8A5B09),
-                    title: 'Rent reclaim',
-                    subtitle: 'Close empty token accounts and recover SOL',
+                    title: l10n.settingsRentReclaim,
+                    subtitle: l10n.settingsRentReclaimSubtitle,
                     onTap: () => context.push(RentReclaimPage.routePath),
                   ),
                 ),
@@ -573,8 +674,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 child: _SettingsActionTile(
                   icon: Icons.chat_bubble_outline_rounded,
                   iconColor: const Color(0xFF4E7A52),
-                  title: 'Feedback',
-                  subtitle: 'Report a problem or ask a question',
+                  title: l10n.settingsFeedback,
+                  subtitle: l10n.settingsFeedbackSubtitle,
                   onTap: () => context.push(ContactFeedbackPage.routePath),
                 ),
               ),
@@ -585,8 +686,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     icon: Icons.logout_rounded,
                     iconColor: Colors.white,
                     iconBackground: const Color(0xFFCC6A4A),
-                    title: 'Log out',
-                    subtitle: 'Return to the home screen',
+                    title: l10n.settingsLogOut,
+                    subtitle: l10n.settingsLogOutSubtitle,
                     onTap: () async {
                       final confirmed = await _confirmLogout(context);
                       if (!confirmed || !context.mounted) {
@@ -613,6 +714,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               packageInfo.when(
                 data: (value) => _SettingsVersionFooter(
                   versionLabel: _formatVersionLabel(
+                    l10n,
                     value.version,
                     value.buildNumber,
                   ),
@@ -632,14 +734,32 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 }
 
-String _formatVersionLabel(String version, String buildNumber) {
+String _formatVersionLabel(
+  AppLocalizations l10n,
+  String version,
+  String buildNumber,
+) {
   final normalizedVersion = version.trim();
   final normalizedBuild = buildNumber.trim();
   if (normalizedBuild.isEmpty || normalizedBuild == normalizedVersion) {
-    return 'Version $normalizedVersion';
+    return l10n.settingsVersion(normalizedVersion);
   }
 
-  return 'Version $normalizedVersion+$normalizedBuild';
+  return l10n.settingsVersionBuild(normalizedVersion, normalizedBuild);
+}
+
+String _autoLockLabel(AppLocalizations l10n, AutoLockOption option) {
+  return switch (option) {
+    AutoLockOption.immediate => l10n.autoLockImmediate,
+    AutoLockOption.oneMinute => l10n.autoLockOneMinute,
+    AutoLockOption.fiveMinutes => l10n.autoLockFiveMinutes,
+    AutoLockOption.tenMinutes => l10n.autoLockTenMinutes,
+    AutoLockOption.thirtyMinutes => l10n.autoLockThirtyMinutes,
+  };
+}
+
+String _languageLabel(AppLocalizations l10n, AppLanguageOption option) {
+  return option.nativeLabel ?? l10n.languageSystem;
 }
 
 class _RecoveryPhraseCard extends StatelessWidget {
@@ -650,6 +770,7 @@ class _RecoveryPhraseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 26, 24, 24),
@@ -681,7 +802,7 @@ class _RecoveryPhraseCard extends StatelessWidget {
           ),
           const SizedBox(height: 22),
           Text(
-            'Seed Phrase Backup',
+            l10n.settingsSeedPhraseBackup,
             textAlign: TextAlign.center,
             style: theme.textTheme.displaySmall?.copyWith(
               color: const Color(0xFF2D2A23),
@@ -690,7 +811,7 @@ class _RecoveryPhraseCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'We recommend a physical copy stored in a secure spot.',
+            l10n.settingsSeedPhraseBackupDescription,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: const Color(0xFF726759),
@@ -711,7 +832,7 @@ class _RecoveryPhraseCard extends StatelessWidget {
                 elevation: 0,
               ),
               onPressed: onTap,
-              child: const Text('Secure Now'),
+              child: Text(l10n.settingsSecureNow),
             ),
           ),
         ],
@@ -805,7 +926,7 @@ class _SeekerVaultCard extends StatelessWidget {
     final theme = Theme.of(context);
     final displayLabel = label?.trim().isNotEmpty == true
         ? label!.trim()
-        : 'Seeker Wallet';
+        : context.l10n.settingsSeekerWallet;
     final displayAddress = address == null || address!.isEmpty
         ? null
         : Formatters.compactAddress(address!, visibleChars: 6);
@@ -959,6 +1080,7 @@ class _SettingsVersionFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final textStyle = theme.textTheme.bodySmall?.copyWith(
       color: const Color(0xFF8F8578),
       fontWeight: FontWeight.w600,
@@ -976,7 +1098,9 @@ class _SettingsVersionFooter extends StatelessWidget {
             GestureDetector(
               onTap: isChecking ? null : onCheckUpdatesTap,
               child: Text(
-                isChecking ? 'Checking...' : 'Check for updates',
+                isChecking
+                    ? l10n.settingsCheckingUpdates
+                    : l10n.settingsCheckForUpdates,
                 style: textStyle?.copyWith(
                   color: isChecking
                       ? const Color(0xFF8F8578)
@@ -1028,6 +1152,7 @@ class _MnemonicDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final words = mnemonic.split(' ');
 
     return SecureScreen(
@@ -1097,7 +1222,7 @@ class _MnemonicDialog extends StatelessWidget {
               FractionallySizedBox(
                 widthFactor: 0.75,
                 child: PrimaryButton(
-                  label: 'Copy phrase',
+                  label: l10n.copyPhrase,
                   onPressed: () async {
                     await ClipboardUtils.setDataWithAutoWipe(
                       mnemonic,
@@ -1108,11 +1233,7 @@ class _MnemonicDialog extends StatelessWidget {
                       return;
                     }
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Recovery phrase copied (will clear in 15s)',
-                        ),
-                      ),
+                      SnackBar(content: Text(l10n.recoveryPhraseCopied)),
                     );
                   },
                 ),

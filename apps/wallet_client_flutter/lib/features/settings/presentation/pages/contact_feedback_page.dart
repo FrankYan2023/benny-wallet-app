@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/di/providers.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/error_alert_dialog.dart';
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../l10n/l10n.dart';
 
 class ContactFeedbackPage extends ConsumerStatefulWidget {
   const ContactFeedbackPage({super.key});
@@ -37,9 +39,10 @@ class _ContactFeedbackPageState extends ConsumerState<ContactFeedbackPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return AppScaffold(
-      title: 'Feedback',
+      title: l10n.settingsFeedback,
       child: ListView(
         children: [
           WalletCard(
@@ -47,30 +50,25 @@ class _ContactFeedbackPageState extends ConsumerState<ContactFeedbackPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Tell us what went wrong',
+                  l10n.feedbackHeading,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w900,
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  'Send your question or issue directly to Benny Wallet support.',
-                  style: theme.textTheme.bodyMedium,
-                ),
+                Text(l10n.feedbackSubtitle, style: theme.textTheme.bodyMedium),
                 const SizedBox(height: 18),
-                _FieldLabel(label: 'Email (optional)'),
+                _FieldLabel(label: l10n.feedbackEmailOptional),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   autofillHints: const [AutofillHints.email],
                   enabled: !_submitting,
-                  decoration: _inputDecoration(
-                    hintText: 'you@example.com',
-                  ),
+                  decoration: _inputDecoration(hintText: 'you@example.com'),
                 ),
                 const SizedBox(height: 16),
-                _FieldLabel(label: 'Message'),
+                _FieldLabel(label: l10n.feedbackMessage),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _messageController,
@@ -80,12 +78,12 @@ class _ContactFeedbackPageState extends ConsumerState<ContactFeedbackPage> {
                   maxLines: 10,
                   textInputAction: TextInputAction.newline,
                   decoration: _inputDecoration(
-                    hintText: 'Describe the issue you are seeing.',
+                    hintText: l10n.feedbackMessageHint,
                   ),
                 ),
                 const SizedBox(height: 18),
                 PrimaryButton(
-                  label: _submitting ? 'Sending...' : 'Send',
+                  label: _submitting ? l10n.feedbackSending : l10n.commonSend,
                   onPressed: _submitting ? null : _submit,
                 ),
               ],
@@ -113,9 +111,7 @@ class _ContactFeedbackPageState extends ConsumerState<ContactFeedbackPage> {
         borderRadius: BorderRadius.circular(22),
         borderSide: const BorderSide(color: Color(0xFFA46708), width: 1.5),
       ),
-      counterStyle: const TextStyle(
-        color: Color(0xFF8A7D6A),
-      ),
+      counterStyle: const TextStyle(color: Color(0xFF8A7D6A)),
     );
   }
 
@@ -126,8 +122,8 @@ class _ContactFeedbackPageState extends ConsumerState<ContactFeedbackPage> {
     if (message.isEmpty) {
       await showErrorAlertDialog(
         context,
-        title: 'Message Required',
-        message: 'Enter your feedback before sending.',
+        title: context.l10n.feedbackMessageRequiredTitle,
+        message: context.l10n.feedbackMessageRequiredMessage,
       );
       return;
     }
@@ -135,8 +131,8 @@ class _ContactFeedbackPageState extends ConsumerState<ContactFeedbackPage> {
     if (message.length > 2000) {
       await showErrorAlertDialog(
         context,
-        title: 'Message Too Long',
-        message: 'Keep your feedback within 2000 characters.',
+        title: context.l10n.feedbackMessageTooLongTitle,
+        message: context.l10n.feedbackMessageTooLongMessage,
       );
       return;
     }
@@ -144,8 +140,8 @@ class _ContactFeedbackPageState extends ConsumerState<ContactFeedbackPage> {
     if (email.isNotEmpty && !_emailPattern.hasMatch(email)) {
       await showErrorAlertDialog(
         context,
-        title: 'Invalid Email',
-        message: 'Enter a valid email address or leave it empty.',
+        title: context.l10n.feedbackInvalidEmailTitle,
+        message: context.l10n.feedbackInvalidEmailMessage,
       );
       return;
     }
@@ -155,7 +151,9 @@ class _ContactFeedbackPageState extends ConsumerState<ContactFeedbackPage> {
     });
 
     try {
-      await ref.read(backendApiClientProvider).submitContactRequest(
+      await ref
+          .read(backendApiClientProvider)
+          .submitContactRequest(
             email: '',
             message: _buildContactPayloadMessage(
               email: email,
@@ -165,9 +163,9 @@ class _ContactFeedbackPageState extends ConsumerState<ContactFeedbackPage> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Your message has been sent.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.feedbackSent)));
       Navigator.of(context).pop();
     } catch (error) {
       if (!mounted) {
@@ -175,8 +173,8 @@ class _ContactFeedbackPageState extends ConsumerState<ContactFeedbackPage> {
       }
       await showErrorAlertDialog(
         context,
-        title: 'Send Failed',
-        message: _normalizeContactErrorMessage(error.toString()),
+        title: context.l10n.feedbackSendFailedTitle,
+        message: _normalizeContactErrorMessage(error.toString(), context.l10n),
       );
     } finally {
       if (mounted) {
@@ -197,9 +195,9 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
     );
   }
 }
@@ -215,12 +213,13 @@ String _buildContactPayloadMessage({
   return 'Contact email: $email\n\n$message';
 }
 
-String _normalizeContactErrorMessage(String value) {
-  const fallback = 'Unable to send your message right now. Please try again shortly.';
+String _normalizeContactErrorMessage(String value, AppLocalizations l10n) {
+  final fallback = l10n.feedbackSendFailedFallback;
   final normalized = value.trim();
   if (normalized.startsWith('Exception: ')) {
     return _normalizeContactErrorMessage(
       normalized.substring('Exception: '.length),
+      l10n,
     );
   }
 

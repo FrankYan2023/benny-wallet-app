@@ -7,6 +7,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../l10n/l10n.dart';
 
 class ScanAddressPage extends StatefulWidget {
   const ScanAddressPage({super.key});
@@ -94,15 +95,15 @@ class _ScanAddressPageState extends State<ScanAddressPage>
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('No Solana address found in this QR code.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(context.l10n.scanNoSolanaAddress)));
   }
 
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: 'Scan address',
+      title: context.l10n.scanAddressTitle,
       child: Column(
         children: [
           Expanded(
@@ -150,11 +151,11 @@ class _ScanAddressPageState extends State<ScanAddressPage>
           ),
           const SizedBox(height: 18),
           Text(
-            'Point the camera at a Solana QR code.',
+            context.l10n.scanPointCamera,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -174,11 +175,13 @@ class _ScanAddressPageState extends State<ScanAddressPage>
         if (uri.path.isNotEmpty) uri.path.replaceFirst('/', ''),
         if (uri.scheme.toLowerCase() == 'solana' && uri.path.isNotEmpty)
           uri.path.replaceFirst('/', ''),
-        if (uri.scheme.toLowerCase() == 'solana' && uri.host.isNotEmpty) uri.host,
+        if (uri.scheme.toLowerCase() == 'solana' && uri.host.isNotEmpty)
+          uri.host,
       };
 
       for (final candidate in candidates) {
-        if (candidate.isNotEmpty && Validators.isValidPublicAddress(candidate)) {
+        if (candidate.isNotEmpty &&
+            Validators.isValidPublicAddress(candidate)) {
           return candidate;
         }
       }

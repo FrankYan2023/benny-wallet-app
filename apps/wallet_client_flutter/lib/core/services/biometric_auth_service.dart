@@ -35,7 +35,7 @@ class BiometricAuthService {
 
   /// Authenticate for wallet unlock (5-minute session TTL)
   /// Uses sticky auth for better UX
-  Future<bool> authenticateForUnlock() async {
+  Future<bool> authenticateForUnlock({String? localizedReason}) async {
     final supported = await isSupported();
     if (!supported) {
       debugPrint('[SECURITY] Biometric not supported, skipping unlock');
@@ -44,7 +44,8 @@ class BiometricAuthService {
 
     try {
       final authenticated = await _auth.authenticate(
-        localizedReason: 'Use biometrics to unlock your Benny Wallet.',
+        localizedReason:
+            localizedReason ?? 'Use biometrics to unlock your Benny Wallet.',
         options: const AuthenticationOptions(
           biometricOnly: true,
           stickyAuth: true,
@@ -66,7 +67,7 @@ class BiometricAuthService {
 
   /// Authenticate for enabling/setting up biometrics
   /// More strict than unlock (requires explicit approval each time)
-  Future<bool> authenticateForSetup() async {
+  Future<bool> authenticateForSetup({String? localizedReason}) async {
     final supported = await isSupported();
     if (!supported) {
       debugPrint('[SECURITY] Biometric not supported for setup');
@@ -76,6 +77,7 @@ class BiometricAuthService {
     try {
       final authenticated = await _auth.authenticate(
         localizedReason:
+            localizedReason ??
             'Verify with biometrics to enable this security feature.',
         options: const AuthenticationOptions(
           biometricOnly: true,

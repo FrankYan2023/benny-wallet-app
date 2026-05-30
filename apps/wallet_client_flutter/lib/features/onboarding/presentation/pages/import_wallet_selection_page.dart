@@ -8,6 +8,7 @@ import '../../../../app/di/providers.dart';
 import '../../../../core/security/secure_screen.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../auth/domain/wallet_derivation.dart';
 import '../../../auth/presentation/pages/pin_setup_page.dart';
 
@@ -192,10 +193,11 @@ class _ImportWalletSelectionPageState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return SecureScreen(
       child: AppScaffold(
-        title: 'Import Wallet',
+        title: l10n.importWalletTitle,
         child: Column(
           children: [
             WalletCard(
@@ -203,7 +205,7 @@ class _ImportWalletSelectionPageState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Network',
+                    l10n.commonNetwork,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -231,14 +233,14 @@ class _ImportWalletSelectionPageState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Solana Mainnet',
+                                l10n.importSolanaMainnet,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   color: theme.colorScheme.onSecondaryContainer,
                                 ),
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Select the Solana account to import.',
+                                l10n.importSelectSolanaAccount,
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSecondaryContainer
                                       .withValues(alpha: 0.78),
@@ -257,7 +259,7 @@ class _ImportWalletSelectionPageState
             Expanded(child: _buildBody(theme)),
             const SizedBox(height: 16),
             PrimaryButton(
-              label: 'Continue',
+              label: l10n.commonContinue,
               onPressed: _selectedOption == null || _submitting
                   ? null
                   : _continue,
@@ -278,12 +280,12 @@ class _ImportWalletSelectionPageState
               const CircularProgressIndicator(),
               const SizedBox(height: 16),
               Text(
-                'Loading Solana accounts...',
+                context.l10n.importLoadingSolanaAccounts,
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 6),
               Text(
-                'Checking active Solana accounts.',
+                context.l10n.importCheckingActiveSolanaAccounts,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -301,7 +303,7 @@ class _ImportWalletSelectionPageState
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Unable to scan this recovery phrase right now.',
+              context.l10n.importUnableScanRecoveryPhrase,
               style: theme.textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
@@ -316,7 +318,7 @@ class _ImportWalletSelectionPageState
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: _loadOptions,
-              child: const Text('Try again'),
+              child: Text(context.l10n.commonRetry),
             ),
           ],
         ),
@@ -380,7 +382,9 @@ class _ImportWalletSelectionPageState
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  option.hasAssets ? 'Active account' : 'Default main wallet',
+                  option.hasAssets
+                      ? context.l10n.importActiveAccount
+                      : context.l10n.importDefaultMainWallet,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
