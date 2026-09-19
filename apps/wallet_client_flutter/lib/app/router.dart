@@ -21,6 +21,9 @@ import '../features/portfolio/presentation/pages/portfolio_page.dart';
 import '../features/portfolio/presentation/pages/child_wallet_monitor_page.dart';
 import '../features/portfolio/presentation/pages/child_wallets_page.dart';
 import '../features/receive/presentation/pages/receive_page.dart';
+import '../features/multichain/presentation/network_page.dart';
+import '../features/multichain/presentation/network_send_page.dart';
+import '../features/multichain/presentation/token_import_page.dart';
 import '../features/send/domain/send_draft_data.dart';
 import '../features/send/presentation/pages/send_page.dart';
 import '../features/send/presentation/pages/scan_address_page.dart';
@@ -212,6 +215,35 @@ class AppRouter {
         builder: (context, state) => _RouteAccessGuard(
           currentLocation: state.matchedLocation,
           child: const ReceivePage(),
+        ),
+      ),
+      GoRoute(
+        path: NetworkPage.routePath,
+        builder: (context, state) => _RouteAccessGuard(
+          currentLocation: state.matchedLocation,
+          requireUnlocked: true,
+          child: NetworkPage(chainId: state.pathParameters['chainId']!),
+        ),
+      ),
+      GoRoute(
+        path: NetworkSendPage.routePath,
+        builder: (context, state) => _RouteAccessGuard(
+          currentLocation: state.matchedLocation,
+          requireUnlocked: true,
+          allowInChildMode: false,
+          child: NetworkSendPage(
+            chainId: state.pathParameters['chainId']!,
+            assetId: state.uri.queryParameters['asset'],
+          ),
+        ),
+      ),
+      GoRoute(
+        path: TokenImportPage.routePath,
+        builder: (context, state) => _RouteAccessGuard(
+          currentLocation: state.matchedLocation,
+          requireUnlocked: true,
+          allowInChildMode: false,
+          child: TokenImportPage(chainId: state.pathParameters['chainId']!),
         ),
       ),
       GoRoute(
@@ -446,19 +478,25 @@ class _RouteAccessGuard extends ConsumerWidget {
     required this.child,
     this.allowInChildMode = true,
     this.blockWhenWalletExists = false,
+    this.requireUnlocked = false,
   });
 
   final String currentLocation;
   final Widget child;
   final bool allowInChildMode;
   final bool blockWhenWalletExists;
+  final bool requireUnlocked;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final walletState = ref.watch(walletControllerProvider);
 
     String? redirectPath;
-    if (blockWhenWalletExists &&
+    if (requireUnlocked && !walletState.isUnlocked) {
+      redirectPath = !walletState.hasWallet || walletState.loggedOut
+          ? WelcomePage.routePath
+          : UnlockPage.routePath;
+    } else if (blockWhenWalletExists &&
         walletState.hasWallet &&
         !walletState.loggedOut) {
       redirectPath = walletState.isUnlocked

@@ -8,6 +8,8 @@ import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../portfolio/domain/entities/portfolio_view_data.dart';
+import '../../../multichain/presentation/chain_widgets.dart';
+import '../../../multichain/providers/multichain_providers.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
 import '../../../receive/presentation/pages/receive_page.dart';
 import 'send_compose_page.dart';
@@ -82,70 +84,83 @@ class SendPage extends ConsumerWidget {
           ),
         ),
       ],
-      child: portfolio.when(
-        data: (data) {
-          final assets = data.assets
-              .where((asset) => asset.balance > 0)
-              .toList();
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const AdditionalNetworkSendLinks(),
+          Text(
+            ref.watch(chainConfigsProvider).first.displayName,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: portfolio.when(
+              data: (data) {
+                final assets = data.assets
+                    .where((asset) => asset.balance > 0)
+                    .toList();
 
-          if (assets.isEmpty) {
-            return Center(child: Text(l10n.sendNoAssets));
-          }
+                if (assets.isEmpty) {
+                  return Center(child: Text(l10n.sendNoAssets));
+                }
 
-          return ListView(
-            children: [
-              if (normalizedRecipient != null &&
-                  normalizedRecipient.isNotEmpty) ...[
-                WalletCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.sendRecipientPrefilled,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w800),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        Formatters.compactAddress(
-                          normalizedRecipient,
-                          visibleChars: 6,
+                return ListView(
+                  children: [
+                    if (normalizedRecipient != null &&
+                        normalizedRecipient.isNotEmpty) ...[
+                      WalletCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.sendRecipientPrefilled,
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w800),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              Formatters.compactAddress(
+                                normalizedRecipient,
+                                visibleChars: 6,
+                              ),
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
                         ),
-                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
+                      const SizedBox(height: 12),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-              ],
-              const SizedBox(height: 6),
-              for (final asset in assets) ...[
-                TokenRow(
-                  name: asset.token.name,
-                  symbol: Formatters.tokenSymbol(asset.token.symbol),
-                  balanceLine:
-                      '${Formatters.compactNumber(asset.balance)} ${Formatters.tokenSymbol(asset.token.symbol)}',
-                  value: asset.priceQuote == null
-                      ? '--'
-                      : Formatters.usd(asset.totalValueUsd),
-                  change: _assetChangeLine(asset),
-                  isPositiveChange: _assetChangeDirection(asset),
-                  iconUrl: asset.logoUrl,
-                  onTap: () => context.push(
-                    SendComposePage.pathFor(
-                      asset.token.mintAddress,
-                      recipientAddress: normalizedRecipient,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-              ],
-            ],
-          );
-        },
-        error: (error, _) =>
-            Center(child: Text(l10n.sendLoadAssetsFailed('$error'))),
-        loading: () => const Center(child: CircularProgressIndicator()),
+                    const SizedBox(height: 6),
+                    for (final asset in assets) ...[
+                      TokenRow(
+                        name: asset.token.name,
+                        symbol: Formatters.tokenSymbol(asset.token.symbol),
+                        balanceLine:
+                            '${Formatters.compactNumber(asset.balance)} ${Formatters.tokenSymbol(asset.token.symbol)}',
+                        value: asset.priceQuote == null
+                            ? '--'
+                            : Formatters.usd(asset.totalValueUsd),
+                        change: _assetChangeLine(asset),
+                        isPositiveChange: _assetChangeDirection(asset),
+                        iconUrl: asset.logoUrl,
+                        onTap: () => context.push(
+                          SendComposePage.pathFor(
+                            asset.token.mintAddress,
+                            recipientAddress: normalizedRecipient,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ],
+                );
+              },
+              error: (error, _) =>
+                  Center(child: Text(l10n.sendLoadAssetsFailed('$error'))),
+              loading: () => const Center(child: CircularProgressIndicator()),
+            ),
+          ),
+        ],
       ),
     );
   }

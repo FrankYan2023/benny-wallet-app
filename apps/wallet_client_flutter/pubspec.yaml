@@ -30,6 +30,9 @@ dependencies:
   url_launcher: ^6.3.2
   mobile_scanner: ^7.2.0
   bip39: ^1.0.6
+  bip32: ^2.0.0
+  web3dart: ^2.7.3
+  eth_sig_util: ^0.0.9
   freezed_annotation: ^3.1.0
   json_annotation: ^4.11.0
   design_system:

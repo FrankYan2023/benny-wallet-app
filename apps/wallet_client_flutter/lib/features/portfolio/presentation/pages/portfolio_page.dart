@@ -16,6 +16,8 @@ import '../../../auth/presentation/pages/unlock_page.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../auth/domain/wallet_controller_state.dart';
 import '../../../notifications/presentation/pages/notifications_page.dart';
+import '../../../multichain/presentation/chain_widgets.dart';
+import '../../../multichain/providers/multichain_providers.dart';
 import '../../../notifications/presentation/providers/notification_inbox_provider.dart';
 import '../../../onboarding/presentation/pages/welcome_page.dart';
 import '../../../receive/presentation/pages/receive_page.dart';
@@ -149,6 +151,10 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
     }
 
     Future<void> refreshPortfolio() async {
+      for (final config in ref.read(additionalChainConfigsProvider)) {
+        ref.invalidate(chainAssetsProvider(config.id));
+        ref.invalidate(chainActivityProvider(config.id));
+      }
       try {
         ref.invalidate(portfolioProvider(ownerAddress));
         ref.invalidate(defiPortfolioProvider(ownerAddress));
@@ -210,33 +216,29 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
             icon: const Icon(Icons.settings_outlined),
           ),
         ],
-        child: displayData == null && state.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
-                onRefresh: refreshPortfolio,
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: _buildContent(
-                    context: context,
-                    theme: theme,
-                    data: displayData,
-                    defiData: displayDefiData,
-                    hasDefiPositions: hasDefiPositions,
-                    isRefreshing: state.isLoading && displayData != null,
-                    isDefiRefreshing:
-                        defiState.isLoading && displayDefiData != null,
-                    hasLoadError: state.hasError && displayData == null,
-                    hasDefiLoadError:
-                        defiState.hasError && displayDefiData == null,
-                    walletState: walletState,
-                    canOpenSwap: canOpenSwap,
-                    selectedTab: _selectedTab,
-                    onSelectedTabChanged: (tab) {
-                      setState(() => _selectedTab = tab);
-                    },
-                  ),
-                ),
-              ),
+        child: RefreshIndicator(
+          onRefresh: refreshPortfolio,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: _buildContent(
+              context: context,
+              theme: theme,
+              data: displayData,
+              defiData: displayDefiData,
+              hasDefiPositions: hasDefiPositions,
+              isRefreshing: state.isLoading,
+              isDefiRefreshing: defiState.isLoading && displayDefiData != null,
+              hasLoadError: state.hasError && displayData == null,
+              hasDefiLoadError: defiState.hasError && displayDefiData == null,
+              walletState: walletState,
+              canOpenSwap: canOpenSwap,
+              selectedTab: _selectedTab,
+              onSelectedTabChanged: (tab) {
+                setState(() => _selectedTab = tab);
+              },
+            ),
+          ),
+        ),
       ),
     );
 
@@ -387,7 +389,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
         child: Column(
           children: [
             Text(
-              Formatters.usd(totalValueUsd),
+              data == null ? '--' : Formatters.usd(totalValueUsd),
               textAlign: TextAlign.center,
               style: theme.textTheme.displayLarge?.copyWith(
                 color: theme.colorScheme.onPrimary,
@@ -544,6 +546,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
           ],
         ),
       ),
+      const AdditionalNetworkAssets(),
       const SizedBox(height: 16),
       if (hasLoadError)
         WalletCard(

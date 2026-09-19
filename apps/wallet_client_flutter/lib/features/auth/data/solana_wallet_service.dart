@@ -24,6 +24,7 @@ import 'package:solana/dto.dart'
         ParsedSplToken2022ProgramAccountData,
         ProgramAccount,
         SplTokenAccountDataInfo,
+        SignatureStatus,
         TokenAmount,
         TokenAccountData,
         TokenAccountsFilter,
@@ -487,6 +488,19 @@ class SolanaWalletService {
     required String ownerAddress,
     required String destinationAddress,
     required int lamports,
+  }) async =>
+      (await estimateSolFeeLamports(
+        ownerAddress: ownerAddress,
+        destinationAddress: destinationAddress,
+        lamports: lamports,
+      )) /
+      lamportsPerSol;
+
+  /// Exact fee units for multichain callers; keeps the existing Sender budget.
+  Future<int> estimateSolFeeLamports({
+    required String ownerAddress,
+    required String destinationAddress,
+    required int lamports,
   }) async {
     final rpcClient = await _getRpcClient();
     final owner = Ed25519HDPublicKey.fromBase58(ownerAddress);
@@ -506,14 +520,27 @@ class SolanaWalletService {
     final fee = await rpcClient.getFeeForMessage(
       base64Encode(compiled.toByteArray().toList()),
     );
-    return ((fee ?? 0) +
-            _senderTipLamports +
-            _senderPriorityFeeLamports +
-            _senderSafetyBufferLamports) /
-        lamportsPerSol;
+    return (fee ?? 0) +
+        _senderTipLamports +
+        _senderPriorityFeeLamports +
+        _senderSafetyBufferLamports;
   }
 
   Future<double> estimateSplFee({
+    required String ownerAddress,
+    required String destinationAddress,
+    required TokenInfo token,
+    required int amount,
+  }) async =>
+      (await estimateSplFeeLamports(
+        ownerAddress: ownerAddress,
+        destinationAddress: destinationAddress,
+        token: token,
+        amount: amount,
+      )) /
+      lamportsPerSol;
+
+  Future<int> estimateSplFeeLamports({
     required String ownerAddress,
     required String destinationAddress,
     required TokenInfo token,
@@ -579,11 +606,10 @@ class SolanaWalletService {
     final fee = await rpcClient.getFeeForMessage(
       base64Encode(compiled.toByteArray().toList()),
     );
-    return ((fee ?? 0) +
-            _senderTipLamports +
-            _senderPriorityFeeLamports +
-            _senderSafetyBufferLamports) /
-        lamportsPerSol;
+    return (fee ?? 0) +
+        _senderTipLamports +
+        _senderPriorityFeeLamports +
+        _senderSafetyBufferLamports;
   }
 
   Future<String> sendSol({
@@ -792,6 +818,64 @@ class SolanaWalletService {
       message: message,
       feePayer: owner,
     );
+  }
+
+  /// Sign a locally prepared transfer without broadcasting or exposing keys.
+  Future<String> signPreparedTransfer({
+    required String mnemonic,
+    required String encodedTransaction,
+    WalletDerivation derivation = WalletDerivation.legacy,
+  }) async {
+    final signer = await keyPairFromMnemonic(mnemonic, derivation: derivation);
+    final transaction = SignedTx.decode(encodedTransaction);
+    if (transaction.compiledMessage.accountKeys.first.toBase58() !=
+        signer.address) {
+      throw StateError('The transfer does not belong to the selected account.');
+    }
+    return (await _signPreparedTransaction(
+      encodedTransaction: encodedTransaction,
+      signer: signer,
+    )).encode();
+  }
+
+  /// Preserve the same Sender submission path used by sendSol/sendSplToken.
+  Future<String> broadcastSignedTransfer({
+    required String encodedTransaction,
+    required String mintAddress,
+    required String amount,
+    required String destinationAddress,
+  }) async {
+    final backendApiClient = _backendApiClient;
+    if (backendApiClient != null) {
+      return backendApiClient.submitSenderTransaction(
+        encodedTransaction: encodedTransaction,
+        txType: 'send',
+        fromMint: mintAddress,
+        toMint: mintAddress,
+        amount: amount,
+        destinationAddress: destinationAddress,
+      );
+    }
+    return _broadcastEncodedTransaction(
+      rpcClient: await _getRpcClient(),
+      encodedTransaction: encodedTransaction,
+    );
+  }
+
+  Future<TransactionDetails?> getTransactionDetails(String signature) async {
+    return (await _getRpcClient()).getTransaction(
+      signature,
+      encoding: Encoding.jsonParsed,
+      commitment: Commitment.confirmed,
+      maxSupportedTransactionVersion: 0,
+    );
+  }
+
+  Future<SignatureStatus?> getTransactionStatus(String signature) async {
+    final response = await (await _getRpcClient()).getSignatureStatuses([
+      signature,
+    ], searchTransactionHistory: true);
+    return response.value.isEmpty ? null : response.value.first;
   }
 
   Future<String> signAndSendPreparedTransaction({
