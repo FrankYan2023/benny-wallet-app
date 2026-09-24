@@ -21,6 +21,9 @@ import 'package:wallet_client_flutter/features/auth/presentation/providers/walle
 import 'package:wallet_client_flutter/features/multichain/data/chain_transfer_controller.dart';
 import 'package:wallet_client_flutter/features/multichain/data/multichain_store.dart';
 import 'package:wallet_client_flutter/features/multichain/presentation/chain_widgets.dart';
+import 'package:wallet_client_flutter/features/multichain/presentation/chain_navigation.dart';
+import 'package:wallet_client_flutter/features/multichain/presentation/network_page.dart';
+import 'package:wallet_client_flutter/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:wallet_client_flutter/features/multichain/presentation/network_send_page.dart';
 import 'package:wallet_client_flutter/features/multichain/providers/multichain_providers.dart';
 import 'package:wallet_client_flutter/features/receive/presentation/pages/receive_page.dart';
@@ -138,6 +141,32 @@ Future<void> screenshot(WidgetTester tester, String name) async {
 }
 
 void main() {
+  test(
+    'receive history preserves Solana and routes other networks correctly',
+    () {
+      expect(
+        receiveHistoryPath(SolanaAdapter.networkId),
+        ReceivedHistoryPage.routePath,
+      );
+      expect(
+        receiveHistoryPath(arcTestnetConfig.id),
+        networkPath(arcTestnetConfig.id),
+      );
+      expect(receiveHistoryPath('future-evm'), networkPath('future-evm'));
+    },
+  );
+  testWidgets('child mode exposes receive but no blocked network actions', (
+    tester,
+  ) async {
+    await show(
+      tester,
+      NetworkPage(chainId: arcTestnetConfig.id),
+      state: unlocked.copyWith(childModeEnabled: true),
+    );
+    expect(find.text('Receive'), findsOneWidget);
+    expect(find.text('Send'), findsNothing);
+    expect(find.text('Import token'), findsNothing);
+  });
   setUpAll(() async {
     for (final entry in {
       'Manrope': 'assets/fonts/Manrope/Manrope-wght.ttf',

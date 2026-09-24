@@ -23,6 +23,8 @@ const arcTestnetConfig = ChainConfig(
   nativeTokenDecimals: 6,
   nativeTransferEmitter: '0xfffffffffffffffffffffffffffffffffffffffe',
   minimumGasPrice: 20000000000,
+  // Public fallback rejected 250-block queries in emulator QA (2026-09-24).
+  maxLogBlockRange: 100,
 );
 
 const arcMainnetConfig = ChainConfig(

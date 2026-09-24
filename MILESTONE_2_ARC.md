@@ -100,7 +100,7 @@ These are configuration inputs, not a remotely managed configuration service. Pr
 - Receive switches network, full address and QR together, with explicit network warning. Unsupported custody shows an explanation instead of substituting an address.
 - Send retains old Solana path and provides a shared network send page: exact amount, validated recipient, estimate, review of full recipient/token/network/fees, explicit confirmation, hash and activity.
 - USDC and generic ERC-20 balance/import/send implemented. Token metadata is bounded and rejects control/bidi characters, unsupported decimals, non-contract addresses and malformed ABI results.
-- Activity polls without overlapping refreshes. It scans the latest 1,000 blocks in 250-block chunks plus the last 100 locally recorded submissions. It displays pending/final/failed/unknown, exact amounts and receipt fees. Public submissions remain visible if RPC reads fail.
+- Activity polls without overlapping refreshes. It scans the latest 1,000 blocks in configured chunks (100 blocks on public Arc Testnet) plus the last 100 locally recorded submissions. It displays pending/final/failed/unknown, exact amounts and receipt fees. Public submissions remain visible if RPC reads fail.
 - EIP-191 and chain-domain-checked EIP-712 V4 signing services are implemented, with namespace preparation and transfer/approval/unlimited-approval decoding. Unknown actions require additional review. No dapp signing UI is exposed.
 - No new Swap, Bridge, DApp browser or full WalletConnect flow.
 
@@ -157,4 +157,87 @@ No files in the synced project `sources/`, no backend repository, and no iOS/And
 4. Validate representative backed-up production record versions in a controlled recovery QA process before release. No production migration is required by this change.
 5. Provision private-mainnet access and verify actual BENNY deployment before enabling mainnet. Perform a dedicated wallet security review before distributing a release build.
 
-Recommended next step: complete Xcode setup and the cross-platform funded Testnet/device checklist. WalletConnect, swap, bridge and additional EVM networks remain separate later phases.
+Recommended next step: complete the funded Android Testnet transfer/receipt checklist first, then initialize Xcode and finish iOS and physical-device validation. WalletConnect, swap, bridge and additional EVM networks remain separate later phases.
+
+
+## Android emulator interaction pass (2026-09-22–24)
+
+Device: dedicated `Benny_Arc_QA_API36`, Pixel 7, Android 16/API 36,
+Google APIs ARM64, 1080×2400. The original app's `liteStore` flavor is used.
+A random, unfunded QA mnemonic is encrypted using the existing Android secure
+storage/PIN flow. No existing user wallet was opened, rewritten or migrated.
+No transfer was signed or broadcast during this pass.
+
+Fixes:
+- Guard the PIN unlock continuation before calling `setState` or reading its
+  provider after the router has disposed the page. The first real emulator
+  test reproduced `setState() called after dispose`; subsequent runs passed.
+- Receive history follows the selected network. Solana retains its original
+  receipt feed; Arc opens its own network activity. Routing is centralized in
+  `chain_navigation.dart` rather than adding protocol branches to widgets.
+- Child mode hides the unsupported token import action, consistently with its
+  existing route restrictions.
+- Arc Testnet history now uses configurable 100-block log queries. Live public
+  fallback requests rejected 250-block ranges with HTTP 400/provider code 35;
+  100-block requests succeeded. The full 1,000-block window remains intact.
+  Regression coverage checks contiguous incoming/outgoing coverage without gaps.
+
+Validation:
+- Dedicated emulator integration test: **passed**, final retained-wallet run 43 seconds after build,
+  using actual app routing, Android secure storage and public Arc RPC reads.
+  Covers PIN unlock, existing Solana address, derived Arc address/QR switching,
+  clipboard feedback, Arc history navigation and successful empty-history loading,
+  invalid recipient/zero amount,
+  insufficient balance, USDC metadata lookup/import and balance deduplication.
+- Unit/widget regression suite: **70 tests passed**, including all existing
+  tests plus selected-network history and child-mode action checks.
+- Static analysis: **passed**, no issues (8.5 seconds after the history fix).
+- Regular Android debug APK: **built successfully**, final rebuild 16.0 seconds, and installed
+  for manual inspection. Flutter test itself removes its harness and wallet;
+  retained QA state requires flutter run followed by adb install -r.
+- Existing localization generation still reports 310 untranslated Chinese
+  messages; the repository's localization coverage test passes. Full translation
+  is outside this interaction pass.
+
+Additional changed files: `lib/features/auth/presentation/pages/unlock_page.dart`,
+`lib/features/multichain/presentation/chain_navigation.dart`,
+`lib/features/multichain/presentation/network_page.dart`,
+`lib/features/receive/presentation/pages/receive_page.dart`,
+`test/features/multichain/widgets_test.dart`, and
+`integration_test/arc/{arc_emulator_smoke_test.dart,README.md}`,
+`lib/core/chains/{chain_models.dart,arc_chain_config.dart}`,
+`lib/core/chains/evm/evm_adapter.dart`, `test/core/chains/evm_adapter_test.dart`,
+and `tool/arc_read_smoke.dart` (app-relative).
+
+This completes the unfunded Android smoke path, not the funded cross-platform
+MVP acceptance. iOS build setup, physical-device biometric checks, controlled
+production-format recovery validation, and actual Testnet transfer/receipt
+verification remain open. No mainnet readiness or safe production migration is
+claimed.
+
+
+Manual regular-APK checks on 2026-09-24:
+- Retained QA harness completed its assertions, then a regular APK replaced it
+  using `adb install -r`. Cold launch required PIN and unlocked the same QA root.
+- Checked receive network/address/QR, network history navigation, recipient
+  keyboard Next → numeric amount keyboard, Android Back hiding the keyboard
+  without leaving the form, and inline insufficient-balance feedback.
+- Inspected normal and 130% system-font send layouts; labels/actions remain
+  visible and contract text wraps. Restored system font scale to 1.0.
+- Read-only full-history smoke passed after the range fix: block `0x3ccc13b`,
+  USDC decimals 6, six system events in that block, zero recent events for this
+  unfunded QA account, zero broadcasts. The optional public-address argument to
+  `tool/arc_read_smoke.dart` now exercises the same adapter history path as UI.
+- Screenshots are generated locally under
+  `apps/wallet_client_flutter/build/emulator_qa/`: `home.png`,
+  `arc-receive.png`, `arc-send-keyboard.png`, `arc-amount-keyboard.png`,
+  `arc-send-validation.png`, `arc-send-large-text.png`.
+
+Final emulator rerun (2026-09-24) passed the added live history-loading assertion
+and reused the marked QA wallet from the previous ordinary APK. The test runner
+reported all tests passed before the emulator was subsequently closed.
+
+The emulator was restarted and the final ordinary APK reinstalled afterward.
+PIN unlock succeeded, and the Arc activity page loaded its empty state normally;
+`build/emulator_qa/arc-activity.png` records this final manual verification.
+The dedicated emulator was left running on that page.

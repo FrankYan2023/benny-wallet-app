@@ -734,8 +734,9 @@ class EvmAdapter extends ChainAdapter {
     final logs = <String, Map<dynamic, dynamic>>{};
     for (final entry in emitters.entries) {
       _checkAsset(entry.value);
-      for (var first = start; first <= latest; first += 250) {
-        final last = first + 249 < latest ? first + 249 : latest;
+      final range = config.maxLogBlockRange;
+      for (var first = start; first <= latest; first += range) {
+        final last = first + range - 1 < latest ? first + range - 1 : latest;
         final responses = await Future.wait([
           for (final topics in [
             [_transferTopic, addressTopic],

@@ -72,12 +72,13 @@ class NetworkPage extends ConsumerWidget {
                   icon: const Icon(Icons.qr_code_rounded),
                   label: Text(chainText(context, 'Receive', '接收')),
                 ),
-                OutlinedButton.icon(
-                  onPressed: () =>
-                      context.push('${networkPath(chainId)}/import-token'),
-                  icon: const Icon(Icons.add_rounded),
-                  label: Text(chainText(context, 'Import token', '导入代币')),
-                ),
+                if (!wallet.childModeEnabled)
+                  OutlinedButton.icon(
+                    onPressed: () =>
+                        context.push('${networkPath(chainId)}/import-token'),
+                    icon: const Icon(Icons.add_rounded),
+                    label: Text(chainText(context, 'Import token', '导入代币')),
+                  ),
               ],
             ),
             const SizedBox(height: 20),

@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../l10n/l10n.dart';
+import '../../../multichain/presentation/chain_navigation.dart';
 import '../../../multichain/presentation/chain_widgets.dart';
 import '../../../multichain/providers/multichain_providers.dart';
-import '../../../notifications/presentation/pages/notifications_page.dart';
 
 class ReceivePage extends ConsumerWidget {
   const ReceivePage({super.key});
@@ -25,9 +25,8 @@ class ReceivePage extends ConsumerWidget {
       title: l10n.receiveTitle,
       actions: [
         IconButton(
-          tooltip:
-              '${configs.first.displayName} · ${l10n.receivedHistoryTitle}',
-          onPressed: () => context.push(ReceivedHistoryPage.routePath),
+          tooltip: l10n.receivedHistoryTitle,
+          onPressed: () => context.push(receiveHistoryPath(config.id)),
           icon: const Icon(Icons.history_rounded),
         ),
       ],

@@ -113,12 +113,12 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
 
     setState(() => _submitting = true);
     await ref.read(walletControllerProvider.notifier).unlock(_pin);
-    setState(() => _submitting = false);
-
-    final state = ref.read(walletControllerProvider);
     if (!mounted) {
       return;
     }
+    setState(() => _submitting = false);
+
+    final state = ref.read(walletControllerProvider);
 
     if (state.isUnlocked) {
       context.go(PortfolioPage.routePath);

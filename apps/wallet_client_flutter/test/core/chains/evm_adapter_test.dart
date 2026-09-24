@@ -470,7 +470,20 @@ void main() {
       final filters = rpc.parameters['eth_getLogs']!
           .map((p) => p.single as Map)
           .toList();
-      expect(filters, hasLength(8));
+      expect(filters, hasLength(20));
+      // Cover the complete window without gaps, while respecting the public
+      // provider's smaller range limit for both incoming and outgoing logs.
+      var next = 1001;
+      for (var i = 0; i < filters.length; i += 2) {
+        final first = int.parse(filters[i]['fromBlock'] as String);
+        final last = int.parse(filters[i]['toBlock'] as String);
+        expect(first, next);
+        expect(last - first + 1, lessThanOrEqualTo(100));
+        expect(filters[i + 1]['fromBlock'], filters[i]['fromBlock']);
+        expect(filters[i + 1]['toBlock'], filters[i]['toBlock']);
+        next = last + 1;
+      }
+      expect(next, 2001);
       expect(
         filters.every(
           (p) => p['address'] == arcTestnetConfig.nativeTransferEmitter,

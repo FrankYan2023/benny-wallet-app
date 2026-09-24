@@ -18,7 +18,8 @@ class ChainConfig {
     this.nativeTokenDecimals,
     this.nativeTransferEmitter,
     this.minimumGasPrice = 0,
-  });
+    this.maxLogBlockRange = 250,
+  }) : assert(maxLogBlockRange > 0);
   final String id;
   final ChainFamily family;
   final String displayName;
@@ -33,6 +34,9 @@ class ChainConfig {
   final int? nativeTokenDecimals;
   final String? nativeTransferEmitter;
   final int minimumGasPrice;
+
+  /// Provider request limit; does not reduce the total history window.
+  final int maxLogBlockRange;
   String get namespace => family == ChainFamily.evm ? 'eip155:$chainId' : id;
   Uri transactionUrl(String hash) =>
       Uri.parse('$explorerUrl/tx/${Uri.encodeComponent(hash)}');
