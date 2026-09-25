@@ -1,0 +1,118 @@
+00:00 +0: loading apps/wallet_client_flutter/test/l10n/localization_coverage_test.dart
+00:00 +0: apps/wallet_client_flutter/test/core/constants/app_constants_test.dart: default API configuration uses the production backend
+00:00 +1: apps/wallet_client_flutter/test/l10n/localization_coverage_test.dart: localization coverage target locales have every template message key
+00:00 +2: apps/wallet_client_flutter/test/l10n/localization_coverage_test.dart: localization coverage supported locales include every language option
+00:00 +3: apps/wallet_client_flutter/test/l10n/localization_coverage_test.dart: localization coverage language picker order is stable
+00:00 +4: apps/wallet_client_flutter/test/l10n/localization_coverage_test.dart: localization coverage language picker options use native language names
+00:00 +5: apps/wallet_client_flutter/test/l10n/localization_coverage_test.dart: localization coverage Android and iOS native localization resources exist
+00:00 +6: apps/wallet_client_flutter/test/l10n/localization_coverage_test.dart: localization coverage presentation pages do not contain unlocalized visible literals
+00:00 +7: apps/wallet_client_flutter/test/l10n/localization_coverage_test.dart: localization coverage used AppLocalizations keys exist in target locale ARB files
+00:00 +8: apps/wallet_client_flutter/test/core/network/api_client_test.dart: BackendApiClient maps connection timeout errors to a friendly message
+00:00 +9: apps/wallet_client_flutter/test/core/network/api_client_test.dart: BackendApiClient uses endpoint fallback text for server errors
+00:00 +10: apps/wallet_client_flutter/test/core/network/api_client_test.dart: BackendApiClient retries read requests against a fallback backend
+00:00 +11: apps/wallet_client_flutter/test/core/network/api_client_test.dart: WalletAuthApiClient maps connection timeout errors to a friendly message
+00:00 +12: apps/wallet_client_flutter/test/core/network/api_client_test.dart: WalletAuthApiClient retries auth requests against a fallback backend
+00:01 +13: apps/wallet_client_flutter/test/core/chains/evm_rpc_test.dart: wrong chain ID fails closed without reading or broadcasting
+00:01 +14: apps/wallet_client_flutter/test/core/chains/evm_rpc_test.dart: wrong chain ID fails closed without reading or broadcasting
+00:01 +15: apps/wallet_client_flutter/test/core/chains/evm_rpc_test.dart: wrong chain ID fails closed without reading or broadcasting
+00:01 +16: apps/wallet_client_flutter/test/core/chains/evm_rpc_test.dart: wrong chain ID fails closed without reading or broadcasting
+00:01 +17: apps/wallet_client_flutter/test/core/chains/evm_rpc_test.dart: wrong chain ID fails closed without reading or broadcasting
+00:01 +18: apps/wallet_client_flutter/test/core/chains/evm_rpc_test.dart: wrong chain ID fails closed without reading or broadcasting
+00:01 +19: apps/wallet_client_flutter/test/core/chains/evm_rpc_test.dart: wrong chain ID fails closed without reading or broadcasting
+00:01 +20: apps/wallet_client_flutter/test/core/utils/amount_parser_test.dart: AmountParser formats raw units with full token precision
+00:01 +21: apps/wallet_client_flutter/test/core/chains/evm_rpc_test.dart: transport failure falls back to another verified endpoint
+00:01 +22: apps/wallet_client_flutter/test/core/chains/evm_rpc_test.dart: broadcast response loss is not retried or echoed in error text
+00:01 +23: apps/wallet_client_flutter/test/core/chains/evm_rpc_test.dart: RPC response must match the request id
+00:01 +24: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: BIP44 derivation matches independent Ethereum vector
+00:01 +25: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: EVM address rejects bad EIP55 mixed case, zero and missing prefix
+00:01 +26: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: native/ERC20 USDC aliases deduplicate and preserve fee dust separately
+00:01 +27: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: custom ERC20 metadata, exact balance and ABI transfer encoding
+00:01 +28: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: invalid metadata decimals, malformed ABI and non-contract import fail
+00:01 +29: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: fee estimation applies Arc floor and reserves combined USDC spend
+00:01 +30: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: custom token needs both token balance and USDC fee balance
+00:01 +31: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: typed EIP1559 envelope and hash match independent ethers vector
+00:02 +32: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: network mismatch, wrong root mnemonic, stale nonce prevent signing
+00:02 +33: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: network mismatch, wrong root mnemonic, stale nonce prevent signing
+00:02 +34: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: network mismatch, wrong root mnemonic, stale nonce prevent signing
+00:02 +35: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: network mismatch, wrong root mnemonic, stale nonce prevent signing
+00:02 +36: apps/wallet_client_flutter/test/core/chains/solana_adapter_test.dart: native send reserves network fee and rent before building
+00:02 +37: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: altered reviewed amount or signed envelope cannot broadcast
+00:02 +38: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: altered reviewed amount or signed envelope cannot broadcast
+00:02 +39: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: altered reviewed amount or signed envelope cannot broadcast
+00:03 +40: apps/wallet_client_flutter/test/core/chains/solana_adapter_test.dart: signs the reviewed transfer and preserves Sender submission metadata
+00:03 +41: apps/wallet_client_flutter/test/core/chains/solana_adapter_test.dart: signs the reviewed transfer and preserves Sender submission metadata
+00:03 +42: apps/wallet_client_flutter/test/core/chains/solana_adapter_test.dart: signs the reviewed transfer and preserves Sender submission metadata
+00:03 +43: apps/wallet_client_flutter/test/core/chains/solana_adapter_test.dart: signs the reviewed transfer and preserves Sender submission metadata
+00:03 +44: apps/wallet_client_flutter/test/core/chains/solana_adapter_test.dart: signs the reviewed transfer and preserves Sender submission metadata
+00:03 +45: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: tracked unknown submissions never leak to a different root wallet
+00:03 +46: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: tracked unknown submissions never leak to a different root wallet
+00:03 +47: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: tracked unknown submissions never leak to a different root wallet
+00:03 +48: apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart: tracked unknown submissions never leak to a different root wallet
+00:04 +49: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: child mode activity has network selection and no transfer actions
+00:04 +50: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: child mode activity has network selection and no transfer actions
+00:04 +51: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: child mode activity has network selection and no transfer actions
+00:04 +52: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: child mode activity has network selection and no transfer actions
+00:04 +53: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: child mode activity has network selection and no transfer actions
+00:04 +54: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: child mode activity has network selection and no transfer actions
+00:04 +55: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: child mode activity has network selection and no transfer actions
+00:04 +56: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: child mode activity has network selection and no transfer actions
+00:05 +57: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: child mode activity has network selection and no transfer actions
+00:05 +58: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: child mode activity has network selection and no transfer actions
+00:05 +59: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: child mode activity has network selection and no transfer actions
+00:05 +60: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: child mode activity has network selection and no transfer actions
+00:05 +61: apps/wallet_client_flutter/test/features/auth/wallet_storage_regression_test.dart: pre-existing encrypted mnemonic record decrypts without rewriting storage
+00:06 +61: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: home defaults to both networks and filters shared asset rows
+
+Warning: A call to tap() with finder "Found 1 widget with text "Arc Testnet" (ignoring all but last): [
+  Text("Arc Testnet", dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+]" derived an Offset (Offset(273.2, 156.0)) that would not hit test on the specified widget.
+Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+The finder corresponds to this RenderBox: RenderParagraph#10802 relayoutBoundary=up40
+The hit test result at that offset is: HitTestResult(RenderPointerListener#91c75@Offset(104.0, 28.0), RenderSemanticsAnnotations#da084@Offset(104.0, 28.0), RenderMouseRegion#f37bf@Offset(104.0, 28.0), RenderSemanticsAnnotations#b5fbc@Offset(104.0, 28.0), RenderSemanticsAnnotations#8788d@Offset(104.0, 28.0), RenderMergeSemantics#c068a@Offset(104.0, 28.0), RenderAnimatedOpacity#7465e@Offset(104.0, 28.0), _RenderMenuItem#e611d@Offset(104.0, 28.0), RenderListBody#47026@Offset(104.0, 140.0), RenderPadding#72576@Offset(104.0, 148.0), _RenderSingleChildViewport#a13e9@Offset(104.0, 148.0), RenderIgnorePointer#40995@Offset(104.0, 148.0), RenderSemanticsAnnotations#57391@Offset(104.0, 148.0), RenderPointerListener#d2c23@Offset(104.0, 148.0), RenderSemanticsGestureHandler#5eef1@Offset(104.0, 148.0), RenderPointerListener#4dd61@Offset(104.0, 148.0), _RenderScrollSemantics#5f930@Offset(104.0, 148.0), RenderClipRect#15e04@Offset(104.0, 148.0), RenderSemanticsAnnotations#4c735@Offset(104.0, 148.0), RenderIntrinsicWidth#ef509@Offset(104.0, 148.0), RenderConstrainedBox#02e9a@Offset(104.0, 148.0), RenderPositionedBox#5b8ac@Offset(104.0, 148.0), _RenderInkFeatures#18e15@Offset(104.0, 148.0), RenderCustomPaint#55b58@Offset(104.0, 148.0), RenderPhysicalShape#a02ec@Offset(104.0, 148.0), RenderAnimatedOpacity#3545d@Offset(104.0, 148.0), RenderCustomSingleChildLayoutBox#162f8@Offset(273.2, 156.0), _RenderLayoutBuilder#f96df@Offset(273.2, 156.0), RenderRepaintBoundary#46761@Offset(273.2, 156.0), RenderIgnorePointer#254df@Offset(273.2, 156.0), RenderRepaintBoundary#d552f@Offset(273.2, 156.0), RenderSemanticsAnnotations#a9986@Offset(273.2, 156.0), RenderOffstage#7880e@Offset(273.2, 156.0), RenderSemanticsAnnotations#31285@Offset(273.2, 156.0), _RenderTheater#1bf3c@Offset(273.2, 156.0), RenderAbsorbPointer#99bce@Offset(273.2, 156.0), RenderPointerListener#511df@Offset(273.2, 156.0), RenderSemanticsAnnotations#e3590@Offset(273.2, 156.0), RenderSemanticsAnnotations#3f968@Offset(273.2, 156.0), RenderSemanticsAnnotations#a2606@Offset(273.2, 156.0), RenderSemanticsAnnotations#76b70@Offset(273.2, 156.0), RenderTapRegionSurface#726e4@Offset(273.2, 156.0), RenderSemanticsAnnotations#74117@Offset(273.2, 156.0), RenderSemanticsAnnotations#d432d@Offset(273.2, 156.0), RenderRepaintBoundary#4fba4@Offset(273.2, 156.0), HitTestEntry<HitTestTarget>#6435f(_ReusableRenderView#3dd14), HitTestEntry<HitTestTarget>#454fc(<AutomatedTestWidgetsFlutterBinding>))
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2158:25)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1942:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1075:7)
+#3      main.<anonymous closure> (file://apps/wallet_client_flutter/test/features/multichain/widgets_test.dart:207:18)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1682:5)
+<asynchronous suspension>
+#6      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+To silence this warning, pass "warnIfMissed: false" to "tap()".
+To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+
+
+Warning: A call to tap() with finder "Found 1 widget with text "Solana Mainnet" (ignoring all but last): [
+  Text("Solana Mainnet", dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+]" derived an Offset (Offset(270.8, 100.0)) that would not hit test on the specified widget.
+Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+The finder corresponds to this RenderBox: RenderParagraph#ad62a relayoutBoundary=up40
+The hit test result at that offset is: HitTestResult(RenderPointerListener#9afa7@Offset(104.0, 28.0), RenderSemanticsAnnotations#e9889@Offset(104.0, 28.0), RenderMouseRegion#d0db1@Offset(104.0, 28.0), RenderSemanticsAnnotations#85e0c@Offset(104.0, 28.0), RenderSemanticsAnnotations#2d1e7@Offset(104.0, 28.0), RenderMergeSemantics#17703@Offset(104.0, 28.0), RenderAnimatedOpacity#0d6fb@Offset(104.0, 28.0), _RenderMenuItem#65911@Offset(104.0, 28.0), RenderListBody#08d26@Offset(104.0, 84.0), RenderPadding#82b31@Offset(104.0, 92.0), _RenderSingleChildViewport#f9797@Offset(104.0, 92.0), RenderIgnorePointer#03074@Offset(104.0, 92.0), RenderSemanticsAnnotations#09753@Offset(104.0, 92.0), RenderPointerListener#3156b@Offset(104.0, 92.0), RenderSemanticsGestureHandler#dbbb7@Offset(104.0, 92.0), RenderPointerListener#a08e2@Offset(104.0, 92.0), _RenderScrollSemantics#08f2f@Offset(104.0, 92.0), RenderClipRect#985d6@Offset(104.0, 92.0), RenderSemanticsAnnotations#7f9cc@Offset(104.0, 92.0), RenderIntrinsicWidth#ae016@Offset(104.0, 92.0), RenderConstrainedBox#39c30@Offset(104.0, 92.0), RenderPositionedBox#9cfe6@Offset(104.0, 92.0), _RenderInkFeatures#f18e8@Offset(104.0, 92.0), RenderCustomPaint#fb730@Offset(104.0, 92.0), RenderPhysicalShape#2615a@Offset(104.0, 92.0), RenderAnimatedOpacity#bbddf@Offset(104.0, 92.0), RenderCustomSingleChildLayoutBox#331dc@Offset(270.8, 100.0), _RenderLayoutBuilder#18254@Offset(270.8, 100.0), RenderRepaintBoundary#d0156@Offset(270.8, 100.0), RenderIgnorePointer#c33a7@Offset(270.8, 100.0), RenderRepaintBoundary#1b7fb@Offset(270.8, 100.0), RenderSemanticsAnnotations#39eed@Offset(270.8, 100.0), RenderOffstage#9bf93@Offset(270.8, 100.0), RenderSemanticsAnnotations#54a93@Offset(270.8, 100.0), _RenderTheater#1bf3c@Offset(270.8, 100.0), RenderAbsorbPointer#99bce@Offset(270.8, 100.0), RenderPointerListener#511df@Offset(270.8, 100.0), RenderSemanticsAnnotations#e3590@Offset(270.8, 100.0), RenderSemanticsAnnotations#3f968@Offset(270.8, 100.0), RenderSemanticsAnnotations#a2606@Offset(270.8, 100.0), RenderSemanticsAnnotations#76b70@Offset(270.8, 100.0), RenderTapRegionSurface#726e4@Offset(270.8, 100.0), RenderSemanticsAnnotations#74117@Offset(270.8, 100.0), RenderSemanticsAnnotations#d432d@Offset(270.8, 100.0), RenderRepaintBoundary#4fba4@Offset(270.8, 100.0), HitTestEntry<HitTestTarget>#91d2a(_ReusableRenderView#3dd14), HitTestEntry<HitTestTarget>#4fdf7(<AutomatedTestWidgetsFlutterBinding>))
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2158:25)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1942:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1075:7)
+#3      main.<anonymous closure> (file://apps/wallet_client_flutter/test/features/multichain/widgets_test.dart:213:18)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1682:5)
+<asynchronous suspension>
+#6      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+To silence this warning, pass "warnIfMissed: false" to "tap()".
+To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+
+00:06 +62: apps/wallet_client_flutter/test/features/auth/wallet_storage_regression_test.dart: pre-existing encrypted mnemonic record decrypts without rewriting storage
+00:06 +63: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: shared send selects Arc inline and clears its form on network switch
+00:07 +64: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: shared send selects Arc inline and clears its form on network switch
+00:07 +65: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: shared send selects Arc inline and clears its form on network switch
+00:07 +66: apps/wallet_client_flutter/test/features/auth/wallet_storage_regression_test.dart: legacy standard and imported Solana addresses match independent SLIP-0010 vectors
+00:08 +67: apps/wallet_client_flutter/test/features/auth/wallet_storage_regression_test.dart: legacy standard and imported Solana addresses match independent SLIP-0010 vectors
+00:08 +68: apps/wallet_client_flutter/test/features/auth/wallet_storage_regression_test.dart: legacy standard and imported Solana addresses match independent SLIP-0010 vectors
+00:08 +69: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: send reviews exact USDC amount and fee before explicit signing
+00:08 +70: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: child mode cannot compose or confirm a transfer
+00:08 +71: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: locked session cannot compose or confirm a transfer
+00:08 +72: apps/wallet_client_flutter/test/features/multichain/widgets_test.dart: (tearDownAll)
+00:08 +72: All tests passed!

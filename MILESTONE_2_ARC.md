@@ -1,16 +1,30 @@
 # Milestone 2 — Arc Support / Multichain Foundation
 
-Last updated: 2026-09-19. Base: `08cbed3` (`origin/main`, Release Android v0.0.50).
-Branch: `codex/milestone-2-arc`.
+Last updated: 2026-09-25. Base: `08cbed3` (`origin/main`, Release Android v0.0.50).
+Delivery branch: `arc`; original implementation branch: `codex/milestone-2-arc`.
 Repository: `FrankYan2023/benny-wallet-app`.
 App: `apps/wallet_client_flutter`.
-Worktree: `/Users/frankyan/.codex/.chatgpt-projects/g-p-6a12b1dad62c819185730cad6f417095/worktrees/benny-wallet-app-arc`.
+Checkout location is machine-specific; use the repository root. Do not depend on the original local worktree path.
+
+## Documentation status and reading order
+
+This is the technical audit plus dated implementation history. The current entry point is
+[Arc documentation](docs/arc/README.md), with [AI handoff](docs/arc/AI_HANDOFF.md),
+[complete commit/file history](docs/arc/CHANGELOG.md), [frontend/backend test plan](docs/arc/TEST_PLAN.md),
+[backend contracts](docs/arc/BACKEND_CONTRACTS.md), and [latest validation](docs/arc/VALIDATION.md).
+
+Latest functional revision: `67da717`. All **72** unit/widget tests and analysis were rerun
+successfully on 2026-09-25 before documentation publication. Android UI/build passed;
+iOS, funded testnet acceptance, physical-device security and backend end-to-end tests remain open.
+Earlier counts below are historical results, not the latest aggregate. Arc mainnet access statements
+and constants below describe the official-documentation snapshot at the stated verification dates;
+recheck current Arc/Circle docs before enabling mainnet. Current code still defaults to Testnet.
 
 ## Delivery status
 
 The existing Flutter client now has a shared chain interface, Solana wrapper, generic EVM implementation, and an Arc Testnet wallet loop. The code covers independent EVM account derivation, a single USDC balance, custom ERC-20 import (including BENNY when configured), receive/QR, reviewed transfers, fee estimation, EIP-1559 signing/broadcast, and receipt/log activity.
 
-**Full MVP acceptance is not yet claimed.** iOS compilation is blocked by this machine's unaccepted Xcode license. A funded end-to-end Testnet transfer and real iOS/Android secure-storage/biometric regression still require device testing. No production mnemonic, private key or funded wallet was accessed; no real transaction was broadcast. Mainnet access remains permissioned per the official documentation.
+**Full MVP acceptance is not yet claimed.** iOS compilation is blocked by this machine's unaccepted Xcode license. A funded end-to-end Testnet transfer and real iOS/Android secure-storage/biometric regression still require device testing. No production mnemonic, private key or funded wallet was accessed; no real transaction was broadcast. Mainnet is disabled by default; the original verification found permissioned access, which must be rechecked before enabling it.
 
 ## Actual architecture discovered before changes
 
@@ -114,7 +128,7 @@ These are configuration inputs, not a remotely managed configuration service. Pr
 - New feature copy supports English and Chinese, with English fallback for other locales. Full seven-locale localization and grouped cross-network asset/fiat totals remain follow-up product work.
 - Standard native value transfers are supported by the adapter; ordinary user USDC sends intentionally choose the canonical ERC-20 path. Arbitrary payable contract/dapp UI is out of scope.
 
-## Validation
+## Initial validation (2026-09-19; later results follow below)
 
 Final results are recorded below after execution. Existing tests were retained.
 

@@ -1,0 +1,2 @@
+Running Gradle task 'assembleLiteStoreDebug'...                    13.3s
+✓ Built build/app/outputs/flutter-apk/app-litestore-debug.apk
