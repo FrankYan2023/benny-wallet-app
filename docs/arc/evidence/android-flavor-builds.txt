@@ -1,0 +1,15 @@
+2026-09-25; ordinary debug APKs, no integration harness.
+App code: 67da717 (unchanged by this test/docs update).
+All: FEATURE_APP_UPDATES_ENABLED=false.
+full: STORE_MODE=full, FEATURE_SEEKER_VAULT_ENABLED=false.
+liteStore: STORE_MODE=full for original UX inspection, FEATURE_SEEKER_VAULT_ENABLED=false.
+liteSeeker: STORE_MODE=lite, Seeker Vault default enabled; build only, not hardware validation.
+
+Running Gradle task 'assembleLiteSeekerDebug'...
+Running Gradle task 'assembleLiteSeekerDebug'...                   43.9s
+✓ Built build/app/outputs/flutter-apk/app-liteseeker-debug.apk
+Running Gradle task 'assembleFullDebug'...                         18.3s
+✓ Built build/app/outputs/flutter-apk/app-full-debug.apk
+Running Gradle task 'assembleLiteStoreDebug'...
+Running Gradle task 'assembleLiteStoreDebug'...                    39.6s
+✓ Built build/app/outputs/flutter-apk/app-litestore-debug.apk

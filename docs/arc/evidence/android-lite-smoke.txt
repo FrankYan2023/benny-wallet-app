@@ -1,0 +1,10 @@
+2026-09-25; flavor=liteStore; STORE_MODE=lite; dedicated API36 emulator.
+BENNY_EMULATOR_QA=true; app updates and Seeker Vault disabled.
+Selected build/test-runner output only; Android system logs and local debug service URLs omitted.
+
+Running Gradle task 'assembleLiteStoreDebug'...
+Running Gradle task 'assembleLiteStoreDebug'...                    32.2s
+✓ Built build/app/outputs/flutter-apk/app-litestore-debug.apk
+I/flutter ( 4259): 00:00 +0: Android real storage, PIN, Arc receive, forms and token import
+I/flutter ( 4259): 00:39 +1: (tearDownAll)
+I/flutter ( 4259): 00:39 +2: All tests passed!

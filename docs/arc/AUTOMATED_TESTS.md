@@ -165,3 +165,7 @@
 - 本轮没有自动截图回归、全语言完整翻译、后台服务端或完整iOS测试证明。
 
 维护方法：添加/重命名/删除测试时同步本目录，重新运行flutter test记录runner计数；不要自动将新列出的测试标为通过。
+
+## 2026-09-25 Android 回归增补
+
+现有Arc集成测试增加：Send/Receive/Swap的横向顺序、full/lite功能开关、Arc-only不展示Swap、两链本地AssetImage角标。菜单点击改为命中实际菜单项，避免文本子节点的hit-test警告。测试名称不变，不改变72项本地单元/组件测试计数；full与lite模式分别执行，结果见VALIDATION最新记录。

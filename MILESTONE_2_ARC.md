@@ -315,3 +315,15 @@ Screenshots: `build/emulator_qa/unified-home.png`,
   Android liteStore debug APK built (13.3 seconds), installed with existing QA
   data preserved, and visually reviewed on the Android emulator.
 - Screenshot: `apps/wallet_client_flutter/build/emulator_qa/network-badges-home.png`.
+
+## Explicit Android feature-mode regression (2026-09-25)
+
+The existing unfunded emulator test now asserts Send/Receive/Swap geometry,
+bundled Solana/Arc badges, and feature-mode/Arc-only Swap visibility. It clicks
+actual checked menu items instead of non-hit-testable text children.
+Full flavor with STORE_MODE=full passed in 73 seconds; liteStore with
+STORE_MODE=lite passed in 39 seconds. Both exercised real Android secure storage,
+PIN, receive address switching, history reads, send rejection and USDC import
+deduplication. No signing or broadcast. Analysis passed in 10.8 seconds.
+App runtime code remains unchanged from 67da717; only test/docs were updated.
+See docs/arc/VALIDATION.md for the test source blob, logs and remaining gates.

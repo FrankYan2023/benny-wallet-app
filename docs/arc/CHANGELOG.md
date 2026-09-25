@@ -220,3 +220,23 @@
 - [`docs/arc/evidence/unit-widget-tests.txt`](../../docs/arc/evidence/unit-widget-tests.txt)
 
 后续修改追加新日期条目，记录：原因、最终行为、文件、代码提交、实际测试、剩余事项。历史结果不要原地改写成新状态。
+
+## 2026-09-25 · 显式 Android Full/Lite 验收增补
+
+后续于 `c7b3c2d`，没有改动运行时代码、密钥或网络常量。
+
+- 现有Android原生集成加入按钮顺序、链角标、Arc-only Swap隐藏，以及full/lite独立功能模式的断言。
+- 点击真实菜单项以消除文本子节点hit-test警告；保留无资金、无签名/广播、拒绝非QA钱包的限制。
+- full+STORE_MODE=full测试73秒通过；liteStore+STORE_MODE=lite测试39秒通过；分析10.8秒通过。
+- 补查Android flavor构建、测试后恢复普通APK，具体构建结果与设备限制见VALIDATION。此记录不宣称Seeker硬件、签名release或iOS通过。
+- 更新集成README、测试计划/目录、根README、索引、原里程碑和验证记录；保留旧阶段日志，新增脱敏runner摘要。
+
+变更文件：
+- `apps/wallet_client_flutter/integration_test/arc/arc_emulator_smoke_test.dart`
+- `apps/wallet_client_flutter/integration_test/arc/README.md`
+- `README.md`、`MILESTONE_2_ARC.md`
+- `docs/arc/{README,CHANGELOG,AUTOMATED_TESTS,TEST_PLAN,DEVELOPMENT,VALIDATION}.md`
+- `docs/arc/evidence/android-{full-smoke,lite-smoke,acceptance-analysis}.txt`
+- 构建/普通APK检查的额外证据文件在VALIDATION中逐项链接。
+
+剩余：私有测试钱包有资金闭环、后台staging联调、物理设备安全回归、iOS环境/构建、release配置；93项计划未全部通过，72项单元测试仍是上次相同运行时代码的结果。

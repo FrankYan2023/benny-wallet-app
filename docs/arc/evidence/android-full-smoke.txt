@@ -1,0 +1,10 @@
+2026-09-25; flavor=full; STORE_MODE=full; dedicated API36 emulator.
+BENNY_EMULATOR_QA=true; app updates and Seeker Vault disabled.
+Selected build/test-runner output only; Android system logs and local debug service URLs omitted.
+
+Running Gradle task 'assembleFullDebug'...
+Running Gradle task 'assembleFullDebug'...                         44.9s
+✓ Built build/app/outputs/flutter-apk/app-full-debug.apk
+I/flutter ( 3709): 00:00 +0: Android real storage, PIN, Arc receive, forms and token import
+I/flutter ( 3709): 01:13 +1: (tearDownAll)
+I/flutter ( 3709): 01:13 +2: All tests passed!

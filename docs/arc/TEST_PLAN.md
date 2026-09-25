@@ -18,8 +18,8 @@
 | --- | --- | --- | --- |
 | FE-01 | P0 A/M | 兼容钱包解锁后冷启动首页 | 默认 All；同页显示 Solana 和 Arc；无独立 Arc 收发模块 |
 | FE-02 | P1 A/M | All → Arc → Solana → All；每次刷新 | 网络行/余额过滤一致；单链失败不隐藏另一链 |
-| FE-03 | P1 M | 检查按钮并分别点击；Arc-only、儿童模式、STORE_MODE=lite | 顺序 Send→Receive→Swap；导航正确；Arc-only/开关关闭不显示 Swap，儿童仅接收 |
-| FE-04 | P1 M | SOL、Solana USDC、Arc USDC、Arc 自定义币；断网重启 | 每个币头像右下角显示所属链；离线标识仍在，不按币种符号推测链 |
+| FE-03 | P1 A/M | 检查按钮并分别点击；Arc-only、儿童模式、STORE_MODE=lite | 顺序 Send→Receive→Swap；导航正确；Arc-only/开关关闭不显示 Swap，儿童仅接收 |
+| FE-04 | P1 A/M | SOL、Solana USDC、Arc USDC、Arc 自定义币；断网重启 | 每个币头像右下角显示所属链；离线标识仍在，不按币种符号推测链 |
 | FE-05 | P0 A/M | 两链均有 USDC；Arc 测试网余额变化 | 不重复显示 native/ERC-20 USDC；测试网不进入真实美元合计 |
 | FE-06 | P1 M | 空列表、零余额、loading、请求失败、下拉刷新 | 状态明确，0 不伪装为请求成功；能重试，无永久转圈 |
 | FE-07 | P1 M | 同根不同 Solana index、不同根钱包切换 | 地址/余额/活动/导入币按正确网络账户切换，无前一钱包残影 |
@@ -153,3 +153,7 @@ Evidence (sanitized log/screenshot/tx hash) / Issue / Next action
 ```
 
 当前未满足的门槛见 [VALIDATION.md](VALIDATION.md)，不得因为这里列出了用例就宣称已完成。
+
+## 2026-09-25 Android 自动化范围补充
+
+现有原生集成脚本现在直接断言FE-03的横向顺序/功能模式和FE-04的两链本地图片来源；full/lite模式分别运行。该断言不替代FE-03儿童模式、FE-04所有自定义代币和断网重启等剩余变体。其它收发/历史/导入检查也只证明脚本实际覆盖的步骤；最新结果与限制见VALIDATION，不整行批量标为通过。

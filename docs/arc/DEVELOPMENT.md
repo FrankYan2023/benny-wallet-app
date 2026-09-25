@@ -93,3 +93,10 @@ flutter test integration_test/arc/arc_emulator_smoke_test.dart \
 - 超时广播：先用本地hash查receipt；不要重复点击重发。
 - Arc无EVM账户：检查custody、解锁token、原Sol地址验证；不复制或转换Solana私钥。
 - 文档维护：新增测试同步 AUTOMATED_TESTS；每次结果记录代码hash，已有结果保留日期，不覆盖旧证据。
+
+## 显式 full / lite 回归
+
+Arc未注资测试可分别传 `--flavor full --dart-define=STORE_MODE=full` 和
+`--flavor liteStore --dart-define=STORE_MODE=lite`，其余QA安全flags保持不变。
+最新脚本还验证操作顺序、链图标和Arc-only的Swap可见性。只测试flavor名称不能证明feature mode正确。
+`liteSeeker` 构建成功不证明真实Seeker设备/Seed Vault可用，需要对应硬件测试。

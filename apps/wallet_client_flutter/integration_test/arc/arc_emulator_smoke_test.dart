@@ -7,6 +7,8 @@ import 'package:integration_test/integration_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_client_flutter/main.dart' as app;
 import 'package:wallet_client_flutter/core/chains/arc_chain_config.dart';
+import 'package:wallet_client_flutter/core/chains/solana_adapter.dart';
+import 'package:wallet_client_flutter/core/config/app_features.dart';
 import 'package:wallet_client_flutter/core/chains/evm/evm_key_service.dart';
 import 'package:wallet_client_flutter/core/crypto/local_cipher.dart';
 import 'package:wallet_client_flutter/core/security/biometric_session_protector.dart';
@@ -86,13 +88,37 @@ void main() {
       await waitFor(tester, find.textContaining('0 USDC'));
       expect(find.text('All'), findsOneWidget);
       expect(find.text('Solana Mainnet'), findsWidgets);
+      expect(
+        tester.getCenter(find.text('Send')).dx,
+        lessThan(tester.getCenter(find.text('Receive')).dx),
+      );
+      if (AppFeatures.canOpenSwap) {
+        expect(
+          tester.getCenter(find.text('Receive')).dx,
+          lessThan(tester.getCenter(find.text('Swap')).dx),
+        );
+      } else {
+        expect(find.text('Swap'), findsNothing);
+      }
+      for (final config in [SolanaAdapter.chainConfig, arcTestnetConfig]) {
+        expect(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is Image &&
+                widget.image is AssetImage &&
+                (widget.image as AssetImage).assetName == config.iconAsset,
+          ),
+          findsOneWidget,
+        );
+      }
       await tap(tester, find.byKey(const Key('portfolio-network-menu')));
-      await tap(tester, find.text('Arc Testnet').last);
+      await selectNetworkMenu(tester, 'Arc Testnet');
       expect(find.text('Solana Mainnet'), findsNothing);
+      expect(find.text('Swap'), findsNothing);
       await tap(tester, find.byKey(const Key('portfolio-network-menu')));
-      await tap(tester, find.text('Solana Mainnet').last);
+      await selectNetworkMenu(tester, 'Solana Mainnet');
       await tap(tester, find.byKey(const Key('portfolio-network-menu')));
-      await tap(tester, find.text('All networks').last);
+      await selectNetworkMenu(tester, 'All networks');
       await tap(tester, find.text('Receive').first);
       await waitFor(tester, find.text(solanaAddress));
       await tap(tester, find.byType(DropdownButtonFormField<String>));
@@ -194,3 +220,11 @@ Future<void> back(WidgetTester tester) async {
   await tester.pageBack();
   await tester.pump(const Duration(milliseconds: 500));
 }
+
+Future<void> selectNetworkMenu(WidgetTester tester, String label) => tap(
+  tester,
+  find.ancestor(
+    of: find.text(label).last,
+    matching: find.byType(CheckedPopupMenuItem<String>),
+  ),
+);
