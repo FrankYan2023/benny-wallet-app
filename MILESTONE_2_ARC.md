@@ -286,3 +286,18 @@ swap integration; Solana/All retain the existing Solana action.
 Screenshots: `build/emulator_qa/unified-home.png`,
 `unified-network-menu.png`, `unified-send.png`, `unified-receive.png`
 (app-relative). All 72 tests and analysis passed again after the final tweaks.
+
+### Action order and network badges (2026-09-25)
+
+- Home actions now read Send, Receive, Swap from left to right; existing
+  child-mode and unsupported-swap visibility rules remain in place.
+- Asset avatars show the configured network's bundled icon at bottom-right,
+  replacing the generic layers marker. Solana holdings use the existing Solana
+  image; Arc holdings use the official Arc site icon (source recorded in
+  `assets/chain_logos/README.md`). Send's Solana asset picker uses the same badge.
+- `ChainConfig.iconAsset` supplies presentation metadata; `TokenRow` accepts it
+  without chain-specific branching. Badges work offline.
+- Validation: analysis passed, all 9 existing multichain widget tests passed,
+  Android liteStore debug APK built (13.3 seconds), installed with existing QA
+  data preserved, and visually reviewed on the Android emulator.
+- Screenshot: `apps/wallet_client_flutter/build/emulator_qa/network-badges-home.png`.

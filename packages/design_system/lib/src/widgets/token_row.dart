@@ -11,6 +11,7 @@ class TokenRow extends StatelessWidget {
     required this.symbol,
     this.secondaryValue,
     this.networkLabel,
+    this.networkIconAsset,
     this.iconUrl,
     this.onTap,
   });
@@ -23,6 +24,7 @@ class TokenRow extends StatelessWidget {
   final String symbol;
   final String? secondaryValue;
   final String? networkLabel;
+  final String? networkIconAsset;
   final String? iconUrl;
   final VoidCallback? onTap;
 
@@ -59,7 +61,11 @@ class TokenRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            _AvatarStack(symbol: symbol, iconUrl: iconUrl),
+            _AvatarStack(
+              symbol: symbol,
+              iconUrl: iconUrl,
+              networkIconAsset: networkIconAsset,
+            ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -233,10 +239,15 @@ class _SecondaryDetailLine extends StatelessWidget {
 }
 
 class _AvatarStack extends StatelessWidget {
-  const _AvatarStack({required this.symbol, this.iconUrl});
+  const _AvatarStack({
+    required this.symbol,
+    this.iconUrl,
+    this.networkIconAsset,
+  });
 
   final String symbol;
   final String? iconUrl;
+  final String? networkIconAsset;
 
   @override
   Widget build(BuildContext context) {
@@ -257,27 +268,31 @@ class _AvatarStack extends StatelessWidget {
               child: _TokenAvatar(symbol: symbol, iconUrl: iconUrl),
             ),
           ),
-          Positioned(
-            right: -1,
-            bottom: -1,
-            child: Container(
-              width: 22,
-              height: 22,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(context).colorScheme.surface,
-                border: Border.all(
+          if (networkIconAsset != null)
+            Positioned(
+              right: -1,
+              bottom: -1,
+              child: Container(
+                width: 24,
+                height: 24,
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
                   color: Theme.of(context).colorScheme.surface,
-                  width: 1.5,
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.surface,
+                    width: 1.5,
+                  ),
+                ),
+                child: ClipOval(
+                  child: Image.asset(
+                    networkIconAsset!,
+                    fit: BoxFit.cover,
+                    excludeFromSemantics: true,
+                  ),
                 ),
               ),
-              child: Icon(
-                Icons.layers_rounded,
-                size: 12,
-                color: Theme.of(context).colorScheme.primary,
-              ),
             ),
-          ),
         ],
       ),
     );

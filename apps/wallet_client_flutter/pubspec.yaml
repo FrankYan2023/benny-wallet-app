@@ -59,6 +59,7 @@ flutter:
     - assets/brand/benny_logo.png
     - assets/brand/pump_mark.svg
     - assets/market_logos/
+    - assets/chain_logos/
   fonts:
     - family: Manrope
       fonts:

@@ -196,6 +196,14 @@ class _SendPageState extends ConsumerState<SendPage> {
                           for (final asset in assets) ...[
                             TokenRow(
                               name: asset.token.name,
+                              networkLabel: ref
+                                  .watch(chainConfigsProvider)
+                                  .first
+                                  .displayName,
+                              networkIconAsset: ref
+                                  .watch(chainConfigsProvider)
+                                  .first
+                                  .iconAsset,
                               symbol: Formatters.tokenSymbol(
                                 asset.token.symbol,
                               ),

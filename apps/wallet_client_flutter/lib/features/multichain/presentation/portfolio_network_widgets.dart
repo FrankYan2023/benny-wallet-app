@@ -167,6 +167,7 @@ class AdditionalAssetRows extends ConsumerWidget {
                       isPositiveChange: null,
                       balanceLine: '${asset.balanceText} ${asset.symbol}',
                       networkLabel: config.displayName,
+                      networkIconAsset: config.iconAsset,
                       value: config.isTestnet
                           ? chainText(context, 'Testnet', '测试网')
                           : asset.fiatPrice == null

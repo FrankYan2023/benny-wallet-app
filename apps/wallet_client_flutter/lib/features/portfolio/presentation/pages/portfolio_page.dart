@@ -511,19 +511,6 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  if (canOpenSwap) ...[
-                    Expanded(
-                      child: _BalanceActionButton(
-                        backgroundColor: Colors.white,
-                        foregroundColor: theme.colorScheme.primary,
-                        icon: Icons.swap_horiz_rounded,
-                        iconSize: 24,
-                        label: context.l10n.portfolioSwap,
-                        onTap: () => context.push(SwapPage.routePath),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                  ],
                   Expanded(
                     child: _BalanceActionButton(
                       backgroundColor: Colors.white,
@@ -534,6 +521,19 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                       onTap: () => context.push(ReceivePage.routePath),
                     ),
                   ),
+                  if (canOpenSwap) ...[
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _BalanceActionButton(
+                        backgroundColor: Colors.white,
+                        foregroundColor: theme.colorScheme.primary,
+                        icon: Icons.swap_horiz_rounded,
+                        iconSize: 24,
+                        label: context.l10n.portfolioSwap,
+                        onTap: () => context.push(SwapPage.routePath),
+                      ),
+                    ),
+                  ],
                 ],
               )
             else
@@ -608,6 +608,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                 .split(' ')
                 .first,
             networkLabel: ref.watch(chainConfigsProvider).first.displayName,
+            networkIconAsset: ref.watch(chainConfigsProvider).first.iconAsset,
             symbol: ref.watch(chainConfigsProvider).first.feeSymbol,
             balanceLine: '0 ${ref.watch(chainConfigsProvider).first.feeSymbol}',
             value: Formatters.usd(0),
@@ -662,6 +663,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
           balanceLine:
               '${Formatters.compactNumber(asset.balance)} ${Formatters.tokenSymbol(asset.token.symbol)}',
           networkLabel: ref.watch(chainConfigsProvider).first.displayName,
+          networkIconAsset: ref.watch(chainConfigsProvider).first.iconAsset,
           value: asset.priceQuote == null
               ? '--'
               : Formatters.usd(asset.totalValueUsd),

@@ -12,6 +12,7 @@ class ChainConfig {
     required this.feeSymbol,
     required this.feeDecimals,
     this.chainId,
+    this.iconAsset,
     this.isTestnet = false,
     this.deterministicFinality = false,
     this.nativeTokenContract,
@@ -28,6 +29,7 @@ class ChainConfig {
   final String feeSymbol;
   final int feeDecimals;
   final int? chainId;
+  final String? iconAsset;
   final bool isTestnet;
   final bool deterministicFinality;
   final String? nativeTokenContract;

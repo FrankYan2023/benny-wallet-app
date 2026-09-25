@@ -6,6 +6,7 @@ const arcTestnetConfig = ChainConfig(
   id: 'arc-testnet',
   family: ChainFamily.evm,
   displayName: 'Arc Testnet',
+  iconAsset: 'assets/chain_logos/arc.png',
   chainId: 5042002,
   isTestnet: true,
   deterministicFinality: true,
@@ -31,6 +32,7 @@ const arcMainnetConfig = ChainConfig(
   id: 'arc-mainnet',
   family: ChainFamily.evm,
   displayName: 'Arc',
+  iconAsset: 'assets/chain_logos/arc.png',
   chainId: 5042,
   deterministicFinality: true,
   rpcUrl: String.fromEnvironment(

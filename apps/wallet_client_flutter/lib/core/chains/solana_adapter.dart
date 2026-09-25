@@ -30,6 +30,7 @@ class SolanaAdapter extends ChainAdapter {
     id: networkId,
     family: ChainFamily.solana,
     displayName: AppConstants.supportedNetwork,
+    iconAsset: 'assets/market_logos/sol.png',
     rpcUrl: AppConstants.solanaRpcUrl,
     explorerUrl: 'https://solscan.io',
     feeSymbol: 'SOL',
