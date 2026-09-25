@@ -1,7 +1,6 @@
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/chains/chain_models.dart';
@@ -14,8 +13,8 @@ String chainText(BuildContext context, String english, String chinese) =>
 String networkPath(String chainId) =>
     '/networks/${Uri.encodeComponent(chainId)}';
 String networkSendPath(String chainId, {String? assetId}) => Uri(
-  path: '${networkPath(chainId)}/send',
-  queryParameters: assetId == null ? null : {'asset': assetId},
+  path: '/send',
+  queryParameters: {'network': chainId, if (assetId != null) 'asset': assetId},
 ).toString();
 
 ChainConfig? findChain(List<ChainConfig> configs, String id) {
@@ -187,124 +186,4 @@ class ChainReceivePanel extends ConsumerWidget {
       ),
     );
   }
-}
-
-/// Additional network assets remain available even while the legacy portfolio loads.
-class AdditionalNetworkAssets extends ConsumerWidget {
-  const AdditionalNetworkAssets({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      for (final config in ref.watch(additionalChainConfigsProvider)) ...[
-        const SizedBox(height: 16),
-        WalletCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Expanded(child: ChainNetworkLabel(config: config)),
-                  IconButton(
-                    tooltip: chainText(
-                      context,
-                      'Network assets and activity',
-                      '网络资产和活动',
-                    ),
-                    onPressed: () => context.push(networkPath(config.id)),
-                    icon: const Icon(Icons.chevron_right_rounded),
-                  ),
-                ],
-              ),
-              if (config.isTestnet)
-                Text(
-                  chainText(
-                    context,
-                    'Test assets · excluded from total balance',
-                    '测试资产 · 不计入总余额',
-                  ),
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              const SizedBox(height: 8),
-              ref
-                  .watch(chainAssetsProvider(config.id))
-                  .when(
-                    loading: () => const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: LinearProgressIndicator(),
-                    ),
-                    error: (error, _) => Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('$error'),
-                        TextButton(
-                          onPressed: () =>
-                              ref.invalidate(chainAssetsProvider(config.id)),
-                          child: Text(chainText(context, 'Retry', '重试')),
-                        ),
-                      ],
-                    ),
-                    data: (assets) => Column(
-                      children: [
-                        for (final asset in assets)
-                          ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            title: Text(
-                              asset.symbol,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            subtitle: Text(
-                              asset.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            trailing: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 160),
-                              child: Text(
-                                asset.balanceText,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.end,
-                              ),
-                            ),
-                            onTap: () => context.push(networkPath(config.id)),
-                          ),
-                      ],
-                    ),
-                  ),
-            ],
-          ),
-        ),
-      ],
-    ],
-  );
-}
-
-/// Explicit routes preserve the existing Solana send flow and its validations.
-class AdditionalNetworkSendLinks extends ConsumerWidget {
-  const AdditionalNetworkSendLinks({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      for (final config in ref.watch(additionalChainConfigsProvider))
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: OutlinedButton.icon(
-            onPressed: () => context.push(networkSendPath(config.id)),
-            icon: const Icon(Icons.public_rounded),
-            label: Text(
-              chainText(
-                context,
-                'Send on ${config.displayName}',
-                '通过 ${config.displayName} 发送',
-              ),
-            ),
-          ),
-        ),
-    ],
-  );
 }

@@ -18,15 +18,16 @@ existing wallets unless their public root matches its QA marker. The marker
 is an accidental-use guard, not a security boundary. Do not fund this wallet
 or use the test PIN for a real wallet. No recovery phrase is logged/exported.
 
-The test launches the actual app, unlocks using the PIN keypad, switches from
+The test launches the actual app, unlocks using the PIN keypad, checks the
+default unified portfolio and filters each network, then switches from
 Solana to Arc receive, checks the derived address and clipboard feedback,
 opens the selected network's history and waits for successful loading, validates invalid/zero/insufficient
-send inputs, looks up USDC metadata from the real RPC, imports it and checks
+send inputs through the shared Send entry, looks up USDC metadata from the real RPC, imports it and checks
 that only one USDC asset row remains. It never signs or broadcasts a transfer.
 Live RPC availability is required. The existing Android send/swap QA suite is
 separate and is not invoked by this command.
 
-Validated on 2026-09-22 and 2026-09-24 using `Benny_Arc_QA_API36` (Pixel 7, Android 16/API 36,
+Validated on 2026-09-22–25 using `Benny_Arc_QA_API36` (Pixel 7, Android 16/API 36,
 Google APIs ARM64). On this development host, Flutter commands require
 `DEVELOPER_DIR=/Library/Developer/CommandLineTools` until Xcode is initialized.
 

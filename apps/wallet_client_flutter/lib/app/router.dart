@@ -227,15 +227,14 @@ class AppRouter {
       ),
       GoRoute(
         path: NetworkSendPage.routePath,
-        builder: (context, state) => _RouteAccessGuard(
-          currentLocation: state.matchedLocation,
-          requireUnlocked: true,
-          allowInChildMode: false,
-          child: NetworkSendPage(
-            chainId: state.pathParameters['chainId']!,
-            assetId: state.uri.queryParameters['asset'],
-          ),
-        ),
+        redirect: (context, state) => Uri(
+          path: SendPage.routePath,
+          queryParameters: {
+            'network': state.pathParameters['chainId']!,
+            if (state.uri.queryParameters['asset'] != null)
+              'asset': state.uri.queryParameters['asset']!,
+          },
+        ).toString(),
       ),
       GoRoute(
         path: TokenImportPage.routePath,
@@ -253,6 +252,8 @@ class AppRouter {
           currentLocation: state.matchedLocation,
           allowInChildMode: false,
           child: SendPage(
+            chainId: state.uri.queryParameters['network'],
+            assetId: state.uri.queryParameters['asset'],
             recipientAddress: state.uri.queryParameters['recipient'],
           ),
         ),
@@ -411,7 +412,11 @@ class AppRouter {
         name: AssetDetailPage.routeName,
         builder: (context, state) => _RouteAccessGuard(
           currentLocation: state.matchedLocation,
-          child: AssetDetailPage(mintAddress: state.pathParameters['mint']!),
+          child: AssetDetailPage(
+            mintAddress: state.pathParameters['mint']!,
+            chainId: state.uri.queryParameters['network'],
+            assetId: state.uri.queryParameters['asset'],
+          ),
         ),
       ),
       GoRoute(

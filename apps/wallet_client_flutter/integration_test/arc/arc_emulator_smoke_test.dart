@@ -82,6 +82,17 @@ void main() {
         find.text('Receive'),
         timeout: const Duration(seconds: 100),
       );
+      await waitFor(tester, find.byKey(const Key('portfolio-network-menu')));
+      await waitFor(tester, find.textContaining('0 USDC'));
+      expect(find.text('All'), findsOneWidget);
+      expect(find.text('Solana Mainnet'), findsWidgets);
+      await tap(tester, find.byKey(const Key('portfolio-network-menu')));
+      await tap(tester, find.text('Arc Testnet').last);
+      expect(find.text('Solana Mainnet'), findsNothing);
+      await tap(tester, find.byKey(const Key('portfolio-network-menu')));
+      await tap(tester, find.text('Solana Mainnet').last);
+      await tap(tester, find.byKey(const Key('portfolio-network-menu')));
+      await tap(tester, find.text('All networks').last);
       await tap(tester, find.text('Receive').first);
       await waitFor(tester, find.text(solanaAddress));
       await tap(tester, find.byType(DropdownButtonFormField<String>));
@@ -108,8 +119,8 @@ void main() {
       await back(tester);
       await waitFor(tester, find.text('Send'));
       await tap(tester, find.text('Send').first);
-      await waitFor(tester, find.text('Send on Arc Testnet'));
-      await tap(tester, find.text('Send on Arc Testnet'));
+      expect(find.text('Send on Arc Testnet'), findsNothing);
+      expect(find.text('Arc Testnet'), findsWidgets);
       await waitFor(
         tester,
         find.text('Estimate fee & review'),
@@ -137,11 +148,8 @@ void main() {
       await waitFor(tester, find.text('Insufficient asset balance.'));
       expect(find.text('Confirm & send'), findsNothing);
       await back(tester);
-      await back(tester);
-      await waitFor(tester, find.byTooltip('Network assets and activity'));
-      await tap(tester, find.byTooltip('Network assets and activity'));
-      await waitFor(tester, find.text('Import token'));
-      await tap(tester, find.text('Import token'));
+      await waitFor(tester, find.byTooltip('Import token'));
+      await tap(tester, find.byTooltip('Import token'));
       await waitFor(tester, find.text('Look up token'));
       await tester.enterText(
         find.byType(TextField).first,
@@ -152,11 +160,8 @@ void main() {
       await waitFor(tester, find.text('Import this token'));
       await tap(tester, find.text('Import this token'));
       await waitFor(tester, find.text('Token imported'));
-      await waitFor(tester, find.text('USDC').first);
-      expect(
-        find.text('USDC'),
-        findsNWidgets(2),
-      ); // one name and one symbol, one asset row
+      await waitFor(tester, find.textContaining('0 USDC'));
+      expect(find.textContaining('0 USDC'), findsOneWidget);
       expect(find.text('Confirm & send'), findsNothing);
       expect(tester.takeException(), isNull);
     },

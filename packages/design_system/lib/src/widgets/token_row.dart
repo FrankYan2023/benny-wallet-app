@@ -10,6 +10,7 @@ class TokenRow extends StatelessWidget {
     required this.isPositiveChange,
     required this.symbol,
     this.secondaryValue,
+    this.networkLabel,
     this.iconUrl,
     this.onTap,
   });
@@ -21,6 +22,7 @@ class TokenRow extends StatelessWidget {
   final bool? isPositiveChange;
   final String symbol;
   final String? secondaryValue;
+  final String? networkLabel;
   final String? iconUrl;
   final VoidCallback? onTap;
 
@@ -72,6 +74,18 @@ class TokenRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (networkLabel != null) ...[
+                    const SizedBox(height: 3),
+                    Text(
+                      networkLabel!,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: secondaryText,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                   const SizedBox(height: 2),
                   Text(
                     balanceLine,

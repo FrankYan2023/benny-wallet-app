@@ -12,7 +12,17 @@ import 'chain_widgets.dart';
 import 'network_page.dart';
 
 class NetworkSendPage extends ConsumerStatefulWidget {
-  const NetworkSendPage({super.key, required this.chainId, this.assetId});
+  const NetworkSendPage({
+    super.key,
+    required this.chainId,
+    this.assetId,
+    this.embedded = false,
+    this.recipientAddress,
+    this.onBusyChanged,
+  });
+  final bool embedded;
+  final String? recipientAddress;
+  final ValueChanged<bool>? onBusyChanged;
   static const routePath = '/networks/:chainId/send';
   final String chainId;
   final String? assetId;
@@ -36,6 +46,7 @@ class _NetworkSendPageState extends ConsumerState<NetworkSendPage> {
   void initState() {
     super.initState();
     _selectedAssetId = widget.assetId;
+    _recipient.text = widget.recipientAddress ?? '';
   }
 
   @override
@@ -65,13 +76,11 @@ class _NetworkSendPageState extends ConsumerState<NetworkSendPage> {
     }
     return PopScope(
       canPop: !_busy,
-      child: AppScaffold(
-        title: chainText(context, 'Send assets', '发送资产'),
-        enableTitleNavigation: !_busy,
-        showBackButton: !_busy,
-        child: ListView(
+      child: _layout(
+        context,
+        ListView(
           children: [
-            ChainNetworkLabel(config: config),
+            if (!widget.embedded) ChainNetworkLabel(config: config),
             if (config.isTestnet)
               Text(
                 chainText(
@@ -178,6 +187,15 @@ class _NetworkSendPageState extends ConsumerState<NetworkSendPage> {
       ),
     );
   }
+
+  Widget _layout(BuildContext context, Widget child) => widget.embedded
+      ? child
+      : AppScaffold(
+          title: chainText(context, 'Send assets', '发送资产'),
+          enableTitleNavigation: !_busy,
+          showBackButton: !_busy,
+          child: child,
+        );
 
   Widget _compose(
     BuildContext context,
@@ -377,6 +395,7 @@ class _NetworkSendPageState extends ConsumerState<NetworkSendPage> {
   Future<void> _prepare(ChainAccount account, ChainAsset asset) async {
     if (!_form.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
+    widget.onBusyChanged?.call(true);
     setState(() {
       _busy = true;
       _error = null;
@@ -396,11 +415,15 @@ class _NetworkSendPageState extends ConsumerState<NetworkSendPage> {
     } catch (error) {
       if (mounted) setState(() => _error = error);
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() => _busy = false);
+        widget.onBusyChanged?.call(false);
+      }
     }
   }
 
   Future<void> _send(PreparedChainTransaction transaction) async {
+    widget.onBusyChanged?.call(true);
     setState(() {
       _busy = true;
       _error = null;
@@ -418,7 +441,10 @@ class _NetworkSendPageState extends ConsumerState<NetworkSendPage> {
           _prepared = null;
         });
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() => _busy = false);
+        widget.onBusyChanged?.call(false);
+      }
     }
   }
 }

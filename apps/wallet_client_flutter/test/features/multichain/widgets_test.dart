@@ -21,6 +21,10 @@ import 'package:wallet_client_flutter/features/auth/presentation/providers/walle
 import 'package:wallet_client_flutter/features/multichain/data/chain_transfer_controller.dart';
 import 'package:wallet_client_flutter/features/multichain/data/multichain_store.dart';
 import 'package:wallet_client_flutter/features/multichain/presentation/chain_widgets.dart';
+import 'package:wallet_client_flutter/features/multichain/presentation/portfolio_network_widgets.dart';
+import 'package:wallet_client_flutter/features/send/presentation/pages/send_page.dart';
+import 'package:wallet_client_flutter/features/portfolio/presentation/providers/portfolio_provider.dart';
+import 'package:wallet_client_flutter/features/portfolio/domain/entities/portfolio_view_data.dart';
 import 'package:wallet_client_flutter/features/multichain/presentation/chain_navigation.dart';
 import 'package:wallet_client_flutter/features/multichain/presentation/network_page.dart';
 import 'package:wallet_client_flutter/features/notifications/presentation/pages/notifications_page.dart';
@@ -74,6 +78,16 @@ Future<void> show(
     ProviderScope(
       overrides: [
         walletRepositoryProvider.overrideWithValue(PendingRepository()),
+        activePortfolioProvider.overrideWith(
+          (ref) => AsyncData(
+            PortfolioViewData(
+              address: 'root-1',
+              assets: [],
+              totalValueUsd: 0,
+              lastUpdatedAt: DateTime(2026),
+            ),
+          ),
+        ),
         walletControllerProvider.overrideWith(
           (ref) => TestWalletController(ref, state),
         ),
@@ -116,7 +130,7 @@ Future<void> show(
           locale: const Locale('en'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: page,
+          home: Scaffold(body: page),
         ),
       ),
     ),
@@ -155,18 +169,85 @@ void main() {
       expect(receiveHistoryPath('future-evm'), networkPath('future-evm'));
     },
   );
-  testWidgets('child mode exposes receive but no blocked network actions', (
+  testWidgets(
+    'child mode activity has network selection and no transfer actions',
+    (tester) async {
+      await show(
+        tester,
+        NetworkPage(chainId: arcTestnetConfig.id),
+        state: unlocked.copyWith(childModeEnabled: true),
+      );
+      expect(find.byType(ChainNetworkSelector), findsOneWidget);
+      expect(find.text('Send'), findsNothing);
+      expect(find.text('Import token'), findsNothing);
+    },
+  );
+  testWidgets('home defaults to both networks and filters shared asset rows', (
     tester,
   ) async {
     await show(
       tester,
-      NetworkPage(chainId: arcTestnetConfig.id),
-      state: unlocked.copyWith(childModeEnabled: true),
+      Column(
+        children: [
+          const PortfolioNetworkMenu(),
+          Consumer(
+            builder: (_, ref, _) => ref.watch(showPrimaryPortfolioProvider)
+                ? const Text('Primary asset row')
+                : const SizedBox.shrink(),
+          ),
+          const AdditionalAssetRows(),
+        ],
+      ),
     );
-    expect(find.text('Receive'), findsOneWidget);
-    expect(find.text('Send'), findsNothing);
-    expect(find.text('Import token'), findsNothing);
+    expect(find.text('All'), findsOneWidget);
+    expect(find.text('Primary asset row'), findsOneWidget);
+    expect(find.textContaining('Arc Testnet'), findsWidgets);
+    await tester.tap(find.byKey(const Key('portfolio-network-menu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Arc Testnet').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Primary asset row'), findsNothing);
+    expect(find.textContaining('Arc Testnet'), findsWidgets);
+    await tester.tap(find.byKey(const Key('portfolio-network-menu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Solana Mainnet').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Primary asset row'), findsOneWidget);
+    expect(find.textContaining('Arc Testnet'), findsNothing);
   });
+  testWidgets(
+    'shared send selects Arc inline and clears its form on network switch',
+    (tester) async {
+      await show(tester, const SendPage());
+      expect(find.text('Send on Arc Testnet'), findsNothing);
+      await tester.tap(find.byType(ChainNetworkSelector));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Arc Testnet').last);
+      await tester.pumpAndSettle();
+      expect(find.text('Estimate fee & review'), findsOneWidget);
+      await tester.enterText(
+        find.byType(TextFormField).first,
+        fixture.recipient,
+      );
+      await tester.tap(find.byType(ChainNetworkSelector));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Solana Mainnet').last);
+      await tester.pumpAndSettle();
+      expect(find.text('Estimate fee & review'), findsNothing);
+      await tester.tap(find.byType(ChainNetworkSelector));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Arc Testnet').last);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<TextFormField>(find.byType(TextFormField).first)
+            .controller!
+            .text,
+        isEmpty,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
   setUpAll(() async {
     for (final entry in {
       'Manrope': 'assets/fonts/Manrope/Manrope-wght.ttf',

@@ -241,3 +241,48 @@ The emulator was restarted and the final ordinary APK reinstalled afterward.
 PIN unlock succeeded, and the Arc activity page loaded its empty state normally;
 `build/emulator_qa/arc-activity.png` records this final manual verification.
 The dedicated emulator was left running on that page.
+
+## Unified two-network interface (2026-09-25)
+
+The product layout now supersedes the earlier separate-network card:
+- The balance card's upper-right selector defaults to **All networks** and can
+  filter Solana or Arc. Existing Solana totals/pricing remain intact; Arc
+  Testnet assets are shown but excluded from real dollar totals.
+- Solana and Arc assets share the existing `TokenRow` design and explicit network
+  labels. The standalone Arc module and empty-wallet “Receive SOL” panel are
+  removed. An unfunded primary account shows its zero native balance as a row.
+- The existing Send entry now contains a network selector. Arc's reusable form
+  renders inside that page; the extra “Send on Arc” entry is removed. Switching
+  networks discards the form state, and the selector is blocked during an
+  in-flight operation. The original Solana compose/sign/broadcast flow stays in
+  place with an explicit network label.
+- Receive uses the existing shared network selector/address/QR screen. Asset
+  detail actions retain the asset's network when entering Send or Receive.
+- Arc assets open the existing asset-detail route and reuse its header/actions/
+  balance components. The old network landing page now shows activity only;
+  legacy network-send URLs redirect to the shared Send entry.
+- Token import is reached from the shared Assets heading. No new key storage,
+  signing algorithms, wallet migration or native platform changes were made.
+
+Implementation touches the portfolio, send, receive navigation and asset-detail
+presentation, router, shared TokenRow (optional network label), and tests.
+`portfolio_network_widgets.dart` owns the shared filter/menu/asset rows.
+
+Validation: static analysis passed; **72 unit/widget tests passed**;
+Android emulator integration passed in 46 seconds, covering default two-chain
+visibility, network filtering, receive address switching, history, shared Send
+validation and token import deduplication. Ordinary Android APK rebuilt in
+18.8 seconds in the final rebuild. No transfer was broadcast. iOS setup/funded transfer acceptance
+remain the previously documented open items.
+
+
+Manual UI review of the ordinary APK confirmed the selector in the balance
+card's upper-right corner, default SOL/Arc USDC rows, Arc-only filtering,
+inline Arc Send with the selected network visible, and asset-detail Receive
+opening the correct Arc address. The empty SOL row now uses the asset name
+without repeating the network name and has the same row spacing as other
+assets. Arc-only filtering hides Swap because that network has no supported
+swap integration; Solana/All retain the existing Solana action.
+Screenshots: `build/emulator_qa/unified-home.png`,
+`unified-network-menu.png`, `unified-send.png`, `unified-receive.png`
+(app-relative). All 72 tests and analysis passed again after the final tweaks.

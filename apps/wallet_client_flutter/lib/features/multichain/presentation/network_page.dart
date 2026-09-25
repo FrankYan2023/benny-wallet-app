@@ -6,7 +6,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/chains/chain_models.dart';
 import '../../../core/widgets/app_scaffold.dart';
-import '../../auth/presentation/providers/wallet_controller.dart';
 import '../providers/multichain_providers.dart';
 import 'chain_widgets.dart';
 
@@ -26,114 +25,17 @@ class NetworkPage extends ConsumerWidget {
         ),
       );
     }
-    final wallet = ref.watch(walletControllerProvider);
     return AppScaffold(
-      title: config.displayName,
-      child: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(chainAssetsProvider(chainId));
-          ref.invalidate(chainActivityProvider(chainId));
-          try {
-            await ref.read(chainAssetsProvider(chainId).future);
-          } catch (_) {
-            /* Shown below. */
-          }
-        },
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: [
-            ChainNetworkLabel(config: config),
-            if (config.isTestnet) ...[
-              const SizedBox(height: 4),
-              Text(
-                chainText(
-                  context,
-                  'Test tokens have no monetary value and are excluded from your total balance.',
-                  '测试代币无实际货币价值，不计入总余额。',
-                ),
-              ),
-            ],
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                if (!wallet.childModeEnabled)
-                  FilledButton.icon(
-                    onPressed: () => context.push(networkSendPath(chainId)),
-                    icon: const Icon(Icons.send_rounded),
-                    label: Text(chainText(context, 'Send', '发送')),
-                  ),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    ref.read(selectedChainIdProvider.notifier).state = chainId;
-                    context.push('/receive');
-                  },
-                  icon: const Icon(Icons.qr_code_rounded),
-                  label: Text(chainText(context, 'Receive', '接收')),
-                ),
-                if (!wallet.childModeEnabled)
-                  OutlinedButton.icon(
-                    onPressed: () =>
-                        context.push('${networkPath(chainId)}/import-token'),
-                    icon: const Icon(Icons.add_rounded),
-                    label: Text(chainText(context, 'Import token', '导入代币')),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Text(
-              chainText(context, 'Assets', '资产'),
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 12),
-            ref
-                .watch(chainAssetsProvider(chainId))
-                .when(
-                  loading: () => const LinearProgressIndicator(),
-                  error: (error, _) => ChainErrorCard(
-                    error: error,
-                    onRetry: () => ref.invalidate(chainAssetsProvider(chainId)),
-                  ),
-                  data: (assets) => WalletCard(
-                    child: Column(
-                      children: [
-                        for (final asset in assets)
-                          ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            title: Text(
-                              asset.symbol,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            subtitle: Text(
-                              asset.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            trailing: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 160),
-                              child: Text(
-                                asset.balanceText,
-                                textAlign: TextAlign.end,
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            onTap: wallet.childModeEnabled
-                                ? null
-                                : () => context.push(
-                                    networkSendPath(chainId, assetId: asset.id),
-                                  ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-            const SizedBox(height: 24),
-            ChainActivitySection(config: config),
-          ],
-        ),
+      title: chainText(context, 'Activity', '活动'),
+      child: ListView(
+        children: [
+          ChainNetworkSelector(
+            value: config.id,
+            onChanged: (id) => context.replace(networkPath(id)),
+          ),
+          const SizedBox(height: 16),
+          ChainActivitySection(config: config),
+        ],
       ),
     );
   }

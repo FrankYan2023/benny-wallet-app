@@ -9,6 +9,8 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../l10n/l10n.dart';
+import '../../../multichain/presentation/chain_widgets.dart';
+import '../../../multichain/providers/multichain_providers.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../portfolio/domain/entities/portfolio_view_data.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
@@ -92,6 +94,9 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
               Expanded(
                 child: ListView(
                   children: [
+                    ChainNetworkLabel(
+                      config: ref.watch(chainConfigsProvider).first,
+                    ),
                     const SizedBox(height: 8),
                     Center(
                       child: _TokenAvatar(

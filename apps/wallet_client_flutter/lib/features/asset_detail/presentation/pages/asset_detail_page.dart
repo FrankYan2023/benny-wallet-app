@@ -13,11 +13,14 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../l10n/l10n.dart';
+import '../../../multichain/presentation/chain_widgets.dart';
+import '../../../multichain/presentation/portfolio_network_widgets.dart';
+import '../../../multichain/presentation/network_page.dart';
+import '../../../multichain/providers/multichain_providers.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../portfolio/domain/entities/portfolio_view_data.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
 import '../../../receive/presentation/pages/receive_page.dart';
-import '../../../send/presentation/pages/send_page.dart';
 import '../../../swap/presentation/pages/swap_page.dart';
 import '../../../transaction_history/domain/transaction_activity.dart';
 import '../../domain/asset_detail_view_data.dart';
@@ -49,7 +52,14 @@ final assetTransactionsProvider =
     });
 
 class AssetDetailPage extends ConsumerWidget {
-  const AssetDetailPage({super.key, required this.mintAddress});
+  const AssetDetailPage({
+    super.key,
+    required this.mintAddress,
+    this.chainId,
+    this.assetId,
+  });
+  final String? chainId;
+  final String? assetId;
 
   static const routeName = 'assetDetail';
   static const routePath = '/asset/:mint';
@@ -58,8 +68,93 @@ class AssetDetailPage extends ConsumerWidget {
 
   final String mintAddress;
 
+  Widget _networkAsset(BuildContext context, WidgetRef ref) {
+    final config = findChain(ref.watch(chainConfigsProvider), chainId!);
+    final l10n = context.l10n;
+    if (config == null)
+      return AppScaffold(
+        title: l10n.assetInfo,
+        child: Text(l10n.assetNotFound),
+      );
+    final childMode = ref.watch(walletControllerProvider).childModeEnabled;
+    void receive() {
+      ref.read(selectedChainIdProvider.notifier).state = config.id;
+      context.push(ReceivePage.routePath);
+    }
+
+    return AppScaffold(
+      title: '',
+      showTopBar: false,
+      child: ref
+          .watch(chainAssetsProvider(config.id))
+          .when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => ChainErrorCard(
+              error: error,
+              onRetry: () => ref.invalidate(chainAssetsProvider(config.id)),
+            ),
+            data: (assets) {
+              final asset = assets.where((a) => a.id == assetId).firstOrNull;
+              if (asset == null) return Center(child: Text(l10n.assetNotFound));
+              return ListView(
+                children: [
+                  _HeaderBar(
+                    name: asset.name,
+                    symbol: asset.symbol,
+                    logoUrl: asset.logoUrl,
+                  ),
+                  const SizedBox(height: 12),
+                  ChainNetworkLabel(config: config),
+                  const SizedBox(height: 18),
+                  if (childMode)
+                    _ChildModeActionRow(onReceive: receive)
+                  else
+                    _ActionRow(
+                      primaryIcon: Icons.qr_code_rounded,
+                      primaryLabel: l10n.portfolioReceive,
+                      onPrimaryAction: receive,
+                      onSend: () => context.push(
+                        walletSendPath(config.id, assetId: asset.id),
+                      ),
+                      onCopy: () => _copyMint(
+                        context,
+                        asset.contractAddress ?? mintAddress,
+                      ),
+                    ),
+                  const SizedBox(height: 18),
+                  _SectionLabel(title: l10n.assetPosition),
+                  const SizedBox(height: 10),
+                  _MetricCard(
+                    label: l10n.assetBalance,
+                    value: '${asset.balanceText} ${asset.symbol}',
+                  ),
+                  const SizedBox(height: 12),
+                  _MetricCard(
+                    label: l10n.assetValue,
+                    value: config.isTestnet
+                        ? chainText(
+                            context,
+                            'Testnet · excluded from total',
+                            '测试网 · 不计入总额',
+                          )
+                        : asset.fiatPrice == null
+                        ? '--'
+                        : Formatters.usd(
+                            double.parse(asset.balanceText) * asset.fiatPrice!,
+                          ),
+                  ),
+                  const SizedBox(height: 20),
+                  ChainActivitySection(config: config),
+                ],
+              );
+            },
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (chainId != null) return _networkAsset(context, ref);
     final walletState = ref.watch(walletControllerProvider);
     final l10n = context.l10n;
     final isChildMode = walletState.childModeEnabled;
@@ -91,7 +186,7 @@ class AssetDetailPage extends ConsumerWidget {
           final websiteUrl = _normalizeWebsiteUrl(detail?.websiteUrl);
           final showMarketStatsUnavailableNotice =
               detailError != null && priceUsd == null && priceChangePct == null;
-          final primaryAction = _primaryActionForAsset(context, asset);
+          final primaryAction = _primaryActionForAsset(context, ref, asset);
 
           return ListView(
             children: [
@@ -103,14 +198,22 @@ class AssetDetailPage extends ConsumerWidget {
               const SizedBox(height: 18),
               if (isChildMode)
                 _ChildModeActionRow(
-                  onReceive: () => context.push(ReceivePage.routePath),
+                  onReceive: () {
+                    ref.read(selectedChainIdProvider.notifier).state = ref
+                        .read(chainConfigsProvider)
+                        .first
+                        .id;
+                    context.push(ReceivePage.routePath);
+                  },
                 )
               else
                 _ActionRow(
                   primaryIcon: primaryAction.icon,
                   primaryLabel: primaryAction.label,
                   onPrimaryAction: primaryAction.onTap,
-                  onSend: () => context.push(SendPage.routePath),
+                  onSend: () => context.push(
+                    walletSendPath(ref.read(chainConfigsProvider).first.id),
+                  ),
                   onCopy: () => _copyMint(context, mintAddress),
                 ),
               const SizedBox(height: 18),
@@ -326,12 +429,21 @@ class AssetDetailPage extends ConsumerWidget {
 
   static _AssetPrimaryAction _primaryActionForAsset(
     BuildContext context,
+    WidgetRef ref,
     AssetHolding asset,
   ) {
+    void receive() {
+      ref.read(selectedChainIdProvider.notifier).state = ref
+          .read(chainConfigsProvider)
+          .first
+          .id;
+      context.push(ReceivePage.routePath);
+    }
+
     if (!AppFeatures.canOpenSwap) {
       return _AssetPrimaryAction.receive(
         context.l10n.portfolioReceive,
-        () => context.push(ReceivePage.routePath),
+        receive,
       );
     }
 
@@ -339,7 +451,7 @@ class AssetDetailPage extends ConsumerWidget {
       if (!AppFeatures.canOpenXStocks) {
         return _AssetPrimaryAction.receive(
           context.l10n.portfolioReceive,
-          () => context.push(ReceivePage.routePath),
+          receive,
         );
       }
       return _AssetPrimaryAction.swap(

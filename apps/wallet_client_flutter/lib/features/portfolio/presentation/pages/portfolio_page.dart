@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/responsive/layout_shell.dart';
 import '../../../../core/config/app_features.dart';
-import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/app_update_gate.dart';
@@ -16,7 +15,7 @@ import '../../../auth/presentation/pages/unlock_page.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../auth/domain/wallet_controller_state.dart';
 import '../../../notifications/presentation/pages/notifications_page.dart';
-import '../../../multichain/presentation/chain_widgets.dart';
+import '../../../multichain/presentation/portfolio_network_widgets.dart';
 import '../../../multichain/providers/multichain_providers.dart';
 import '../../../notifications/presentation/providers/notification_inbox_provider.dart';
 import '../../../onboarding/presentation/pages/welcome_page.dart';
@@ -140,7 +139,8 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
     );
     final displayData = state.valueOrNull ?? cachedData;
     final displayDefiData = defiState.valueOrNull ?? cachedDefiData;
-    final hasDefiPositions = _hasDefiPositions(displayDefiData);
+    final showPrimary = ref.watch(showPrimaryPortfolioProvider);
+    final hasDefiPositions = showPrimary && _hasDefiPositions(displayDefiData);
 
     if (!hasDefiPositions && _selectedTab == _PortfolioAssetTab.defi) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -223,15 +223,16 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
             children: _buildContent(
               context: context,
               theme: theme,
-              data: displayData,
-              defiData: displayDefiData,
+              data: showPrimary ? displayData : null,
+              defiData: showPrimary ? displayDefiData : null,
               hasDefiPositions: hasDefiPositions,
-              isRefreshing: state.isLoading,
+              isRefreshing: showPrimary && state.isLoading,
               isDefiRefreshing: defiState.isLoading && displayDefiData != null,
-              hasLoadError: state.hasError && displayData == null,
+              hasLoadError:
+                  showPrimary && state.hasError && displayData == null,
               hasDefiLoadError: defiState.hasError && displayDefiData == null,
               walletState: walletState,
-              canOpenSwap: canOpenSwap,
+              canOpenSwap: canOpenSwap && showPrimary,
               selectedTab: _selectedTab,
               onSelectedTabChanged: (tab) {
                 setState(() => _selectedTab = tab);
@@ -388,14 +389,31 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
         ),
         child: Column(
           children: [
-            Text(
-              data == null ? '--' : Formatters.usd(totalValueUsd),
-              textAlign: TextAlign.center,
-              style: theme.textTheme.displayLarge?.copyWith(
-                color: theme.colorScheme.onPrimary,
-                fontSize: 48,
-                letterSpacing: -1.8,
-              ),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 88),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      data == null && ref.watch(showPrimaryPortfolioProvider)
+                          ? '--'
+                          : Formatters.usd(totalValueUsd),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.displayLarge?.copyWith(
+                        color: theme.colorScheme.onPrimary,
+                        fontSize: 48,
+                        letterSpacing: -1.8,
+                      ),
+                    ),
+                  ),
+                ),
+                const Align(
+                  alignment: Alignment.centerRight,
+                  child: PortfolioNetworkMenu(),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
             if (totalPerformance != null)
@@ -546,8 +564,9 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
           ],
         ),
       ),
-      const AdditionalNetworkAssets(),
       const SizedBox(height: 16),
+      const WalletAssetsHeading(),
+      const SizedBox(height: 8),
       if (hasLoadError)
         WalletCard(
           child: Padding(
@@ -575,8 +594,34 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
             ),
           ),
         )
-      else if (assets.isEmpty && !hasDefiPositions)
-        _ReceiveSolPromptCard(onTap: () => context.push(ReceivePage.routePath))
+      else if (assets.isEmpty &&
+          !hasDefiPositions &&
+          ref.watch(showPrimaryPortfolioProvider) &&
+          data != null)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: TokenRow(
+            name: ref
+                .watch(chainConfigsProvider)
+                .first
+                .displayName
+                .split(' ')
+                .first,
+            networkLabel: ref.watch(chainConfigsProvider).first.displayName,
+            symbol: ref.watch(chainConfigsProvider).first.feeSymbol,
+            balanceLine: '0 ${ref.watch(chainConfigsProvider).first.feeSymbol}',
+            value: Formatters.usd(0),
+            change: '--',
+            isPositiveChange: null,
+            onTap: () {
+              ref.read(selectedChainIdProvider.notifier).state = ref
+                  .read(chainConfigsProvider)
+                  .first
+                  .id;
+              context.push(ReceivePage.routePath);
+            },
+          ),
+        )
       else ...[
         if (hasDefiPositions) ...[
           _PortfolioAssetTabs(
@@ -596,6 +641,8 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
             walletState: walletState,
           ),
       ],
+      if (!hasDefiPositions || selectedTab == _PortfolioAssetTab.tokens)
+        const AdditionalAssetRows(),
     ];
   }
 
@@ -604,9 +651,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
     List<AssetHolding> assets,
   ) {
     if (assets.isEmpty) {
-      return [
-        _ReceiveSolPromptCard(onTap: () => context.push(ReceivePage.routePath)),
-      ];
+      return [];
     }
 
     return [
@@ -616,6 +661,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
           symbol: Formatters.tokenSymbol(asset.token.symbol),
           balanceLine:
               '${Formatters.compactNumber(asset.balance)} ${Formatters.tokenSymbol(asset.token.symbol)}',
+          networkLabel: ref.watch(chainConfigsProvider).first.displayName,
           value: asset.priceQuote == null
               ? '--'
               : Formatters.usd(asset.totalValueUsd),
@@ -1177,153 +1223,6 @@ class _DefiStateCard extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _ReceiveSolPromptCard extends StatelessWidget {
-  const _ReceiveSolPromptCard({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-    const promptText = Color(0xFF7A5B2D);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(18, 22, 18, 18),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFFFFBF2), Color(0xFFFFF4DC)],
-        ),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: AppColors.tertiary.withValues(alpha: 0.28)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryBright.withValues(alpha: 0.06),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 74,
-            height: 74,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.primaryStrong.withValues(alpha: 0.42),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  blurRadius: 24,
-                  offset: const Offset(0, 12),
-                ),
-              ],
-            ),
-            child: SizedBox(
-              width: 40,
-              height: 30,
-              child: _SolanaMark(
-                color: AppColors.tertiary.withValues(alpha: 0.68),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.portfolioReceiveSol,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: AppColors.primaryStrong.withValues(alpha: 0.72),
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 7),
-          Text(
-            l10n.portfolioReceiveSolSubtitle,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: promptText.withValues(alpha: 0.72),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 18),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFA46708),
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(58),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              onPressed: onTap,
-              child: Text(l10n.portfolioReceiveSol),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SolanaMark extends StatelessWidget {
-  const _SolanaMark({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(painter: _SolanaMarkPainter(color));
-  }
-}
-
-class _SolanaMarkPainter extends CustomPainter {
-  const _SolanaMarkPainter(this.color);
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    final barHeight = size.height * 0.22;
-    final gap = size.height * 0.17;
-    final slant = size.width * 0.18;
-
-    void drawBar(double top, {required bool reversed}) {
-      final path = Path();
-      if (reversed) {
-        path
-          ..moveTo(0, top)
-          ..lineTo(size.width - slant, top)
-          ..lineTo(size.width, top + barHeight)
-          ..lineTo(slant, top + barHeight);
-      } else {
-        path
-          ..moveTo(slant, top)
-          ..lineTo(size.width, top)
-          ..lineTo(size.width - slant, top + barHeight)
-          ..lineTo(0, top + barHeight);
-      }
-      canvas.drawPath(path..close(), paint);
-    }
-
-    drawBar(0, reversed: false);
-    drawBar(barHeight + gap, reversed: true);
-    drawBar((barHeight + gap) * 2, reversed: false);
-  }
-
-  @override
-  bool shouldRepaint(covariant _SolanaMarkPainter oldDelegate) {
-    return oldDelegate.color != color;
   }
 }
 
