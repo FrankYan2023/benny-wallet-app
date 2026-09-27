@@ -1,6 +1,6 @@
 # Arc / Multichain 文档入口
 
-更新时间：2026-09-26。两个仓库均使用 `arc` 分支。先读 [MAINNET_PARITY](MAINNET_PARITY.md) 与 [后台实施文档](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_MULTICHAIN.md)；客户端默认主网/后台模式，生产上线尚待部署与链上验收。下表中标注 2026-09-25 的记录保留为历史证据。
+更新时间：2026-09-27。开发保留 `arc` 分支，交付快进合并到 `main`。先读 [MAINNET_PARITY](MAINNET_PARITY.md) 与 [后台实施文档](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_MULTICHAIN.md)；客户端默认主网/后台模式，数据库已增量更新，后台 main 自动发布结果见 [发布记录](https://github.com/FrankYan2023/benny-wallet/blob/main/docs/ARC_RELEASE_2026_09_27.md)；资金与设备验收仍待完成。下表中标注 2026-09-25 的记录保留为历史证据。
 
 ## 阅读顺序
 

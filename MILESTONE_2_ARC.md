@@ -13,7 +13,11 @@ This is the technical audit plus dated implementation history. The current entry
 [complete commit/file history](docs/arc/CHANGELOG.md), [frontend/backend test plan](docs/arc/TEST_PLAN.md),
 [backend contracts](docs/arc/BACKEND_CONTRACTS.md), and [latest validation](docs/arc/VALIDATION.md).
 
-## Current implementation / release boundary (2026-09-26)
+## 2026-09-27 release update
+
+Production additive SQL has been applied, and backend main now triggers the existing Railway automatic deployment. Read the [release record](https://github.com/FrankYan2023/benny-wallet/blob/main/docs/ARC_RELEASE_2026_09_27.md) for actual online validation. The dated implementation snapshot below is historical; funded transfers, FCM and physical-device/release acceptance remain pending.
+
+## Implementation / release boundary at 2026-09-26
 
 The new [MAINNET_PARITY](docs/arc/MAINNET_PARITY.md) acceptance contract adds backend Arc RPC, ownership proof, cloud tokens, valuation, indexed history and FCM notifications. The app defaults to mainnet through the authenticated backend, with explicit testnet QA flags. The companion [backend implementation](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_MULTICHAIN.md) adds six server-only tables and four transactional functions without changing root wallet storage or existing Solana endpoints.
 

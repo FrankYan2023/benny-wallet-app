@@ -23,7 +23,7 @@
 可以。界面、解锁和地址生成可提前在专用手机检查；完整余额/历史/发送联调需以下条件同时满足：
 
 1. 生产或隔离 staging 环境先应用新增 SQL，部署后台；配置 `ARC_ENABLED=true`、`ARC_NETWORK=mainnet`、有效 `ARC_RPC_URLS`。历史/到账索引另启用 `ARC_INDEXER_ENABLED=true`；推送需要真实 FCM 配置。
-2. 从部署环境验证 RPC、账户绑定、余额、费用、收据和日志，不能仅以服务器启动或 health 返回 200 代替验证。之前开发机的主网 403 仍未解决；生产节点可访问性必须独立确认。
+2. 从部署环境验证 RPC、账户绑定、余额、费用、收据和日志，不能仅以服务器启动或 health 返回 200 代替验证。09-27 开发机主网 eth_chainId 已恢复 200 / 5042，生产检查结果见 [发布记录](https://github.com/FrankYan2023/benny-wallet/blob/main/docs/ARC_RELEASE_2026_09_27.md)。
 3. 安装普通 `main.dart` 构建，`API_BASE_URL` 指向部署的 HTTPS 后台。当前默认 `https://api.gobennyapp.com`。保持默认主网，不启用 `ARC_USE_TESTNET`、`ARC_DIRECT_TESTNET_RPC` 或 `BENNY_EMULATOR_QA`，不要将测试 harness 安装到个人钱包设备。
 4. 先在专用测试手机启用 USB 调试并连接，使用新建的私有受控测试钱包；先测无资金流程，再按测试计划完成小额 USDC/ERC-20 收发与费用/回执核对。公开测试向量和公开 QA PIN 钱包不能注资。
 5. 存量升级另做受控测试：旧版创建测试钱包 → 新版同包名、同签名覆盖安装 → 核对 PIN、生物识别、Solana 地址/资产/收发/Swap → 启用 Arc → 重启、锁定和切换账户后再核对。商店版本还要匹配商店签名升级通道和递增 versionCode。
@@ -32,4 +32,4 @@ Android 当前包名：full `com.benny.wallet`，liteStore `com.benny.wallet.lit
 
 建议先测：旧钱包解锁/地址保持 → Solana 收发与 Swap → Arc 地址/余额/收款 → Arc 估费/确认/广播/回执 → 后台断开时 Solana 可用性 → 多设备历史与通知 → 真机生物识别。完整用例见 [TEST_PLAN](TEST_PLAN.md) 及 [后台矩阵](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_TEST_PLAN.md)。
 
-本轮没有执行生产部署、远程数据库迁移、个人手机安装或真实资金转账。
+09-27 已执行远程数据库增量，后台 main 推送触发现有自动部署；详见发布记录。没有安装个人手机或进行真实资金转账。

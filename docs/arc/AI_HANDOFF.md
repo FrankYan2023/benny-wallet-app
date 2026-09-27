@@ -1,5 +1,14 @@
 # AI 接手说明
 
+## 2026-09-27 自动发布与数据库增量
+
+按现有 GitHub main → Railway 自动发布流程交付，不更换服务或部署分支。后台提交 `4b24dab` 已快进合并 main，数据库 SQL 已在 Supabase 执行（远程版本 `20260927142033`，本地源文件 `20260926094915_arc_multichain_services.sql`）；新增 6 表/4 函数，保留原表和钱包数据。生产发布和只读验证的最终状态见 [后台发布记录](https://github.com/FrankYan2023/benny-wallet/blob/main/docs/ARC_RELEASE_2026_09_27.md)。
+
+Arc 默认主网 5042，节点/功能开关来自后台版本化配置，既有服务密钥继续由 Railway 管理。手机默认连接 `https://api.gobennyapp.com`，不需要打开测试网或直接 RPC 开关。本地 Circle 主网复查已返回 HTTP 200 / 5042，不再将 09-26 的 403 当成当前结果。
+
+本次手机仅更新文档，没有修改运行代码、密钥存储或 Android/iOS 构建配置。最新既有证据仍为 88 项 Flutter 测试、静态检查、Android full/liteStore debug 和 iOS unsigned debug 通过；没有借此声称受控资金收发、FCM、真机升级或签名发布通过。
+
+
 ## 2026-09-27 存量用户检查
 
 运行代码未改，补充回归后客户端 88 / 后台 23 项通过。真机联调与受控旧版本升级前先读 [EXISTING_USER_ANDROID](EXISTING_USER_ANDROID.md)。不对个人钱包卸载、清数据或用 debug 签名强行覆盖生产包。

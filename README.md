@@ -15,7 +15,7 @@ Benny Wallet 是现有的 Flutter 自托管钱包，主要移动端工程为 [`a
 
 2026-09-26 本轮增加 [主网对齐目标](docs/arc/MAINNET_PARITY.md)：Arc RPC 后台代理、EVM 账户所有权绑定、USDC/ERC-20 估值、代币云同步、持久化历史索引与到账通知。对应 [后台实现与部署](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_MULTICHAIN.md) 位于独立的 `benny-wallet` 仓库 `arc` 分支。
 
-客户端现在默认 Arc Mainnet（`5042`），通过 Benny 后台访问；测试网须显式启用。**这不表示生产主网已经上线**：远程数据库迁移、后台部署、主网连通性、真实资金收发/推送和 iOS 真机/签名发布仍需独立验证。Android full/liteStore 与 iOS 无签名 debug 已构建通过。本机曾收到主网 RPC 的 HTTP 403。最新执行证据见 [VALIDATION](docs/arc/VALIDATION.md)，历史通过数字不能替代本轮结果。
+客户端现在默认 Arc Mainnet（`5042`），通过 Benny 后台访问；测试网须显式启用。数据库增量已执行，后台代码已合并 main 触发现有 Railway 自动发布；最终线上验证见 [发布记录](https://github.com/FrankYan2023/benny-wallet/blob/main/docs/ARC_RELEASE_2026_09_27.md)。真实资金收发/推送和 iOS 真机/签名发布仍需独立验证。Android full/liteStore 与 iOS 无签名 debug 已构建通过。09-26 本机曾收到主网 RPC HTTP 403，09-27 复查已返回 HTTP 200 / 5042。最新执行证据见 [VALIDATION](docs/arc/VALIDATION.md)，历史通过数字不能替代本轮结果。
 
 ## 开发入口
 
