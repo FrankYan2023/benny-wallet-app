@@ -1,4 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:web3dart/web3dart.dart';
+import 'package:web3dart/crypto.dart';
+import '../../../core/chains/chain_backend_client.dart';
+import '../../../core/constants/app_constants.dart';
+import '../data/backend_history_controller.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -88,6 +95,69 @@ Future<ChainAccount> _account(Ref ref, String chainId) async {
   );
 }
 
+/// Session-scoped client; stale asynchronous work cannot bind/send for a new wallet.
+final chainBackendProvider = Provider.family<ChainBackendClient?, String>((
+  ref,
+  chainId,
+) {
+  if (chainId == 'solana-mainnet' || useDirectTestnetRpc) return null;
+  final config = ref
+      .watch(additionalChainConfigsProvider)
+      .where((c) => c.id == chainId)
+      .firstOrNull;
+  if (config == null) return null;
+  final snapshot = ref.watch(walletControllerProvider);
+  void guard() {
+    final current = ref.read(walletControllerProvider);
+    if (!current.isUnlocked ||
+        current.publicKey != snapshot.publicKey ||
+        current.mnemonicTokenId != snapshot.mnemonicTokenId) {
+      throw StateError('Wallet session changed. Unlock again.');
+    }
+  }
+
+  return ChainBackendClient(
+    config: config,
+    baseUrl: AppConstants.apiBaseUrl,
+    guard: guard,
+    accountReader: () => _account(ref, chainId),
+    headersReader: () async {
+      final session = await ref
+          .read(backendSessionManagerProvider)
+          .currentSession();
+      guard();
+      if (session.ownerAddress != snapshot.publicKey)
+        throw StateError('Wallet session mismatch.');
+      return {'Authorization': 'Bearer ${session.accessToken}'};
+    },
+    proofSigner: (message) async {
+      guard();
+      final key = EvmKeyService.derivePrivateKey(_readMnemonic(ref));
+      try {
+        final signature = EthPrivateKey(key).signPersonalMessageToUint8List(
+          Uint8List.fromList(utf8.encode(message)),
+        );
+        guard();
+        return bytesToHex(signature, include0x: true);
+      } finally {
+        key.fillRange(0, key.length, 0);
+      }
+    },
+  );
+});
+
+final backendChainHistoryProvider = StateNotifierProvider.autoDispose
+    .family<BackendHistoryController, AsyncValue<ChainHistoryPage>, String>((
+      ref,
+      chainId,
+    ) {
+      return BackendHistoryController(
+        ref.watch(chainBackendProvider(chainId))!,
+        ref.read(multichainStoreProvider),
+        ref.watch(chainAccountProvider(chainId).future),
+      );
+    });
+
 final chainAdapterProvider = Provider.family<ChainAdapter, String>((
   ref,
   chainId,
@@ -104,11 +174,13 @@ final chainAdapterProvider = Provider.family<ChainAdapter, String>((
       .where((config) => config.id == chainId)
       .firstOrNull;
   if (config == null) throw StateError('Unsupported network.');
+  final backend = ref.watch(chainBackendProvider(chainId));
   return EvmAdapter(
     config: config,
     accountReader: () => _account(ref, chainId),
     mnemonicReader: () async => _readMnemonic(ref, forSigning: true),
     rpcUrls: arcRpcUrls(config),
+    rpc: backend == null ? null : BackendEvmRpc(backend),
   );
 });
 
@@ -123,6 +195,18 @@ final chainTokensProvider = FutureProvider.autoDispose
       final account = await ref.watch(chainAccountProvider(chainId).future);
       final tokens = await ref.read(multichainStoreProvider).tokens(account);
       final adapter = ref.watch(chainAdapterProvider(chainId));
+      final backend = ref.watch(chainBackendProvider(chainId));
+      if (backend != null) {
+        final remote = await backend.tokens();
+        final byId = {for (final token in remote) token.id: token};
+        for (final token in tokens) {
+          if (!byId.containsKey(token.id) && token.contractAddress != null) {
+            final verified = await backend.importToken(token.contractAddress!);
+            byId[verified.id] = verified;
+          }
+        }
+        return byId.values.toList();
+      }
       const bennyContract = String.fromEnvironment('ARC_BENNY_TOKEN_ADDRESS');
       if (bennyContract.isNotEmpty &&
           adapter is EvmAdapter &&
@@ -140,6 +224,13 @@ final chainAssetsProvider = FutureProvider.autoDispose
     .family<List<ChainAsset>, String>((ref, chainId) async {
       final account = await ref.watch(chainAccountProvider(chainId).future);
       final tokens = await ref.watch(chainTokensProvider(chainId).future);
+      final backend = ref.watch(chainBackendProvider(chainId));
+      if (backend != null) {
+        final assets = await backend.portfolio();
+        final timer = Timer(const Duration(seconds: 20), ref.invalidateSelf);
+        ref.onDispose(timer.cancel);
+        return assets;
+      }
       return ref
           .watch(chainAdapterProvider(chainId))
           .getAssets(account, tokens: tokens);
@@ -150,6 +241,21 @@ final chainAssetsProvider = FutureProvider.autoDispose
 final chainActivityProvider = StreamProvider.autoDispose
     .family<List<ChainActivity>, String>((ref, chainId) {
       final controller = StreamController<List<ChainActivity>>();
+      if (ref.watch(chainBackendProvider(chainId)) != null) {
+        ref.listen<AsyncValue<ChainHistoryPage>>(
+          backendChainHistoryProvider(chainId),
+          (_, next) {
+            next.when(
+              data: (page) => controller.add(page.items),
+              error: controller.addError,
+              loading: () {},
+            );
+          },
+          fireImmediately: true,
+        );
+        ref.onDispose(controller.close);
+        return controller.stream;
+      }
       final adapter = ref.watch(chainAdapterProvider(chainId));
       final accountFuture = ref.watch(chainAccountProvider(chainId).future);
       final store = ref.read(multichainStoreProvider);
@@ -241,10 +347,16 @@ class TokenImportController {
 
   Future<void> saveToken(String chainId, ChainAsset asset) async {
     final account = await _account(ref, chainId);
-    await ref.read(multichainStoreProvider).saveToken(account, asset);
+    final backend = ref.read(chainBackendProvider(chainId));
+    final verified = backend == null
+        ? asset
+        : await backend.importToken(asset.contractAddress!);
+    if (!verified.isFeeAsset)
+      await ref.read(multichainStoreProvider).saveToken(account, verified);
     ref.invalidate(chainTokensProvider(chainId));
     ref.invalidate(chainAssetsProvider(chainId));
     ref.invalidate(chainActivityProvider(chainId));
+    ref.invalidate(backendChainHistoryProvider(chainId));
   }
 }
 
@@ -269,6 +381,7 @@ final chainTransferControllerProvider = Provider<ChainTransferController>(
       ref.invalidate(chainTokensProvider(chainId));
       ref.invalidate(chainAssetsProvider(chainId));
       ref.invalidate(chainActivityProvider(chainId));
+      ref.invalidate(backendChainHistoryProvider(chainId));
     },
   ),
 );

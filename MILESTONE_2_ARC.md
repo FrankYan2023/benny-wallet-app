@@ -1,6 +1,6 @@
 # Milestone 2 — Arc Support / Multichain Foundation
 
-Last updated: 2026-09-25. Base: `08cbed3` (`origin/main`, Release Android v0.0.50).
+Last updated: 2026-09-26. Base: `08cbed3` (`origin/main`, Release Android v0.0.50).
 Delivery branch: `arc`; original implementation branch: `codex/milestone-2-arc`.
 Repository: `FrankYan2023/benny-wallet-app`.
 App: `apps/wallet_client_flutter`.
@@ -13,18 +13,11 @@ This is the technical audit plus dated implementation history. The current entry
 [complete commit/file history](docs/arc/CHANGELOG.md), [frontend/backend test plan](docs/arc/TEST_PLAN.md),
 [backend contracts](docs/arc/BACKEND_CONTRACTS.md), and [latest validation](docs/arc/VALIDATION.md).
 
-Latest functional revision: `67da717`. All **72** unit/widget tests and analysis were rerun
-successfully on 2026-09-25 before documentation publication. Android UI/build passed;
-iOS, funded testnet acceptance, physical-device security and backend end-to-end tests remain open.
-Earlier counts below are historical results, not the latest aggregate. Arc mainnet access statements
-and constants below describe the official-documentation snapshot at the stated verification dates;
-recheck current Arc/Circle docs before enabling mainnet. Current code still defaults to Testnet.
+## Current implementation / release boundary (2026-09-26)
 
-## Delivery status
+The new [MAINNET_PARITY](docs/arc/MAINNET_PARITY.md) acceptance contract adds backend Arc RPC, ownership proof, cloud tokens, valuation, indexed history and FCM notifications. The app defaults to mainnet through the authenticated backend, with explicit testnet QA flags. The companion [backend implementation](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_MULTICHAIN.md) adds six server-only tables and four transactional functions without changing root wallet storage or existing Solana endpoints.
 
-The existing Flutter client now has a shared chain interface, Solana wrapper, generic EVM implementation, and an Arc Testnet wallet loop. The code covers independent EVM account derivation, a single USDC balance, custom ERC-20 import (including BENNY when configured), receive/QR, reviewed transfers, fee estimation, EIP-1559 signing/broadcast, and receipt/log activity.
-
-**Full MVP acceptance is not yet claimed.** iOS compilation is blocked by this machine's unaccepted Xcode license. A funded end-to-end Testnet transfer and real iOS/Android secure-storage/biometric regression still require device testing. No production mnemonic, private key or funded wallet was accessed; no real transaction was broadcast. Mainnet is disabled by default; the original verification found permissioned access, which must be rechecked before enabling it.
+This is implemented code, **not a production launch claim**. Remote migration/deployment, mainnet provider connectivity, controlled funded transactions, real FCM and signed iOS/device acceptance remain release gates. The unsigned iOS debug build passed on 2026-09-26; it does not prove release/device readiness. Unit/widget, PostgreSQL and Android evidence is recorded separately in [VALIDATION](docs/arc/VALIDATION.md). Earlier dated sections retain the configuration and observations of their original testnet implementation dates.
 
 ## Actual architecture discovered before changes
 

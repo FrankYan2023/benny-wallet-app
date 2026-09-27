@@ -1,7 +1,7 @@
 import 'chain_models.dart';
 
-// Verified 2026-09-16: https://docs.arc.io/arc/references/rpc-endpoints
-// Mainnet is currently permissioned. Never silently select it for public builds.
+// Verified 2026-09-26: https://docs.arc.io/arc/references/rpc-endpoints
+// Production transport uses the authenticated wallet backend. Public test RPC is explicit QA only.
 const arcTestnetConfig = ChainConfig(
   id: 'arc-testnet',
   family: ChainFamily.evm,
@@ -48,12 +48,19 @@ const arcMainnetConfig = ChainConfig(
   nativeTokenContract: '0x3600000000000000000000000000000000000000',
   nativeTokenDecimals: 6,
   nativeTransferEmitter: '0xfffffffffffffffffffffffffffffffffffffffe',
-  minimumGasPrice: 20000000000,
+  // Mainnet fee floor is read from RPC; documented 20 Gwei is testnet-only.
+  minimumGasPrice: 0,
+  maxLogBlockRange: 100,
 );
 
-const configuredArcChain = bool.fromEnvironment('ENABLE_ARC_MAINNET')
-    ? arcMainnetConfig
-    : arcTestnetConfig;
+const configuredArcChain = bool.fromEnvironment('ARC_USE_TESTNET')
+    ? arcTestnetConfig
+    : arcMainnetConfig;
+
+// Never bypass the backend for mainnet transactions.
+const useDirectTestnetRpc =
+    bool.fromEnvironment('ARC_USE_TESTNET') &&
+    bool.fromEnvironment('ARC_DIRECT_TESTNET_RPC');
 
 List<String> arcRpcUrls(ChainConfig config) => [
   config.rpcUrl,

@@ -39,19 +39,20 @@ flutter devices
 flutter run -d <ios-simulator-or-device-id>
 ```
 
-本轮历史检查因 Xcode许可未接受而阻塞；无成功的iOS构建记录。物理设备生物识别/Keychain与签名分发是额外验收，不由无签名构建涵盖。
+2026-09-26 使用 Xcode 27.0 / 27A266a 的无签名 iOS debug 构建已通过。旧的许可阻塞仅为历史记录。缺少本机 Firebase plist 时 Debug 可以构建；Release/Profile 仍要求真实 `ios/Runner/GoogleService-Info.plist`，不要提交该凭据文件。物理设备生物识别/Keychain与签名分发是额外验收，不由无签名构建涵盖。
 
 ## Arc 配置
 
-默认值与 source links 见 [`arc_chain_config.dart`](../../apps/wallet_client_flutter/lib/core/chains/arc_chain_config.dart) 和 [架构记录](../../MILESTONE_2_ARC.md)。当前默认 Testnet 5042002。参数由 `--dart-define=NAME=value` 传入：
+默认值与 source links 见 [`arc_chain_config.dart`](../../apps/wallet_client_flutter/lib/core/chains/arc_chain_config.dart) 和 [架构记录](../../MILESTONE_2_ARC.md)。当前默认 Mainnet 5042，经钱包后台访问。参数由 `--dart-define=NAME=value` 传入：
 
 | 参数 | 用途 |
 | --- | --- |
 | `ARC_TESTNET_RPC_URL` / `ARC_TESTNET_EXPLORER_URL` | 替换测试网端点 |
 | `ARC_DISABLE_RPC_FALLBACK=true` | 关闭公共dRPC备用端点 |
 | `ARC_BENNY_TOKEN_ADDRESS` | 经发行方核实的当前网络BENNY合约；未配置可手工导入 |
-| `ENABLE_ARC_MAINNET=true` | 启用预留主网配置；不是普通QA指令，先重新核对官方文档/接入 |
-| `ARC_MAINNET_RPC_URL` / `ARC_MAINNET_EXPLORER_URL` | 经核实的主网端点 |
+| `ARC_USE_TESTNET=true` | 显式选择 Arc Testnet；默认现在为主网 |
+| `ARC_DIRECT_TESTNET_RPC=true` | 仅配合测试网开关进行直接公共 RPC QA；主网无绕过后台路径 |
+| `ARC_MAINNET_EXPLORER_URL` | 经核实的主网浏览器；主网 RPC 上游由后台 `ARC_RPC_URLS` 管理 |
 
 不要把编译进App的RPC key当成秘密。不要编造BENNY合约地址。Arc Testnet资产不计入真实总额，native USDC18与ERC20 USDC6不是两个独立资产。
 
@@ -73,6 +74,8 @@ dart run tool/arc_read_smoke.dart <public-test-evm-address>
 flutter test integration_test/arc/arc_emulator_smoke_test.dart \
   -d <dedicated-emulator-id> --flavor liteStore \
   --dart-define=BENNY_EMULATOR_QA=true \
+  --dart-define=ARC_USE_TESTNET=true \
+  --dart-define=ARC_DIRECT_TESTNET_RPC=true \
   --dart-define=FEATURE_APP_UPDATES_ENABLED=false \
   --dart-define=FEATURE_SEEKER_VAULT_ENABLED=false
 ```
@@ -100,3 +103,15 @@ Arc未注资测试可分别传 `--flavor full --dart-define=STORE_MODE=full` 和
 `--flavor liteStore --dart-define=STORE_MODE=lite`，其余QA安全flags保持不变。
 最新脚本还验证操作顺序、链图标和Arc-only的Swap可见性。只测试flavor名称不能证明feature mode正确。
 `liteSeeker` 构建成功不证明真实Seeker设备/Seed Vault可用，需要对应硬件测试。
+
+
+## 2026-09-26 主网/后台模式
+
+默认构建使用 Arc 主网和现有 `API_BASE_URL` 下的 `/v1/arc-rpc`，必须先部署 companion 后台并应用迁移。`ENABLE_ARC_MAINNET` 已移除；不得继续用旧开关判断当前网络。主网不允许公共节点 fallback 绕过后台。
+
+- 后台测试网：`--dart-define=ARC_USE_TESTNET=true`，对应后台 `ARC_NETWORK=testnet`。
+- 原只读公共测试网模拟器脚本：同时传 `--dart-define=ARC_USE_TESTNET=true --dart-define=ARC_DIRECT_TESTNET_RPC=true`。
+- 主网接口/页面 fixture 模拟器：`integration_test/arc/arc_backend_ui_test.dart`，不传上述测试网开关。该脚本用模拟 API 验证 UI/数据合同，不代表线上后台已通。
+- 普通主网调试包：保留默认网络；若后台未部署，页面会显示服务不可用和总额可能不完整，不应伪装为已查到 0 余额。
+
+后台完整操作与配置：[ARC_MULTICHAIN.md](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_MULTICHAIN.md)。

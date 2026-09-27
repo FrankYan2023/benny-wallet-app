@@ -12,7 +12,6 @@
 		1A1B37919931F35AC0D561D5 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 66EB9B43A0BCD8CB48BF49D6 /* Pods_Runner.framework */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
-		4A7F34D12D0F4CBDB1712701 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4A7F34D02D0F4CBDB1712701 /* GoogleService-Info.plist */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		7D747EBF3FFD3142C60A5E86 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2ED412DA50802E1A5342A003 /* InfoPlist.strings */; };
 		7884E8682EC3CC0700C636F2 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */; };
@@ -210,6 +209,7 @@
 				97C146EA1CF9000F007C117D /* Sources */,
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
+				B824AB1E4FD247728C358901 /* Copy Firebase Configuration */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				CB856F05C183D68DD24E3B72 /* [CP] Embed Pods Frameworks */,
@@ -285,7 +285,6 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				7D747EBF3FFD3142C60A5E86 /* InfoPlist.strings in Resources */,
-				4A7F34D12D0F4CBDB1712701 /* GoogleService-Info.plist in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -293,6 +292,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		B824AB1E4FD247728C358901 /* Copy Firebase Configuration */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = ();
+			inputPaths = ();
+			name = "Copy Firebase Configuration";
+			outputPaths = ();
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/sh \"$SRCROOT/scripts/copy_firebase_config.sh\"";
+			showEnvVarsInLog = 0;
+		};
+
 		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;

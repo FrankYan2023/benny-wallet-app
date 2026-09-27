@@ -1,11 +1,11 @@
 # Arc / Multichain 文档入口
 
-更新时间：2026-09-25。目标分支：`arc`。原开发分支：`codex/milestone-2-arc`。起点：`08cbed3`（Android v0.0.50）。发布准备时的最新功能提交：`67da717`。
+更新时间：2026-09-26。两个仓库均使用 `arc` 分支。先读 [MAINNET_PARITY](MAINNET_PARITY.md) 与 [后台实施文档](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_MULTICHAIN.md)；客户端默认主网/后台模式，生产上线尚待部署与链上验收。下表中标注 2026-09-25 的记录保留为历史证据。
 
 ## 阅读顺序
 
 1. [AI_HANDOFF.md](AI_HANDOFF.md)：新 AI / 新工程师首先阅读。
-2. [CHANGELOG.md](CHANGELOG.md)：4 次实现提交、决策变更、逐文件清单。
+2. [CHANGELOG.md](CHANGELOG.md)：历次实现提交、前后端决策变更、逐文件清单。
 3. [MILESTONE_2_ARC.md](../../MILESTONE_2_ARC.md)：架构、存储、派生和链配置的原始技术记录。
 4. [DEVELOPMENT.md](DEVELOPMENT.md)：本地运行和复测命令。
 5. [TEST_PLAN.md](TEST_PLAN.md)：全部需要执行的测试；[AUTOMATED_TESTS.md](AUTOMATED_TESTS.md) 是现有自动化的逐条目录。
@@ -18,11 +18,11 @@
 | --- | --- |
 | Solana/EVM 抽象、兼容根钱包派生、Arc 基本服务 | 已实现；有本地自动化覆盖 |
 | 两链首页、共用 Send/Receive、链标识与操作顺序 | 已实现；Android 模拟器已检查 |
-| Android调试包 | full/liteStore/liteSeeker均构建；前两者已安装，Seeker硬件/签名发布未验收 |
-| 最新功能代码完整单元/组件测试 | 72 项通过（2026-09-25 重新执行） |
-| Arc RPC 只读、未注资模拟器路径 | 最新增强脚本在full（73秒）和lite（39秒）均通过，见验证记录 |
+| Android调试包 | 当前 full/liteStore 构建与模拟器集成通过；liteSeeker 仅有 09-25 历史证据，硬件/签名发布待验收 |
+| 单元/组件与后台测试 | Flutter 86 项、后台 22 项通过；环境/日期见 VALIDATION |
+| Android 未注资模拟器路径 | 主网 API fixture full/lite 通过；真实公共测试网 full 回归通过，未广播 |
 | 有资金的完整发送/接收/回执 | 待执行，当前没有链上转账验收证据 |
-| iOS 编译/设备测试 | 构建环境阻塞，未通过 |
+| iOS 编译/设备测试 | 09-26 无签名 debug 构建通过；模拟器/真机/签名发布待验收 |
 | 生物识别硬件、旧生产版本恢复、后台端到端 | 待执行；不宣称安全迁移或完整回归 |
 | Arc Swap/Bridge/完整 WalletConnect | 明确不在第一版范围 |
 

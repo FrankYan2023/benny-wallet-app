@@ -162,10 +162,22 @@
 - 加密fixture/公开派生向量不证明所有已发布生产存储版本都兼容。
 - 组件测试不验证原生安全硬件、真实链上余额结算或商店签名包。
 - 未注资Arc集成不会执行真实发送；有资金验收看TEST_PLAN的E2E组。
-- 本轮没有自动截图回归、全语言完整翻译、后台服务端或完整iOS测试证明。
+- 初版没有后台服务端或 iOS 成功证据；2026-09-26 增补后台 22 项测试与 iOS 无签名 debug 构建，见最新 VALIDATION。自动截图回归、全语言翻译和完整设备测试仍未覆盖。
 
 维护方法：添加/重命名/删除测试时同步本目录，重新运行flutter test记录runner计数；不要自动将新列出的测试标为通过。
 
 ## 2026-09-25 Android 回归增补
 
 现有Arc集成测试增加：Send/Receive/Swap的横向顺序、full/lite功能开关、Arc-only不展示Swap、两链本地AssetImage角标。菜单点击改为命中实际菜单项，避免文本子节点的hit-test警告。测试名称不变，不改变72项本地单元/组件测试计数；full与lite模式分别执行，结果见VALIDATION最新记录。
+
+
+## 2026-09-26 新增自动化
+
+- `test/core/chains/chain_backend_client_test.dart`：默认主网/费用参数；固定所有权证明；API 主机鉴权；网络不匹配；广播不重试；会话切换；资产精度；日志/交易摘要去重。
+- `test/features/multichain/portfolio_value_test.dart`：主网总额与未知报价；测试网排除；后台失败不能代表零余额。
+- `test/features/notifications/chain_notification_test.dart`：网络/根账户序列化兼容；重试事件保留已读/删除；并发通知不互相覆盖。
+- `integration_test/arc/arc_backend_ui_test.dart`：真实 Android 存储/PIN + HTTP 边界 fixtures，验证主网共用 UI 与新接口合同；**不是线上主网联调**。
+- 原 `arc_emulator_smoke_test.dart` 保留，直接公共测试网运行须显式传 `ARC_USE_TESTNET` + `ARC_DIRECT_TESTNET_RPC` 两个开关。
+- 后台 `apps/wallet_api/test/arc.test.ts`、`arc-database.test.ts`：服务/路由/索引/通知与 PGlite 权限/事务测试，逐项清单见 [后台矩阵](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_TEST_PLAN.md)。
+
+本轮实际通过数字、平台结果及日期以 [VALIDATION](VALIDATION.md) 最新记录为准。

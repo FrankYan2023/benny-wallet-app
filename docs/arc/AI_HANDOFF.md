@@ -1,6 +1,16 @@
 # AI 接手说明
 
-## 当前任务与仓库
+## 2026-09-26 当前工作
+
+新增 [MAINNET_PARITY](MAINNET_PARITY.md) 为本轮验收合同；除 Arc Swap/Bridge 外，对齐既有 Solana 的基础钱包能力。后台源码已检查并修改：[benny-wallet / arc](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_MULTICHAIN.md)，`apps/wallet_api/src/multichain`、`src/routes/arc.ts` 和新增 Supabase migration。不要再将后台任务标为“只从客户端推断”。**未部署、未执行远程迁移或真实资金转账。**
+
+客户端默认 `arc-mainnet` / chain ID 5042，经 `ChainBackendClient` → `/v1/arc-rpc`；`ARC_USE_TESTNET=true` 选择测试网，只有同时设置 `ARC_DIRECT_TESTNET_RPC=true` 才可直接访问测试 RPC。旧 `ENABLE_ARC_MAINNET` 不再控制网络。配置切换不会改动密钥、旧测试网资产也不会被当成主网余额。
+
+新增账户证明、云 token 同步、合约身份价格、总额汇总、后台历史分页、网络化通知字段/去重。`backend_history_controller.dart` 保留本地提交并轮询后台；`chain_backend_client.dart` 在每次请求前后检查当前解锁账户、只向 API 主机发送凭据。主网 RPC 的费用来自实时数据，不使用测试网固定下限。
+
+下一步以 VALIDATION 最新条目为准：完成 staging/生产迁移与部署，核实节点访问、索引追赶、通知和受控资金收发；iOS 无签名 debug 已通过，仍需模拟器/真机及签名发布验证。不要把 mocked API/PGlite 成功等同远程环境成功。
+
+## 仓库与前期历史
 
 在 `FrankYan2023/benny-wallet-app` 的 **`arc`** 分支继续现有 Flutter 钱包。不要另建应用，也不要误入后台仓库当成手机工程。主工程 `apps/wallet_client_flutter`；所有本文路径默认仓库相对。先运行 `git status`、`git log -8 --oneline`，确认用户尚未提交的修改。
 
@@ -13,7 +23,7 @@
 - 主操作从左到右：Send、Receive、Swap。Arc-only 隐藏未支持的 Swap；原有功能开关与儿童模式仍生效。
 - 币种主图标右下角是链图标；链标签仍明确显示。
 - Receive 选择网络后地址/二维码/历史一起对应变化。Send 显式选择网络；切换时清掉旧表单，操作进行时禁止切换。
-- Arc Testnet 资产不计入真实美元合计；跨链聚合定价是未来工作。
+- Arc Testnet 资产不计入真实美元合计；主网报价按合约身份映射，未知价格和余额不可用必须明确提示。
 
 ## 密钥与安全不变量
 
@@ -38,7 +48,8 @@ MWA/Seed Vault 等无本地助记词托管没有 EVM 能力；必须给出不支
 | `lib/features/multichain/presentation/chain_navigation.dart` | 按网络选择历史路由 |
 | `lib/app/router.dart` | 登录/儿童模式守卫、旧链接兼容 |
 | `packages/design_system/lib/src/widgets/token_row.dart` | 共用币种行与网络角标 |
-| `lib/core/network/` | 既有后台 API 与认证；不是 EVM RPC |
+| `lib/core/network/` | 既有后台 API 与认证；由 ChainBackendClient 复用认证 |
+| `lib/core/chains/chain_backend_client.dart` | Arc 后台 RPC、固定账户证明、资产/历史 DTO |
 
 表中 `lib/` 开头路径均位于 `apps/wallet_client_flutter/`。
 
@@ -46,10 +57,10 @@ MWA/Seed Vault 等无本地助记词托管没有 EVM 能力；必须给出不支
 
 1. 使用 [验证记录](VALIDATION.md) 判断“最新代码已测”与“历史已测”；不要只引用旧的通过数字。
 2. 在独立、私有的测试网钱包完成 [TEST_PLAN.md](TEST_PLAN.md) 中 E2E 用例，保存 tx hash、网络、预期/实际余额与回执。不要给公开 QA PIN 或标准测试向量钱包注资。
-3. 初始化合规可用的 Xcode/CocoaPods，执行无签名 iOS 构建、模拟器和物理设备安全测试；当前没有 iOS 成功证据。
+3. 在已通过无签名 debug 构建的基础上执行 iOS 模拟器、物理设备安全测试及带真实 Firebase 配置的签名发布构建；不能把编译通过当作设备验收。
 4. 在后台 staging 环境按 [后台清单](BACKEND_CONTRACTS.md) 回归原 Solana API、认证、通知及权限。没有后台访问证据时，标为未测。
 5. 使用受控旧版本测试记录验证升级/恢复；现有 fixture 只证明仓库当前已知格式。
-6. 处理剩余本地化、长期历史索引、主网准入/配置评审后再谈发布。
+6. 处理剩余本地化，验证后台长期历史索引/主网配置和运维容量后再发布。
 
 ## 每次交接需要写下
 

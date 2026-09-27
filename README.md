@@ -1,21 +1,21 @@
 # Benny Wallet
 
-Benny Wallet 是现有的 Flutter 自托管钱包，主要移动端工程为 [`apps/wallet_client_flutter`](apps/wallet_client_flutter)。`arc` 分支在保留 Solana 功能的基础上，加入通用 EVM 架构与 Arc Testnet 支持。不是新建钱包应用，也不包含服务端工程。
+Benny Wallet 是现有的 Flutter 自托管钱包，主要移动端工程为 [`apps/wallet_client_flutter`](apps/wallet_client_flutter)。`arc` 分支在保留 Solana 功能的基础上，加入通用 EVM 架构与 Arc 主网配置/后台服务接入。不是新建钱包应用，也不包含服务端工程。
 
 ## 当前功能
 
 - 同一兼容 BIP39 根钱包独立派生原有 Solana 账户与 EVM 账户；密钥留在设备上。
 - 首页默认显示两条链，余额卡右上角可切换 All / Solana / Arc；资产图标右下角显示所属链。
 - 操作顺序为 **Send → Receive → Swap**。Arc 收发整合进原有页面，显式选择网络；Arc-only 不展示尚未支持的 Swap。
-- Arc USDC 余额、收款地址/二维码、ERC-20 导入（含经核实的 BENNY 合约）、费用估算、交易确认/签名/广播与近期活动。
+- Arc USDC 余额、收款地址/二维码、ERC-20 导入（含经核实的 BENNY 合约）、费用估算、交易确认/签名/广播、后台分页活动与本地提交记录。
 - 保留 Solana 发送、接收、Swap、资产/DeFi、PIN/生物识别、儿童模式和现有后台功能。
-- 测试网资产不计入真实美元总额。Arc Swap、跨链桥、完整 WalletConnect 和 DApp 浏览器不在当前 MVP 范围。
+- 主网有价格的资产计入双链总额，未知价格/网络不可用明确提示总额不完整；测试网资产不计入真实美元总额。Arc Swap、跨链桥、完整 WalletConnect 和 DApp 浏览器不在当前 MVP 范围。
 
 ## 交付状态
 
-截至 2026-09-25，代码提交 `67da717`：72 项本地单元/组件测试通过，静态分析通过，Android 调试包已构建并在模拟器检查；增强原生集成脚本在显式full/lite模式下均通过。**完整 MVP 尚未验收**：真实测试网资金收发、物理设备安全回归、iOS 构建和服务端端到端回归仍待完成。iOS 当前受开发机 Xcode 许可/初始化阻塞。最新证据见 [验证记录](docs/arc/VALIDATION.md)，不要把测试用例清单当成通过记录。
+2026-09-26 本轮增加 [主网对齐目标](docs/arc/MAINNET_PARITY.md)：Arc RPC 后台代理、EVM 账户所有权绑定、USDC/ERC-20 估值、代币云同步、持久化历史索引与到账通知。对应 [后台实现与部署](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_MULTICHAIN.md) 位于独立的 `benny-wallet` 仓库 `arc` 分支。
 
-当前代码默认 Arc Testnet（chain ID `5042002`）。主网配置是此前文档核对的快照，发布前须重新核对官方资料和接入条件；禁止仅因存在配置就宣称主网可用。
+客户端现在默认 Arc Mainnet（`5042`），通过 Benny 后台访问；测试网须显式启用。**这不表示生产主网已经上线**：远程数据库迁移、后台部署、主网连通性、真实资金收发/推送和 iOS 真机/签名发布仍需独立验证。Android full/liteStore 与 iOS 无签名 debug 已构建通过。本机曾收到主网 RPC 的 HTTP 403。最新执行证据见 [VALIDATION](docs/arc/VALIDATION.md)，历史通过数字不能替代本轮结果。
 
 ## 开发入口
 
@@ -38,13 +38,14 @@ flutter run --flavor liteStore -d <android-device-id> \
 
 | 文档 | 内容 |
 | --- | --- |
+| [本轮完整目标](docs/arc/MAINNET_PARITY.md) | 前后端主网对齐范围、验收要求和排除项 |
 | [Arc 文档索引](docs/arc/README.md) | 当前状态、目录、阅读顺序、遗留事项 |
 | [AI 接手说明](docs/arc/AI_HANDOFF.md) | 项目定位、约束、代码入口、下次工作顺序 |
 | [完整修改历史](docs/arc/CHANGELOG.md) | 每次提交的原因/行为变化、决策、完整文件清单 |
 | [架构与密钥审计](MILESTONE_2_ARC.md) | 实际存储、派生、多链/RPC/费用模型和历史验证 |
 | [全部测试计划](docs/arc/TEST_PLAN.md) | 前端、链服务、后台、安全、平台的用例与发布门槛 |
 | [现有自动化测试目录](docs/arc/AUTOMATED_TESTS.md) | 测试文件和逐条测试名称，区分自动化与未执行端到端 |
-| [后台接口与联调](docs/arc/BACKEND_CONTRACTS.md) | 从客户端发现的真实接口、边界和后台测试要求 |
+| [后台接口与联调](docs/arc/BACKEND_CONTRACTS.md) | 前后端真实接口、所有权边界和联调要求 |
 | [验证记录](docs/arc/VALIDATION.md) | 哪个版本、何时、如何验证、结果及未测项目 |
 | [开发指南](docs/arc/DEVELOPMENT.md) | 构建、配置、模拟器、复测、故障排查 |
 

@@ -4,6 +4,60 @@
 
 最新结果以 [VALIDATION.md](VALIDATION.md) 为准。架构细节见 [MILESTONE_2_ARC.md](../../MILESTONE_2_ARC.md)。
 
+## 2026-09-26–27 · Arc 主网后台服务与双链能力对齐
+
+客户端从 `6f8b623` 继续，后台从 `db53c5a` 新建 `arc`，对应提交 [`283f8a5`](https://github.com/FrankYan2023/benny-wallet/commit/283f8a5)；本条对应所在提交，使用 Git blame/log 获取不可变 commit。后台完整记录见 [ARC_CHANGELOG](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_CHANGELOG.md)。
+
+原因：初版主要依赖公开测试网、设备近期日志，尚未对齐 Solana 的后台资产/持久历史/通知/多设备能力。用户要求统一架构，除 Arc Swap/Bridge 外完成基础钱包功能。
+
+- 默认网络改为 Mainnet 5042；所有普通 Arc 请求复用现有钱包 Bearer 会话，经新 `/v1/arc-rpc` 和链服务接口。测试网及直接 RPC QA 必须显式启用；主网没有绕过后台的自动 fallback。
+- 账户绑定采用手机本地 EIP-191 固定证明，逐项验证挑战文案、根账户、网络、地址与时效；后台验签并原子消费。助记词、私钥和交易签名仍留手机，Solana 路径和旧加密数据不迁移。
+- 新增云代币同步、合约身份价格映射、两链资产总额；未知报价、坏代币与后台不可用明确提示，不伪装成零余额，也不计入测试网价值。
+- 共用历史页面接入后台分页/回填状态，保留本地提交并轮询收据；新增链/根账户通知字段、事件去重、已读/删除保持和并发收件箱写入串行化。
+- 延续 All/Solana/Arc 筛选、Send→Receive→Swap、币种链角标及原收发入口；网络逻辑留在配置、适配器及服务中。
+- iOS Firebase 配置改为构建时受控复制：Debug 可无私有 plist，Release/Profile 必须真实配置；修复新 checkout 无签名 debug 构建失败。
+- 新增 14 项客户端测试、主网 HTTP fixture 原生脚本；后台增加 22 项服务/SQL 测试、6 张表/4 个函数、FCM outbox 与部署开关。完整目标、测试矩阵、部署/回滚、已测/未测记录同步更新。
+
+验证：Flutter 86、后台 22 全通过；分析、Android full/liteStore 与 iOS 无签名 debug 构建通过；Android 主网 fixture full/lite 与真实公共测试网 full 通过。精确日期/flags/限制见 [VALIDATION](VALIDATION.md)。未执行远程迁移、生产部署、真实资金转账或真实 FCM；主网探测仍 HTTP 403。不能将此提交标为已正式上线。
+
+本轮完整文件清单（含运行代码、平台、测试、交接文档；Git diff 为权威）：
+
+- [AGENTS.md](../../AGENTS.md)
+- [MILESTONE_2_ARC.md](../../MILESTONE_2_ARC.md)
+- [README.md](../../README.md)
+- [apps/wallet_client_flutter/integration_test/arc/README.md](../../apps/wallet_client_flutter/integration_test/arc/README.md)
+- [apps/wallet_client_flutter/integration_test/arc/arc_backend_ui_test.dart](../../apps/wallet_client_flutter/integration_test/arc/arc_backend_ui_test.dart)
+- [apps/wallet_client_flutter/ios/Runner.xcodeproj/project.pbxproj](../../apps/wallet_client_flutter/ios/Runner.xcodeproj/project.pbxproj)
+- [apps/wallet_client_flutter/ios/scripts/copy_firebase_config.sh](../../apps/wallet_client_flutter/ios/scripts/copy_firebase_config.sh)
+- [apps/wallet_client_flutter/lib/app/router.dart](../../apps/wallet_client_flutter/lib/app/router.dart)
+- [apps/wallet_client_flutter/lib/core/chains/arc_chain_config.dart](../../apps/wallet_client_flutter/lib/core/chains/arc_chain_config.dart)
+- [apps/wallet_client_flutter/lib/core/chains/chain_backend_client.dart](../../apps/wallet_client_flutter/lib/core/chains/chain_backend_client.dart)
+- [apps/wallet_client_flutter/lib/core/chains/chain_models.dart](../../apps/wallet_client_flutter/lib/core/chains/chain_models.dart)
+- [apps/wallet_client_flutter/lib/features/multichain/data/backend_history_controller.dart](../../apps/wallet_client_flutter/lib/features/multichain/data/backend_history_controller.dart)
+- [apps/wallet_client_flutter/lib/features/multichain/presentation/network_page.dart](../../apps/wallet_client_flutter/lib/features/multichain/presentation/network_page.dart)
+- [apps/wallet_client_flutter/lib/features/multichain/presentation/network_send_page.dart](../../apps/wallet_client_flutter/lib/features/multichain/presentation/network_send_page.dart)
+- [apps/wallet_client_flutter/lib/features/multichain/presentation/portfolio_network_widgets.dart](../../apps/wallet_client_flutter/lib/features/multichain/presentation/portfolio_network_widgets.dart)
+- [apps/wallet_client_flutter/lib/features/multichain/providers/multichain_providers.dart](../../apps/wallet_client_flutter/lib/features/multichain/providers/multichain_providers.dart)
+- [apps/wallet_client_flutter/lib/features/notifications/data/notification_inbox_repository.dart](../../apps/wallet_client_flutter/lib/features/notifications/data/notification_inbox_repository.dart)
+- [apps/wallet_client_flutter/lib/features/notifications/domain/notification_message.dart](../../apps/wallet_client_flutter/lib/features/notifications/domain/notification_message.dart)
+- [apps/wallet_client_flutter/lib/features/notifications/presentation/pages/notifications_page.dart](../../apps/wallet_client_flutter/lib/features/notifications/presentation/pages/notifications_page.dart)
+- [apps/wallet_client_flutter/lib/features/notifications/presentation/providers/notification_inbox_provider.dart](../../apps/wallet_client_flutter/lib/features/notifications/presentation/providers/notification_inbox_provider.dart)
+- [apps/wallet_client_flutter/lib/features/portfolio/presentation/pages/portfolio_page.dart](../../apps/wallet_client_flutter/lib/features/portfolio/presentation/pages/portfolio_page.dart)
+- [apps/wallet_client_flutter/test/core/chains/chain_backend_client_test.dart](../../apps/wallet_client_flutter/test/core/chains/chain_backend_client_test.dart)
+- [apps/wallet_client_flutter/test/features/multichain/portfolio_value_test.dart](../../apps/wallet_client_flutter/test/features/multichain/portfolio_value_test.dart)
+- [apps/wallet_client_flutter/test/features/multichain/widgets_test.dart](../../apps/wallet_client_flutter/test/features/multichain/widgets_test.dart)
+- [apps/wallet_client_flutter/test/features/notifications/chain_notification_test.dart](../../apps/wallet_client_flutter/test/features/notifications/chain_notification_test.dart)
+- [docs/arc/AI_HANDOFF.md](../../docs/arc/AI_HANDOFF.md)
+- [docs/arc/AUTOMATED_TESTS.md](../../docs/arc/AUTOMATED_TESTS.md)
+- [docs/arc/BACKEND_CONTRACTS.md](../../docs/arc/BACKEND_CONTRACTS.md)
+- [docs/arc/CHANGELOG.md](../../docs/arc/CHANGELOG.md)
+- [docs/arc/DEVELOPMENT.md](../../docs/arc/DEVELOPMENT.md)
+- [docs/arc/MAINNET_PARITY.md](../../docs/arc/MAINNET_PARITY.md)
+- [docs/arc/README.md](../../docs/arc/README.md)
+- [docs/arc/TEST_PLAN.md](../../docs/arc/TEST_PLAN.md)
+- [docs/arc/VALIDATION.md](../../docs/arc/VALIDATION.md)
+- [docs/arc/evidence/mainnet-source-manifest.txt](../../docs/arc/evidence/mainnet-source-manifest.txt)
+
 ## 2026-09-19 · 多链基础与Arc Testnet基本服务
 
 提交：[`ba322ad`](https://github.com/FrankYan2023/benny-wallet-app/commit/ba322ad1e6c5f2ef3c9e9c04c7bd435e0d7d757e)。

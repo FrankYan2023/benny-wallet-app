@@ -96,6 +96,7 @@ Future<void> show(
           arcTestnetConfig,
         ]),
         additionalChainConfigsProvider.overrideWithValue([arcTestnetConfig]),
+        chainBackendProvider(arcTestnetConfig.id).overrideWithValue(null),
         chainAdapterProvider(arcTestnetConfig.id).overrideWithValue(adapter),
         chainAccountProvider(arcTestnetConfig.id).overrideWith((ref) async {
           if (unsupported)

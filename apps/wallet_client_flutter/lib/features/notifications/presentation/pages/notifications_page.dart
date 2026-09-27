@@ -16,6 +16,9 @@ import '../../../auth/domain/wallet_controller_state.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../transaction_history/domain/transaction_activity.dart';
 import '../../domain/notification_message.dart';
+import '../../../multichain/providers/multichain_providers.dart';
+import '../../../multichain/presentation/chain_widgets.dart';
+import '../../../multichain/presentation/network_page.dart';
 import '../providers/notification_inbox_provider.dart';
 
 final receivedTransferDetailProvider = FutureProvider.autoDispose
@@ -112,7 +115,11 @@ class NotificationsPage extends ConsumerWidget {
           title: l10n.notificationsUnavailableTitle,
           subtitle: l10n.notificationsUnavailableSubtitle,
         ),
-        data: (messages) {
+        data: (allMessages) {
+          final owner = ref.watch(walletControllerProvider).publicKey;
+          final messages = allMessages
+              .where((m) => m.ownerAddress == null || m.ownerAddress == owner)
+              .toList();
           if (messages.isEmpty && receivedTransfers.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -211,6 +218,62 @@ class ReceivedNotificationDetailPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (message.chainId != null) {
+      final config = findChain(
+        ref.watch(chainConfigsProvider),
+        message.chainId!,
+      );
+      final owner = ref.watch(walletControllerProvider).publicKey;
+      if (config == null ||
+          (message.ownerAddress != null && message.ownerAddress != owner)) {
+        return AppScaffold(
+          title: context.l10n.receivedDetailsTitle,
+          child: Text(
+            chainText(
+              context,
+              'Select the matching wallet and network to view this transfer.',
+              '请切换至对应钱包和网络查看此转账。',
+            ),
+          ),
+        );
+      }
+      return AppScaffold(
+        title: config.displayName,
+        child: ListView(
+          children: [
+            ChainDetail(
+              label: chainText(context, 'Network', '网络'),
+              value: config.displayName,
+            ),
+            if (message.amountText != null)
+              ChainDetail(
+                label: chainText(context, 'Received', '已接收'),
+                value: '${message.amountText} ${message.symbol ?? ''}',
+              ),
+            if (message.senderAddress != null)
+              ChainDetail(
+                label: chainText(context, 'From', '发送地址'),
+                value: message.senderAddress!,
+              ),
+            if (message.recipientAddress != null)
+              ChainDetail(
+                label: chainText(context, 'To', '接收地址'),
+                value: message.recipientAddress!,
+              ),
+            ChainActivitySection(config: config, focusHash: message.signature),
+            if (message.signature != null &&
+                RegExp(r'^0x[0-9a-fA-F]{64}$').hasMatch(message.signature!))
+              TextButton(
+                onPressed: () => launchUrl(
+                  config.transactionUrl(message.signature!),
+                  mode: LaunchMode.externalApplication,
+                ),
+                child: Text(chainText(context, 'View in explorer', '在区块浏览器查看')),
+              ),
+          ],
+        ),
+      );
+    }
     final eventId = message.eventId;
     if (eventId == null || eventId.isEmpty) {
       return AppScaffold(
@@ -1095,7 +1158,9 @@ String _localizedMessageTitle(
   AppLocalizations l10n,
   NotificationMessage message,
 ) {
-  return message.isIncomingFunds ? l10n.receivedFundsTitle : message.title;
+  return message.isIncomingFunds && message.chainId == null
+      ? l10n.receivedFundsTitle
+      : message.title;
 }
 
 String _localizedMessageBody(

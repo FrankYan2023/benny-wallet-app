@@ -10,7 +10,7 @@ For Arc/multichain work, read these first:
 
 Preserve existing Solana derivation, encrypted wallet records, custody modes and child-mode restrictions. Never derive EVM keys from Solana private keys. Inspect actual code before assuming a storage migration is needed. Keep chain protocol logic in adapters/services; UI uses shared network configuration.
 
-Before changing Arc constants, recheck current official Arc/Circle docs. Testnet configuration is not production readiness. Backend API inventory here is inferred from client calls, not verification of server implementation. This repository has no backend source.
+Before changing Arc constants, recheck current official Arc/Circle docs. Testnet configuration is not production readiness. This repository has no backend source. As of 2026-09-26 the companion `FrankYan2023/benny-wallet` arc branch is also in scope; read its `docs/ARC_MULTICHAIN.md` and the client `docs/arc/MAINNET_PARITY.md`. Production migration/deployment and live-chain verification remain distinct from local implementation/tests.
 
 For future changes, append a dated entry to `docs/arc/CHANGELOG.md` (why, behavior, files, validation, remaining work), update affected test cases and the latest validation record. Keep prior results with their code revision; never silently promote pending tests to passed. Refresh the automated-test inventory when adding/removing tests. Use repository-relative documentation links so GitHub and a fresh checkout can read them.
 

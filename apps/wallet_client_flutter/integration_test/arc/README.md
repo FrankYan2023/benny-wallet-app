@@ -6,6 +6,8 @@ Run on a **dedicated disposable emulator**, never a personal wallet device:
 flutter test integration_test/arc/arc_emulator_smoke_test.dart \
   -d emulator-5554 --flavor liteStore \
   --dart-define=BENNY_EMULATOR_QA=true \
+  --dart-define=ARC_USE_TESTNET=true \
+  --dart-define=ARC_DIRECT_TESTNET_RPC=true \
   --dart-define=FEATURE_APP_UPDATES_ENABLED=false \
   --dart-define=FEATURE_SEEKER_VAULT_ENABLED=false
 ```
@@ -52,3 +54,8 @@ filtering hides Swap, and that Solana/Arc badges use the bundled network assets.
 The public-RPC read checks and no-sign/no-broadcast restriction are identical.
 The flavor package IDs differ, so the dedicated emulator keeps independent QA
 wallet state for full and liteStore. Never copy recovery material between them.
+
+
+## Mainnet backend contract fixture smoke
+
+`arc_backend_ui_test.dart` uses the same disposable Android storage/PIN and common UI, with mocked HTTP responses at `ChainBackendClient`'s transport boundary. Run it with the command above substituting the test filename and **omitting both testnet flags**. It checks the mainnet network/header, shared receive/send validation, token sync and indexed history UI without funds or transaction broadcast. This is not a deployed-backend or real-mainnet acceptance test. Backend Fastify/SQL tests are in the companion repository.

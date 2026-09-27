@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,6 +9,30 @@ class NotificationInboxRepository {
   static const _storageKey = 'notification_inbox_v1';
   static const _deletedReceivedIdsKey = 'notification_deleted_received_ids_v1';
   static const _maxMessages = 80;
+  Future<void> _pending = Future<void>.value();
+  Future<T> _mutate<T>(Future<T> Function() action) async {
+    final previous = _pending;
+    final done = Completer<void>();
+    _pending = done.future;
+    await previous;
+    try {
+      return await action();
+    } finally {
+      done.complete();
+    }
+  }
+
+  Future<List<NotificationMessage>> upsertMessage(
+    NotificationMessage message,
+  ) => _mutate(() => _upsertMessage(message));
+  Future<List<NotificationMessage>> syncMessages(
+    List<NotificationMessage> messages,
+  ) => _mutate(() => _syncMessages(messages));
+  Future<List<NotificationMessage>> markAllRead() => _mutate(_markAllRead);
+  Future<List<NotificationMessage>> markRead(String id) =>
+      _mutate(() => _markRead(id));
+  Future<List<NotificationMessage>> deleteMessage(String id) =>
+      _mutate(() => _deleteMessage(id));
 
   Future<List<NotificationMessage>> loadMessages() async {
     final prefs = await SharedPreferences.getInstance();
@@ -35,12 +60,31 @@ class NotificationInboxRepository {
     return messages;
   }
 
-  Future<List<NotificationMessage>> upsertMessage(
+  Future<List<NotificationMessage>> _upsertMessage(
     NotificationMessage message,
   ) async {
     final messages = await loadMessages();
+    final existing = messages
+        .where(
+          (item) =>
+              item.id == message.id ||
+              (message.eventId != null &&
+                  item.eventId == message.eventId &&
+                  item.ownerAddress == message.ownerAddress),
+        )
+        .firstOrNull;
+    if (existing != null) message = message.copyWith(isRead: existing.isRead);
+    if (message.eventId != null &&
+        (await loadDeletedReceivedIds()).contains(message.eventId))
+      return messages;
     final withoutExisting = messages
-        .where((item) => item.id != message.id)
+        .where(
+          (item) =>
+              item.id != message.id &&
+              !(message.eventId != null &&
+                  item.eventId == message.eventId &&
+                  item.ownerAddress == message.ownerAddress),
+        )
         .toList();
     final next = [message, ...withoutExisting]
       ..sort((a, b) => b.receivedAt.compareTo(a.receivedAt));
@@ -49,7 +93,7 @@ class NotificationInboxRepository {
     return capped;
   }
 
-  Future<List<NotificationMessage>> syncMessages(
+  Future<List<NotificationMessage>> _syncMessages(
     List<NotificationMessage> incomingMessages,
   ) async {
     if (incomingMessages.isEmpty) {
@@ -84,7 +128,7 @@ class NotificationInboxRepository {
     return capped;
   }
 
-  Future<List<NotificationMessage>> markAllRead() async {
+  Future<List<NotificationMessage>> _markAllRead() async {
     final messages = await loadMessages();
     final next = [
       for (final message in messages) message.copyWith(isRead: true),
@@ -93,7 +137,7 @@ class NotificationInboxRepository {
     return next;
   }
 
-  Future<List<NotificationMessage>> markRead(String id) async {
+  Future<List<NotificationMessage>> _markRead(String id) async {
     final messages = await loadMessages();
     final next = [
       for (final message in messages)
@@ -103,7 +147,7 @@ class NotificationInboxRepository {
     return next;
   }
 
-  Future<List<NotificationMessage>> deleteMessage(String id) async {
+  Future<List<NotificationMessage>> _deleteMessage(String id) async {
     final messages = await loadMessages();
     NotificationMessage? deletedMessage;
     for (final message in messages) {

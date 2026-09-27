@@ -1,26 +1,20 @@
 # 后台接口与联调边界
 
-## 已确认与未确认
+## 当前架构（2026-09-26）
 
-本分支只修改 `benny-wallet-app`。没有修改/部署 `FrankYan2023/benny-wallet` 后台，也没有数据库迁移。本清单来自客户端实际调用，不是经服务端源码/OpenAPI审核的完整服务规范。不要把客户端 mock 通过等同于服务器通过。
-
-客户端来源：
-- [`api_client.dart`](../../apps/wallet_client_flutter/lib/core/network/api_client.dart)
-- [`wallet_auth_api_client.dart`](../../apps/wallet_client_flutter/lib/core/network/wallet_auth_api_client.dart)
-- [`backend_session_manager.dart`](../../apps/wallet_client_flutter/lib/core/network/backend_session_manager.dart)
-- [`backend_endpoint_fallback.dart`](../../apps/wallet_client_flutter/lib/core/network/backend_endpoint_fallback.dart)
-- [`evm_rpc.dart`](../../apps/wallet_client_flutter/lib/core/chains/evm/evm_rpc.dart)
-
-## 两条调用路径
+本轮实际检查并修改独立后台仓库 `FrankYan2023/benny-wallet` 的 `apps/wallet_api`。新增 API、表、鉴权/签名校验、持久化历史与通知细节见 [后台权威实施文档](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_MULTICHAIN.md)、[后台测试矩阵](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_TEST_PLAN.md)。已做本地测试；远程部署和数据库迁移未执行。
 
 ```text
-原 Solana UI → 既有 repository/API client → Benny 后台 / Solana RPC
-                                      → Solana Sender（签名交易，非私钥）
-共用 Arc UI → ChainAdapter / EvmAdapter → 经 eth_chainId 校验的 Arc JSON-RPC
-                                      → 本地 metadata/submission store
+共用 Solana UI → SolanaAdapter / 原 service → 原 Benny 后台 → Solana/Helius
+共用 Arc UI → EvmAdapter + ChainBackendClient → /v1/arc-rpc → Arc EVM 节点
+           → 账户证明/资产/云 token/历史 API → Supabase + 后台索引 → 共用 FCM
 ```
 
-Arc 不需要把 0x 地址伪装成 Solana `ownerAddress`，不调用 Solana Sender 广播 EVM 交易，不要求后台持有助记词。既有后台认证目前沿用 Solana 身份流程；本轮没有新增 SIWE/EVM 登录。未来若要增加 Arc 价格、完整历史索引或推送，需独立设计链/账户隔离与身份绑定。
+Arc 沿用原 Solana 根地址的 Bearer 会话，但独立要求 EVM 地址所有权证明。`0x` 地址不会冒充 Solana owner；地址绑定后以 owner + chain + EVM address 隔离数据。助记词和交易签名留在手机；后台仅校验、记录哈希并转发已签名交易。
+
+新增 `/v1/chains/arc/{config,health,account,tokens,portfolio,activity}` 与账户 challenge/verify；需要 Bearer，除 config 外还须匹配 `X-Chain-Id`。客户端不向公共 RPC 泄露钱包 API token，也不会在主网失败后切到测试网。
+
+以下原接口表保留为前期从客户端收集的 Solana 回归范围；具体服务端实现、部署权限与集成结果必须分别核实。
 
 ## 从客户端发现的真实端点
 

@@ -13,6 +13,8 @@ class NotificationMessage {
     this.senderAddress,
     this.amountText,
     this.symbol,
+    this.chainId,
+    this.ownerAddress,
   });
 
   final String id;
@@ -28,6 +30,8 @@ class NotificationMessage {
   final String? senderAddress;
   final String? amountText;
   final String? symbol;
+  final String? chainId;
+  final String? ownerAddress;
 
   NotificationMessage copyWith({bool? isRead}) {
     return NotificationMessage(
@@ -44,6 +48,8 @@ class NotificationMessage {
       senderAddress: senderAddress,
       amountText: amountText,
       symbol: symbol,
+      chainId: chainId,
+      ownerAddress: ownerAddress,
     );
   }
 
@@ -62,6 +68,8 @@ class NotificationMessage {
       'senderAddress': senderAddress,
       'amountText': amountText,
       'symbol': symbol,
+      'chainId': chainId,
+      'ownerAddress': ownerAddress,
     };
   }
 
@@ -82,6 +90,8 @@ class NotificationMessage {
       senderAddress: _readString(json['senderAddress']),
       amountText: _readString(json['amountText']),
       symbol: _readString(json['symbol']),
+      chainId: _readString(json['chainId']),
+      ownerAddress: _readString(json['ownerAddress']),
     );
   }
 

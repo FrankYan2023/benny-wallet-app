@@ -154,6 +154,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
       for (final config in ref.read(additionalChainConfigsProvider)) {
         ref.invalidate(chainAssetsProvider(config.id));
         ref.invalidate(chainActivityProvider(config.id));
+        ref.invalidate(backendChainHistoryProvider(config.id));
       }
       try {
         ref.invalidate(portfolioProvider(ownerAddress));
@@ -266,6 +267,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
     required _PortfolioAssetTab selectedTab,
     required ValueChanged<_PortfolioAssetTab> onSelectedTabChanged,
   }) {
+    final additionalValue = ref.watch(additionalPortfolioValueProvider);
     final assets = [...(data?.assets ?? const <AssetHolding>[])]
       ..sort((a, b) {
         final byValue = b.totalValueUsd.compareTo(a.totalValueUsd);
@@ -295,13 +297,14 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
     final defiValueUsd = hasDefiPositions
         ? defiData?.totalValueUsd ?? 0.0
         : 0.0;
-    final totalValueUsd = (data?.totalValueUsd ?? 0) + defiValueUsd;
+    final totalValueUsd =
+        (data?.totalValueUsd ?? 0) + defiValueUsd + additionalValue.usd;
     final cryptoPerformance = _totalPerformance(cryptoAssets);
     final stockPerformance = _totalPerformance(stockAssets);
-    final totalPerformance = _totalPerformanceWithDefi(
-      assets,
-      hasDefiPositions ? defiData : null,
-    );
+    final totalPerformance =
+        additionalValue.hasHoldings || additionalValue.incomplete
+        ? null
+        : _totalPerformanceWithDefi(assets, hasDefiPositions ? defiData : null);
     return [
       if (!walletState.childModeEnabled &&
           walletState.childWallets.isNotEmpty) ...[
@@ -397,7 +400,11 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
-                      data == null && ref.watch(showPrimaryPortfolioProvider)
+                      (data == null &&
+                                  ref.watch(showPrimaryPortfolioProvider)) ||
+                              (!ref.watch(showPrimaryPortfolioProvider) &&
+                                  additionalValue.incomplete &&
+                                  !additionalValue.hasData)
                           ? '--'
                           : Formatters.usd(totalValueUsd),
                       textAlign: TextAlign.center,
@@ -415,6 +422,19 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                 ),
               ],
             ),
+            if (additionalValue.incomplete)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  Localizations.localeOf(context).languageCode == 'zh'
+                      ? '部分资产尚未计价，总额可能不完整'
+                      : 'Some assets are not priced. Total may be incomplete.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                ),
+              ),
             const SizedBox(height: 20),
             if (totalPerformance != null)
               Row(
@@ -468,8 +488,12 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                 Expanded(
                   child: _ValueBreakdownChip(
                     label: context.l10n.portfolioCrypto,
-                    value: Formatters.usd(cryptoValueUsd),
-                    performance: cryptoPerformance,
+                    value: Formatters.usd(cryptoValueUsd + additionalValue.usd),
+                    performance:
+                        additionalValue.hasHoldings ||
+                            additionalValue.incomplete
+                        ? null
+                        : cryptoPerformance,
                     showPerformance: true,
                   ),
                 ),

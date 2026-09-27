@@ -286,6 +286,12 @@ class _NetworkSendPageState extends ConsumerState<NetworkSendPage> {
                 suffixText: asset.symbol,
               ),
               validator: (value) {
+                if (!asset.balanceAvailable)
+                  return chainText(
+                    context,
+                    'Balance unavailable. Refresh and try again.',
+                    '余额暂不可用，请刷新后重试。',
+                  );
                 try {
                   final amount = parseUnits(
                     value?.trim() ?? '',

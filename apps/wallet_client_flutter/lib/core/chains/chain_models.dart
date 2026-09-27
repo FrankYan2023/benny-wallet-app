@@ -68,6 +68,7 @@ class ChainAsset {
     this.logoUrl,
     this.fiatPrice,
     this.isFeeAsset = false,
+    this.balanceAvailable = true,
   });
   final String chainId;
   final String symbol;
@@ -78,10 +79,12 @@ class ChainAsset {
   final String? logoUrl;
   final double? fiatPrice;
   final bool isFeeAsset;
+  final bool balanceAvailable;
   bool get isNative => contractAddress == null;
   String get id =>
       '$chainId:${contractAddress?.startsWith("0x") == true ? contractAddress!.toLowerCase() : contractAddress ?? "native"}';
-  String get balanceText => formatUnits(rawBalance, decimals);
+  String get balanceText =>
+      balanceAvailable ? formatUnits(rawBalance, decimals) : '--';
   ChainAsset withBalance(BigInt balance) => ChainAsset(
     chainId: chainId,
     symbol: symbol,
@@ -92,6 +95,7 @@ class ChainAsset {
     logoUrl: logoUrl,
     fiatPrice: fiatPrice,
     isFeeAsset: isFeeAsset,
+    balanceAvailable: balanceAvailable,
   );
   Map<String, dynamic> toJson() => {
     'chainId': chainId,
@@ -107,10 +111,12 @@ class ChainAsset {
     symbol: json['symbol'] as String,
     name: json['name'] as String,
     decimals: json['decimals'] as int,
-    rawBalance: BigInt.zero,
+    rawBalance: BigInt.parse(json['rawBalance'] as String? ?? '0'),
+    fiatPrice: (json['fiatPrice'] as num?)?.toDouble(),
     contractAddress: json['contractAddress'] as String?,
     logoUrl: json['logoUrl'] as String?,
     isFeeAsset: json['isFeeAsset'] == true,
+    balanceAvailable: json['balanceAvailable'] != false,
   );
 }
 

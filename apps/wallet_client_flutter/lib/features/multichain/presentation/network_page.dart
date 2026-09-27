@@ -10,8 +10,9 @@ import '../providers/multichain_providers.dart';
 import 'chain_widgets.dart';
 
 class NetworkPage extends ConsumerWidget {
-  const NetworkPage({super.key, required this.chainId});
+  const NetworkPage({super.key, required this.chainId, this.focusHash});
   final String chainId;
+  final String? focusHash;
   static const routePath = '/networks/:chainId';
 
   @override
@@ -34,7 +35,7 @@ class NetworkPage extends ConsumerWidget {
             onChanged: (id) => context.replace(networkPath(id)),
           ),
           const SizedBox(height: 16),
-          ChainActivitySection(config: config),
+          ChainActivitySection(config: config, focusHash: focusHash),
         ],
       ),
     );
@@ -76,7 +77,10 @@ class ChainActivitySection extends ConsumerWidget {
           ),
           IconButton(
             tooltip: chainText(context, 'Refresh activity', '刷新活动'),
-            onPressed: () => ref.invalidate(chainActivityProvider(config.id)),
+            onPressed: () {
+              ref.invalidate(chainActivityProvider(config.id));
+              ref.invalidate(backendChainHistoryProvider(config.id));
+            },
             icon: const Icon(Icons.refresh_rounded),
           ),
         ],
@@ -84,8 +88,24 @@ class ChainActivitySection extends ConsumerWidget {
       Text(
         chainText(
           context,
-          'Recent transfers and transactions sent from this device. Older history may not appear. Status updates automatically.',
-          '显示近期转账和本设备发送的交易，可能不包含较早记录。状态会自动更新。',
+          ref.watch(chainBackendProvider(config.id)) == null
+              ? 'Recent transfers and transactions sent from this device. Older history may not appear.'
+              : (ref
+                            .watch(backendChainHistoryProvider(config.id))
+                            .valueOrNull
+                            ?.backfillComplete ==
+                        true
+                    ? 'Synced history. Status updates automatically.'
+                    : 'Syncing earlier history. Recent activity updates automatically.'),
+          ref.watch(chainBackendProvider(config.id)) == null
+              ? '显示近期转账和本设备发送的交易，可能不包含较早记录。'
+              : (ref
+                            .watch(backendChainHistoryProvider(config.id))
+                            .valueOrNull
+                            ?.backfillComplete ==
+                        true
+                    ? '历史已同步，状态会自动更新。'
+                    : '正在同步较早记录，近期活动会自动更新。'),
         ),
         style: Theme.of(context).textTheme.bodySmall,
       ),
@@ -96,7 +116,10 @@ class ChainActivitySection extends ConsumerWidget {
             loading: () => const LinearProgressIndicator(),
             error: (error, _) => ChainErrorCard(
               error: error,
-              onRetry: () => ref.invalidate(chainActivityProvider(config.id)),
+              onRetry: () {
+                ref.invalidate(chainActivityProvider(config.id));
+                ref.invalidate(backendChainHistoryProvider(config.id));
+              },
             ),
             data: (items) {
               final visible = focusHash == null
@@ -203,6 +226,36 @@ class ChainActivitySection extends ConsumerWidget {
               );
             },
           ),
+      if (focusHash == null &&
+          ref.watch(chainBackendProvider(config.id)) != null &&
+          ref
+                  .watch(backendChainHistoryProvider(config.id))
+                  .valueOrNull
+                  ?.nextCursor !=
+              null)
+        TextButton(
+          onPressed: () async {
+            try {
+              await ref
+                  .read(backendChainHistoryProvider(config.id).notifier)
+                  .loadMore();
+            } catch (_) {
+              if (context.mounted)
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      chainText(
+                        context,
+                        'Unable to load earlier history. Try again.',
+                        '较早记录加载失败，请重试。',
+                      ),
+                    ),
+                  ),
+                );
+            }
+          },
+          child: Text(chainText(context, 'Load earlier activity', '加载更早记录')),
+        ),
     ],
   );
 }

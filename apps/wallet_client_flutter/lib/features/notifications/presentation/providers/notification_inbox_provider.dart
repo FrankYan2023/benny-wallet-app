@@ -51,7 +51,11 @@ class NotificationInboxController
           notification?.body ??
           _readString(message.data['body']) ??
           _bodyFromData(message.data);
+      final eventId = _readString(message.data['eventId']);
       final id =
+          (eventId == null
+              ? null
+              : 'received:${message.data['ownerAddress'] ?? ''}:$eventId') ??
           message.messageId ??
           _readString(message.data['id']) ??
           '${DateTime.now().microsecondsSinceEpoch}';
@@ -63,7 +67,17 @@ class NotificationInboxController
           body: body,
           receivedAt: message.sentTime ?? DateTime.now(),
           type: _readString(message.data['type']),
-          eventId: _readString(message.data['eventId']),
+          eventId: eventId,
+          chainId: _readString(message.data['chainId']),
+          ownerAddress: _readString(message.data['ownerAddress']),
+          signature:
+              _readString(message.data['txHash']) ??
+              _readString(message.data['signature']),
+          mintAddress: _readString(message.data['mintAddress']),
+          recipientAddress: _readString(message.data['recipientAddress']),
+          senderAddress: _readString(message.data['senderAddress']),
+          amountText: _readString(message.data['amountText']),
+          symbol: _readString(message.data['symbol']),
         ),
       );
       state = AsyncValue.data(next);

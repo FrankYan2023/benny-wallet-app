@@ -157,3 +157,10 @@ Evidence (sanitized log/screenshot/tx hash) / Issue / Next action
 ## 2026-09-25 Android 自动化范围补充
 
 现有原生集成脚本现在直接断言FE-03的横向顺序/功能模式和FE-04的两链本地图片来源；full/lite模式分别运行。该断言不替代FE-03儿童模式、FE-04所有自定义代币和断网重启等剩余变体。其它收发/历史/导入检查也只证明脚本实际覆盖的步骤；最新结果与限制见VALIDATION，不整行批量标为通过。
+
+
+## 2026-09-26 主网与后台对齐新增验收
+
+范围以 [MAINNET_PARITY](MAINNET_PARITY.md) 为准，除 Arc Swap/Bridge 外实现钱包基本能力对齐。后台权威测试矩阵：[ARC_TEST_PLAN.md](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_TEST_PLAN.md)。该矩阵列出 ARC-B01–B21（后台）、ARC-F01–F12（客户端）与 ARC-L01–L05（部署/真实链/设备）的预期和证据类型。
+
+本轮特别覆盖：网络配置不一致、固定账户证明与重放、错误签名人/儿童模式、重复与未知广播、数据库角色权限、并发代币导入与索引游标、USDC 双精度/去重、报价缺失/符号冒充、损坏代币余额、分页/失败交易、FCM 部分失败重试与收件箱并发去重。现有 Solana 与密钥测试保留。需要生产/设备环境的项目不会因本地 mock 或 PGlite 通过而变成已通过。

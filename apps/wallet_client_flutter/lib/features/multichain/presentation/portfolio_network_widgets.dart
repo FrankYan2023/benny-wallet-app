@@ -22,6 +22,64 @@ final visibleAdditionalNetworksProvider = Provider<List<ChainConfig>>((ref) {
       .where((config) => filter == null || filter == config.id)
       .toList();
 });
+
+class AdditionalPortfolioValue {
+  const AdditionalPortfolioValue({
+    this.usd = 0,
+    this.loading = false,
+    this.unavailable = false,
+    this.unpriced = false,
+    this.hasHoldings = false,
+    this.hasData = false,
+  });
+  final double usd;
+  final bool loading, unavailable, unpriced, hasHoldings, hasData;
+  bool get incomplete => loading || unavailable || unpriced;
+}
+
+final additionalPortfolioValueProvider = Provider<AdditionalPortfolioValue>((
+  ref,
+) {
+  var usd = 0.0,
+      loading = false,
+      unavailable = false,
+      unpriced = false,
+      hasHoldings = false,
+      hasData = false;
+  for (final config in ref.watch(visibleAdditionalNetworksProvider)) {
+    if (config.isTestnet) continue;
+    final result = ref.watch(chainAssetsProvider(config.id));
+    loading = loading || result.isLoading;
+    unavailable = unavailable || result.hasError;
+    final assets = result.valueOrNull;
+    hasData = hasData || assets != null;
+    for (final asset in assets ?? <ChainAsset>[]) {
+      if (!asset.balanceAvailable) {
+        unavailable = true;
+        continue;
+      }
+      if (asset.rawBalance == BigInt.zero) continue;
+      hasHoldings = true;
+      final price = asset.fiatPrice;
+      final balance = double.tryParse(asset.balanceText);
+      final value = price == null || balance == null ? null : price * balance;
+      if (value == null || !value.isFinite || value < 0) {
+        unpriced = true;
+      } else {
+        usd += value;
+      }
+    }
+  }
+  return AdditionalPortfolioValue(
+    usd: usd,
+    loading: loading,
+    unavailable: unavailable,
+    unpriced: unpriced,
+    hasHoldings: hasHoldings,
+    hasData: hasData,
+  );
+});
+
 final usesPrimarySendProvider = Provider.family<bool, String>(
   (ref, id) => id == ref.watch(chainConfigsProvider).first.id,
 );
@@ -170,7 +228,7 @@ class AdditionalAssetRows extends ConsumerWidget {
                       networkIconAsset: config.iconAsset,
                       value: config.isTestnet
                           ? chainText(context, 'Testnet', '测试网')
-                          : asset.fiatPrice == null
+                          : !asset.balanceAvailable || asset.fiatPrice == null
                           ? '--'
                           : Formatters.usd(
                               double.parse(asset.balanceText) *
@@ -178,6 +236,10 @@ class AdditionalAssetRows extends ConsumerWidget {
                             ),
                       secondaryValue: config.isTestnet
                           ? chainText(context, 'Excluded from total', '不计入总额')
+                          : !asset.balanceAvailable ||
+                                asset.fiatPrice == null &&
+                                    asset.rawBalance > BigInt.zero
+                          ? chainText(context, 'Price unavailable', '暂无价格')
                           : null,
                       iconUrl: asset.logoUrl,
                       onTap: () => context.push(walletAssetPath(asset)),

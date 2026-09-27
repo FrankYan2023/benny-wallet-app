@@ -222,7 +222,10 @@ class AppRouter {
         builder: (context, state) => _RouteAccessGuard(
           currentLocation: state.matchedLocation,
           requireUnlocked: true,
-          child: NetworkPage(chainId: state.pathParameters['chainId']!),
+          child: NetworkPage(
+            chainId: state.pathParameters['chainId']!,
+            focusHash: state.uri.queryParameters['tx'],
+          ),
         ),
       ),
       GoRoute(
