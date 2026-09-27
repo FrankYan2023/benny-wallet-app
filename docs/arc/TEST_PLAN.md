@@ -164,3 +164,5 @@ Evidence (sanitized log/screenshot/tx hash) / Issue / Next action
 范围以 [MAINNET_PARITY](MAINNET_PARITY.md) 为准，除 Arc Swap/Bridge 外实现钱包基本能力对齐。后台权威测试矩阵：[ARC_TEST_PLAN.md](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_TEST_PLAN.md)。该矩阵列出 ARC-B01–B21（后台）、ARC-F01–F12（客户端）与 ARC-L01–L05（部署/真实链/设备）的预期和证据类型。
 
 本轮特别覆盖：网络配置不一致、固定账户证明与重放、错误签名人/儿童模式、重复与未知广播、数据库角色权限、并发代币导入与索引游标、USDC 双精度/去重、报价缺失/符号冒充、损坏代币余额、分页/失败交易、FCM 部分失败重试与收件箱并发去重。现有 Solana 与密钥测试保留。需要生产/设备环境的项目不会因本地 mock 或 PGlite 通过而变成已通过。
+
+存量用户升级与 Android 真机操作细节见 [EXISTING_USER_ANDROID](EXISTING_USER_ANDROID.md)。新增故障隔离自动化只覆盖其明确步骤，不将生产升级/硬件/真实收发用例整项标为通过。

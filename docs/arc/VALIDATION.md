@@ -1,5 +1,15 @@
 # 验证记录与待验收事项
 
+## 2026-09-27 存量用户兼容复核
+
+运行代码仍为客户端 `460cd44` / 后台 `283f8a5`；本次仅补充测试和文档，没有修改运行逻辑。完整审查与真机前置条件：[EXISTING_USER_ANDROID](EXISTING_USER_ANDROID.md)。
+
+- `flutter test --no-pub --reporter expanded`：**88 项通过**（约 7 秒），含旧密文不变/Arc 地址稳定/Solana 地址保持的增强断言、2 项 Arc 故障/不支持时的 Solana 页面回归。
+- `flutter analyze --no-pub`：PASS，No issues found。
+- 后台 `npm test`：**23 项通过**；新增 Arc 插件故障/链头与旧路由隔离测试。测试文件 TypeScript strict 检查通过。
+- 旧钱包仓库、钱包 controller、加密/存储/安全及 Android 目录对照 `08cbed3` 无代码变化。Solana 服务增加精确费用/适配器辅助方法，原费用总额算法与发送入口保留；解锁页面有 mounted 生命周期修复。
+- 原 Android/iOS 构建证据继续适用于未变更的运行代码，本次未重复构建。未部署生产、未安装个人真机、未用真实用户数据或资金；历史生产版本覆盖升级与硬件生物识别仍需设备验收。
+
 ## 当前：主网后台对齐（2026-09-26 实测，09-27 收尾复核）
 
 客户端基线 `6f8b623`，后台基线 `db53c5a`（实现提交 `283f8a5`），各自 `arc` 分支的本轮提交。精确运行代码对应 [客户端 blob 清单](evidence/mainnet-source-manifest.txt) 和 [后台 blob 清单](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/arc-source-manifest.txt)；Git 提交和 CHANGELOG 保存完整差异。以下为实际执行结果摘要，未把旧测试网结果移植成主网证据。

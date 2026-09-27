@@ -1,5 +1,9 @@
 # AI 接手说明
 
+## 2026-09-27 存量用户检查
+
+运行代码未改，补充回归后客户端 88 / 后台 23 项通过。真机联调与受控旧版本升级前先读 [EXISTING_USER_ANDROID](EXISTING_USER_ANDROID.md)。不对个人钱包卸载、清数据或用 debug 签名强行覆盖生产包。
+
 ## 2026-09-26 当前工作
 
 新增 [MAINNET_PARITY](MAINNET_PARITY.md) 为本轮验收合同；除 Arc Swap/Bridge 外，对齐既有 Solana 的基础钱包能力。后台源码已检查并修改：[benny-wallet / arc](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_MULTICHAIN.md)，`apps/wallet_api/src/multichain`、`src/routes/arc.ts` 和新增 Supabase migration。不要再将后台任务标为“只从客户端推断”。**未部署、未执行远程迁移或真实资金转账。**

@@ -181,3 +181,10 @@
 - 后台 `apps/wallet_api/test/arc.test.ts`、`arc-database.test.ts`：服务/路由/索引/通知与 PGlite 权限/事务测试，逐项清单见 [后台矩阵](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_TEST_PLAN.md)。
 
 本轮实际通过数字、平台结果及日期以 [VALIDATION](VALIDATION.md) 最新记录为准。
+
+## 2026-09-27 存量用户回归增补
+
+- `wallet_storage_regression_test.dart` 原旧记录用例增强：解密、派生 Arc、重开、地址稳定与密文字节不变，Solana 地址保持。
+- `widgets_test.dart` 新增 `Arc outage does not hide primary assets or prevent network selection` 和 `unsupported Arc custody does not block original Solana receive`。
+- 后台新增 `Arc failure and chain-header policy stay inside the Arc plugin`，仅验证 sibling 合同路由隔离，不代替真实 Solana 后台回归。
+- 全量客户端 88、后台 23 项通过；参考最新 VALIDATION。

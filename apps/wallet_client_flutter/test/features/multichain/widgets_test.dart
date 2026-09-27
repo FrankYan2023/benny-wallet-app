@@ -67,6 +67,7 @@ Future<void> show(
   WalletControllerState state = unlocked,
   fixture.FakeRpc? rpc,
   bool unsupported = false,
+  bool arcUnavailable = false,
 }) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
@@ -106,11 +107,10 @@ Future<void> show(
         chainAccountProvider(
           SolanaAdapter.networkId,
         ).overrideWith((ref) async => solana),
-        chainAssetsProvider(arcTestnetConfig.id).overrideWith(
-          (ref) async => [
-            adapter.nativeAsset.withBalance(BigInt.from(100000000)),
-          ],
-        ),
+        chainAssetsProvider(arcTestnetConfig.id).overrideWith((ref) async {
+          if (arcUnavailable) throw StateError('Arc service unavailable');
+          return [adapter.nativeAsset.withBalance(BigInt.from(100000000))];
+        }),
         chainActivityProvider(
           arcTestnetConfig.id,
         ).overrideWith((ref) => Stream.value([])),
@@ -216,6 +216,61 @@ void main() {
     expect(find.text('Primary asset row'), findsOneWidget);
     expect(find.textContaining('Arc Testnet'), findsNothing);
   });
+  testWidgets(
+    'Arc outage does not hide primary assets or prevent network selection',
+    (tester) async {
+      await show(
+        tester,
+        Column(
+          children: [
+            const PortfolioNetworkMenu(),
+            Consumer(
+              builder: (_, ref, _) => ref.watch(showPrimaryPortfolioProvider)
+                  ? const Text('Primary asset row')
+                  : const SizedBox.shrink(),
+            ),
+            const AdditionalAssetRows(),
+          ],
+        ),
+        arcUnavailable: true,
+      );
+      expect(find.text('Primary asset row'), findsOneWidget);
+      expect(find.textContaining('Arc service unavailable'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('portfolio-network-menu')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Solana Mainnet').last);
+      await tester.pumpAndSettle();
+      expect(find.text('Primary asset row'), findsOneWidget);
+      expect(find.textContaining('Arc service unavailable'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'unsupported Arc custody does not block original Solana receive',
+    (tester) async {
+      await show(
+        tester,
+        const ReceivePage(),
+        unsupported: true,
+        arcUnavailable: true,
+      );
+      expect(find.text(solana.address), findsOneWidget);
+      expect(find.byType(QrImageView), findsOneWidget);
+      await tester.tap(find.byType(ChainNetworkSelector));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Arc Testnet').last);
+      await tester.pumpAndSettle();
+      expect(find.textContaining('External wallet cannot'), findsOneWidget);
+      expect(find.byType(QrImageView), findsNothing);
+      await tester.tap(find.byType(ChainNetworkSelector));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Solana Mainnet').last);
+      await tester.pumpAndSettle();
+      expect(find.text(solana.address), findsOneWidget);
+      expect(find.byType(QrImageView), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets(
     'shared send selects Arc inline and clears its form on network switch',
     (tester) async {

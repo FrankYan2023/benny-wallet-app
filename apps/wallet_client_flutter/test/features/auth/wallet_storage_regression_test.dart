@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wallet_client_flutter/core/chains/evm/evm_key_service.dart';
 import 'package:wallet_client_flutter/core/constants/app_constants.dart';
 import 'package:wallet_client_flutter/core/crypto/local_cipher.dart';
 import 'package:wallet_client_flutter/core/security/biometric_session_protector.dart';
@@ -41,6 +42,27 @@ void main() {
       expect(
         await repository.decryptMnemonic(pin: '123456', record: record),
         phrase,
+      );
+      // Enabling Arc on an existing encrypted root must not replace that root.
+      final restoredPhrase = await repository.decryptMnemonic(
+        pin: '123456',
+        record: record,
+      );
+      final evmAddress = EvmKeyService.deriveAddress(restoredPhrase);
+      expect(evmAddress, matches(RegExp(r'^0x[0-9a-fA-F]{40}$')));
+      final reopened = (await repository.readRecords()).single;
+      expect(
+        EvmKeyService.deriveAddress(
+          await repository.decryptMnemonic(pin: '123456', record: reopened),
+        ),
+        evmAddress,
+      );
+      expect(
+        await SolanaWalletService().deriveAddress(
+          restoredPhrase,
+          derivation: reopened.derivation,
+        ),
+        fixture['publicKey'],
       );
       expect(await store.read(AppConstants.walletRecordsKey), encoded);
       expect(await store.read(AppConstants.unlockedSessionMnemonicKey), isNull);

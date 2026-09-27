@@ -4,6 +4,12 @@
 
 最新结果以 [VALIDATION.md](VALIDATION.md) 为准。架构细节见 [MILESTONE_2_ARC.md](../../MILESTONE_2_ARC.md)。
 
+## 2026-09-27 · 存量用户保护检查与真机联调条件
+
+在 `460cd44` 客户端 / `283f8a5` 后台运行代码上补回归；没有为本次检查改写运行代码或密钥数据。客户端 `wallet_storage_regression_test.dart` 增强旧加密记录派生 Arc 后的不变性；`widgets_test.dart` 增加 Arc 不可用时原资产/网络选择及不支持 Arc 时 Solana 收款恢复测试。后台 `arc.test.ts` 增加插件路由隔离断言。
+
+更新本日志、VALIDATION、AUTOMATED_TESTS、TEST_PLAN、README 索引、AI_HANDOFF，并新增 [EXISTING_USER_ANDROID](EXISTING_USER_ANDROID.md)：已审查边界、共享服务风险、生产接口前提、同包名/同签名覆盖升级及禁止清数据绕过冲突。客户端 88 / 后台 23 项全通过，分析与测试类型检查通过。生产链上/历史版本真机升级仍待验收；没有执行部署或真机安装。
+
 ## 2026-09-26–27 · Arc 主网后台服务与双链能力对齐
 
 客户端从 `6f8b623` 继续，后台从 `db53c5a` 新建 `arc`，对应提交 [`283f8a5`](https://github.com/FrankYan2023/benny-wallet/commit/283f8a5)；本条对应所在提交，使用 Git blame/log 获取不可变 commit。后台完整记录见 [ARC_CHANGELOG](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_CHANGELOG.md)。
