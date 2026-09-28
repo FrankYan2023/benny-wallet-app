@@ -1,5 +1,12 @@
 # 验证记录与待验收事项
 
+## 2026-09-28 Swap 范围与首次提示
+
+- Flutter 3.47.5 / Dart 3.13.4；`flutter test --no-pub test/features/swap/solana_swap_scope_test.dart test/features/settings/app_settings_repository_test.dart`：4 项通过。覆盖同名 USDC 的 Solana/EVM 持仓与目录/搜索隔离、EVM 币对在 quote/build 请求前拒绝、首次确认及页面重建不重复提示、原设置清理保留语言。
+- `dart analyze lib/features/swap lib/features/settings/data/app_settings_repository.dart test/features/swap/solana_swap_scope_test.dart`：No issues found。
+- 普通 Android full debug 在 Benny_Arc_QA_API36 热更新成功（72 个库 / 4,167 ms），现有生产 API 调试会话保留。没有运行真实兑换或签名/广播，后台与钱包密钥未变；本轮未重新完整构建 Android/iOS。
+- 人工复核步骤：首次进入 Swap → 查看提示及 Solana 标题 → 确认 → 返回再次进入/重启后进入应不再提示；分别打开支付/接收币种搜索，同名 USDC 仅 Solana 可用。提示 UI 与持久化已由组件测试覆盖，真机人工复核待执行。
+
 ## 2026-09-28 网络菜单图标
 
 - Android full debug 构建通过（128.2 秒），安装通过（12.8 秒），专用 Benny_Arc_QA_API36 启动并连接调试器；普通 main.dart，继续使用生产 API https://api.gobennyapp.com。

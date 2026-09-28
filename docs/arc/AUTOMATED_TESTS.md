@@ -190,3 +190,11 @@
 - 全量客户端 88、后台 23 项通过；参考最新 VALIDATION。
 
 2026-09-28：现有 arc_emulator_smoke_test.dart 同时支持显式主网生产 QA；新增主网保护参数、动态网络断言，仍为同一testWidgets用例。真实生产模式51秒通过，范围见VALIDATION；单元/组件总数未改变。
+
+## 2026-09-28 `test/features/swap/solana_swap_scope_test.dart`
+
+新增 3 项，实际执行结果见 [VALIDATION](VALIDATION.md)。
+
+- Solana swap excludes EVM holdings, catalog and search results
+- EVM pairs cannot reach Solana quote or build endpoints
+- Arc swap notice is acknowledged once across page recreation

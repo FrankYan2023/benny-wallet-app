@@ -1,5 +1,13 @@
 # Arc 完整修改记录
 
+## 2026-09-28 · Swap 仅支持 Solana 与首次提示
+
+按产品要求，普通 Swap 标题明确 `Swap · Solana`，首次打开时提示 `ARC Swap coming soon` 及当前仅支持 Solana。点击 Got it/知道了后，以本机 SharedPreferences 非敏感标记保存确认状态，重开页面/应用不重复提示；退出弹窗而未确认或写入失败时下次再提示。不是每个钱包单独弹出，xStocks、锁定或儿童模式不弹此提示。
+
+审查确认原 Swap 只从 Solana portfolio/balance 和既有 Solana catalog/search/quote/build 接口取数据，未合并 Arc 资产。`swap_repository.dart` 增加 32 字节 Base58 mint 校验，持仓、目录、搜索结果排除 EVM/无效地址；quote/build 同样先校验币对，防止绕过选择器调用。没有启用 Arc Swap、桥接或更改后台。
+
+文件：`swap_page.dart`、`swap_repository.dart`、`app_settings_repository.dart`，新增 `test/features/swap/solana_swap_scope_test.dart`。新增三项覆盖混合数据过滤、错误链币对阻止请求及提示持久化；连同设置回归共 4 项通过，静态分析通过，Android 调试热更新成功。实际兑换资金闭环未重测，见 [VALIDATION](VALIDATION.md)。
+
 ## 2026-09-28 · 网络菜单图标
 
 首页全部网络按钮将 `All` 文字替换为地球图标，保留下拉箭头；菜单内全部网络显示地球，Solana/Arc 名称前显示 ChainConfig 中的本地链图标，继续保留选中勾号与筛选行为。按钮提示包含当前网络，便于无障碍识别。修改 `portfolio_network_widgets.dart`，同步既有组件测试及两份 Arc 集成测试的 All 按钮匹配。未新增测试；11 项相关组件测试与文件静态分析通过。Android 调试更新和工具链说明见 [VALIDATION](VALIDATION.md)。

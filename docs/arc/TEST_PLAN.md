@@ -28,6 +28,13 @@
 | FE-10 | P1 M | 错误 network/asset 参数、已删除钱包、返回栈重复进入 | 不崩溃、不意外选错网络；无效参数需明确拒绝/安全回退 |
 | FE-11 | P1 M/D | 解锁处理中快速返回、旋转、切后台再回来 | 无 disposed widget 更新/黑屏；锁屏和返回路径正确 |
 
+## 前端：Swap Solana 范围
+
+| ID | 优先级/方法 | 操作与输入 | 预期结果 |
+| --- | --- | --- | --- |
+| FE-SWAP-01 | P1 A/M | 首次进入 Swap，确认后返回/重启再进入 | 首次提示 ARC Swap coming soon；说明只支持 Solana；确认后本机不重复，xStocks/儿童/锁定页不弹 |
+| FE-SWAP-02 | P0 A/M | 支付/接收币种目录与搜索混入 Solana USDC、Arc USDC、EVM 合约地址 | 仅 Solana 币可选，页面明确 Solana；EVM 币对不能发起 Solana quote/build 请求 |
+
 ## 前端：接收、发送、导入与活动
 
 | ID | 优先级/方法 | 操作与输入 | 预期结果 |

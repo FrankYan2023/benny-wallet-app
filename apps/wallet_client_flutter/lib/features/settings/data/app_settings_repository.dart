@@ -4,6 +4,18 @@ import '../../../core/constants/app_constants.dart';
 import '../domain/app_settings.dart';
 
 class AppSettingsRepository {
+  static const _arcSwapNoticeKey = 'arc_swap_notice_acknowledged_v1';
+
+  Future<bool> hasAcknowledgedArcSwapNotice() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_arcSwapNoticeKey) ?? false;
+  }
+
+  Future<void> acknowledgeArcSwapNotice() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_arcSwapNoticeKey, true);
+  }
+
   Future<AppSettings> load() async {
     final prefs = await SharedPreferences.getInstance();
     return AppSettings(

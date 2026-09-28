@@ -144,7 +144,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
 
   bool get _isXStocksMode => widget.mode == SwapExperience.xstocks;
   String _pageTitle(AppLocalizations l10n) =>
-      _isXStocksMode ? 'xStocks' : l10n.swapTitle;
+      _isXStocksMode ? 'xStocks' : '${l10n.swapTitle} · Solana';
   String _receiveTitle(AppLocalizations l10n) =>
       _isXStocksMode ? l10n.commonBuy : l10n.swapReceive;
 
@@ -153,6 +153,45 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     super.initState();
     _amountController.addListener(_onSwapInputChanged);
     _customSlippageController.addListener(_onSwapInputChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showArcSwapNotice());
+  }
+
+  Future<void> _showArcSwapNotice() async {
+    if (!mounted || _isXStocksMode) return;
+    final settings = ref.read(appSettingsRepositoryProvider);
+    try {
+      if (await settings.hasAcknowledgedArcSwapNotice()) return;
+    } catch (_) {
+      // A preference read failure must not block the Solana swap flow.
+    }
+    if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+    final wallet = ref.read(walletControllerProvider);
+    if (!wallet.isUnlocked || wallet.childModeEnabled) return;
+    final chinese = Localizations.localeOf(context).languageCode == 'zh';
+    final acknowledged = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('ARC Swap coming soon'),
+        content: Text(
+          chinese
+              ? '当前仅支持 Solana 网络的币种兑换。Arc 兑换即将上线。'
+              : 'Swap currently supports Solana tokens only. Arc support is coming soon.',
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(chinese ? '知道了' : 'Got it'),
+          ),
+        ],
+      ),
+    );
+    if (acknowledged == true) {
+      try {
+        await settings.acknowledgeArcSwapNotice();
+      } catch (_) {
+        // Retry the notice next time if the acknowledgement cannot be saved.
+      }
+    }
   }
 
   @override

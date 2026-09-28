@@ -1,4 +1,5 @@
 import 'package:shared_types/shared_types.dart';
+import 'package:solana/solana.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../portfolio/domain/entities/portfolio_view_data.dart';
@@ -11,17 +12,36 @@ class SwapRepository {
 
   final BackendApiClient _apiClient;
 
+  // This repository uses the Solana-only catalog/quote/build endpoints.
+  // Reject EVM contract addresses even if a mixed catalog reaches this boundary.
+  static bool _isSolanaMint(String mint) {
+    try {
+      return Ed25519HDPublicKey.fromBase58(mint).bytes.length == 32;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static void _requireSolanaPair(String inputMint, String outputMint) {
+    if (!_isSolanaMint(inputMint) || !_isSolanaMint(outputMint)) {
+      throw ArgumentError('Swap currently supports Solana tokens only.');
+    }
+  }
+
   Future<List<SwapTokenOption>> loadTokenOptions(
     List<AssetHolding> portfolioAssets,
   ) async {
     final catalog = await _apiClient.getTokens();
     final catalogByMint = {
-      for (final item in catalog.where((entry) => entry.isVisible))
+      for (final item in catalog.where(
+        (entry) => entry.isVisible && _isSolanaMint(entry.mintAddress),
+      ))
         item.mintAddress: item,
     };
     final optionsByMint = <String, SwapTokenOption>{};
 
     for (final asset in portfolioAssets) {
+      if (!_isSolanaMint(asset.token.mintAddress)) continue;
       final catalogItem = catalogByMint[asset.token.mintAddress];
       optionsByMint[asset.token.mintAddress] = SwapTokenOption(
         token: TokenInfo(
@@ -45,7 +65,9 @@ class SwapRepository {
       );
     }
 
-    for (final item in catalog.where((entry) => entry.isVisible)) {
+    for (final item in catalog.where(
+      (entry) => entry.isVisible && _isSolanaMint(entry.mintAddress),
+    )) {
       optionsByMint.putIfAbsent(
         item.mintAddress,
         () => SwapTokenOption(
@@ -106,6 +128,7 @@ class SwapRepository {
     };
 
     return results
+        .where((item) => _isSolanaMint(item.mintAddress))
         .where((item) => !excludedCategories.contains(item.category))
         .map((item) {
           final isOwned = ownedMints.contains(item.mintAddress);
@@ -137,6 +160,7 @@ class SwapRepository {
     required String rawAmount,
     required int slippageBps,
   }) async {
+    _requireSolanaPair(inputMint, outputMint);
     final payload = await _apiClient.quoteSwap(
       inputMint: inputMint,
       outputMint: outputMint,
@@ -154,6 +178,7 @@ class SwapRepository {
     required int slippageBps,
     required String priorityPreset,
   }) async {
+    _requireSolanaPair(inputMint, outputMint);
     final payload = await _apiClient.buildSwap(
       ownerAddress: ownerAddress,
       inputMint: inputMint,
