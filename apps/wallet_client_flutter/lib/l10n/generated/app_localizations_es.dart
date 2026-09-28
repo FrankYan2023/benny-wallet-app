@@ -757,7 +757,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Preparando tu lista de billeteras Solana.';
 
   @override
-  String get importSolanaMainnet => 'Solana Mainnet';
+  String get importSolanaMainnet => 'Solana';
 
   @override
   String get importSelectSolanaAccount =>

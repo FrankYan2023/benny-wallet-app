@@ -701,7 +701,7 @@ class AppLocalizationsZh extends AppLocalizations {
       'Preparing your Solana wallet list.';
 
   @override
-  String get importSolanaMainnet => 'Solana Mainnet';
+  String get importSolanaMainnet => 'Solana';
 
   @override
   String get importSelectSolanaAccount =>
@@ -2452,7 +2452,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get importWalletLoadingSubtitle => '正在準備你的 Solana 錢包清單。';
 
   @override
-  String get importSolanaMainnet => 'Solana 主網';
+  String get importSolanaMainnet => 'Solana';
 
   @override
   String get importSelectSolanaAccount => '選擇要匯入的 Solana 帳戶。';

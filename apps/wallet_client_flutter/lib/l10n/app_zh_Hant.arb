@@ -221,7 +221,7 @@
   "relativeDaysAgo": "{count} 天前",
   "importWalletLoadingTitle": "正在匯入錢包...",
   "importWalletLoadingSubtitle": "正在準備你的 Solana 錢包清單。",
-  "importSolanaMainnet": "Solana 主網",
+  "importSolanaMainnet": "Solana",
   "importSelectSolanaAccount": "選擇要匯入的 Solana 帳戶。",
   "importLoadingSolanaAccounts": "正在載入 Solana 帳戶...",
   "importCheckingActiveSolanaAccounts": "正在檢查有效的 Solana 帳戶。",

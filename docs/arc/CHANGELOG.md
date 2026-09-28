@@ -1,5 +1,9 @@
 # Arc 完整修改记录
 
+## 2026-09-28 · Solana 显示名称简化
+
+按产品要求将网络选择、资产网络标签、收发与导入页显示的 `Solana Mainnet`（繁中 `Solana 主網`）统一为 `Solana`。修改共享显示名称与各语言 ARB，重新生成本地化代码，同步已有组件/集成测试的文案匹配；网络 ID、RPC、派生和存储没有变化。相关组件测试11项通过（既有菜单文本点击警告仍存在），未新增测试或重跑资金链路。Android full debug 构建、安装与启动通过，已更新专用模拟器并保留生产 API 调试连接；详细结果见 [VALIDATION](VALIDATION.md)。
+
 ## 2026-09-28 Android 连接生产 Arc 接口实测
 
 设备：专用 `Benny_Arc_QA_API36` / emulator-5554 / Pixel 7 / API 36 ARM64；没有连接物理 Android 设备。客户端运行代码仍为 `460cd44`；此次只扩展集成测试和文档。后台生产 `1a2415c`（运行源与 `abab0b1` 相同），API `https://api.gobennyapp.com`，Arc mainnet 5042。

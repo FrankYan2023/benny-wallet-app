@@ -712,7 +712,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get importWalletLoadingSubtitle => 'Solana 지갑 목록을 준비하세요.';
 
   @override
-  String get importSolanaMainnet => 'Solana Mainnet';
+  String get importSolanaMainnet => 'Solana';
 
   @override
   String get importSelectSolanaAccount => '가져올 Solana 계정을 선택하세요.';

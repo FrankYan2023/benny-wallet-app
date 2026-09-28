@@ -741,7 +741,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Preparing your Solana wallet list.';
 
   @override
-  String get importSolanaMainnet => 'Solana Mainnet';
+  String get importSolanaMainnet => 'Solana';
 
   @override
   String get importSelectSolanaAccount =>

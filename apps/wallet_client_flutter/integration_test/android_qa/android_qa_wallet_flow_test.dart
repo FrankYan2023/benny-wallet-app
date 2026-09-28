@@ -78,7 +78,7 @@ void main() {
       await _tapVisible(tester, find.text('Continue').last);
 
       await _waitForAny(tester, [
-        find.text('Solana Mainnet'),
+        find.text('Solana'),
         find.text('Unable to scan this recovery phrase right now.'),
       ], timeout: const Duration(seconds: 90));
       expect(

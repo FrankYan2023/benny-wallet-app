@@ -1436,7 +1436,7 @@ abstract class AppLocalizations {
   /// No description provided for @importSolanaMainnet.
   ///
   /// In en, this message translates to:
-  /// **'Solana Mainnet'**
+  /// **'Solana'**
   String get importSolanaMainnet;
 
   /// No description provided for @importSelectSolanaAccount.

@@ -1,5 +1,15 @@
 # 验证记录与待验收事项
 
+## 2026-09-28 Solana 显示名称简化
+
+网络菜单、资产网络标签、收发与导入页统一显示 `Solana`；共享显示常量、各语言 ARB/生成文件与已有测试匹配同步更新。网络 ID、RPC、派生和钱包存储未变。
+
+- `flutter test --no-pub test/features/multichain/widgets_test.dart`：11 项通过，保留既有菜单文本点击警告；集成测试只同步文案，本轮未重跑。
+- `flutter pub get`：通过，锁文件无变化。
+- Android full debug / 普通 `lib/main.dart`：构建通过（230.7 秒），安装通过（4.4 秒），专用 `Benny_Arc_QA_API36` 模拟器启动成功；继续连接 `https://api.gobennyapp.com`，保留调试连接和原 QA 钱包。
+- 文案搜索确认 lib/packages 无旧显示名称；内部 `solana-mainnet` 标识保持。`git diff --check` 通过。
+- 本轮未重跑 iOS、生产资金链路或全量测试；现有中文翻译缺失提示仍待补齐。
+
 ## 2026-09-28 Android 连接生产 Arc 接口实测
 
 设备：专用 `Benny_Arc_QA_API36` / emulator-5554 / Pixel 7 / API 36 ARM64；没有连接物理 Android 设备。客户端运行代码仍为 `460cd44`；此次只扩展集成测试和文档。后台生产 `1a2415c`（运行源与 `abab0b1` 相同），API `https://api.gobennyapp.com`，Arc mainnet 5042。

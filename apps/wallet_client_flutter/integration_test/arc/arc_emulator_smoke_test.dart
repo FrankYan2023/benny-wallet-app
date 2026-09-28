@@ -96,7 +96,7 @@ void main() {
       await waitFor(tester, find.byKey(const Key('portfolio-network-menu')));
       await waitFor(tester, find.textContaining('0 USDC'));
       expect(find.text('All'), findsOneWidget);
-      expect(find.text('Solana Mainnet'), findsWidgets);
+      expect(find.text('Solana'), findsWidgets);
       expect(
         tester.getCenter(find.text('Send')).dx,
         lessThan(tester.getCenter(find.text('Receive')).dx),
@@ -122,10 +122,10 @@ void main() {
       }
       await tap(tester, find.byKey(const Key('portfolio-network-menu')));
       await selectNetworkMenu(tester, networkName);
-      expect(find.text('Solana Mainnet'), findsNothing);
+      expect(find.text('Solana'), findsNothing);
       expect(find.text('Swap'), findsNothing);
       await tap(tester, find.byKey(const Key('portfolio-network-menu')));
-      await selectNetworkMenu(tester, 'Solana Mainnet');
+      await selectNetworkMenu(tester, 'Solana');
       await tap(tester, find.byKey(const Key('portfolio-network-menu')));
       await selectNetworkMenu(tester, 'All networks');
       await tap(tester, find.text('Receive').first);

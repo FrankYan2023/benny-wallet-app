@@ -290,7 +290,7 @@
   "relativeDaysAgo": "{count}d назад",
   "importWalletLoadingTitle": "Импорт кошелька...",
   "importWalletLoadingSubtitle": "Подготовка списка кошельков Solana.",
-  "importSolanaMainnet": "Solana Mainnet",
+  "importSolanaMainnet": "Solana",
   "importSelectSolanaAccount": "Выберите учетную запись Solana для импорта.",
   "importLoadingSolanaAccounts": "Загрузка учетных записей Solana...",
   "importCheckingActiveSolanaAccounts": "Проверка активных учетных записей Solana.",

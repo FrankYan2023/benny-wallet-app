@@ -290,7 +290,7 @@
   "relativeDaysAgo": "{count}d ago",
   "importWalletLoadingTitle": "Importing wallet...",
   "importWalletLoadingSubtitle": "Preparing your Solana wallet list.",
-  "importSolanaMainnet": "Solana Mainnet",
+  "importSolanaMainnet": "Solana",
   "importSelectSolanaAccount": "Select the Solana account to import.",
   "importLoadingSolanaAccounts": "Loading Solana accounts...",
   "importCheckingActiveSolanaAccounts": "Checking active Solana accounts.",

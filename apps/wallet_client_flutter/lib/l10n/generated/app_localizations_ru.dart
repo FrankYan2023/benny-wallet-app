@@ -752,7 +752,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Подготовка списка кошельков Solana.';
 
   @override
-  String get importSolanaMainnet => 'Solana Mainnet';
+  String get importSolanaMainnet => 'Solana';
 
   @override
   String get importSelectSolanaAccount =>

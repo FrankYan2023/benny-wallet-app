@@ -211,7 +211,7 @@ void main() {
     expect(find.textContaining('Arc Testnet'), findsWidgets);
     await tester.tap(find.byKey(const Key('portfolio-network-menu')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Solana Mainnet').last);
+    await tester.tap(find.text('Solana').last);
     await tester.pumpAndSettle();
     expect(find.text('Primary asset row'), findsOneWidget);
     expect(find.textContaining('Arc Testnet'), findsNothing);
@@ -238,7 +238,7 @@ void main() {
       expect(find.textContaining('Arc service unavailable'), findsOneWidget);
       await tester.tap(find.byKey(const Key('portfolio-network-menu')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Solana Mainnet').last);
+      await tester.tap(find.text('Solana').last);
       await tester.pumpAndSettle();
       expect(find.text('Primary asset row'), findsOneWidget);
       expect(find.textContaining('Arc service unavailable'), findsNothing);
@@ -264,7 +264,7 @@ void main() {
       expect(find.byType(QrImageView), findsNothing);
       await tester.tap(find.byType(ChainNetworkSelector));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Solana Mainnet').last);
+      await tester.tap(find.text('Solana').last);
       await tester.pumpAndSettle();
       expect(find.text(solana.address), findsOneWidget);
       expect(find.byType(QrImageView), findsOneWidget);
@@ -287,7 +287,7 @@ void main() {
       );
       await tester.tap(find.byType(ChainNetworkSelector));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Solana Mainnet').last);
+      await tester.tap(find.text('Solana').last);
       await tester.pumpAndSettle();
       expect(find.text('Estimate fee & review'), findsNothing);
       await tester.tap(find.byType(ChainNetworkSelector));

@@ -290,7 +290,7 @@
   "relativeDaysAgo": "{count}日前",
   "importWalletLoadingTitle": "ウォレットをインポートしています...",
   "importWalletLoadingSubtitle": "Solana ウォレット リストを準備しています。",
-  "importSolanaMainnet": "Solana Mainnet",
+  "importSolanaMainnet": "Solana",
   "importSelectSolanaAccount": "インポートする Solana アカウントを選択します。",
   "importLoadingSolanaAccounts": "Solana アカウントをロードしています...",
   "importCheckingActiveSolanaAccounts": "アクティブな Solana アカウントを確認しています。",

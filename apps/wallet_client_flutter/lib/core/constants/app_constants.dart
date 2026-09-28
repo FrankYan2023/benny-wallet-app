@@ -4,7 +4,7 @@ abstract final class AppConstants {
       'https://benny-wallet-api-production.up.railway.app';
 
   static const appName = 'Benny Wallet';
-  static const supportedNetwork = 'Solana Mainnet';
+  static const supportedNetwork = 'Solana';
   static const assetRefreshIntervalSec = 20;
   static const priceRefreshIntervalSec = 30;
   static const sessionTimeoutSec = 60;

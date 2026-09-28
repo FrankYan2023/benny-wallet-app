@@ -714,7 +714,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get importWalletLoadingSubtitle => 'Solana ウォレット リストを準備しています。';
 
   @override
-  String get importSolanaMainnet => 'Solana Mainnet';
+  String get importSolanaMainnet => 'Solana';
 
   @override
   String get importSelectSolanaAccount => 'インポートする Solana アカウントを選択します。';

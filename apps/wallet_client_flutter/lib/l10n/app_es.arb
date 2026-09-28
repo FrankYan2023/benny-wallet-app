@@ -221,7 +221,7 @@
   "relativeDaysAgo": "hace {count} d",
   "importWalletLoadingTitle": "Importando billetera...",
   "importWalletLoadingSubtitle": "Preparando tu lista de billeteras Solana.",
-  "importSolanaMainnet": "Solana Mainnet",
+  "importSolanaMainnet": "Solana",
   "importSelectSolanaAccount": "Selecciona la cuenta Solana que quieres importar.",
   "importLoadingSolanaAccounts": "Cargando cuentas Solana...",
   "importCheckingActiveSolanaAccounts": "Comprobando cuentas Solana activas.",
