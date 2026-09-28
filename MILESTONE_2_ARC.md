@@ -15,7 +15,7 @@ This is the technical audit plus dated implementation history. The current entry
 
 ## 2026-09-27 release update
 
-Production additive SQL has been applied, and backend main now triggers the existing Railway automatic deployment. Read the [release record](https://github.com/FrankYan2023/benny-wallet/blob/main/docs/ARC_RELEASE_2026_09_27.md) for actual online validation. The dated implementation snapshot below is historical; funded transfers, FCM and physical-device/release acceptance remain pending.
+Production additive SQL has been applied. Backend main automatically deployed API/indexer runtime `abab0b1`; September 28 authenticated mainnet, database, worker and original Solana read-only checks passed. Read the [release record](https://github.com/FrankYan2023/benny-wallet/blob/main/docs/ARC_RELEASE_2026_09_27.md) for actual online validation. The dated implementation snapshot below is historical; funded transfers, FCM and physical-device/release acceptance remain pending.
 
 ## Implementation / release boundary at 2026-09-26
 

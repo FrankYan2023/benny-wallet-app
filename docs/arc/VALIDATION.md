@@ -1,5 +1,14 @@
 # 验证记录与待验收事项
 
+## 2026-09-28 生产只读验收完成
+
+后台运行版本 `abab0b1` 已由 GitHub main 自动部署，Railway deployment `0781842c-3366-4abf-b390-ef566a6f40f9` 为 Active。生产主网 5042、Supabase 读取、Arc USDC 精度/余额/估费/日志/回执查询及原 Solana 登录和余额读取均通过；索引已开启，08:05:23.293Z 成功完成一轮，无 lastError。未注册测试 EVM 账户、未广播交易、未使用资金；索引健康不代表大账户历史回填或实际 FCM 送达已验收。
+
+前后端 `arc` 均已快进合并到 `main` 并保留开发分支。手机运行代码仍为 `460cd44`，本次仅补充文档，未重建或发布商店包。可以开始专用 Android 真机无资金联调；资金闭环、真机通知和存量版本原地升级按测试计划继续。后台配置默认开启 API/索引，主网节点有默认值，既有秘密仍在 Railway；无需另外上传 `.env` 文件。
+
+详细 SQL 版本、发布顺序、线上结果与未验收项目：[后台发布记录](https://github.com/FrankYan2023/benny-wallet/blob/main/docs/ARC_RELEASE_2026_09_27.md)。
+
+
 ## 2026-09-27 自动发布与数据库增量
 
 按现有 GitHub main → Railway 自动发布流程交付，不更换服务或部署分支。后台提交 `4b24dab` 已快进合并 main，数据库 SQL 已在 Supabase 执行（远程版本 `20260927142033`，本地源文件 `20260926094915_arc_multichain_services.sql`）；新增 6 表/4 函数，保留原表和钱包数据。生产发布和只读验证的最终状态见 [后台发布记录](https://github.com/FrankYan2023/benny-wallet/blob/main/docs/ARC_RELEASE_2026_09_27.md)。
