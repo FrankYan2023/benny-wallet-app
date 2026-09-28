@@ -115,3 +115,17 @@ Arc未注资测试可分别传 `--flavor full --dart-define=STORE_MODE=full` 和
 - 普通主网调试包：保留默认网络；若后台未部署，页面会显示服务不可用和总额可能不完整，不应伪装为已查到 0 余额。
 
 后台完整操作与配置：[ARC_MULTICHAIN.md](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_MULTICHAIN.md)。
+
+## 当前 Android 生产后台调试入口（2026-09-28）
+
+专用 AVD `Benny_Arc_QA_API36` 已保留无资金 QA 钱包，PIN `258025`。普通入口：
+
+```sh
+flutter run -d emulator-5554 --flavor full -t lib/main.dart --no-pub \
+  --dart-define=STORE_MODE=full \
+  --dart-define=API_BASE_URL=https://api.gobennyapp.com \
+  --dart-define=FEATURE_APP_UPDATES_ENABLED=false \
+  --dart-define=FEATURE_SEEKER_VAULT_ENABLED=false
+```
+
+默认主网5042，经认证生产后台；不要添加测试网或直接RPC flags。终端保留热重载连接（r热重载、R重启、d脱离并保留应用）。生产无资金集成命令见 integration README；不能把普通个人设备用于自动QA。日志提示Firebase未配置时，不能据此测试推送送达。

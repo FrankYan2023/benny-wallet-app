@@ -188,3 +188,5 @@
 - `widgets_test.dart` 新增 `Arc outage does not hide primary assets or prevent network selection` 和 `unsupported Arc custody does not block original Solana receive`。
 - 后台新增 `Arc failure and chain-header policy stay inside the Arc plugin`，仅验证 sibling 合同路由隔离，不代替真实 Solana 后台回归。
 - 全量客户端 88、后台 23 项通过；参考最新 VALIDATION。
+
+2026-09-28：现有 arc_emulator_smoke_test.dart 同时支持显式主网生产 QA；新增主网保护参数、动态网络断言，仍为同一testWidgets用例。真实生产模式51秒通过，范围见VALIDATION；单元/组件总数未改变。

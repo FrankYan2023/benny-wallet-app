@@ -1,5 +1,9 @@
 # AI 接手说明
 
+## 2026-09-28 Android 生产接口联调
+
+专用模拟器 full 模式已用真实生产 API 完成51秒无资金 UI 集成测试，未使用fixture或公共直连。主网测试新增显式ARC_PRODUCTION_QA保护，未修改运行代码。普通调试启动命令和实际覆盖/限制见 [DEVELOPMENT](DEVELOPMENT.md) 与 [VALIDATION](VALIDATION.md) 最新记录。QA PIN258025仅限无资金模拟器，不能注资。
+
 ## 2026-09-28 生产只读验收完成
 
 后台运行版本 `abab0b1` 已由 GitHub main 自动部署，Railway deployment `0781842c-3366-4abf-b390-ef566a6f40f9` 为 Active。生产主网 5042、Supabase 读取、Arc USDC 精度/余额/估费/日志/回执查询及原 Solana 登录和余额读取均通过；索引已开启，08:05:23.293Z 成功完成一轮，无 lastError。未注册测试 EVM 账户、未广播交易、未使用资金；索引健康不代表大账户历史回填或实际 FCM 送达已验收。

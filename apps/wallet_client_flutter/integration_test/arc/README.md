@@ -59,3 +59,9 @@ wallet state for full and liteStore. Never copy recovery material between them.
 ## Mainnet backend contract fixture smoke
 
 `arc_backend_ui_test.dart` uses the same disposable Android storage/PIN and common UI, with mocked HTTP responses at `ChainBackendClient`'s transport boundary. Run it with the command above substituting the test filename and **omitting both testnet flags**. It checks the mainnet network/header, shared receive/send validation, token sync and indexed history UI without funds or transaction broadcast. This is not a deployed-backend or real-mainnet acceptance test. Backend Fastify/SQL tests are in the companion repository.
+
+## Live production mainnet smoke (2026-09-28)
+
+On the dedicated disposable emulator only, run the same test with `--dart-define=BENNY_EMULATOR_QA=true --dart-define=ARC_PRODUCTION_QA=true --dart-define=API_BASE_URL=https://api.gobennyapp.com --flavor full --dart-define=STORE_MODE=full`. Omit both testnet/direct-RPC flags. Keep app-update/Seeker-Vault flags disabled as above. The extra mainnet opt-in is mandatory. No HTTP fixture is installed. Normal app authentication may register the QA wallet's public EVM binding and token metadata in production; no transfer is signed or broadcast. The existing 0-USDC prerequisite, QA-root guard and refusal of unknown wallets remain.
+
+Use `flutter run -t integration_test/arc/arc_emulator_smoke_test.dart` to preserve QA state, wait for All tests passed, then detach. Run ordinary `lib/main.dart` afterward without either QA opt-in. Validated 51 seconds on full/API36; physical-device and funded acceptance remain separate.

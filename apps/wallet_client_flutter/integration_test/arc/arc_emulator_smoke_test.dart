@@ -7,6 +7,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_client_flutter/main.dart' as app;
 import 'package:wallet_client_flutter/core/chains/arc_chain_config.dart';
+import 'package:wallet_client_flutter/core/constants/app_constants.dart';
 import 'package:wallet_client_flutter/core/chains/solana_adapter.dart';
 import 'package:wallet_client_flutter/core/config/app_features.dart';
 import 'package:wallet_client_flutter/core/chains/evm/evm_key_service.dart';
@@ -32,6 +33,14 @@ void main() {
         isTrue,
         reason: 'Enable BENNY_EMULATOR_QA only on the dedicated test emulator.',
       );
+      // Production QA is explicit and uses the real authenticated transport.
+      if (!configuredArcChain.isTestnet) {
+        expect(const bool.fromEnvironment('ARC_PRODUCTION_QA'), isTrue);
+        expect(configuredArcChain.chainId, 5042);
+        expect(useDirectTestnetRpc, isFalse);
+        expect(AppConstants.apiBaseUrl, 'https://api.gobennyapp.com');
+      }
+      final networkName = configuredArcChain.displayName;
       const pin = '258025';
       final preferences = await SharedPreferences.getInstance();
       final repository = WalletRepository(
@@ -100,7 +109,7 @@ void main() {
       } else {
         expect(find.text('Swap'), findsNothing);
       }
-      for (final config in [SolanaAdapter.chainConfig, arcTestnetConfig]) {
+      for (final config in [SolanaAdapter.chainConfig, configuredArcChain]) {
         expect(
           find.byWidgetPredicate(
             (widget) =>
@@ -112,7 +121,7 @@ void main() {
         );
       }
       await tap(tester, find.byKey(const Key('portfolio-network-menu')));
-      await selectNetworkMenu(tester, 'Arc Testnet');
+      await selectNetworkMenu(tester, networkName);
       expect(find.text('Solana Mainnet'), findsNothing);
       expect(find.text('Swap'), findsNothing);
       await tap(tester, find.byKey(const Key('portfolio-network-menu')));
@@ -122,18 +131,18 @@ void main() {
       await tap(tester, find.text('Receive').first);
       await waitFor(tester, find.text(solanaAddress));
       await tap(tester, find.byType(DropdownButtonFormField<String>));
-      await tap(tester, find.text('Arc Testnet').last);
+      await tap(tester, find.text(networkName).last);
       await waitFor(tester, find.text(evmAddress));
       expect(find.text(solanaAddress), findsNothing);
       expect(
-        find.text('Only receive assets on Arc Testnet at this address.'),
+        find.text('Only receive assets on $networkName at this address.'),
         findsOneWidget,
       );
       await tap(tester, find.text('Copy address'));
       await waitFor(tester, find.text('Address copied'));
       await tap(tester, find.byIcon(Icons.history_rounded));
       await waitFor(tester, find.text('Activity'));
-      expect(find.text('Arc Testnet'), findsWidgets);
+      expect(find.text(networkName), findsWidgets);
       await waitFor(
         tester,
         find.text('No recent transfers. Receive assets to get started.'),
@@ -145,8 +154,8 @@ void main() {
       await back(tester);
       await waitFor(tester, find.text('Send'));
       await tap(tester, find.text('Send').first);
-      expect(find.text('Send on Arc Testnet'), findsNothing);
-      expect(find.text('Arc Testnet'), findsWidgets);
+      expect(find.text('Send on $networkName'), findsNothing);
+      expect(find.text(networkName), findsWidgets);
       await waitFor(
         tester,
         find.text('Estimate fee & review'),
@@ -179,7 +188,7 @@ void main() {
       await waitFor(tester, find.text('Look up token'));
       await tester.enterText(
         find.byType(TextField).first,
-        arcTestnetConfig.nativeTokenContract!,
+        configuredArcChain.nativeTokenContract!,
       );
       await tester.testTextInput.receiveAction(TextInputAction.done);
       await tap(tester, find.text('Look up token'));

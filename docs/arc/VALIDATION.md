@@ -1,5 +1,16 @@
 # 验证记录与待验收事项
 
+## 2026-09-28 Android 连接生产 Arc 接口实测
+
+设备：专用 `Benny_Arc_QA_API36` / emulator-5554 / Pixel 7 / API 36 ARM64；没有连接物理 Android 设备。客户端运行代码仍为 `460cd44`；此次只扩展集成测试和文档。后台生产 `1a2415c`（运行源与 `abab0b1` 相同），API `https://api.gobennyapp.com`，Arc mainnet 5042。
+
+将现有真实设备测试按选中网络参数化，主网执行额外要求 `ARC_PRODUCTION_QA=true`、固定生产 API 和关闭直连 RPC。保留 `BENNY_EMULATOR_QA`、QA 根标记、未知钱包拒绝及无广播限制。实际运行 `flutter run -t integration_test/arc/arc_emulator_smoke_test.dart --flavor full`，STORE_MODE=full；无测试网/直接 RPC 开关、无 HTTP fixtures。构建58.5秒；设备用例51秒通过（一个 testWidgets + tearDown）。该测试文件静态分析通过，无问题。
+
+覆盖真实 PIN/安全存储解锁、All/Solana/Arc 切换、Send→Receive→Swap 与链角标、生产 Arc 余额、原 Solana/派生 EVM 收款地址与复制、生产后台历史空态、错误地址/零数量/余额不足拒绝、USDC metadata 查询和导入去重。实际客户端流程可向生产写入此无资金 QA 钱包的公开账户绑定/自定义代币元数据；未上传恢复词/私钥、未签名或广播转账。页面证据：[生产主网首页](evidence/android-production-mainnet-20260928.png)。
+
+测试后通过 detach 保留 QA 钱包，普通 lib/main.dart 的 full debug 构建41.1秒通过并成功安装启动，热重载连接保留，继续连接生产 API；不把集成测试 APK 留作普通应用。QA PIN为258025，仅限该无资金模拟器钱包，禁止注资。真机、资金闭环和推送没有验收；当前 debug 构建报告 Firebase runtime options 未配置，测试中通知关闭。
+
+
 ## 2026-09-28 生产只读验收完成
 
 后台运行版本 `abab0b1` 已由 GitHub main 自动部署，Railway deployment `0781842c-3366-4abf-b390-ef566a6f40f9` 为 Active。生产主网 5042、Supabase 读取、Arc USDC 精度/余额/估费/日志/回执查询及原 Solana 登录和余额读取均通过；索引已开启，08:05:23.293Z 成功完成一轮，无 lastError。未注册测试 EVM 账户、未广播交易、未使用资金；索引健康不代表大账户历史回填或实际 FCM 送达已验收。
