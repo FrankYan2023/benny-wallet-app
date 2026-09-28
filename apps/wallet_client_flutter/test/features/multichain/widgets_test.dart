@@ -200,7 +200,10 @@ void main() {
         ],
       ),
     );
-    expect(find.text('All'), findsOneWidget);
+    expect(
+      find.byKey(const Key('portfolio-all-networks-icon')),
+      findsOneWidget,
+    );
     expect(find.text('Primary asset row'), findsOneWidget);
     expect(find.textContaining('Arc Testnet'), findsWidgets);
     await tester.tap(find.byKey(const Key('portfolio-network-menu')));

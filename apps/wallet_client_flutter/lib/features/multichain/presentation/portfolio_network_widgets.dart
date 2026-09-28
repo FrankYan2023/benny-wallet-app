@@ -107,7 +107,9 @@ class PortfolioNetworkMenu extends ConsumerWidget {
     final config = selected == null ? null : findChain(configs, selected);
     return PopupMenuButton<String>(
       key: const Key('portfolio-network-menu'),
-      tooltip: chainText(context, 'Choose networks', '选择网络'),
+      tooltip:
+          '${chainText(context, 'Choose networks', '选择网络')}: '
+          '${config?.displayName ?? chainText(context, 'All networks', '全部网络')}',
       initialValue: selected ?? 'all',
       onSelected: (value) {
         ref.read(portfolioNetworkFilterProvider.notifier).state = value == 'all'
@@ -120,13 +122,35 @@ class PortfolioNetworkMenu extends ConsumerWidget {
         CheckedPopupMenuItem(
           value: 'all',
           checked: selected == null,
-          child: Text(chainText(context, 'All networks', '全部网络')),
+          child: Row(
+            children: [
+              const Icon(Icons.public_rounded, size: 24),
+              const SizedBox(width: 12),
+              Flexible(child: Text(chainText(context, 'All networks', '全部网络'))),
+            ],
+          ),
         ),
         for (final item in configs)
           CheckedPopupMenuItem(
             value: item.id,
             checked: selected == item.id,
-            child: Text(item.displayName),
+            child: Row(
+              children: [
+                ClipOval(
+                  child: item.iconAsset == null
+                      ? const Icon(Icons.public_rounded, size: 24)
+                      : Image.asset(
+                          item.iconAsset!,
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.cover,
+                          excludeFromSemantics: true,
+                        ),
+                ),
+                const SizedBox(width: 12),
+                Flexible(child: Text(item.displayName)),
+              ],
+            ),
           ),
       ],
       child: Container(
@@ -139,18 +163,26 @@ class PortfolioNetworkMenu extends ConsumerWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Flexible(
-              child: Text(
-                config?.displayName.split(' ').first ??
-                    chainText(context, 'All', '全部'),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  fontWeight: FontWeight.w700,
+            if (config == null)
+              Icon(
+                Icons.public_rounded,
+                key: const Key('portfolio-all-networks-icon'),
+                size: 24,
+                color: Theme.of(context).colorScheme.onPrimary,
+              )
+            else
+              Flexible(
+                child: Text(
+                  config.displayName.split(' ').first,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-            ),
+            const SizedBox(width: 4),
             Icon(
               Icons.expand_more_rounded,
               color: Theme.of(context).colorScheme.onPrimary,

@@ -16,7 +16,7 @@
 
 | ID | 优先级/方法 | 操作与输入 | 预期结果 |
 | --- | --- | --- | --- |
-| FE-01 | P0 A/M | 兼容钱包解锁后冷启动首页 | 默认 All；同页显示 Solana 和 Arc；无独立 Arc 收发模块 |
+| FE-01 | P0 A/M | 兼容钱包解锁后冷启动首页 | 默认全部网络按钮为地球图标；菜单中 Solana/Arc 名称前显示各自链图标；同页显示 Solana 和 Arc；无独立 Arc 收发模块 |
 | FE-02 | P1 A/M | All → Arc → Solana → All；每次刷新 | 网络行/余额过滤一致；单链失败不隐藏另一链 |
 | FE-03 | P1 A/M | 检查按钮并分别点击；Arc-only、儿童模式、STORE_MODE=lite | 顺序 Send→Receive→Swap；导航正确；Arc-only/开关关闭不显示 Swap，儿童仅接收 |
 | FE-04 | P1 A/M | SOL、Solana USDC、Arc USDC、Arc 自定义币；断网重启 | 每个币头像右下角显示所属链；离线标识仍在，不按币种符号推测链 |

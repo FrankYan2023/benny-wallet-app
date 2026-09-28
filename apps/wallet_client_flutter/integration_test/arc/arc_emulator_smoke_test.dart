@@ -95,7 +95,10 @@ void main() {
       );
       await waitFor(tester, find.byKey(const Key('portfolio-network-menu')));
       await waitFor(tester, find.textContaining('0 USDC'));
-      expect(find.text('All'), findsOneWidget);
+      expect(
+        find.byKey(const Key('portfolio-all-networks-icon')),
+        findsOneWidget,
+      );
       expect(find.text('Solana'), findsWidgets);
       expect(
         tester.getCenter(find.text('Send')).dx,

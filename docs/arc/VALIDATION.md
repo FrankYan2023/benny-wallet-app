@@ -1,5 +1,13 @@
 # 验证记录与待验收事项
 
+## 2026-09-28 网络菜单图标
+
+- Android full debug 构建通过（128.2 秒），安装通过（12.8 秒），专用 Benny_Arc_QA_API36 启动并连接调试器；普通 main.dart，继续使用生产 API https://api.gobennyapp.com。
+- `flutter test --no-pub test/features/multichain/widgets_test.dart`：11 项通过；复用原首页筛选测试，All 匹配改为地球图标。两份 Arc 集成测试仅同步匹配，本轮未重跑生产端到端测试。
+- `dart analyze lib/features/multichain/presentation/portfolio_network_widgets.dart`：No issues found。
+- 本机 SDK 在调试期间变为 Flutter 3.47.5 / Dart 3.13.4，旧会话断开，首次测试因 Flutter 包语言版本缓存过旧编译失败；重新 pub get 后通过。新 SDK 自动解析的 5 项 SDK 依赖和 Gradle 迁移属于本地验证环境，恢复原锁文件和 Gradle 属性，未混入本次 UI 提交。
+- 未重跑 iOS、全量测试或资金收发；原 310 项 zh 翻译提示仍存在。
+
 ## 2026-09-28 Solana 显示名称简化
 
 网络菜单、资产网络标签、收发与导入页统一显示 `Solana`；共享显示常量、各语言 ARB/生成文件与已有测试匹配同步更新。网络 ID、RPC、派生和钱包存储未变。
