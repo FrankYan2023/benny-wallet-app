@@ -1,3 +1,4 @@
+import '../../../core/widgets/network_badge.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,6 +25,20 @@ ChainConfig? findChain(List<ChainConfig> configs, String id) {
   return null;
 }
 
+/// Resolves a stored transaction network independently of the current selection.
+class ChainNetworkIdentity extends ConsumerWidget {
+  const ChainNetworkIdentity({super.key, required this.chainId});
+  final String chainId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final config = findChain(ref.watch(chainConfigsProvider), chainId);
+    return config == null
+        ? NetworkBadge(name: chainId)
+        : NetworkBadge.fromConfig(config);
+  }
+}
+
 class ChainNetworkLabel extends StatelessWidget {
   const ChainNetworkLabel({super.key, required this.config});
   final ChainConfig config;
@@ -33,7 +48,7 @@ class ChainNetworkLabel extends StatelessWidget {
     spacing: 8,
     crossAxisAlignment: WrapCrossAlignment.center,
     children: [
-      Text(config.displayName, style: Theme.of(context).textTheme.titleMedium),
+      NetworkBadge.fromConfig(config, compact: false),
       if (config.isTestnet)
         Chip(
           label: Text(chainText(context, 'Testnet', '测试网')),
@@ -64,7 +79,10 @@ class ChainNetworkSelector extends ConsumerWidget {
         ),
         items: [
           for (final config in ref.watch(chainConfigsProvider))
-            DropdownMenuItem(value: config.id, child: Text(config.displayName)),
+            DropdownMenuItem(
+              value: config.id,
+              child: NetworkBadge.fromConfig(config, compact: false),
+            ),
         ],
         onChanged: (value) {
           if (value != null) onChanged(value);

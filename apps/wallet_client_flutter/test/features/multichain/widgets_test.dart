@@ -1,4 +1,7 @@
+import 'package:wallet_client_flutter/features/send/presentation/pages/send_history_page.dart';
+import 'package:wallet_client_flutter/core/network/api_client.dart';
 import 'dart:async';
+import 'package:wallet_client_flutter/core/widgets/network_badge.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -68,6 +71,7 @@ Future<void> show(
   fixture.FakeRpc? rpc,
   bool unsupported = false,
   bool arcUnavailable = false,
+  List<ChainActivity> activity = const [],
 }) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
@@ -113,7 +117,7 @@ Future<void> show(
         }),
         chainActivityProvider(
           arcTestnetConfig.id,
-        ).overrideWith((ref) => Stream.value([])),
+        ).overrideWith((ref) => Stream.value(activity)),
         chainTransferControllerProvider.overrideWithValue(
           ChainTransferController(
             adapterFor: (_) => adapter,
@@ -140,6 +144,15 @@ Future<void> show(
 }
 
 Future<void> screenshot(WidgetTester tester, String name) async {
+  // Wait for local chain artwork to decode before capturing the rendered frame.
+  await tester.runAsync(() async {
+    for (final widget in tester.widgetList<Image>(find.byType(Image))) {
+      if (widget.image is AssetImage) {
+        await precacheImage(widget.image, screenshotKey.currentContext!);
+      }
+    }
+  });
+  await tester.pump();
   await tester.runAsync(() async {
     final boundary =
         screenshotKey.currentContext!.findRenderObject()!
@@ -181,6 +194,95 @@ void main() {
       expect(find.byType(ChainNetworkSelector), findsOneWidget);
       expect(find.text('Send'), findsNothing);
       expect(find.text('Import token'), findsNothing);
+    },
+  );
+  testWidgets('legacy send history shows Solana in list and detail', (
+    tester,
+  ) async {
+    const item = RemoteSendHistoryItem(
+      signature: 'fixture-solana-signature',
+      txType: 'send',
+      status: 'finalized',
+      result: 'success',
+      statusSource: 'rpc_sync',
+      submittedAt: '2026-09-29T12:00:00Z',
+      amount: '1',
+    );
+    await show(
+      tester,
+      ProviderScope(
+        overrides: [
+          sendHistoryProvider.overrideWith((ref) async => [item]),
+          sendHistoryTokensProvider.overrideWith((ref) async => []),
+        ],
+        child: const SendHistoryPage(),
+      ),
+    );
+    expect(find.text('Solana'), findsOneWidget);
+    expect(
+      tester.widget<NetworkBadge>(find.byType(NetworkBadge)).iconAsset,
+      SolanaAdapter.chainConfig.iconAsset,
+    );
+    await screenshot(tester, 'solana-history-network');
+    await show(
+      tester,
+      const SendHistoryDetailPage(data: SendHistoryDetailData(item: item)),
+    );
+    await tester.scrollUntilVisible(
+      find.byType(NetworkBadge),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Solana'), findsOneWidget);
+    expect(
+      tester.widget<NetworkBadge>(find.byType(NetworkBadge)).iconAsset,
+      SolanaAdapter.chainConfig.iconAsset,
+    );
+  });
+  testWidgets(
+    'activity retains its network in list and detail while another network is selected',
+    (tester) async {
+      final adapter = fixture.adapterFor(fixture.FakeRpc());
+      await show(
+        tester,
+        SingleChildScrollView(
+          child: ChainActivitySection(config: arcTestnetConfig),
+        ),
+        activity: [
+          ChainActivity(
+            chainId: arcTestnetConfig.id,
+            hash: 'fixture-arc-hash',
+            from: fixture.account.address,
+            to: fixture.account.address,
+            asset: adapter.nativeAsset,
+            amount: BigInt.from(1000000),
+            status: ChainTransactionStatus.finalSuccess,
+          ),
+        ],
+      );
+      final badge = tester.widget<NetworkBadge>(
+        find.byType(NetworkBadge).first,
+      );
+      expect(badge.name, arcTestnetConfig.displayName);
+      expect(badge.iconAsset, arcTestnetConfig.iconAsset);
+      expect(find.text('Solana'), findsNothing);
+      await tester.tap(find.byType(ExpansionTile));
+      await tester.pumpAndSettle();
+      expect(find.text('Network'), findsOneWidget);
+      expect(find.text(arcTestnetConfig.displayName), findsNWidgets(2));
+      await screenshot(tester, 'network-activity-labels');
+    },
+  );
+  testWidgets(
+    'unknown historical network keeps its identity instead of using selected network',
+    (tester) async {
+      await show(tester, const ChainNetworkIdentity(chainId: 'future-network'));
+      expect(find.text('future-network'), findsOneWidget);
+      expect(find.text('Solana'), findsNothing);
+      expect(
+        tester.widget<NetworkBadge>(find.byType(NetworkBadge)).iconAsset,
+        isNull,
+      );
     },
   );
   testWidgets('home defaults to both networks and filters shared asset rows', (

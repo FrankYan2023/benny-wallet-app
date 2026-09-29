@@ -1,5 +1,11 @@
 # Arc 完整修改记录
 
+## 2026-09-29 · 全页面网络图标与交易历史链信息
+
+统一 NetworkIcon/NetworkBadge，覆盖首页选中网络按钮、收发/活动下拉与标签、导入页、资产信息、确认/结果页及 Swap 币种选择。所有 Solana 收发历史与资产活动补链标识；Arc 活动列表/详情与通知按记录 chainId 显示，未知链保留标识不猜测。AppScaffold 支持带网络标识的标题。保留原链配置、协议与旧记录格式，无后台/数据库变更。
+
+新增三项历史身份回归；20 项相关测试通过，静态分析通过，Android full debug 已构建安装启动。发现并修复新版 Flutter 对活动 ExpansionTile 背景层的断言，截图验证图标与历史展示。逐页覆盖、文件、截图和限制见 [NETWORK_UI_AUDIT](NETWORK_UI_AUDIT.md)。
+
 ## 2026-09-28 · Swap 仅支持 Solana 与首次提示
 
 按产品要求，普通 Swap 标题明确 `Swap · Solana`，首次打开时提示 `ARC Swap coming soon` 及当前仅支持 Solana。点击 Got it/知道了后，以本机 SharedPreferences 非敏感标记保存确认状态，重开页面/应用不重复提示；退出弹窗而未确认或写入失败时下次再提示。不是每个钱包单独弹出，xStocks、锁定或儿童模式不弹此提示。

@@ -1,3 +1,4 @@
+import '../../../../core/widgets/network_badge.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -271,7 +272,10 @@ class AssetDetailPage extends ConsumerWidget {
                   ),
                   _InfoRowData(
                     l10n.commonNetwork,
-                    detail?.network ?? l10n.commonSolana,
+                    l10n.commonSolana,
+                    valueWidget: NetworkBadge.solana(
+                      alignment: MainAxisAlignment.end,
+                    ),
                   ),
                   _InfoRowData(
                     l10n.assetMint,
@@ -839,10 +843,11 @@ class _InfoPanel extends StatelessWidget {
 }
 
 class _InfoRowData {
-  const _InfoRowData(this.label, this.value, {this.linkUrl});
+  const _InfoRowData(this.label, this.value, {this.linkUrl, this.valueWidget});
 
   final String label;
   final String value;
+  final Widget? valueWidget;
   final String? linkUrl;
 }
 
@@ -873,20 +878,22 @@ class _InfoRow extends StatelessWidget {
               onTap: data.linkUrl == null
                   ? null
                   : () => _openWebsite(context, data.linkUrl!),
-              child: Text(
-                data.value,
-                textAlign: TextAlign.end,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: data.linkUrl == null
-                      ? AppColors.textPrimary
-                      : theme.colorScheme.primary,
-                  decoration: data.linkUrl == null
-                      ? null
-                      : TextDecoration.underline,
-                ),
-              ),
+              child:
+                  data.valueWidget ??
+                  Text(
+                    data.value,
+                    textAlign: TextAlign.end,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: data.linkUrl == null
+                          ? AppColors.textPrimary
+                          : theme.colorScheme.primary,
+                      decoration: data.linkUrl == null
+                          ? null
+                          : TextDecoration.underline,
+                    ),
+                  ),
             ),
           ),
         ],
@@ -975,6 +982,8 @@ class _ActivityCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title, style: theme.textTheme.titleMedium),
+                const SizedBox(height: 4),
+                NetworkBadge.solana(),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,

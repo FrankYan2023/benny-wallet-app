@@ -347,6 +347,13 @@ class _NetworkSendPageState extends ConsumerState<NetworkSendPage> {
         ),
         const SizedBox(height: 18),
         ChainDetail(
+          label: chainText(context, 'Network', '网络'),
+          value: transaction.request.account.chainId,
+          valueWidget: ChainNetworkIdentity(
+            chainId: transaction.request.account.chainId,
+          ),
+        ),
+        ChainDetail(
           label: chainText(context, 'Amount', '金额'),
           value:
               '${formatUnits(transaction.request.amount, transaction.request.asset.decimals)} ${transaction.request.asset.symbol}',

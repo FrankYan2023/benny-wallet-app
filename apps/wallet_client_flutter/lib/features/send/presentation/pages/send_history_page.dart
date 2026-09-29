@@ -1,3 +1,4 @@
+import '../../../../core/widgets/network_badge.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -200,6 +201,9 @@ class SendHistoryDetailPage extends StatelessWidget {
               _DetailRowData(
                 label: context.l10n.commonNetwork,
                 value: context.l10n.commonSolana,
+                valueWidget: NetworkBadge.solana(
+                  alignment: MainAxisAlignment.end,
+                ),
               ),
               _DetailRowData(
                 label: context.l10n.commonNetworkFee,
@@ -291,6 +295,8 @@ class _SendHistoryTile extends StatelessWidget {
                         fontWeight: FontWeight.w900,
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    NetworkBadge.solana(),
                     const SizedBox(height: 4),
                     Text(
                       destination == null || destination.isEmpty
@@ -647,15 +653,17 @@ class _DetailRow extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              data.value,
-              textAlign: TextAlign.right,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-            ),
+            child:
+                data.valueWidget ??
+                Text(
+                  data.value,
+                  textAlign: TextAlign.right,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
           ),
           if (data.copyValue != null && data.copyValue!.isNotEmpty) ...[
             const SizedBox(width: 4),
@@ -686,11 +694,13 @@ class _DetailRowData {
     required this.label,
     required this.value,
     this.copyValue,
+    this.valueWidget,
   });
 
   final String label;
   final String value;
   final String? copyValue;
+  final Widget? valueWidget;
 }
 
 class _TokenAvatar extends StatelessWidget {

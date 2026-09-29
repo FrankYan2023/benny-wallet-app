@@ -1,5 +1,9 @@
 # AI 接手说明
 
+## 2026-09-29 网络标识统一
+
+网络图标、交易历史来源与逐页覆盖见 [NETWORK_UI_AUDIT](NETWORK_UI_AUDIT.md)。后续新增网络标签复用 NetworkBadge / ChainNetworkIdentity；历史必须取记录 chainId，不取当前筛选值。20 项相关测试及 Android debug 更新通过，后端和钱包存储未变。
+
 ## 2026-09-28 Android 生产接口联调
 
 专用模拟器 full 模式已用真实生产 API 完成51秒无资金 UI 集成测试，未使用fixture或公共直连。主网测试新增显式ARC_PRODUCTION_QA保护，未修改运行代码。普通调试启动命令和实际覆盖/限制见 [DEVELOPMENT](DEVELOPMENT.md) 与 [VALIDATION](VALIDATION.md) 最新记录。QA PIN258025仅限无资金模拟器，不能注资。

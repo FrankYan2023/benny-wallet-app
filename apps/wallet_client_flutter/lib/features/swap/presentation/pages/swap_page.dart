@@ -1,3 +1,4 @@
+import '../../../../core/widgets/network_badge.dart';
 import 'dart:async';
 import 'dart:math';
 
@@ -148,6 +149,20 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   String _receiveTitle(AppLocalizations l10n) =>
       _isXStocksMode ? l10n.commonBuy : l10n.swapReceive;
 
+  Widget _networkTitle(AppLocalizations l10n) => Row(
+    children: [
+      Text(
+        _isXStocksMode ? 'xStocks' : l10n.swapTitle,
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          color: AppColors.primary,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+      const SizedBox(width: 8),
+      Flexible(child: NetworkBadge.solana()),
+    ],
+  );
+
   @override
   void initState() {
     super.initState();
@@ -222,6 +237,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
 
       return AppScaffold(
         title: pageTitle,
+        titleWidget: _networkTitle(l10n),
         child: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -229,6 +245,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     if (walletState.childModeEnabled) {
       return AppScaffold(
         title: pageTitle,
+        titleWidget: _networkTitle(l10n),
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -264,6 +281,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         if (_loadingOptions && _tokenOptions.isEmpty) {
           return AppScaffold(
             title: pageTitle,
+            titleWidget: _networkTitle(l10n),
             child: const Center(child: CircularProgressIndicator()),
           );
         }
@@ -271,6 +289,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         if (_availableInputOptions.isEmpty) {
           return AppScaffold(
             title: pageTitle,
+            titleWidget: _networkTitle(l10n),
             child: Center(
               child: Text(
                 _isXStocksMode
@@ -286,6 +305,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
 
         return AppScaffold(
           title: pageTitle,
+          titleWidget: _networkTitle(l10n),
           actions: [
             Container(
               width: 44,
@@ -625,10 +645,12 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       },
       error: (error, _) => AppScaffold(
         title: pageTitle,
+        titleWidget: _networkTitle(l10n),
         child: Center(child: Text(l10n.swapFailedLoadWalletAssets('$error'))),
       ),
       loading: () => AppScaffold(
         title: pageTitle,
+        titleWidget: _networkTitle(l10n),
         child: const Center(child: CircularProgressIndicator()),
       ),
     );
@@ -2793,6 +2815,8 @@ class _TokenPickerSheetState extends State<_TokenPickerSheet> {
       child: Column(
         children: [
           Text(widget.title, style: theme.textTheme.titleLarge),
+          const SizedBox(height: 8),
+          NetworkBadge.solana(),
           const SizedBox(height: 16),
           TextField(
             controller: _searchController,
@@ -3004,6 +3028,8 @@ class _SimpleTokenListSheetState extends State<_SimpleTokenListSheet> {
       child: Column(
         children: [
           Text(widget.title, style: theme.textTheme.titleLarge),
+          const SizedBox(height: 8),
+          NetworkBadge.solana(),
           const SizedBox(height: 16),
           TextField(
             controller: _searchController,

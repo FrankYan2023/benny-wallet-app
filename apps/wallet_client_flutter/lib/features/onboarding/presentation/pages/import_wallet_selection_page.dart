@@ -1,3 +1,4 @@
+import '../../../../core/widgets/network_badge.dart';
 import 'dart:async';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
@@ -223,17 +224,12 @@ class _ImportWalletSelectionPageState
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.hub_rounded,
-                          color: theme.colorScheme.onSecondaryContainer,
-                        ),
-                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                l10n.importSolanaMainnet,
+                              NetworkBadge.solana(
+                                compact: false,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   color: theme.colorScheme.onSecondaryContainer,
                                 ),

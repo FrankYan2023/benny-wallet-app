@@ -198,3 +198,13 @@
 - Solana swap excludes EVM holdings, catalog and search results
 - EVM pairs cannot reach Solana quote or build endpoints
 - Arc swap notice is acknowledged once across page recreation
+
+## 2026-09-29 历史网络身份回归
+
+`test/features/multichain/widgets_test.dart` 新增 3 项（现共 14 项）：
+
+- legacy send history shows Solana in list and detail
+- activity retains its network in list and detail while another network is selected
+- unknown historical network keeps its identity instead of using selected network
+
+历史截图先等待本地图标解码。实际结果及证据见 [NETWORK_UI_AUDIT](NETWORK_UI_AUDIT.md)。

@@ -156,7 +156,7 @@ void main() {
 
     await openSwap();
     expect(find.text('ARC Swap coming soon'), findsOneWidget);
-    expect(find.text('Swap · Solana'), findsOneWidget);
+    expect(find.text('Solana'), findsOneWidget);
     await tester.tap(find.text('Got it'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));

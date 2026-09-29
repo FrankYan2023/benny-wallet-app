@@ -1,3 +1,4 @@
+import '../../../../core/widgets/network_badge.dart';
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
@@ -56,6 +57,7 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
     final theme = Theme.of(context);
     return Column(
       children: [
+        NetworkBadge.solana(),
         const Spacer(),
         Container(
           width: 152,
@@ -99,6 +101,7 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
 
     return Column(
       children: [
+        NetworkBadge.solana(),
         const Spacer(),
         Container(
           width: 152,

@@ -1,3 +1,4 @@
+import '../../../../core/widgets/network_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -62,6 +63,13 @@ class _SwapReviewPageState extends State<SwapReviewPage> {
                 const SizedBox(height: 24),
                 _InfoPanel(
                   rows: [
+                    _InfoRowData(
+                      l10n.commonNetwork,
+                      l10n.commonSolana,
+                      valueWidget: NetworkBadge.solana(
+                        alignment: MainAxisAlignment.end,
+                      ),
+                    ),
                     _InfoRowData(
                       l10n.swapPay,
                       '${Formatters.amount(review.inputAmountUi)} ${review.inputToken.token.symbol}',
@@ -188,10 +196,11 @@ class _InfoPanel extends StatelessWidget {
 }
 
 class _InfoRowData {
-  const _InfoRowData(this.label, this.value);
+  const _InfoRowData(this.label, this.value, {this.valueWidget});
 
   final String label;
   final String value;
+  final Widget? valueWidget;
 }
 
 class _InfoRow extends StatelessWidget {
@@ -210,11 +219,13 @@ class _InfoRow extends StatelessWidget {
           Expanded(child: Text(data.label, style: theme.textTheme.bodyLarge)),
           const SizedBox(width: 16),
           Flexible(
-            child: Text(
-              data.value,
-              textAlign: TextAlign.end,
-              style: theme.textTheme.titleLarge,
-            ),
+            child:
+                data.valueWidget ??
+                Text(
+                  data.value,
+                  textAlign: TextAlign.end,
+                  style: theme.textTheme.titleLarge,
+                ),
           ),
         ],
       ),

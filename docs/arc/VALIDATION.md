@@ -1,5 +1,13 @@
 # 验证记录与待验收事项
 
+## 2026-09-29 全页面网络标识
+
+- `flutter test --no-pub test/features/multichain/widgets_test.dart test/features/swap/solana_swap_scope_test.dart test/features/notifications/chain_notification_test.dart`：20 项通过。初次运行发现活动卡片 Material 背景断言，修复后全部通过；既有菜单文本点击警告仍存在。
+- `dart analyze lib test/features/multichain/widgets_test.dart test/features/swap/solana_swap_scope_test.dart`：No issues found。
+- 截图辅助先等待本地图片解码；Solana 历史单项复跑通过，两个历史截图已人工查看，无文字溢出。
+- Android full debug / 普通 main.dart：23.5 秒构建、721 ms 安装并成功启动，专用 Benny_Arc_QA_API36 调试连接保留，生产 API 未变。旧 Gradle/AGP/Kotlin 支持提示与 Firebase 未配置提示仍存在；未修改构建版本。
+- 后台、资金收发、iOS、完整真机逐页验收未重测。[逐页检查清单与截图](NETWORK_UI_AUDIT.md)。
+
 ## 2026-09-28 Swap 范围与首次提示
 
 - Flutter 3.47.5 / Dart 3.13.4；`flutter test --no-pub test/features/swap/solana_swap_scope_test.dart test/features/settings/app_settings_repository_test.dart`：4 项通过。覆盖同名 USDC 的 Solana/EVM 持仓与目录/搜索隔离、EVM 币对在 quote/build 请求前拒绝、首次确认及页面重建不重复提示、原设置清理保留语言。

@@ -1,3 +1,4 @@
+import '../../../../core/widgets/network_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -69,7 +70,13 @@ class _SendConfirmPageState extends ConsumerState<SendConfirmPage> {
                       _compactAddress(widget.draft.destinationAddress),
                       isAddress: true,
                     ),
-                    _InfoRowData(l10n.commonNetwork, l10n.commonSolana),
+                    _InfoRowData(
+                      l10n.commonNetwork,
+                      l10n.commonSolana,
+                      valueWidget: NetworkBadge.solana(
+                        alignment: MainAxisAlignment.end,
+                      ),
+                    ),
                     _InfoRowData(
                       l10n.commonNetworkFee,
                       Formatters.usd(
@@ -154,10 +161,16 @@ class _InfoPanel extends StatelessWidget {
 }
 
 class _InfoRowData {
-  const _InfoRowData(this.label, this.value, {this.isAddress = false});
+  const _InfoRowData(
+    this.label,
+    this.value, {
+    this.isAddress = false,
+    this.valueWidget,
+  });
 
   final String label;
   final String value;
+  final Widget? valueWidget;
   final bool isAddress;
 }
 
@@ -186,21 +199,23 @@ class _InfoRow extends StatelessWidget {
           const SizedBox(width: 16),
           Expanded(
             flex: 3,
-            child: Text(
-              data.value,
-              textAlign: TextAlign.end,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              softWrap: false,
-              style:
-                  (data.isAddress
-                          ? theme.textTheme.titleMedium
-                          : theme.textTheme.titleLarge)
-                      ?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: data.isAddress ? 0.2 : null,
-                      ),
-            ),
+            child:
+                data.valueWidget ??
+                Text(
+                  data.value,
+                  textAlign: TextAlign.end,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
+                  style:
+                      (data.isAddress
+                              ? theme.textTheme.titleMedium
+                              : theme.textTheme.titleLarge)
+                          ?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: data.isAddress ? 0.2 : null,
+                          ),
+                ),
           ),
         ],
       ),

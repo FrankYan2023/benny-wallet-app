@@ -11,6 +11,7 @@ class AppScaffold extends StatelessWidget {
     required this.title,
     required this.child,
     this.actions,
+    this.titleWidget,
     this.showBackButton = true,
     this.enableTitleNavigation = true,
     this.showTopBar = true,
@@ -18,6 +19,7 @@ class AppScaffold extends StatelessWidget {
   });
 
   final String title;
+  final Widget? titleWidget;
   final Widget child;
   final List<Widget>? actions;
   final bool showBackButton;
@@ -85,27 +87,30 @@ class AppScaffold extends StatelessWidget {
                                   ? InkWell(
                                       borderRadius: BorderRadius.circular(16),
                                       onTap: () => context.go('/'),
-                                      child: Text(
-                                        titleText,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: theme.textTheme.titleLarge
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w800,
-                                              color: AppColors.primary,
-                                            ),
-                                      ),
-                                    )
-                                  : Text(
-                                      titleText,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.titleLarge
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w800,
-                                            color: AppColors.primary,
+                                      child:
+                                          titleWidget ??
+                                          Text(
+                                            titleText,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: theme.textTheme.titleLarge
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.w800,
+                                                  color: AppColors.primary,
+                                                ),
                                           ),
-                                    ),
+                                    )
+                                  : titleWidget ??
+                                        Text(
+                                          titleText,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.textTheme.titleLarge
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w800,
+                                                color: AppColors.primary,
+                                              ),
+                                        ),
                             ),
                             const SizedBox(width: 12),
                             actions == null || actions!.isEmpty

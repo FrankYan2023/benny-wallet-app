@@ -1,3 +1,4 @@
+import '../../../core/widgets/network_badge.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -134,27 +135,11 @@ class PortfolioNetworkMenu extends ConsumerWidget {
           CheckedPopupMenuItem(
             value: item.id,
             checked: selected == item.id,
-            child: Row(
-              children: [
-                ClipOval(
-                  child: item.iconAsset == null
-                      ? const Icon(Icons.public_rounded, size: 24)
-                      : Image.asset(
-                          item.iconAsset!,
-                          width: 24,
-                          height: 24,
-                          fit: BoxFit.cover,
-                          excludeFromSemantics: true,
-                        ),
-                ),
-                const SizedBox(width: 12),
-                Flexible(child: Text(item.displayName)),
-              ],
-            ),
+            child: NetworkBadge.fromConfig(item, compact: false),
           ),
       ],
       child: Container(
-        constraints: const BoxConstraints(minHeight: 44, maxWidth: 92),
+        constraints: const BoxConstraints(minHeight: 44, maxWidth: 116),
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: .18),
@@ -170,7 +155,9 @@ class PortfolioNetworkMenu extends ConsumerWidget {
                 size: 24,
                 color: Theme.of(context).colorScheme.onPrimary,
               )
-            else
+            else ...[
+              NetworkIcon(iconAsset: config.iconAsset, size: 20),
+              const SizedBox(width: 6),
               Flexible(
                 child: Text(
                   config.displayName.split(' ').first,
@@ -182,6 +169,7 @@ class PortfolioNetworkMenu extends ConsumerWidget {
                   ),
                 ),
               ),
+            ],
             const SizedBox(width: 4),
             Icon(
               Icons.expand_more_rounded,
@@ -234,11 +222,11 @@ class AdditionalAssetRows extends ConsumerWidget {
             .watch(chainAssetsProvider(config.id))
             .when(
               loading: () => ListTile(
-                title: Text(config.displayName),
+                title: NetworkBadge.fromConfig(config, compact: false),
                 subtitle: const LinearProgressIndicator(),
               ),
               error: (error, _) => ListTile(
-                title: Text(config.displayName),
+                title: NetworkBadge.fromConfig(config, compact: false),
                 subtitle: Text('$error'),
                 trailing: IconButton(
                   tooltip: chainText(context, 'Retry', '重试'),

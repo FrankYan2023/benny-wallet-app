@@ -1,3 +1,4 @@
+import '../../../../core/widgets/network_badge.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -238,12 +239,13 @@ class ReceivedNotificationDetailPage extends ConsumerWidget {
         );
       }
       return AppScaffold(
-        title: config.displayName,
+        title: context.l10n.receivedDetailsTitle,
         child: ListView(
           children: [
             ChainDetail(
               label: chainText(context, 'Network', '网络'),
               value: config.displayName,
+              valueWidget: NetworkBadge.fromConfig(config),
             ),
             if (message.amountText != null)
               ChainDetail(
@@ -365,6 +367,9 @@ class _ReceivedTransferDetailBody extends StatelessWidget {
             _DetailRowData(
               label: context.l10n.commonNetwork,
               value: context.l10n.commonSolana,
+              valueWidget: NetworkBadge.solana(
+                alignment: MainAxisAlignment.end,
+              ),
             ),
             _DetailRowData(
               label: context.l10n.commonStatus,
@@ -463,6 +468,8 @@ class _ReceivedHistoryTile extends StatelessWidget {
                         fontWeight: FontWeight.w900,
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    NetworkBadge.solana(),
                     const SizedBox(height: 4),
                     Text(
                       sender == null || sender.isEmpty
@@ -599,6 +606,13 @@ class _MessageCard extends ConsumerWidget {
                         fontWeight: isReceived ? FontWeight.w900 : null,
                       ),
                     ),
+                    if (isReceived || message.chainId != null) ...[
+                      const SizedBox(height: 8),
+                      if (message.chainId == null)
+                        NetworkBadge.solana()
+                      else
+                        ChainNetworkIdentity(chainId: message.chainId!),
+                    ],
                     const SizedBox(height: 10),
                     Text(
                       _formatTimestamp(message.receivedAt),
@@ -843,6 +857,7 @@ class _ReceivedTimelinePanel extends StatelessWidget {
           _TimelineEntry(
             icon: Icons.call_received_rounded,
             title: context.l10n.receivedOnSolana,
+            titleWidget: NetworkBadge.solana(),
             subtitle: item.status == 'failed'
                 ? context.l10n.receivedMarkedFailed
                 : context.l10n.receivedArrived,
@@ -864,6 +879,7 @@ class _TimelineEntry extends StatelessWidget {
     required this.time,
     required this.active,
     this.failed = false,
+    this.titleWidget,
   });
 
   final IconData icon;
@@ -872,6 +888,7 @@ class _TimelineEntry extends StatelessWidget {
   final String time;
   final bool active;
   final bool failed;
+  final Widget? titleWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -898,12 +915,13 @@ class _TimelineEntry extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
+              titleWidget ??
+                  Text(
+                    title,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
               const SizedBox(height: 2),
               Text(
                 subtitle,
@@ -1077,15 +1095,17 @@ class _DetailRow extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              data.value,
-              textAlign: TextAlign.right,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-            ),
+            child:
+                data.valueWidget ??
+                Text(
+                  data.value,
+                  textAlign: TextAlign.right,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
           ),
           if (data.copyValue != null && data.copyValue!.isNotEmpty) ...[
             const SizedBox(width: 4),
@@ -1116,11 +1136,13 @@ class _DetailRowData {
     required this.label,
     required this.value,
     this.copyValue,
+    this.valueWidget,
   });
 
   final String label;
   final String value;
   final String? copyValue;
+  final Widget? valueWidget;
 }
 
 String _formatTimestamp(DateTime value) {

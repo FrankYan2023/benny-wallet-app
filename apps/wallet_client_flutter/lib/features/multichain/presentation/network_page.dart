@@ -146,79 +146,95 @@ class ChainActivitySection extends ConsumerWidget {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: WalletCard(
-                        child: ExpansionTile(
-                          tilePadding: EdgeInsets.zero,
-                          childrenPadding: const EdgeInsets.only(bottom: 12),
-                          title: Text(
-                            '${formatUnits(activity.amount, activity.asset.decimals)} ${activity.asset.symbol}',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          subtitle: Text(
-                            chainStatusText(context, activity.status),
-                          ),
-                          children: [
-                            ChainDetail(
-                              label: chainText(context, 'From', '发送地址'),
-                              value: activity.from,
+                        child: Material(
+                          type: MaterialType.transparency,
+                          child: ExpansionTile(
+                            tilePadding: EdgeInsets.zero,
+                            childrenPadding: const EdgeInsets.only(bottom: 12),
+                            title: Text(
+                              '${formatUnits(activity.amount, activity.asset.decimals)} ${activity.asset.symbol}',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            ChainDetail(
-                              label: chainText(context, 'To', '接收地址'),
-                              value: activity.to,
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ChainNetworkIdentity(chainId: activity.chainId),
+                                Text(chainStatusText(context, activity.status)),
+                              ],
                             ),
-                            if (activity.timestamp != null)
+                            children: [
                               ChainDetail(
-                                label: chainText(context, 'Time', '时间'),
-                                value: activity.timestamp!.toLocal().toString(),
+                                label: chainText(context, 'Network', '网络'),
+                                value: config.displayName,
+                                valueWidget: ChainNetworkIdentity(
+                                  chainId: activity.chainId,
+                                ),
                               ),
-                            if (activity.fee != null)
+                              ChainDetail(
+                                label: chainText(context, 'From', '发送地址'),
+                                value: activity.from,
+                              ),
+                              ChainDetail(
+                                label: chainText(context, 'To', '接收地址'),
+                                value: activity.to,
+                              ),
+                              if (activity.timestamp != null)
+                                ChainDetail(
+                                  label: chainText(context, 'Time', '时间'),
+                                  value: activity.timestamp!
+                                      .toLocal()
+                                      .toString(),
+                                ),
+                              if (activity.fee != null)
+                                ChainDetail(
+                                  label: chainText(
+                                    context,
+                                    'Network fee',
+                                    '网络费用',
+                                  ),
+                                  value:
+                                      '${formatUnits(activity.fee!, config.feeDecimals)} ${config.feeSymbol}',
+                                ),
                               ChainDetail(
                                 label: chainText(
                                   context,
-                                  'Network fee',
-                                  '网络费用',
+                                  'Transaction hash',
+                                  '交易哈希',
                                 ),
-                                value:
-                                    '${formatUnits(activity.fee!, config.feeDecimals)} ${config.feeSymbol}',
+                                value: activity.hash,
                               ),
-                            ChainDetail(
-                              label: chainText(
-                                context,
-                                'Transaction hash',
-                                '交易哈希',
-                              ),
-                              value: activity.hash,
-                            ),
-                            TextButton.icon(
-                              onPressed: () async {
-                                final opened = await launchUrl(
-                                  config.transactionUrl(activity.hash),
-                                  mode: LaunchMode.externalApplication,
-                                );
-                                if (!opened && context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        chainText(
-                                          context,
-                                          'Unable to open explorer.',
-                                          '无法打开区块浏览器。',
+                              TextButton.icon(
+                                onPressed: () async {
+                                  final opened = await launchUrl(
+                                    config.transactionUrl(activity.hash),
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                  if (!opened && context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          chainText(
+                                            context,
+                                            'Unable to open explorer.',
+                                            '无法打开区块浏览器。',
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  );
-                                }
-                              },
-                              icon: const Icon(Icons.open_in_new_rounded),
-                              label: Text(
-                                chainText(
-                                  context,
-                                  'View in explorer',
-                                  '在区块浏览器查看',
+                                    );
+                                  }
+                                },
+                                icon: const Icon(Icons.open_in_new_rounded),
+                                label: Text(
+                                  chainText(
+                                    context,
+                                    'View in explorer',
+                                    '在区块浏览器查看',
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -261,9 +277,15 @@ class ChainActivitySection extends ConsumerWidget {
 }
 
 class ChainDetail extends StatelessWidget {
-  const ChainDetail({super.key, required this.label, required this.value});
+  const ChainDetail({
+    super.key,
+    required this.label,
+    required this.value,
+    this.valueWidget,
+  });
   final String label;
   final String value;
+  final Widget? valueWidget;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -273,7 +295,11 @@ class ChainDetail extends StatelessWidget {
       children: [
         Text(label, style: Theme.of(context).textTheme.labelMedium),
         const SizedBox(height: 4),
-        SelectableText(value, style: Theme.of(context).textTheme.bodyMedium),
+        valueWidget ??
+            SelectableText(
+              value,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
       ],
     ),
   );
