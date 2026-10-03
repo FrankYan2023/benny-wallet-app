@@ -429,6 +429,7 @@ void main() {
       expect(find.text(solana.address), findsOneWidget);
       await tester.tap(find.byType(DropdownButtonFormField<String>));
       await tester.pumpAndSettle();
+      await screenshot(tester, 'receive-network-menu-compact');
       await tester.tap(find.text('Arc Testnet').last);
       await tester.pumpAndSettle();
       expect(find.text(fixture.address), findsOneWidget);

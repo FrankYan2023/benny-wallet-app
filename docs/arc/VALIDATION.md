@@ -1,5 +1,12 @@
 # 验证记录与待验收事项
 
+## 2026-10-03 网络选择框宽度
+
+- `flutter test --no-pub test/features/multichain/widgets_test.dart`：最终14项通过，包含 Send/Receive 切换、地址/二维码一致性、表单清空、网络历史标识；既有菜单文字点击警告保留。对齐菜单时一次构造函数参数错误导致编译失败，修正后重新全文件通过。
+- `dart analyze lib/features/multichain/presentation/chain_widgets.dart`：No issues found。
+- Android 普通 full debug 热更新成功（35 个库 / 2,117 ms）；既有生产 API 会话保留，本轮无重新安装/完整构建、无实际资金操作。
+- [紧凑网络菜单截图](evidence/receive-network-menu-compact-20261003.png)：390px 组件布局，菜单宽度208px，图标/名称无溢出，已人工查看。Arc Testnet 是组件 fixture，运行 app 主网配置未变。
+
 ## 2026-09-29 全页面网络标识
 
 - `flutter test --no-pub test/features/multichain/widgets_test.dart test/features/swap/solana_swap_scope_test.dart test/features/notifications/chain_notification_test.dart`：20 项通过。初次运行发现活动卡片 Material 背景断言，修复后全部通过；既有菜单文本点击警告仍存在。

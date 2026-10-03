@@ -69,25 +69,41 @@ class ChainNetworkSelector extends ConsumerWidget {
   final ValueChanged<String> onChanged;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) =>
-      DropdownButtonFormField<String>(
-        initialValue: value,
-        key: ValueKey(value),
-        isExpanded: true,
-        decoration: InputDecoration(
-          labelText: chainText(context, 'Network', '网络'),
-        ),
-        items: [
-          for (final config in ref.watch(chainConfigsProvider))
-            DropdownMenuItem(
-              value: config.id,
-              child: NetworkBadge.fromConfig(config, compact: false),
+  Widget build(BuildContext context, WidgetRef ref) => Align(
+    alignment: Alignment.centerLeft,
+    child: SizedBox(
+      width: 208,
+      child: ButtonTheme.fromButtonThemeData(
+        data: ButtonTheme.of(context).copyWith(alignedDropdown: true),
+        child: DropdownButtonFormField<String>(
+          initialValue: value,
+          key: ValueKey(value),
+          isExpanded: true,
+          borderRadius: BorderRadius.circular(20),
+          menuMaxHeight: 280,
+          icon: const Icon(Icons.expand_more_rounded),
+          decoration: InputDecoration(
+            labelText: chainText(context, 'Network', '网络'),
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
             ),
-        ],
-        onChanged: (value) {
-          if (value != null) onChanged(value);
-        },
-      );
+          ),
+          items: [
+            for (final config in ref.watch(chainConfigsProvider))
+              DropdownMenuItem(
+                value: config.id,
+                child: NetworkBadge.fromConfig(config, compact: false),
+              ),
+          ],
+          onChanged: (value) {
+            if (value != null) onChanged(value);
+          },
+        ),
+      ),
+    ),
+  );
 }
 
 class ChainErrorCard extends StatelessWidget {
