@@ -2,7 +2,15 @@
 
 日期：2026-09-29；基线：`595efa2`。仅修改既有 Flutter 客户端，未修改后端、网络配置或钱包存储。
 
-## 2026-10-03 下拉框统一同宽（当前实现）
+## 2026-10-03 Send 交互按 Solana 统一（当前实现）
+
+Arc移除独立币种下拉和首页内嵌发送表单，改为与原Solana相同的持仓币种列表 → 专属填写页 → 独立确认页 → 发送中/结果。填写和确认共用原Solana展示组件，网络图标持续可见；币种行保留链角标、仅可用正余额进入列表，零余额同原Solana空态。资产详情Send直接打开对应币种填写页。
+
+因此当前实际下拉入口只剩首页网络筛选与共享网络选择，继续复用同宽WalletDropdown；发送币种选择以TokenRow列表完成。旧截图/上一轮宽度规则保留历史，不代表仍有Arc币种下拉。扫码显示所选网络，Arc显式错误链QR拒绝，原Solana地址提取保留。
+
+[币种列表](evidence/arc-send-assets-parity-20261003.png)、[填写页](evidence/arc-send-compose-parity-20261003.png)、[确认页](evidence/arc-send-review-parity-20261003.png)为390px公开无资金fixture；生产Android联调使用独立无资金钱包，仅验收空列表与导航。[Send对齐说明与测试](SEND_UX_PARITY.md)。
+
+## 2026-10-03 下拉框统一同宽（上一轮）
 
 按最新反馈，展开菜单与触发选择框等宽、左右对齐，替代之前固定224px的独立菜单。所有实际下拉框统一使用 `core/widgets/wallet_dropdown.dart` 的 WalletDropdown：按父布局读取控件宽度，下方8px展开、22px圆角、细边框无重阴影，选中项暖色底与勾号。
 

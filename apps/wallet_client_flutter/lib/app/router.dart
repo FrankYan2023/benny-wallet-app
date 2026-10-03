@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/config/app_features.dart';
+import '../core/chains/chain_models.dart';
 import '../l10n/l10n.dart';
 import '../features/auth/presentation/providers/wallet_controller.dart';
 import '../features/auth/presentation/pages/pin_setup_page.dart';
@@ -375,12 +376,38 @@ class AppRouter {
         ),
       ),
       GoRoute(
+        path: NetworkSendConfirmPage.routePath,
+        redirect: (context, state) =>
+            state.extra is PreparedChainTransaction ? null : SendPage.routePath,
+        builder: (context, state) => _RouteAccessGuard(
+          currentLocation: state.matchedLocation,
+          allowInChildMode: false,
+          requireUnlocked: true,
+          child: NetworkSendConfirmPage(
+            transaction: state.extra as PreparedChainTransaction,
+          ),
+        ),
+      ),
+      GoRoute(
+        path: NetworkSendPage.composeRoutePath,
+        builder: (context, state) => _RouteAccessGuard(
+          currentLocation: state.matchedLocation,
+          allowInChildMode: false,
+          requireUnlocked: true,
+          child: NetworkSendPage(
+            chainId: state.pathParameters['chainId']!,
+            assetId: state.uri.queryParameters['asset'],
+            recipientAddress: state.uri.queryParameters['recipient'],
+          ),
+        ),
+      ),
+      GoRoute(
         path: ScanAddressPage.routePath,
         name: ScanAddressPage.routeName,
         builder: (context, state) => _RouteAccessGuard(
           currentLocation: state.matchedLocation,
           allowInChildMode: false,
-          child: const ScanAddressPage(),
+          child: ScanAddressPage(chainId: state.uri.queryParameters['network']),
         ),
       ),
       GoRoute(

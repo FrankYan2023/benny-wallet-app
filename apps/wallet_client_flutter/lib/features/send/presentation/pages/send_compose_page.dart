@@ -15,6 +15,7 @@ import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../portfolio/domain/entities/portfolio_view_data.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
 import '../../domain/send_draft_data.dart';
+import '../widgets/send_widgets.dart';
 import 'scan_address_page.dart';
 import 'send_confirm_page.dart';
 
@@ -99,13 +100,13 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
                     ),
                     const SizedBox(height: 8),
                     Center(
-                      child: _TokenAvatar(
+                      child: SendTokenAvatar(
                         symbol: symbol,
                         iconUrl: asset.logoUrl,
                       ),
                     ),
                     const SizedBox(height: 24),
-                    _SendInputCard(
+                    SendInputCard(
                       trailing: IconButton(
                         tooltip: l10n.sendScanQrCode,
                         onPressed: () => _scanAddress(context),
@@ -131,7 +132,7 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    _AmountCard(
+                    SendAmountCard(
                       symbol: symbol,
                       amountController: _amountController,
                       onChanged: () {
@@ -178,7 +179,7 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              _BottomActionRow(
+              SendBottomActionRow(
                 leadingLabel: l10n.commonCancel,
                 trailingLabel: _submitting
                     ? l10n.commonLoading
@@ -465,177 +466,6 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
     }
 
     return context.l10n.sendGenericFailure;
-  }
-}
-
-class _SendInputCard extends StatelessWidget {
-  const _SendInputCard({required this.child, this.trailing});
-
-  final Widget child;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: Theme.of(
-            context,
-          ).colorScheme.outlineVariant.withValues(alpha: 0.6),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(child: child),
-          if (trailing != null) ...[const SizedBox(width: 8), trailing!],
-        ],
-      ),
-    );
-  }
-}
-
-class _AmountCard extends StatelessWidget {
-  const _AmountCard({
-    required this.symbol,
-    required this.amountController,
-    required this.onChanged,
-    required this.onMax,
-  });
-
-  final String symbol;
-  final TextEditingController amountController;
-  final VoidCallback onChanged;
-  final VoidCallback onMax;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(22),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: amountController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              onChanged: (_) {
-                onChanged();
-              },
-              decoration: InputDecoration(
-                hintText: context.l10n.sendAmountHint,
-                border: InputBorder.none,
-                filled: false,
-              ),
-            ),
-          ),
-          Text(symbol, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(width: 10),
-          TextButton(onPressed: onMax, child: Text(context.l10n.commonMax)),
-        ],
-      ),
-    );
-  }
-}
-
-class _TokenAvatar extends StatelessWidget {
-  const _TokenAvatar({required this.symbol, this.iconUrl});
-
-  final String symbol;
-  final String? iconUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: 110,
-      height: 110,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.7),
-      ),
-      child: iconUrl == null
-          ? Center(
-              child: Text(
-                symbol.substring(0, 1),
-                style: theme.textTheme.displayMedium?.copyWith(
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            )
-          : Padding(
-              padding: const EdgeInsets.all(8),
-              child: ClipOval(
-                child: Image.network(
-                  iconUrl!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Center(
-                    child: Text(
-                      symbol.substring(0, 1),
-                      style: theme.textTheme.displayMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-    );
-  }
-}
-
-class _BottomActionRow extends StatelessWidget {
-  const _BottomActionRow({
-    required this.leadingLabel,
-    required this.trailingLabel,
-    required this.onLeading,
-    required this.onTrailing,
-  });
-
-  final String leadingLabel;
-  final String trailingLabel;
-  final VoidCallback? onLeading;
-  final VoidCallback? onTrailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: FilledButton.tonal(
-            onPressed: onLeading,
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(58),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(22),
-              ),
-            ),
-            child: Text(leadingLabel),
-          ),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: FilledButton(
-            onPressed: onTrailing,
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(58),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(22),
-              ),
-            ),
-            child: Text(trailingLabel),
-          ),
-        ),
-      ],
-    );
   }
 }
 

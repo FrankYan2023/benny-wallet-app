@@ -1,5 +1,18 @@
 # 验证记录与待验收事项
 
+## 2026-10-03 Send交互按原Solana统一（最新）
+
+代码基线 `a9c9fb3`；本轮Send对齐改动，提交可从 [CHANGELOG](CHANGELOG.md) / Git历史追溯。没有后台/数据库/密钥/链常量改动。
+
+- 相关组件18项、EVM/Solana adapter与转账控制器38项、QR decoder3项均通过；新增15项，已有流程测试重写但未删除其他测试。公开fixture验证选币→填写→确认→显式Send、取消保留、金额/地址拒绝、单次广播/忙碌返回、Max费用精度/余额/权限、QR错误链及合约URI拒绝。
+- 完整 `flutter test --no-pub`：108通过、1失败。唯一失败为已有Swap提示未本地化字面量 `ARC Swap coming soon`；已确认相同字面量存在于基线提交，原文件未修改。不宣称全量通过，截图/业务回归均通过。
+- `flutter analyze --no-pub lib test integration_test`：No issues found。完整 `flutter analyze --no-pub`另报75项，仅来自忽略的 `build/ios/SourcePackages/firebase_messaging-16.2.2`第三方示例/测试缓存，含mockito缺失和API不匹配；应用源码范围通过，本轮未修改分析配置或第三方缓存来隐藏报告。
+- 三张390px截图人工查看：[Arc币种列表](evidence/arc-send-assets-parity-20261003.png)、[填写页](evidence/arc-send-compose-parity-20261003.png)、[确认页](evidence/arc-send-review-parity-20261003.png)。截图公开无资金Arc Testnet fixture，不代表真实资金链路或生产资产余额。
+- Android专用 `Benny_Arc_QA_API36` / emulator-5554，full debug生产API：新路由热重启7879ms后，又完整构建设备集成APK21.1s、安装7.5s；`integration_test/arc/arc_emulator_smoke_test.dart`105s通过（1个testWidgets + tearDownAll，runner +2）。使用 `BENNY_EMULATOR_QA=true`、`ARC_PRODUCTION_QA=true`、STORE_MODE=full、API_BASE_URL=https://api.gobennyapp.com，主网5042，未打开测试网/直连RPC、无HTTP fixtures。
+- 设备实际覆盖QA钱包PIN/真实安全存储解锁、All/Solana/Arc、收款二维码/复制/历史、Arc与Solana零持仓Send同空态/无表单/切链、USDC metadata/import去重。仅无资金QA账户，可发生既有公开账户绑定和导入元数据写入；未导出秘密，未签名/广播交易。原正余额发送用组件fixture验收，禁止给此QA钱包注资。
+- 测试APK之后已恢复普通 `lib/main.dart` full debug：11.3s构建、5.2s安装、135ms文件同步，启动成功且调试连接保留，仍接生产API。工具链自动增加的4行Gradle兼容属性恢复，不混入提交。
+- 本轮未重跑另一份fixture设备测试 `arc_backend_ui_test.dart`、iOS、物理手机/摄像头QR、受控资金收发及推送。Firebase runtime options未配置、310项zh翻译缺失/旧构建版本支持提示仍存在。详细页面/API/待验收范围见 [SEND_UX_PARITY](SEND_UX_PARITY.md)，测试注册清单已刷新 [AUTOMATED_TESTS](AUTOMATED_TESTS.md)。
+
 ## 2026-10-03 所有下拉菜单同宽（最新）
 
 - 客户端全 lib 与设计组件库静态搜索审查：三处下拉入口共用 WalletDropdown；网络字段/币种字段按页面/卡片内容宽度，首页筛选框和菜单120px。菜单在框下方8px，统一圆角/细边框/选中底色与勾号。

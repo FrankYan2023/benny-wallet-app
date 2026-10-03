@@ -142,16 +142,7 @@ class _SendPageState extends ConsumerState<SendPage> {
           const SizedBox(height: 8),
           Expanded(
             child: !primary
-                ? NetworkSendPage(
-                    key: ValueKey(_chainId),
-                    chainId: _chainId,
-                    assetId: widget.chainId == _chainId ? widget.assetId : null,
-                    recipientAddress: normalizedRecipient,
-                    embedded: true,
-                    onBusyChanged: (busy) {
-                      if (mounted) setState(() => _busy = busy);
-                    },
-                  )
+                ? _additionalAssets(context, normalizedRecipient)
                 : portfolio.when(
                     data: (data) {
                       final assets = data.assets
@@ -237,6 +228,100 @@ class _SendPageState extends ConsumerState<SendPage> {
         ],
       ),
     );
+  }
+
+  Widget _additionalAssets(BuildContext context, String? recipient) {
+    final config = findChain(ref.watch(chainConfigsProvider), _chainId);
+    if (config == null) return Center(child: Text(context.l10n.sendNoAssets));
+    return ref
+        .watch(chainAccountProvider(_chainId))
+        .when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => ChainErrorCard(
+            error: error,
+            onRetry: () => ref.invalidate(chainAccountProvider(_chainId)),
+          ),
+          data: (account) => ref
+              .watch(chainAssetsProvider(_chainId))
+              .when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _) => ChainErrorCard(
+                  error: error,
+                  onRetry: () => ref.invalidate(chainAssetsProvider(_chainId)),
+                ),
+                data: (holdings) {
+                  if (holdings.any((asset) => !asset.balanceAvailable)) {
+                    return ChainErrorCard(
+                      error: chainText(
+                        context,
+                        'Balance unavailable. Refresh and try again.',
+                        '余额暂不可用，请刷新后重试。',
+                      ),
+                      onRetry: () =>
+                          ref.invalidate(chainAssetsProvider(_chainId)),
+                    );
+                  }
+                  final assets = holdings
+                      .where((asset) => asset.rawBalance > BigInt.zero)
+                      .toList();
+                  if (assets.isEmpty)
+                    return Center(child: Text(context.l10n.sendNoAssets));
+                  return ListView(
+                    children: [
+                      if (recipient != null && recipient.isNotEmpty) ...[
+                        WalletCard(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.l10n.sendRecipientPrefilled,
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w800),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                Formatters.compactAddress(
+                                  recipient,
+                                  visibleChars: 6,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      const SizedBox(height: 6),
+                      for (final asset in assets) ...[
+                        TokenRow(
+                          name: asset.name,
+                          symbol: asset.symbol,
+                          networkLabel: config.displayName,
+                          networkIconAsset: config.iconAsset,
+                          balanceLine: '${asset.balanceText} ${asset.symbol}',
+                          value: config.isTestnet || asset.fiatPrice == null
+                              ? '--'
+                              : Formatters.usd(
+                                  double.parse(asset.balanceText) *
+                                      asset.fiatPrice!,
+                                ),
+                          change: '--',
+                          isPositiveChange: null,
+                          iconUrl: asset.logoUrl,
+                          onTap: () => context.push(
+                            NetworkSendPage.composePathFor(
+                              _chainId,
+                              assetId: asset.id,
+                              recipientAddress: recipient,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                    ],
+                  );
+                },
+              ),
+        );
   }
 
   static String _assetChangeLine(AssetHolding asset) {

@@ -36,6 +36,8 @@ class TestAdapter extends ChainAdapter {
   bool beforeBroadcastSaved = false;
   int signed = 0;
   int broadcasts = 0;
+  int maximumCalculations = 0;
+  Completer<void>? maximumGate;
   Completer<void>? signGate;
   late MultichainStore store;
   @override
@@ -52,6 +54,13 @@ class TestAdapter extends ChainAdapter {
   @override
   Future<BigInt> getBalance(ChainAccount account, ChainAsset asset) async =>
       asset.rawBalance;
+  @override
+  Future<BigInt> maximumTransferAmount(ChainTransferRequest request) async {
+    maximumCalculations++;
+    if (maximumGate != null) await maximumGate!.future;
+    return asset.rawBalance;
+  }
+
   @override
   Future<ChainFeeEstimate> estimateFee(ChainTransferRequest request) async =>
       ChainFeeEstimate(
@@ -148,6 +157,24 @@ void main() {
     final prepared = await controller.prepare(request);
     unlocked = false;
     await expectLater(controller.send(prepared), throwsStateError);
+    expect(adapter.signed, 0);
+    expect(adapter.broadcasts, 0);
+  });
+  test('locked session rejects Max before any network calculation', () async {
+    unlocked = false;
+    await expectLater(controller.maximumAmount(request), throwsStateError);
+    expect(adapter.maximumCalculations, 0);
+    expect(adapter.signed, 0);
+    expect(adapter.broadcasts, 0);
+  });
+  test('locking during Max prevents returning a stale-wallet amount', () async {
+    adapter.maximumGate = Completer<void>();
+    final amount = controller.maximumAmount(request);
+    await Future<void>.delayed(Duration.zero);
+    unlocked = false;
+    adapter.maximumGate!.complete();
+    await expectLater(amount, throwsStateError);
+    expect(adapter.maximumCalculations, 1);
     expect(adapter.signed, 0);
     expect(adapter.broadcasts, 0);
   });

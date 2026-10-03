@@ -2,6 +2,10 @@
 
 Benny Wallet 是现有的 Flutter 自托管钱包，主要移动端工程为 [`apps/wallet_client_flutter`](apps/wallet_client_flutter)。`arc` 分支在保留 Solana 功能的基础上，加入通用 EVM 架构与 Arc 主网配置/后台服务接入。不是新建钱包应用，也不包含服务端工程。
 
+## Send交互统一（2026-10-03）
+
+Arc与Solana按同一流程发送：选币 → 填写（扫码、Max）→ 确认 → 结果。原Solana展示组件共享，Arc预留USDC最高费用并明确显示网络；查看 [交互与安全说明](docs/arc/SEND_UX_PARITY.md)、[最新验证](docs/arc/VALIDATION.md) 和 [历史修改](docs/arc/CHANGELOG.md)。
+
 ## 当前功能
 
 - 同一兼容 BIP39 根钱包独立派生原有 Solana 账户与 EVM 账户；密钥留在设备上。

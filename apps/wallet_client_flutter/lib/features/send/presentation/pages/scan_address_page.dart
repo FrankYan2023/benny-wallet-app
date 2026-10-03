@@ -1,25 +1,31 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../../app/theme/app_colors.dart';
-import '../../../../core/utils/validators.dart';
+import '../../../../core/chains/recipient_decoder.dart';
+import '../../../multichain/presentation/chain_widgets.dart';
+import '../../../multichain/providers/multichain_providers.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../l10n/l10n.dart';
 
-class ScanAddressPage extends StatefulWidget {
-  const ScanAddressPage({super.key});
+class ScanAddressPage extends ConsumerStatefulWidget {
+  const ScanAddressPage({super.key, this.chainId});
+  final String? chainId;
+  static String pathFor(String chainId) =>
+      Uri(path: routePath, queryParameters: {'network': chainId}).toString();
 
   static const routeName = 'scanAddress';
   static const routePath = '/send/scan-address';
 
   @override
-  State<ScanAddressPage> createState() => _ScanAddressPageState();
+  ConsumerState<ScanAddressPage> createState() => _ScanAddressPageState();
 }
 
-class _ScanAddressPageState extends State<ScanAddressPage>
+class _ScanAddressPageState extends ConsumerState<ScanAddressPage>
     with WidgetsBindingObserver {
   final MobileScannerController _controller = MobileScannerController(
     detectionSpeed: DetectionSpeed.noDuplicates,
@@ -70,7 +76,15 @@ class _ScanAddressPageState extends State<ScanAddressPage>
         continue;
       }
 
-      final address = _extractSolanaAddress(rawValue);
+      final configs = ref.read(chainConfigsProvider);
+      final chainId = widget.chainId ?? configs.first.id;
+      final config = findChain(configs, chainId);
+      if (config == null) continue;
+      final address = decodeRecipient(
+        rawValue,
+        config,
+        ref.read(chainAdapterProvider(chainId)).validateAddress,
+      );
       if (address == null) {
         continue;
       }
@@ -95,9 +109,19 @@ class _ScanAddressPageState extends State<ScanAddressPage>
       return;
     }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(context.l10n.scanNoSolanaAddress)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          widget.chainId == null
+              ? context.l10n.scanNoSolanaAddress
+              : chainText(
+                  context,
+                  'No valid address for the selected network was found in this QR code.',
+                  '二维码中没有所选网络的有效地址。',
+                ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -106,6 +130,15 @@ class _ScanAddressPageState extends State<ScanAddressPage>
       title: context.l10n.scanAddressTitle,
       child: Column(
         children: [
+          ChainNetworkLabel(
+            config:
+                findChain(
+                  ref.watch(chainConfigsProvider),
+                  widget.chainId ?? ref.watch(chainConfigsProvider).first.id,
+                ) ??
+                ref.watch(chainConfigsProvider).first,
+          ),
+          const SizedBox(height: 12),
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -160,39 +193,5 @@ class _ScanAddressPageState extends State<ScanAddressPage>
         ],
       ),
     );
-  }
-
-  String? _extractSolanaAddress(String rawValue) {
-    final trimmed = rawValue.trim();
-    if (Validators.isValidPublicAddress(trimmed)) {
-      return trimmed;
-    }
-
-    final uri = Uri.tryParse(trimmed);
-    if (uri != null) {
-      final candidates = <String>{
-        if (uri.host.isNotEmpty) uri.host,
-        if (uri.path.isNotEmpty) uri.path.replaceFirst('/', ''),
-        if (uri.scheme.toLowerCase() == 'solana' && uri.path.isNotEmpty)
-          uri.path.replaceFirst('/', ''),
-        if (uri.scheme.toLowerCase() == 'solana' && uri.host.isNotEmpty)
-          uri.host,
-      };
-
-      for (final candidate in candidates) {
-        if (candidate.isNotEmpty &&
-            Validators.isValidPublicAddress(candidate)) {
-          return candidate;
-        }
-      }
-    }
-
-    final match = RegExp(r'[1-9A-HJ-NP-Za-km-z]{32,44}').firstMatch(trimmed);
-    final fallback = match?.group(0);
-    if (fallback != null && Validators.isValidPublicAddress(fallback)) {
-      return fallback;
-    }
-
-    return null;
   }
 }

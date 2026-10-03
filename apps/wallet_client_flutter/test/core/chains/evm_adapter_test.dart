@@ -288,6 +288,117 @@ void main() {
   });
 
   test(
+    'USDC Max reserves maximum native fee and preserves 6/18 precision',
+    () async {
+      final rpc = FakeRpc()..balance += BigInt.from(123);
+      final adapter = adapterFor(rpc);
+      final amount = await adapter.maximumTransferAmount(
+        requestFor(adapter, asset: adapter.nativeAsset.withBalance(BigInt.one)),
+      );
+      final fee = await adapter.estimateFee(
+        requestFor(adapter, amount: amount),
+      );
+      final scale = BigInt.from(10).pow(12);
+      expect(amount, BigInt.from(99997540));
+      expect(amount * scale + fee.maxFee, lessThanOrEqualTo(rpc.balance));
+      expect(
+        (amount + BigInt.one) * scale + fee.maxFee,
+        greaterThan(rpc.balance),
+      );
+      expect(fee.estimatedFee, lessThan(fee.maxFee));
+      expect(rpc.calls, isNot(contains('eth_sendRawTransaction')));
+    },
+  );
+
+  test(
+    'native 18-decimal Max preserves balances beyond double precision',
+    () async {
+      final rpc = FakeRpc()..balance = (BigInt.one << 110) + BigInt.from(123);
+      final adapter = adapterFor(rpc);
+      final native = ChainAsset(
+        chainId: account.chainId,
+        symbol: 'USDC',
+        name: 'Native USDC',
+        decimals: 18,
+        rawBalance: BigInt.zero,
+        isFeeAsset: true,
+      );
+      final amount = await adapter.maximumTransferAmount(
+        requestFor(adapter, asset: native),
+      );
+      expect(amount, rpc.balance - BigInt.from(2460000000000000));
+    },
+  );
+
+  test(
+    'USDC Max requotes the actual amount when gas requirements rise',
+    () async {
+      final rpc = FakeRpc();
+      var estimates = 0;
+      rpc.handlers['eth_estimateGas'] = (_) =>
+          ++estimates == 1 ? '0xc350' : '0x186a0';
+      final adapter = adapterFor(rpc);
+      final amount = await adapter.maximumTransferAmount(requestFor(adapter));
+      expect(amount, BigInt.from(99995080));
+      expect(estimates, 3);
+      final last = rpc.parameters['eth_estimateGas']!.last.single as Map;
+      expect((last['data'] as String).endsWith(word(amount)), isTrue);
+    },
+  );
+
+  test(
+    'ERC20 Max uses fresh full token balance with separate native fee',
+    () async {
+      final rpc = FakeRpc();
+      final adapter = adapterFor(rpc);
+      final token = await adapter.importToken(recipient);
+      final amount = await adapter.maximumTransferAmount(
+        requestFor(adapter, asset: token.withBalance(BigInt.one)),
+      );
+      expect(amount, BigInt.from(5000000000));
+      final gasRequest =
+          rpc.parameters['eth_estimateGas']!.single.single as Map;
+      expect((gasRequest['data'] as String).endsWith(word(amount)), isTrue);
+      expect(gasRequest['value'], '0x0');
+      rpc.balance = BigInt.zero;
+      await expectLater(
+        adapter.maximumTransferAmount(requestFor(adapter, asset: token)),
+        throwsStateError,
+      );
+      expect(rpc.calls, isNot(contains('eth_sendRawTransaction')));
+    },
+  );
+
+  test('USDC Max rejects insufficient fee balance and wrong network', () async {
+    final rpc = FakeRpc()..balance = BigInt.from(10).pow(12);
+    final adapter = adapterFor(rpc);
+    await expectLater(
+      adapter.maximumTransferAmount(requestFor(adapter)),
+      throwsStateError,
+    );
+    rpc.balance = BigInt.from(100) * BigInt.from(10).pow(18);
+    rpc.wrongNetwork = true;
+    await expectLater(
+      adapter.maximumTransferAmount(requestFor(adapter)),
+      throwsA(isA<EvmNetworkMismatch>()),
+    );
+  });
+
+  test('USDC Max fails safely when fees never stabilize', () async {
+    final rpc = FakeRpc();
+    var estimates = 0;
+    rpc.handlers['eth_estimateGas'] = (_) =>
+        quantity(BigInt.from(50000 + ++estimates * 10000));
+    final adapter = adapterFor(rpc);
+    await expectLater(
+      adapter.maximumTransferAmount(requestFor(adapter)),
+      throwsStateError,
+    );
+    expect(estimates, 5);
+    expect(rpc.calls, isNot(contains('eth_sendRawTransaction')));
+  });
+
+  test(
     'typed EIP1559 envelope and hash match independent ethers vector',
     () async {
       final rpc = FakeRpc();

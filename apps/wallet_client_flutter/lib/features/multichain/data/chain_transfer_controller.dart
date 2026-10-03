@@ -27,6 +27,15 @@ class ChainTransferController {
   final Map<PreparedChainTransaction, DateTime> _reviews = Map.identity();
   final Set<String> _sending = {};
 
+  Future<BigInt> maximumAmount(ChainTransferRequest request) async {
+    await ensureCanSend(request.account);
+    final amount = await adapterFor(
+      request.account.chainId,
+    ).maximumTransferAmount(request);
+    await ensureCanSend(request.account);
+    return amount;
+  }
+
   Future<PreparedChainTransaction> prepare(ChainTransferRequest request) async {
     await ensureCanSend(request.account);
     final prepared = await adapterFor(

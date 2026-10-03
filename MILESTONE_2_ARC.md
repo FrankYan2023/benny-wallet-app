@@ -6,6 +6,10 @@ Repository: `FrankYan2023/benny-wallet-app`.
 App: `apps/wallet_client_flutter`.
 Checkout location is machine-specific; use the repository root. Do not depend on the original local worktree path.
 
+## 2026-10-03 Send交互统一更新
+
+两链发送统一沿用原Solana页面顺序：选币 → 填写地址/金额（扫码、Max）→ 确认 → 发送结果。Arc不再使用内嵌单页表单。共享展示组件、EVM最高费用预留、QR网络校验、原Solana保持范围和验证限制见 [Send对齐说明](docs/arc/SEND_UX_PARITY.md)；最新Android/API检查与完整测试结果见 [验证记录](docs/arc/VALIDATION.md)。服务端接口和钱包存储未改变。
+
 ## Documentation status and reading order
 
 This is the technical audit plus dated implementation history. The current entry point is

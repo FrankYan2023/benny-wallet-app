@@ -1,4 +1,5 @@
-import 'package:wallet_client_flutter/core/widgets/wallet_dropdown.dart';
+import 'package:design_system/design_system.dart';
+import 'package:go_router/go_router.dart';
 import 'package:wallet_client_flutter/features/send/presentation/pages/send_history_page.dart';
 import 'package:wallet_client_flutter/core/network/api_client.dart';
 import 'dart:async';
@@ -72,6 +73,8 @@ Future<void> show(
   fixture.FakeRpc? rpc,
   bool unsupported = false,
   bool arcUnavailable = false,
+  List<ChainAsset>? arcAssets,
+  bool withSendRouter = false,
   List<ChainActivity> activity = const [],
 }) async {
   tester.view.physicalSize = const Size(390, 844);
@@ -80,6 +83,49 @@ Future<void> show(
   addTearDown(tester.view.resetDevicePixelRatio);
   final adapter = fixture.adapterFor(rpc ?? fixture.FakeRpc());
   final store = MultichainStore(MemoryStore());
+  final router = withSendRouter
+      ? GoRouter(
+          initialLocation: '/test',
+          routes: [
+            GoRoute(
+              path: '/test',
+              builder: (_, _) => Scaffold(body: page),
+            ),
+            GoRoute(
+              path: NetworkSendPage.composeRoutePath,
+              builder: (_, route) => NetworkSendPage(
+                chainId: route.pathParameters['chainId']!,
+                assetId: route.uri.queryParameters['asset'],
+                recipientAddress: route.uri.queryParameters['recipient'],
+              ),
+            ),
+            GoRoute(
+              path: NetworkSendConfirmPage.routePath,
+              builder: (_, route) => NetworkSendConfirmPage(
+                transaction: route.extra as PreparedChainTransaction,
+              ),
+            ),
+          ],
+        )
+      : null;
+  if (router != null) addTearDown(router.dispose);
+  final app = router == null
+      ? MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light(),
+          locale: const Locale('en'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(body: page),
+        )
+      : MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light(),
+          locale: const Locale('en'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        );
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -114,7 +160,8 @@ Future<void> show(
         ).overrideWith((ref) async => solana),
         chainAssetsProvider(arcTestnetConfig.id).overrideWith((ref) async {
           if (arcUnavailable) throw StateError('Arc service unavailable');
-          return [adapter.nativeAsset.withBalance(BigInt.from(100000000))];
+          return arcAssets ??
+              [adapter.nativeAsset.withBalance(BigInt.from(100000000))];
         }),
         chainActivityProvider(
           arcTestnetConfig.id,
@@ -128,17 +175,7 @@ Future<void> show(
           ),
         ),
       ],
-      child: RepaintBoundary(
-        key: screenshotKey,
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.light(),
-          locale: const Locale('en'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(body: page),
-        ),
-      ),
+      child: RepaintBoundary(key: screenshotKey, child: app),
     ),
   );
   await tester.pumpAndSettle();
@@ -379,34 +416,98 @@ void main() {
     },
   );
   testWidgets(
-    'shared send selects Arc inline and clears its form on network switch',
+    'shared send lists spendable Arc assets and opens the selected asset compose route',
     (tester) async {
-      await show(tester, const SendPage());
+      final adapter = fixture.adapterFor(fixture.FakeRpc());
+      await show(
+        tester,
+        const SendPage(
+          chainId: 'arc-testnet',
+          recipientAddress: fixture.recipient,
+        ),
+        arcAssets: [
+          adapter.nativeAsset.withBalance(BigInt.from(100000000)),
+          ChainAsset(
+            chainId: arcTestnetConfig.id,
+            symbol: 'BENNY',
+            name: 'Benny',
+            decimals: 9,
+            contractAddress: '0x1111111111111111111111111111111111111111',
+            rawBalance: BigInt.zero,
+          ),
+        ],
+        withSendRouter: true,
+      );
       expect(find.text('Send on Arc Testnet'), findsNothing);
+      expect(find.byType(TokenRow), findsOneWidget);
+      expect(find.text('BENNY'), findsNothing);
+      expect(find.byType(TextField), findsNothing);
+      expect(find.text('Next'), findsNothing);
+      await screenshot(tester, 'arc-send-assets');
+      await tester.tap(find.byType(TokenRow));
+      await tester.pumpAndSettle();
+      expect(find.text('Send USDC'), findsOneWidget);
+      expect(find.text('Arc Testnet'), findsOneWidget);
+      expect(find.byType(ChainNetworkSelector), findsNothing);
+      expect(find.byType(TextField), findsNWidgets(2));
+      expect(find.textContaining('Solana'), findsNothing);
+      expect(
+        tester.widget<TextField>(find.byType(TextField).first).controller!.text,
+        fixture.recipient,
+      );
+      expect(find.byTooltip('Scan QR code'), findsOneWidget);
+      expect(find.text('MAX'), findsOneWidget);
+      expect(find.text('Next'), findsOneWidget);
+      expect(find.text('Estimate fee & review'), findsNothing);
+      await screenshot(tester, 'arc-send-compose');
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TokenRow), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'zero-balance Arc send has the same empty asset selection as Solana',
+    (tester) async {
+      final adapter = fixture.adapterFor(fixture.FakeRpc());
+      await show(
+        tester,
+        const SendPage(),
+        arcAssets: [adapter.nativeAsset.withBalance(BigInt.zero)],
+      );
+      expect(find.text('No assets available to send.'), findsOneWidget);
       await tester.tap(find.byType(ChainNetworkSelector));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Arc Testnet').last);
       await tester.pumpAndSettle();
-      expect(find.text('Estimate fee & review'), findsOneWidget);
-      await tester.enterText(
-        find.byType(TextFormField).first,
-        fixture.recipient,
-      );
+      expect(find.text('No assets available to send.'), findsOneWidget);
+      expect(find.byType(TokenRow), findsNothing);
+      expect(find.byType(TextField), findsNothing);
+      expect(find.text('Next'), findsNothing);
       await tester.tap(find.byType(ChainNetworkSelector));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Solana').last);
       await tester.pumpAndSettle();
-      expect(find.text('Estimate fee & review'), findsNothing);
-      await tester.tap(find.byType(ChainNetworkSelector));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Arc Testnet').last);
-      await tester.pumpAndSettle();
+      expect(find.text('No assets available to send.'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'missing selected Arc asset cannot silently compose another token',
+    (tester) async {
+      await show(
+        tester,
+        const NetworkSendPage(
+          chainId: 'arc-testnet',
+          assetId: 'arc-testnet:missing-token',
+        ),
+      );
+      expect(find.text('Asset not found.'), findsOneWidget);
+      expect(find.byType(TextField), findsNothing);
+      expect(find.text('Next'), findsNothing);
       expect(
-        tester
-            .widget<TextFormField>(find.byType(TextFormField).first)
-            .controller!
-            .text,
-        isEmpty,
+        find.textContaining(arcTestnetConfig.nativeTokenContract!),
+        findsNothing,
       );
       expect(tester.takeException(), isNull);
     },
@@ -458,43 +559,162 @@ void main() {
     },
   );
   testWidgets(
-    'send reviews exact USDC amount and fee before explicit signing',
+    'Arc compose rejects wrong addresses, nonpositive amounts and insufficient balance before estimation',
     (tester) async {
       final rpc = fixture.FakeRpc();
+      final adapter = fixture.adapterFor(rpc);
       await show(
         tester,
-        const NetworkSendPage(chainId: 'arc-testnet'),
+        NetworkSendPage(
+          chainId: 'arc-testnet',
+          assetId: adapter.nativeAsset.id,
+        ),
         rpc: rpc,
+        withSendRouter: true,
       );
-      await tester.tap(find.byType(WalletDropdown<String>));
+      await tester.enterText(find.byType(TextField).at(0), 'invalid-address');
+      await tester.enterText(find.byType(TextField).at(1), '1');
+      await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
-      await screenshot(tester, 'send-asset-menu-matched');
-      await tester.tap(find.text('USDC').last);
-      await tester.pumpAndSettle();
-      await tester.enterText(
-        find.byType(TextFormField).at(0),
-        fixture.recipient,
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(
+        find.text('Enter a valid address for this network.'),
+        findsOneWidget,
       );
-      await tester.enterText(find.byType(TextFormField).at(1), '1');
-      await tester.ensureVisible(find.text('Estimate fee & review'));
-      await tester.tap(find.text('Estimate fee & review'));
+      await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();
-      expect(find.text('Review transfer'), findsOneWidget);
+      await tester.enterText(find.byType(TextField).at(0), fixture.recipient);
+      for (final amount in ['0', '-1', 'invalid']) {
+        await tester.enterText(find.byType(TextField).at(1), amount);
+        await tester.tap(find.text('Next'));
+        await tester.pumpAndSettle();
+        expect(find.text('Enter a valid amount.'), findsOneWidget);
+        await tester.tap(find.text('Close'));
+        await tester.pumpAndSettle();
+      }
+      await tester.enterText(find.byType(TextField).at(1), '101');
+      await tester.tap(find.text('Next'));
+      await tester.pumpAndSettle();
+      expect(find.text('Insufficient balance.'), findsOneWidget);
+      expect(rpc.calls, isNot(contains('eth_estimateGas')));
+      expect(rpc.calls, isNot(contains('eth_sendRawTransaction')));
+      expect(find.text('Confirm send'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'Arc Next reviews exact amount and fee, Cancel preserves input, Send explicitly submits',
+    (tester) async {
+      final rpc = fixture.FakeRpc();
+      final adapter = fixture.adapterFor(rpc);
+      await show(
+        tester,
+        NetworkSendPage(
+          chainId: 'arc-testnet',
+          assetId: adapter.nativeAsset.id,
+        ),
+        rpc: rpc,
+        withSendRouter: true,
+      );
+      await tester.enterText(find.byType(TextField).at(0), fixture.recipient);
+      await tester.enterText(find.byType(TextField).at(1), '1');
+      await tester.ensureVisible(find.text('Next'));
+      await tester.tap(find.text('Next'));
+      await tester.pumpAndSettle();
+      expect(find.text('Confirm send'), findsOneWidget);
       expect(find.text('1 USDC'), findsOneWidget);
+      expect(find.text('Arc Testnet'), findsOneWidget);
+      expect(find.text(fixture.recipient), findsOneWidget);
+      expect(find.byType(TextField), findsNothing);
       expect(find.textContaining('ETH'), findsNothing);
       expect(rpc.calls, isNot(contains('eth_sendRawTransaction')));
       await screenshot(tester, 'arc-send-review');
-      await tester.ensureVisible(find.text('Confirm & send'));
-      await tester.tap(find.text('Confirm & send'));
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(find.text('Send USDC'), findsOneWidget);
+      expect(
+        tester.widget<TextField>(find.byType(TextField).at(0)).controller!.text,
+        fixture.recipient,
+      );
+      expect(
+        tester.widget<TextField>(find.byType(TextField).at(1)).controller!.text,
+        '1',
+      );
+      expect(rpc.calls, isNot(contains('eth_sendRawTransaction')));
+      await tester.tap(find.text('Next'));
+      await tester.pumpAndSettle();
+      expect(find.text('Confirm send'), findsOneWidget);
+      await tester.tap(find.text('Send'));
       await tester.pumpAndSettle();
       expect(
         rpc.calls.where((method) => method == 'eth_sendRawTransaction'),
         hasLength(1),
       );
-      expect(find.text('Transaction submitted'), findsOneWidget);
+      expect(find.text('Submitted'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
+  testWidgets('Arc submission blocks duplicate Send and back while busy', (
+    tester,
+  ) async {
+    final rpc = fixture.FakeRpc();
+    final adapter = fixture.adapterFor(rpc);
+    final broadcast = Completer<dynamic>();
+    rpc.handlers['eth_sendRawTransaction'] = (_) => broadcast.future;
+    await show(
+      tester,
+      NetworkSendPage(chainId: 'arc-testnet', assetId: adapter.nativeAsset.id),
+      rpc: rpc,
+      withSendRouter: true,
+    );
+    await tester.enterText(find.byType(TextField).at(0), fixture.recipient);
+    await tester.enterText(find.byType(TextField).at(1), '1');
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+    final sendCallback = tester
+        .widget<FilledButton>(
+          find.ancestor(
+            of: find.text('Send'),
+            matching: find.byType(FilledButton),
+          ),
+        )
+        .onPressed!;
+    await tester.tap(find.text('Send'));
+    await tester.pump(const Duration(milliseconds: 100));
+    // A second queued tap can hold the callback from the preceding frame.
+    // It must not reuse the single reviewed transaction while sending.
+    sendCallback();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('Submitting...'), findsOneWidget);
+    expect(find.text('Send'), findsNothing);
+    expect(
+      rpc.calls.where((method) => method == 'eth_sendRawTransaction'),
+      hasLength(1),
+    );
+    expect(
+      tester
+          .widgetList<PopScope>(find.byType(PopScope))
+          .any((scope) => !scope.canPop),
+      isTrue,
+    );
+    final buttons = tester.widgetList<FilledButton>(find.byType(FilledButton));
+    expect(buttons.every((button) => button.onPressed == null), isTrue);
+    await tester.binding.handlePopRoute();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('Send USDC'), findsNothing);
+    expect(
+      rpc.calls.where((method) => method == 'eth_sendRawTransaction'),
+      hasLength(1),
+    );
+    broadcast.complete(fixture.expectedHash);
+    await tester.pumpAndSettle();
+    expect(find.text('Submitted'), findsOneWidget);
+    expect(
+      rpc.calls.where((method) => method == 'eth_sendRawTransaction'),
+      hasLength(1),
+    );
+    expect(tester.takeException(), isNull);
+  });
   testWidgets('child mode cannot compose or confirm a transfer', (
     tester,
   ) async {
@@ -503,8 +723,9 @@ void main() {
       const NetworkSendPage(chainId: 'arc-testnet'),
       state: unlocked.copyWith(childModeEnabled: true),
     );
-    expect(find.byType(TextFormField), findsNothing);
-    expect(find.text('Confirm & send'), findsNothing);
+    expect(find.byType(TextField), findsNothing);
+    expect(find.text('Next'), findsNothing);
+    expect(find.text('Confirm send'), findsNothing);
   });
   testWidgets('locked session cannot compose or confirm a transfer', (
     tester,
@@ -514,7 +735,8 @@ void main() {
       const NetworkSendPage(chainId: 'arc-testnet'),
       state: unlocked.copyWith(status: WalletStatus.locked),
     );
-    expect(find.byType(TextFormField), findsNothing);
-    expect(find.text('Confirm & send'), findsNothing);
+    expect(find.byType(TextField), findsNothing);
+    expect(find.text('Next'), findsNothing);
+    expect(find.text('Confirm send'), findsNothing);
   });
 }

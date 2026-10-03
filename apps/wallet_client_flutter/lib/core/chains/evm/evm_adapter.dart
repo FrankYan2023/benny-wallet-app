@@ -319,6 +319,14 @@ class EvmAdapter extends ChainAdapter {
 
   @override
   Future<ChainFeeEstimate> estimateFee(ChainTransferRequest request) async {
+    final estimate = await _quoteFee(request);
+    await _checkFunds(request, estimate);
+    return estimate;
+  }
+
+  /// Gas estimation is shared by normal fee review and Max. Max needs a quote
+  /// before it can reserve the fee; normal transfers always check funds below.
+  Future<ChainFeeEstimate> _quoteFee(ChainTransferRequest request) async {
     final transfer = _transfer(request);
     await rpc.verifyNetwork();
     final floor = BigInt.from(config.minimumGasPrice);
@@ -381,8 +389,61 @@ class EvmAdapter extends ChainAdapter {
       maxFee: gas * maxFee,
       estimatedFee: rawGas * (base + tip),
     );
-    await _checkFunds(request, estimate);
     return estimate;
+  }
+
+  @override
+  Future<BigInt> maximumTransferAmount(ChainTransferRequest request) async {
+    _checkRequest(request);
+    final balance = await getBalance(request.account, request.asset);
+    if (balance <= BigInt.zero) {
+      throw StateError('Insufficient ${request.asset.symbol} balance.');
+    }
+    ChainTransferRequest withAmount(BigInt amount) => ChainTransferRequest(
+      account: request.account,
+      asset: request.asset,
+      to: request.to,
+      amount: amount,
+    );
+    if (!_isNativeAlias(request.asset)) {
+      // A custom token can spend its full balance, but native funds must still
+      // cover the maximum fee for that exact ERC-20 transfer.
+      await estimateFee(withAmount(balance));
+      return balance;
+    }
+
+    final scale = BigInt.from(
+      10,
+    ).pow(config.feeDecimals - request.asset.decimals);
+    var reservedFee = (await _quoteFee(withAmount(BigInt.one))).maxFee;
+    for (var attempt = 0; attempt < 4; attempt++) {
+      // Keep fee dust in native precision (e.g. 18 decimals), and round the
+      // spendable amount down only at the selected asset's precision (e.g. 6).
+      final nativeBalance = await getNativeBalance(request.account);
+      if (nativeBalance <= reservedFee) {
+        throw StateError(
+          'Insufficient ${config.feeSymbol} for the amount and network fee.',
+        );
+      }
+      final candidate = (nativeBalance - reservedFee) ~/ scale;
+      if (candidate <= BigInt.zero) {
+        throw StateError(
+          'Insufficient ${config.feeSymbol} after reserving the network fee.',
+        );
+      }
+      final exactRequest = withAmount(candidate);
+      final exactFee = await _quoteFee(exactRequest);
+      if (exactFee.maxFee > reservedFee) {
+        // ERC-20 transfer calldata and changing fee rates can make the real
+        // amount cost more than the initial minimum-unit probe. Recalculate;
+        // never fill an amount using the lower earlier fee.
+        reservedFee = exactFee.maxFee;
+        continue;
+      }
+      await _checkFunds(exactRequest, exactFee);
+      return candidate;
+    }
+    throw StateError('Network fee changed. Try Max again.');
   }
 
   Future<void> _checkFunds(

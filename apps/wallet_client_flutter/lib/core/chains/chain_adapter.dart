@@ -13,6 +13,11 @@ abstract class ChainAdapter {
   });
   Future<BigInt> getBalance(ChainAccount account, ChainAsset asset);
   Future<ChainFeeEstimate> estimateFee(ChainTransferRequest request);
+
+  /// Returns an exact spendable amount after network-specific fee reservation.
+  /// The caller must still prepare and review the final transfer before signing.
+  Future<BigInt> maximumTransferAmount(ChainTransferRequest request) async =>
+      throw UnsupportedError('Maximum transfer amount is unavailable.');
   Future<PreparedChainTransaction> buildTransaction(
     ChainTransferRequest request, {
     ChainFeeEstimate? fee,

@@ -35,7 +35,7 @@ import 'package:wallet_client_flutter/features/settings/domain/app_settings.dart
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   testWidgets(
-    'Android mainnet backend contract fixtures, PIN, receive, send validation and token sync',
+    'Android mainnet backend contract fixtures, PIN, receive, empty send selection and token sync',
     (tester) async {
       expect(
         const bool.fromEnvironment('BENNY_EMULATOR_QA'),
@@ -268,30 +268,17 @@ void main() {
       expect(find.text('Arc'), findsWidgets);
       await waitFor(
         tester,
-        find.text('Estimate fee & review'),
+        find.text('No assets available to send.'),
         timeout: const Duration(seconds: 90),
       );
-      await tester.enterText(
-        find.byType(TextFormField).at(0),
-        'invalid-address',
-      );
-      await tester.enterText(find.byType(TextFormField).at(1), '0');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      await tap(tester, find.text('Estimate fee & review'));
-      await waitFor(
-        tester,
-        find.text('Enter a valid address for this network.'),
-      );
-      expect(find.text('Enter an amount greater than zero.'), findsOneWidget);
-      await tester.enterText(
-        find.byType(TextFormField).at(0),
-        '0x000000000000000000000000000000000000dEaD',
-      );
-      await tester.enterText(find.byType(TextFormField).at(1), '1');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      await tap(tester, find.text('Estimate fee & review'));
-      await waitFor(tester, find.text('Insufficient asset balance.'));
-      expect(find.text('Confirm & send'), findsNothing);
+      expect(find.byType(TextField), findsNothing);
+      expect(find.text('Next'), findsNothing);
+      await tap(tester, find.byType(ChainNetworkSelector));
+      await tap(tester, find.text('Solana').last);
+      await waitFor(tester, find.text('No assets available to send.'));
+      await tap(tester, find.byType(ChainNetworkSelector));
+      await tap(tester, find.text('Arc').last);
+      await waitFor(tester, find.text('No assets available to send.'));
       await back(tester);
       await waitFor(tester, find.byTooltip('Import token'));
       await tap(tester, find.byTooltip('Import token'));
@@ -307,7 +294,7 @@ void main() {
       await waitFor(tester, find.text('Token imported'));
       await waitFor(tester, find.textContaining('0 USDC'));
       expect(find.textContaining('0 USDC'), findsOneWidget);
-      expect(find.text('Confirm & send'), findsNothing);
+      expect(find.text('Confirm send'), findsNothing);
       expect(
         requests,
         containsAll([

@@ -17,6 +17,7 @@ import '../../../../l10n/l10n.dart';
 import '../../../multichain/presentation/chain_widgets.dart';
 import '../../../multichain/presentation/portfolio_network_widgets.dart';
 import '../../../multichain/presentation/network_page.dart';
+import '../../../multichain/presentation/network_send_page.dart';
 import '../../../multichain/providers/multichain_providers.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../portfolio/domain/entities/portfolio_view_data.dart';
@@ -115,7 +116,10 @@ class AssetDetailPage extends ConsumerWidget {
                       primaryLabel: l10n.portfolioReceive,
                       onPrimaryAction: receive,
                       onSend: () => context.push(
-                        walletSendPath(config.id, assetId: asset.id),
+                        NetworkSendPage.composePathFor(
+                          config.id,
+                          assetId: asset.id,
+                        ),
                       ),
                       onCopy: () => _copyMint(
                         context,

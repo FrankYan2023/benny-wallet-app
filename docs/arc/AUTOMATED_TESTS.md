@@ -1,5 +1,251 @@
 # 现有自动化测试目录
 
+## 当前快照：2026-10-03 发送交互对齐
+
+提取自 `a9c9fb3` 加本轮 Send 交互改动的工作树；最终提交号见 [CHANGELOG](CHANGELOG.md) / [VALIDATION](VALIDATION.md)。本节名称逐个来自当前源文件的 `test` / `testWidgets` 注册，路径相对仓库根；注册用例、测试计划 ID、assert 数量和 runner 总数各自独立。旧快照保留在本文末尾，不将旧通过结果覆盖为本轮结果。
+
+当前 `test/` 注册 **109 项**；本轮新增 **15 项**：EVM Max 6 项、控制器 Max 权限 2 项、发送组件 4 项、QR 解析 3 项。另有设备集成脚本 3 个，每个注册 1 项，单独执行，不计入109项。
+
+实际执行结果（2026-10-03）：
+
+- 发送/多链组件：18项通过；EVM + Solana adapter + transfer controller：38项通过；QR解析：3项通过。
+- 完整 `flutter test --no-pub`：**108通过、1失败**。失败为既有 `localization coverage presentation pages do not contain unlocalized visible literals`，指出未改动的 Swap 提示字面量 `ARC Swap coming soon`；当前不能宣称全量套件通过。
+- `flutter analyze --no-pub lib test integration_test`：通过。全项目分析另报75项，位于忽略的 `build/ios/SourcePackages` 第三方示例缓存；记录范围不同，不将全项目结果写成通过。
+- Android普通生产API调试热重启成功（7879ms）；随后专用模拟器生产主网5042无资金集成测试通过（1项testWidgets + tearDownAll，runner +2，105秒），API为`https://api.gobennyapp.com`，无fixture/直接RPC替代。恢复普通main.dart构建11.3秒、安装5.2秒，调试连接保留。本轮未重跑iOS构建、真机、实际发送/Swap或资金测试。
+
+发送流程、用例分工和待验收边界见 [SEND_UX_PARITY](SEND_UX_PARITY.md)。执行方法见 [DEVELOPMENT](DEVELOPMENT.md)。
+
+### `test/core/chains/chain_backend_client_test.dart`（8项）
+
+[源文件](../../apps/wallet_client_flutter/test/core/chains/chain_backend_client_test.dart)
+
+- mainnet is default and has no testnet gas-floor assumption
+- authentication proof rejects arbitrary signing, changed owner, network and expiry
+- backend uses only API host, auth header and expected chain; verifies chain before reads
+- wrong backend network prevents broadcast
+- ambiguous send is attempted once and never fails over
+- wallet switch while awaiting authentication prevents requests
+- asset decoding retains exact balance and optional quote
+- history keeps distinct logs but replaces duplicate transaction summary
+
+### `test/core/chains/evm_adapter_test.dart`（23项）
+
+[源文件](../../apps/wallet_client_flutter/test/core/chains/evm_adapter_test.dart)
+
+- BIP44 derivation matches independent Ethereum vector
+- EVM address rejects bad EIP55 mixed case, zero and missing prefix
+- native/ERC20 USDC aliases deduplicate and preserve fee dust separately
+- custom ERC20 metadata, exact balance and ABI transfer encoding
+- invalid metadata decimals, malformed ABI and non-contract import fail
+- fee estimation applies Arc floor and reserves combined USDC spend
+- custom token needs both token balance and USDC fee balance
+- USDC Max reserves maximum native fee and preserves 6/18 precision
+- native 18-decimal Max preserves balances beyond double precision
+- USDC Max requotes the actual amount when gas requirements rise
+- ERC20 Max uses fresh full token balance with separate native fee
+- USDC Max rejects insufficient fee balance and wrong network
+- USDC Max fails safely when fees never stabilize
+- typed EIP1559 envelope and hash match independent ethers vector
+- network mismatch, wrong root mnemonic, stale nonce prevent signing
+- altered reviewed amount or signed envelope cannot broadcast
+- concurrent duplicate broadcast and ambiguous response never resubmit
+- Arc receipt pending, success and reverted failure are distinguished
+- other EVM networks await finalized block rather than Arc finality
+- bounded history deduplicates incoming/outgoing logs and excludes USDC ERC20 alias
+- tracked unknown submissions never leak to a different root wallet
+- EIP191 and EIP712 match independent ethers signatures
+- future signing intent decodes transfers and unlimited approvals, blocks blind review
+
+### `test/core/chains/evm_rpc_test.dart`（4项）
+
+[源文件](../../apps/wallet_client_flutter/test/core/chains/evm_rpc_test.dart)
+
+- wrong chain ID fails closed without reading or broadcasting
+- transport failure falls back to another verified endpoint
+- broadcast response loss is not retried or echoed in error text
+- RPC response must match the request id
+
+### `test/core/chains/recipient_decoder_test.dart`（3项）
+
+[源文件](../../apps/wallet_client_flutter/test/core/chains/recipient_decoder_test.dart)
+
+- EVM QR accepts only recipient and matching explicit network
+- EVM QR rejects token-transfer targets and arbitrary embedded addresses
+- existing Solana raw and payment QR extraction remains compatible
+
+### `test/core/chains/solana_adapter_test.dart`（8项）
+
+[源文件](../../apps/wallet_client_flutter/test/core/chains/solana_adapter_test.dart)
+
+- validates base58 addresses and rejects EVM addresses
+- aggregates token accounts using exact base units
+- fee estimate retains exact Sender budget and destination
+- native send reserves network fee and rent before building
+- external custody does not invoke mnemonic reader
+- signs the reviewed transfer and preserves Sender submission metadata
+- does not sign a prepared payload attached to a changed request
+- cross-network and negative requests are rejected before RPC
+
+### `test/core/constants/app_constants_test.dart`（1项）
+
+[源文件](../../apps/wallet_client_flutter/test/core/constants/app_constants_test.dart)
+
+- default API configuration uses the production backend
+
+### `test/core/network/api_client_test.dart`（5项）
+
+[源文件](../../apps/wallet_client_flutter/test/core/network/api_client_test.dart)
+
+- maps connection timeout errors to a friendly message
+- uses endpoint fallback text for server errors
+- retries read requests against a fallback backend
+- maps connection timeout errors to a friendly message
+- retries auth requests against a fallback backend
+
+### `test/core/utils/amount_parser_test.dart`（7项）
+
+[源文件](../../apps/wallet_client_flutter/test/core/utils/amount_parser_test.dart)
+
+- accepts dot decimal input
+- accepts comma decimal input from localized keyboards
+- accepts grouped pasted values with dot decimals
+- accepts grouped pasted values with comma decimals
+- rejects invalid input
+- converts decimal input to raw units without rounding up
+- formats raw units with full token precision
+
+### `test/features/auth/wallet_storage_regression_test.dart`（4项）
+
+[源文件](../../apps/wallet_client_flutter/test/features/auth/wallet_storage_regression_test.dart)
+
+- pre-existing encrypted mnemonic record decrypts without rewriting storage
+- persisted account derivation remains attached to its ciphertext
+- external custody cannot expose its encrypted PIN marker as mnemonic
+- legacy standard and imported Solana addresses match independent SLIP-0010 vectors
+
+### `test/features/multichain/chain_transfer_controller_test.dart`（7项）
+
+[源文件](../../apps/wallet_client_flutter/test/features/multichain/chain_transfer_controller_test.dart)
+
+- broadcast response loss retains exact transfer and known hash before submission
+- locking after review prevents any signing
+- locked session rejects Max before any network calculation
+- locking during Max prevents returning a stale-wallet amount
+- locking during signing prevents broadcast
+- parallel confirmations serialize account signing and block duplicates
+- fabricated unreviewed payload is rejected
+
+### `test/features/multichain/multichain_store_test.dart`（4项）
+
+[源文件](../../apps/wallet_client_flutter/test/features/multichain/multichain_store_test.dart)
+
+- concurrent imports preserve both tokens and never rewrite old wallet data
+- token lists are scoped to network and address
+- Solana mint IDs remain case-sensitive
+- base units round-trip at large amounts without floating-point loss
+
+### `test/features/multichain/portfolio_value_test.dart`（3项）
+
+[源文件](../../apps/wallet_client_flutter/test/features/multichain/portfolio_value_test.dart)
+
+- mainnet valuation adds priced holdings and marks unknown tokens incomplete
+- testnet is excluded even if an upstream supplies a fiat quote
+- a backend outage is unavailable, not a known zero balance
+
+### `test/features/multichain/widgets_test.dart`（18项）
+
+[源文件](../../apps/wallet_client_flutter/test/features/multichain/widgets_test.dart)
+
+- receive history preserves Solana and routes other networks correctly
+- child mode activity has network selection and no transfer actions
+- legacy send history shows Solana in list and detail
+- activity retains its network in list and detail while another network is selected
+- unknown historical network keeps its identity instead of using selected network
+- home defaults to both networks and filters shared asset rows
+- Arc outage does not hide primary assets or prevent network selection
+- unsupported Arc custody does not block original Solana receive
+- shared send lists spendable Arc assets and opens the selected asset compose route
+- zero-balance Arc send has the same empty asset selection as Solana
+- missing selected Arc asset cannot silently compose another token
+- receive switches QR/address with explicit network and no stale Solana address
+- unsupported custody shows error instead of another networks address
+- Arc compose rejects wrong addresses, nonpositive amounts and insufficient balance before estimation
+- Arc Next reviews exact amount and fee, Cancel preserves input, Send explicitly submits
+- Arc submission blocks duplicate Send and back while busy
+- child mode cannot compose or confirm a transfer
+- locked session cannot compose or confirm a transfer
+
+### `test/features/notifications/chain_notification_test.dart`（3项）
+
+[源文件](../../apps/wallet_client_flutter/test/features/notifications/chain_notification_test.dart)
+
+- concurrent notification arrivals cannot overwrite each other
+- network and root survive serialization; old Solana messages still parse
+- retried FCM event deduplicates and preserves read state and deletion
+
+### `test/features/settings/app_settings_repository_test.dart`（1项）
+
+[源文件](../../apps/wallet_client_flutter/test/features/settings/app_settings_repository_test.dart)
+
+- clearAll preserves the selected language
+
+### `test/features/swap/solana_swap_scope_test.dart`（3项）
+
+[源文件](../../apps/wallet_client_flutter/test/features/swap/solana_swap_scope_test.dart)
+
+- Solana swap excludes EVM holdings, catalog and search results
+- EVM pairs cannot reach Solana quote or build endpoints
+- Arc swap notice is acknowledged once across page recreation
+
+### `test/l10n/localization_coverage_test.dart`（7项）
+
+[源文件](../../apps/wallet_client_flutter/test/l10n/localization_coverage_test.dart)
+
+- target locales have every template message key
+- supported locales include every language option
+- language picker order is stable
+- language picker options use native language names
+- Android and iOS native localization resources exist
+- presentation pages do not contain unlocalized visible literals
+- used AppLocalizations keys exist in target locale ARB files
+
+### `integration_test/android_qa/android_qa_wallet_flow_test.dart`（1项）
+
+[源文件](../../apps/wallet_client_flutter/integration_test/android_qa/android_qa_wallet_flow_test.dart)
+
+执行范围：独立、有资金发送/Swap副作用的QA配置；本轮未运行。
+
+- QA full import wallet, history screens, send BYC, and swap
+
+### `integration_test/arc/arc_backend_ui_test.dart`（1项）
+
+[源文件](../../apps/wallet_client_flutter/integration_test/arc/arc_backend_ui_test.dart)
+
+执行范围：真实Android存储/PIN + HTTP边界fixtures；此次脚本已同步空余额Send列表和禁用伪发送预期，但本轮未运行。不是线上主网联调。
+
+- Android mainnet backend contract fixtures, PIN, receive, empty send selection and token sync
+
+### `integration_test/arc/arc_emulator_smoke_test.dart`（1项）
+
+[源文件](../../apps/wallet_client_flutter/integration_test/arc/arc_emulator_smoke_test.dart)
+
+执行范围：真实存储/PIN + 生产Arc主网5042接口；本轮2026-10-03执行105秒通过（1项testWidgets + tearDownAll，runner +2）。覆盖两链切换、收款地址/QR/复制/历史、新Send两链零余额空列表及metadata导入去重；无资金、无签名广播。构建21.1秒、安装7.5秒。此前2026-09-28通过记录保持为历史。
+
+- Android real storage, PIN, Arc receive, empty send selection and token import
+
+## 本轮覆盖边界
+
+- 单元/组件测试采用公开、无资金fixture和mock，不证明生产数据库、原生安全硬件、真实广播或余额结算正确。
+- Send的Arc无余额场景应像原Solana显示空列表，不为联调制造可发送资金。
+- Max、QR解析和确认页面均不签名；只有确认页显式Send才进入已有签名/广播边界。
+- 后台源代码和服务端用例位于 companion 仓库；本次客户端改动不修改其路由或数据库。服务端清单见 [后台测试计划](https://github.com/FrankYan2023/benny-wallet/blob/main/docs/ARC_TEST_PLAN.md)。
+- [tool/arc_read_smoke.dart](../../apps/wallet_client_flutter/tool/arc_read_smoke.dart) 是只读独立脚本，不属于flutter test；不签名/广播。
+- 新注册名称代表存在自动化，实际是否通过以验证记录及运行范围为准；iOS、受控资金和真机仍按 [TEST_PLAN](TEST_PLAN.md) 执行。
+
+## 历史快照与验证说明（保留原记录）
+
+以下是原目录内容，日期、版本、计数和状态均保持原历史含义；当前名称/注册数应取上方2026-10-03快照。新增目录未将任何历史未测项目改为通过。
+
 提取版本：`67da717`；2026-09-25。路径相对仓库根。下列名称来自实际 test/testWidgets 注册；不是额外新建的测试，也不是后台服务端测试。完整 test/ 套件本次运行72项通过；集成脚本单独运行，不计入这72项。逐行断言范围请阅读源文件。
 
 执行方式和实际结果分别见 [DEVELOPMENT.md](DEVELOPMENT.md) / [VALIDATION.md](VALIDATION.md)。某些注册使用表驱动/组合fixture，不要把注册数、assert数、用例计划数与runner总数混为一谈。
