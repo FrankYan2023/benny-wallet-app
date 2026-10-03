@@ -1,6 +1,48 @@
 # 现有自动化测试目录
 
-## 当前快照：2026-10-03 发送交互对齐
+## 当前快照：2026-10-03 Arc加载与流畅度优化
+
+客户端基线`66fc383`加本轮优化，`test/`注册**125项**（上一快照109项 + 新增16项），没有删除旧测试；设备集成脚本3项仍单独执行。完整套件实际结果**124通过、1失败**，唯一失败仍为既有Swap提示本地化检查。源码/测试/集成入口范围静态分析通过；本轮未重跑设备集成脚本/iOS/资金测试。后台28项测试通过，其中新增5项详见[后台性能记录](https://github.com/FrankYan2023/benny-wallet/blob/main/docs/ARC_PERFORMANCE_2026_10_03.md)。执行记录见 [VALIDATION](VALIDATION.md)。
+
+以下列出16项新增注册；其余109项名称保留在上一快照中。发送组件已有2项仅调整等待真实isolate完成的方式，广播次数/忙碌断言保持。
+
+### `test/core/chains/evm_key_service_test.dart`（新增5项）
+
+[源文件](../../apps/wallet_client_flutter/test/core/chains/evm_key_service_test.dart)
+
+- background EVM derivation preserves address and rejects invalid roots
+- background personal signing matches independent ethers vector
+- background personal signing rejects a mismatched account
+- background personal signing snapshots mutable message bytes
+- background EVM derivation keeps the main event loop responsive
+
+### `test/core/chains/solana_message_signer_test.dart`（新增2项）
+
+[源文件](../../apps/wallet_client_flutter/test/core/chains/solana_message_signer_test.dart)
+
+- background Solana authentication preserves legacy owner and main event loop
+- background Solana authentication rejects another owner or derivation
+
+### `test/features/multichain/loading_test.dart`（新增5项）
+
+[源文件](../../apps/wallet_client_flutter/test/features/multichain/loading_test.dart)
+
+- public EVM address is derived once per unlock, not once per caller
+- portfolio skips redundant tokens read and survives a brief network switch
+- local-only custom tokens still synchronize and appear in portfolio
+- an owner change hides prior assets even if the new request fails
+- refresh retains rows and shows stale failure until retry succeeds
+
+### `test/core/chains/chain_backend_client_test.dart`（新增4项，现共12项）
+
+[源文件](../../apps/wallet_client_flutter/test/core/chains/chain_backend_client_test.dart)
+
+- transient read retries once with fresh headers and identical RPC payload
+- reads honor short Retry-After and never retry long throttles or permanent errors
+- token import and account verification writes are never retried
+- a wallet switch during retry delay stops before the second request
+
+## 上一快照：2026-10-03 发送交互对齐
 
 提取自 `a9c9fb3` 加本轮 Send 交互改动的工作树；最终提交号见 [CHANGELOG](CHANGELOG.md) / [VALIDATION](VALIDATION.md)。本节名称逐个来自当前源文件的 `test` / `testWidgets` 注册，路径相对仓库根；注册用例、测试计划 ID、assert 数量和 runner 总数各自独立。旧快照保留在本文末尾，不将旧通过结果覆盖为本轮结果。
 

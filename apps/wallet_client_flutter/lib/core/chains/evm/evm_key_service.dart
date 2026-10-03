@@ -1,6 +1,9 @@
+import 'dart:isolate';
 import 'dart:typed_data';
+
 import 'package:bip32/bip32.dart' as bip32;
 import 'package:bip39/bip39.dart' as bip39;
+import 'package:eth_sig_util/eth_sig_util.dart';
 import 'package:web3dart/web3dart.dart';
 
 /// Independent secp256k1 account; never accepts a Solana private key as a root.
@@ -27,6 +30,79 @@ class EvmKeyService {
     final key = derivePrivateKey(mnemonic);
     try {
       return EthPrivateKey(key).address.hexEip55;
+    } finally {
+      key.fillRange(0, key.length, 0);
+    }
+  }
+
+  /// Only the public address crosses back from the short-lived isolate.
+  static Future<String> deriveAddressAsync(String mnemonic) =>
+      Isolate.run(() => deriveAddress(mnemonic));
+
+  /// Derive and sign in one isolate; no derived key enters the UI isolate.
+  static Future<Uint8List> signPersonalMessageAsync(
+    String mnemonic,
+    Uint8List message, {
+    String? expectedAddress,
+  }) {
+    final payload = Uint8List.fromList(message);
+    return Isolate.run(
+      () => _withKey(
+        mnemonic,
+        expectedAddress,
+        (key) => EthPrivateKey(key).signPersonalMessageToUint8List(payload),
+      ),
+    );
+  }
+
+  static Future<Uint8List> signTransactionAsync(
+    String mnemonic,
+    Transaction transaction, {
+    required int chainId,
+    required String expectedAddress,
+  }) => Isolate.run(
+    () => _withKey(
+      mnemonic,
+      expectedAddress,
+      // web3dart 2.x returns signed RLP without EIP-2718's type byte.
+      (key) => prependTransactionType(
+        2,
+        signTransactionRaw(transaction, EthPrivateKey(key), chainId: chainId),
+      ),
+    ),
+  );
+
+  static Future<String> signTypedDataAsync(
+    String mnemonic,
+    String jsonData, {
+    required String expectedAddress,
+  }) => Isolate.run(
+    () => _withKey(
+      mnemonic,
+      expectedAddress,
+      (key) => EthSigUtil.signTypedData(
+        privateKeyInBytes: key,
+        jsonData: jsonData,
+        version: TypedDataVersion.V4,
+      ),
+    ),
+  );
+
+  static T _withKey<T>(
+    String mnemonic,
+    String? expectedAddress,
+    T Function(Uint8List key) operation,
+  ) {
+    final key = derivePrivateKey(mnemonic);
+    try {
+      if (expectedAddress != null &&
+          EthPrivateKey(key).address.hex.toLowerCase() !=
+              expectedAddress.toLowerCase()) {
+        throw StateError(
+          'Recovery phrase does not match the selected EVM account.',
+        );
+      }
+      return operation(key);
     } finally {
       key.fillRange(0, key.length, 0);
     }

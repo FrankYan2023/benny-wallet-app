@@ -242,7 +242,7 @@ class _SendPageState extends ConsumerState<SendPage> {
             onRetry: () => ref.invalidate(chainAccountProvider(_chainId)),
           ),
           data: (account) => ref
-              .watch(chainAssetsProvider(_chainId))
+              .watch(chainAssetsDisplayProvider(_chainId))
               .when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, _) => ChainErrorCard(

@@ -1,5 +1,11 @@
 # Arc 完整修改记录
 
+## 2026-10-03 · Arc 首次加载、切链与失败恢复优化
+
+把地址派生、EVM全部签名与本地Solana后台认证计算移出页面线程；只缓存本次解锁的公开EVM地址，以root/token/custody/路径隔离，减少无关WalletState重建。网络资产短时保留，离开暂停轮询，刷新保留旧数据并明示失败/总额不完整，禁止跨会话旧余额显示。普通后台portfolio省掉串行tokens请求，保留本地缺失custom token同步；只读短暂失败最多重试一次，写请求不重试。
+
+后台提交4e4fe7e：余额与价格并行、4个RPC worker、1.2s价格预算/15s失败backoff、仅in-flight chainId验证共享、去重binding读取；没有SQL/config/indexer改动。客户端基线66fc383，本轮新增16项自动测试，全量124通过/1个既有Swap本地化失败，源范围分析通过；后台28项和build通过。Seeker普通debug13.2s构建/5.5s安装/120ms同步成功。完整文件、边界与真机待测见 [PERFORMANCE](PERFORMANCE.md)、[VALIDATION](VALIDATION.md)，测试注册目录已刷新。
+
 ## 2026-10-03 · Seeker 真机调试与生产复查
 
 Seeker Android16独立新装普通full debug，保留旧Lite，生产API/Arc默认主网5042；构建/安装/欢迎页/调试连接通过。SeekerVault默认开启但未验收，持有人私有无资金钱包/PIN初始化待完成。运行基线a2bc494，无应用源码/后台/数据库改动。

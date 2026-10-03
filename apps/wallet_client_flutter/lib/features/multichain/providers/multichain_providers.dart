@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:web3dart/web3dart.dart';
 import 'package:web3dart/crypto.dart';
 import '../../../core/chains/chain_backend_client.dart';
 import '../../../core/constants/app_constants.dart';
@@ -38,6 +37,90 @@ final multichainStoreProvider = Provider<MultichainStore>(
   (ref) => MultichainStore(ref.read(secureStoreProvider)),
 );
 
+/// Only changes that invalidate chain ownership restart network work. Labels,
+/// notification settings and child-list changes do not recreate RPC clients.
+typedef ChainWalletSession = ({
+  bool unlocked,
+  String? owner,
+  String? token,
+  WalletCustody custody,
+  int? accountIndex,
+  int? changeIndex,
+});
+
+ChainWalletSession _sessionOf(WalletControllerState state) => (
+  unlocked: state.isUnlocked,
+  owner: state.publicKey,
+  token: state.mnemonicTokenId,
+  custody: state.custody,
+  accountIndex: state.derivation.accountIndex,
+  changeIndex: state.derivation.changeIndex,
+);
+
+final chainWalletSessionProvider = Provider<ChainWalletSession>(
+  (ref) => ref.watch(walletControllerProvider.select(_sessionOf)),
+);
+
+void _guardSession(Ref ref, ChainWalletSession expected) {
+  final current = _sessionOf(ref.read(walletControllerProvider));
+  if (!current.unlocked || current != expected) {
+    throw StateError('Wallet session changed. Unlock again.');
+  }
+}
+
+/// Public address only, retained for this unlock session. No root/key cache.
+final evmAddressProvider = FutureProvider<String>((ref) async {
+  final session = ref.watch(chainWalletSessionProvider);
+  final state = ref.read(walletControllerProvider);
+  final mnemonic = _readMnemonic(ref);
+  final original = await ref
+      .read(solanaWalletServiceProvider)
+      .deriveAddress(mnemonic, derivation: state.derivation);
+  _guardSession(ref, session);
+  if (original != session.owner) {
+    throw StateError('Recovery phrase does not match the selected wallet.');
+  }
+  final address = await EvmKeyService.deriveAddressAsync(mnemonic);
+  _guardSession(ref, session);
+  return address;
+});
+
+void _retainNetworkData(Ref<Object?> ref) {
+  final link = ref.keepAlive();
+  Timer? expiry;
+  ref.onCancel(() {
+    expiry?.cancel();
+    expiry = Timer(const Duration(minutes: 2), link.close);
+  });
+  ref.onResume(() => expiry?.cancel());
+  ref.onDispose(() => expiry?.cancel());
+}
+
+// Stamps contain only public ownership and an opaque session ID. They prevent
+// Riverpod's previous AsyncValue from showing another unlock session's balance.
+final _loadedAssetSessionsProvider = Provider(
+  (ref) => <String, ChainWalletSession>{},
+);
+
+final chainAssetsDisplayProvider = Provider.autoDispose
+    .family<AsyncValue<List<ChainAsset>>, String>((ref, chainId) {
+      final value = ref.watch(chainAssetsProvider(chainId));
+      final loaded = ref.read(_loadedAssetSessionsProvider)[chainId];
+      final session = loaded == null
+          ? null
+          : ref.watch(chainWalletSessionProvider);
+      if (loaded != null && loaded != session || value.isReloading) {
+        if (value.hasError && !value.isLoading) {
+          return AsyncError(
+            value.error!,
+            value.stackTrace ?? StackTrace.current,
+          );
+        }
+        return const AsyncLoading();
+      }
+      return value;
+    });
+
 String _readMnemonic(Ref ref, {bool forSigning = false}) {
   final state = ref.read(walletControllerProvider);
   if (!state.isUnlocked)
@@ -72,21 +155,12 @@ Future<ChainAccount> _account(Ref ref, String chainId) async {
           state.custody == WalletCustody.localMnemonic &&
           !state.childModeEnabled,
     );
-  final mnemonic = _readMnemonic(ref);
-  // Validate against the existing persisted Solana path before exposing a second
-  // account. We never rewrite the root record or reinterpret a Solana private key.
-  final originalAddress = await ref
-      .read(solanaWalletServiceProvider)
-      .deriveAddress(mnemonic, derivation: state.derivation);
-  if (originalAddress != rootId)
-    throw StateError('Recovery phrase does not match the selected wallet.');
-  final address = EvmKeyService.deriveAddress(mnemonic);
+  // Validate ephemeral access even when the public address is already cached.
+  _readMnemonic(ref);
+  final session = _sessionOf(state);
+  final address = await ref.read(evmAddressProvider.future);
+  _guardSession(ref, session);
   final current = ref.read(walletControllerProvider);
-  if (!current.isUnlocked ||
-      current.publicKey != rootId ||
-      current.mnemonicTokenId != state.mnemonicTokenId) {
-    throw StateError('Wallet session changed. Try again after unlocking.');
-  }
   return ChainAccount(
     rootWalletId: rootId,
     chainId: chainId,
@@ -106,15 +180,8 @@ final chainBackendProvider = Provider.family<ChainBackendClient?, String>((
       .where((c) => c.id == chainId)
       .firstOrNull;
   if (config == null) return null;
-  final snapshot = ref.watch(walletControllerProvider);
-  void guard() {
-    final current = ref.read(walletControllerProvider);
-    if (!current.isUnlocked ||
-        current.publicKey != snapshot.publicKey ||
-        current.mnemonicTokenId != snapshot.mnemonicTokenId) {
-      throw StateError('Wallet session changed. Unlock again.');
-    }
-  }
+  final snapshot = ref.watch(chainWalletSessionProvider);
+  void guard() => _guardSession(ref, snapshot);
 
   return ChainBackendClient(
     config: config,
@@ -126,22 +193,20 @@ final chainBackendProvider = Provider.family<ChainBackendClient?, String>((
           .read(backendSessionManagerProvider)
           .currentSession();
       guard();
-      if (session.ownerAddress != snapshot.publicKey)
+      if (session.ownerAddress != snapshot.owner)
         throw StateError('Wallet session mismatch.');
       return {'Authorization': 'Bearer ${session.accessToken}'};
     },
     proofSigner: (message) async {
       guard();
-      final key = EvmKeyService.derivePrivateKey(_readMnemonic(ref));
-      try {
-        final signature = EthPrivateKey(key).signPersonalMessageToUint8List(
-          Uint8List.fromList(utf8.encode(message)),
-        );
-        guard();
-        return bytesToHex(signature, include0x: true);
-      } finally {
-        key.fillRange(0, key.length, 0);
-      }
+      final address = await _account(ref, chainId);
+      final signature = await EvmKeyService.signPersonalMessageAsync(
+        _readMnemonic(ref),
+        Uint8List.fromList(utf8.encode(message)),
+        expectedAddress: address.address,
+      );
+      guard();
+      return bytesToHex(signature, include0x: true);
     },
   );
 });
@@ -186,12 +251,18 @@ final chainAdapterProvider = Provider.family<ChainAdapter, String>((
 
 final chainAccountProvider = FutureProvider.autoDispose
     .family<ChainAccount, String>((ref, chainId) {
-      ref.watch(walletControllerProvider);
+      ref.watch(chainWalletSessionProvider);
+      ref.watch(
+        walletControllerProvider.select((state) => state.childModeEnabled),
+      );
+      _retainNetworkData(ref);
       return ref.watch(chainAdapterProvider(chainId)).getAccount();
     });
 
 final chainTokensProvider = FutureProvider.autoDispose
     .family<List<ChainAsset>, String>((ref, chainId) async {
+      _retainNetworkData(ref);
+      ref.watch(chainWalletSessionProvider);
       final account = await ref.watch(chainAccountProvider(chainId).future);
       final tokens = await ref.read(multichainStoreProvider).tokens(account);
       final adapter = ref.watch(chainAdapterProvider(chainId));
@@ -222,18 +293,71 @@ final chainTokensProvider = FutureProvider.autoDispose
 
 final chainAssetsProvider = FutureProvider.autoDispose
     .family<List<ChainAsset>, String>((ref, chainId) async {
+      _retainNetworkData(ref);
+      final session = ref.watch(chainWalletSessionProvider);
       final account = await ref.watch(chainAccountProvider(chainId).future);
-      final tokens = await ref.watch(chainTokensProvider(chainId).future);
       final backend = ref.watch(chainBackendProvider(chainId));
-      if (backend != null) {
-        final assets = await backend.portfolio();
-        final timer = Timer(const Duration(seconds: 20), ref.invalidateSelf);
-        ref.onDispose(timer.cancel);
-        return assets;
+      Timer? poll;
+      DateTime? loadedAt;
+      var listening = true;
+      var disposed = false;
+      void scheduleRefresh() {
+        poll?.cancel();
+        if (backend == null || !listening || disposed || loadedAt == null)
+          return;
+        final remaining =
+            const Duration(seconds: 20) - DateTime.now().difference(loadedAt);
+        poll = Timer(
+          remaining.isNegative ? Duration.zero : remaining,
+          ref.invalidateSelf,
+        );
       }
-      return ref
-          .watch(chainAdapterProvider(chainId))
-          .getAssets(account, tokens: tokens);
+
+      ref.onCancel(() {
+        listening = false;
+        poll?.cancel();
+      });
+      ref.onResume(() {
+        listening = true;
+        scheduleRefresh();
+      });
+      ref.onDispose(() {
+        disposed = true;
+        poll?.cancel();
+      });
+      List<ChainAsset> assets;
+      if (backend != null) {
+        // Portfolio already contains remote token metadata and balances. Do not
+        // serialize an extra tokens request before every ordinary balance load.
+        final results = await Future.wait<List<ChainAsset>>([
+          backend.portfolio(),
+          ref.read(multichainStoreProvider).tokens(account),
+        ]);
+        assets = results[0];
+        final ids = assets.map((asset) => asset.id).toSet();
+        final missingLocal = results[1].any(
+          (token) =>
+              !token.isFeeAsset &&
+              token.contractAddress != null &&
+              !ids.contains(token.id),
+        );
+        if (missingLocal) {
+          // Preserve local-only custom tokens from earlier app versions. Only
+          // accounts that need synchronization take this additional path.
+          await ref.watch(chainTokensProvider(chainId).future);
+          assets = await backend.portfolio();
+        }
+      } else {
+        final tokens = await ref.watch(chainTokensProvider(chainId).future);
+        assets = await ref
+            .watch(chainAdapterProvider(chainId))
+            .getAssets(account, tokens: tokens);
+      }
+      _guardSession(ref, session);
+      ref.read(_loadedAssetSessionsProvider)[chainId] = session;
+      loadedAt = DateTime.now();
+      scheduleRefresh();
+      return assets;
     });
 
 /// Recent on-chain window plus locally submitted transactions (including RPC

@@ -704,7 +704,12 @@ void main() {
       await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
       expect(find.text('Confirm send'), findsOneWidget);
-      await tester.tap(find.text('Send'));
+      await tester.runAsync(() async {
+        await tester.tap(find.text('Send'));
+        await rpc
+            .waitForCall('eth_sendRawTransaction')
+            .timeout(const Duration(seconds: 5));
+      });
       await tester.pumpAndSettle();
       expect(
         rpc.calls.where((method) => method == 'eth_sendRawTransaction'),
@@ -739,7 +744,12 @@ void main() {
           ),
         )
         .onPressed!;
-    await tester.tap(find.text('Send'));
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Send'));
+      await rpc
+          .waitForCall('eth_sendRawTransaction')
+          .timeout(const Duration(seconds: 5));
+    });
     await tester.pump(const Duration(milliseconds: 100));
     // A second queued tap can hold the callback from the preceding frame.
     // It must not reuse the single reviewed transaction while sending.

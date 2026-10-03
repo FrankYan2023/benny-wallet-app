@@ -1,5 +1,13 @@
 # Android 真机联调
 
+## 2026-10-03 性能优化更新（最新）
+
+客户端基线`66fc383`加本轮[性能优化](PERFORMANCE.md)，沿用以下普通main.dart/full生产API启动方式，已原位更新既有Benny Wallet Full。构建13.2秒、安装5.5秒、文件同步120ms，启动与调试连接成功；没有卸载/清除Full钱包数据，独立Lite保留。持有人此前已自行初始化Full钱包，现在需自行解锁进行连续切链与刷新验证，不向AI提供PIN/助记词。
+
+后台`4e4fe7e`经既有GitHub main自动部署成功；部署后生产只读认证/5042配置/余额/USDC/估费/receipt/logs及原Solana余额探测通过。历史索引仍有独立重试错误（19:48:41Z尝试，19:46:13Z上次成功），未因RPC成功而记为健康。测试/部署记录见 [VALIDATION](VALIDATION.md)。
+
+本轮安装成功不能替代手机解锁后的FPS/耗时验收。还需记录冷启动进入首页、快速双链切换、2分钟内返回缓存、刷新中保留行、弱网失败/重试和换钱包/锁定后不出现旧余额；按 [TEST_PLAN](TEST_PLAN.md) FE-32～FE-34、PLAT-09执行。未运行资金、FCM、Vault硬件签名、摄像头或旧版签名升级用例，下面初次安装记录作为历史保留。
+
 ## 2026-10-03 启动记录
 
 客户端运行代码 `a2bc494`，分支 `arc`；Seeker / Android 16（API 36）/ ARM64。普通 `lib/main.dart`、full + STORE_MODE=full，生产API `https://api.gobennyapp.com`，Arc默认主网5042，经 `/v1/arc-rpc`。

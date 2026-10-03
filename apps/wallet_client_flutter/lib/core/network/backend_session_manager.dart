@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:solana/base58.dart';
-import 'package:solana/solana.dart';
+import '../chains/solana_message_signer.dart';
 
 import '../../features/auth/domain/wallet_derivation.dart';
 import '../../features/auth/domain/wallet_controller_state.dart';
@@ -263,13 +263,19 @@ class BackendSessionManager {
 
     final mnemonic = _readCurrentMnemonic();
     final derivation = _readCurrentDerivation();
-    final keyPair = await Ed25519HDKeyPair.fromMnemonic(
-      mnemonic,
-      account: derivation.accountIndex,
-      change: derivation.changeIndex,
+    final signature = await SolanaMessageSigner.sign(
+      mnemonic: mnemonic,
+      derivation: derivation,
+      expectedOwner: ownerAddress,
+      message: message,
     );
-    final signature = await keyPair.sign(utf8.encode(message));
-    return base58encode(signature.bytes.toList(growable: false));
+    final current = _ref.read(walletControllerProvider);
+    if (!current.isUnlocked ||
+        current.publicKey != ownerAddress ||
+        current.mnemonicTokenId != walletState.mnemonicTokenId) {
+      throw StateError('Wallet changed during authentication.');
+    }
+    return signature;
   }
 
   String _readCurrentMnemonic() {

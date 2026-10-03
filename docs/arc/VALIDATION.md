@@ -1,5 +1,16 @@
 # 验证记录与待验收事项
 
+## 2026-10-03 Arc加载、切链与失败恢复优化（最新）
+
+客户端基线`66fc383`，分支`arc`；本轮源文件和行为说明见 [PERFORMANCE](PERFORMANCE.md)，测试注册清单见 [AUTOMATED_TESTS](AUTOMATED_TESTS.md)。伴随后台提交`4e4fe7e31370694116ba5dc0cb24eb61d5e30fb8`已推送`arc`/`main`，Railway自动部署`8c9cda30-e04e-4586-8721-df59f35f024d`状态SUCCESS（创建时间19:41:46Z）。没有手动重建部署、数据库迁移或配置变更。
+
+- 客户端新增16项：EVM后台派生/签名5、Solana后台认证2、加载缓存/会话隔离/刷新恢复5、只读重试4。相关加载/HTTP/页面35项通过；完整`flutter test --no-pub`为**124通过、1失败**（125项），失败仍为既有Swap未本地化字面量`ARC Swap coming soon`，不得写成全量通过。旧加密存储与Solana/EVM派生、签名向量、发送单次广播回归通过。
+- `flutter analyze --no-pub lib test integration_test`：No issues found。后台28项测试与TypeScript build通过，含5项新增并发/报价预算/错误链/USDC失败终止用例。未删除现有测试、变更密钥持久化或放宽认证/签名/广播检查。
+- Seeker/Android16/API36/ARM64已更新普通`main.dart`生产API full debug：构建13.2秒、安装5.5秒、文件同步120ms，启动和调试连接成功。已有Full钱包数据保留；独立旧Lite未卸载/覆盖。SeekerVault保持默认开启，但未执行其授权/硬件签名。没有设备集成harness、公开QA钱包导入、测试网/直连RPC开关或资金操作。
+- **部署后只读探测通过**：`https://api.gobennyapp.com`认证/未认证拒绝、主网5042配置/错误链拒绝、未绑定账户读取、chainId/余额/USDC decimals/估费/gasPrice/feeHistory/receipt/区块/logs及原Solana余额；随机无资金测试密钥仅在脚本内存使用，未登记账户或广播。与手机解锁后的真实请求/FPS测试分开记录。
+- **独立历史索引问题仍存在**：部署后health的lastAttemptAt为19:48:41Z、lastSuccessAt为19:46:13Z，lastError仍为`Arc index pass failed; cursors retained for retry.`。普通RPC探测通过不代表索引健康，本轮没有修改indexer或游标。
+- 持有人尚需在手机自行解锁，验证初次进入首页、快速Solana→Arc→Solana、下拉刷新、弱网恢复及前后台锁定。当前没有真机连续交互/FPS或延迟百分比证据；未重建iOS、执行资金/FCM/扫码/旧版原地升级。Firebase缺配置、310项zh缺翻译和旧构建支持提示仍记录为限制。
+
 ## 2026-10-03 Seeker 真机调试启动（最新）
 
 - 代码基线a2bc494；Seeker/Android16/API36/ARM64，普通main.dart、full/STORE_MODE=full、生产API。独立构建16.6s、安装5.4s、同步196ms，欢迎页与调试连接成功；没有覆盖/卸载旧Lite，其0.0.51/51版本和安装更新时间不变。没有钱包数据迁移、集成harness或公开QA钱包导入。

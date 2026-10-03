@@ -145,10 +145,7 @@ class SolanaWalletService {
   Future<String> deriveAddress(
     String mnemonic, {
     WalletDerivation derivation = WalletDerivation.legacy,
-  }) async {
-    final keypair = await keyPairFromMnemonic(mnemonic, derivation: derivation);
-    return keypair.address;
-  }
+  }) => Isolate.run(() => _deriveSolanaAddressInIsolate(mnemonic, derivation));
 
   Future<List<SolanaImportCandidate>> discoverImportCandidates(
     String mnemonic,
@@ -1750,6 +1747,19 @@ class SolanaWalletService {
 
     throw StateError('Failed to prepare transaction');
   }
+}
+
+/// The account derivation remains unchanged; only the public result is returned.
+Future<String> _deriveSolanaAddressInIsolate(
+  String mnemonic,
+  WalletDerivation derivation,
+) async {
+  final keypair = await Ed25519HDKeyPair.fromMnemonic(
+    mnemonic,
+    account: derivation.accountIndex,
+    change: derivation.changeIndex,
+  );
+  return keypair.address;
 }
 
 Future<List<Map<String, Object?>>> _discoverImportCandidatesInIsolate(

@@ -1,5 +1,19 @@
 # Milestone 2 完整测试计划
 
+## 2026-10-03 加载性能补充
+
+以下新增唯一ID补充原93项，测试计划仍不等于全部通过。源码自动化/真机结果见 [PERFORMANCE](PERFORMANCE.md)、[VALIDATION](VALIDATION.md)。
+
+| ID | 优先级/方法 | 操作与输入 | 预期结果 |
+| --- | --- | --- | --- |
+| FE-32 | P1 A/D | 同解锁会话快速All/Solana/Arc、离开2分钟以内再进入 | 公开EVM地址不重复派生；资产复用，过期刷新；后台任务不阻塞菜单/滚动 |
+| FE-33 | P1 A/D | 成功后下拉刷新，timeout/503，再Retry恢复 | 原行保留、明示更新/旧数据，总额不完整；恢复后替换；首次失败不显示已知0 |
+| FE-34 | P0 A/D | 换root/token/路径、锁定；旧请求稍后完成或新请求失败 | 旧会话地址/余额不显示或计入当前总额；签名前后guard仍拒绝 |
+| CH-21 | P0 A/D | 后台派生、Solana认证、EVM191/712/1559向量与heartbeat | 原Solana/独立EVM向量不变，页面event loop可运行，密钥不回UI或持久化 |
+| BE-20 | P1 A/S | 多token与慢/失败fiat、并发portfolio、USDC/错误链失败 | 最多4并发/有序；1.2s价预算、共享lookup/backoff；错误链关闭、USDC失败停止后续批次 |
+| BE-21 | P0 A/S | timeout/429短长Retry-After/502/503/504、401/403/错误链、切会话、写操作 | 仅安全读最多一次retry，重新认证/guard；写操作不自动retry/fallback |
+| PLAT-09 | P1 D | 私有无资金真机冷启动/解锁、连续切链/滚动，profile模式记录帧与延迟 | 记录首加载/复用切换延迟和帧耗时；不能以debug启动/fixture通过声称FPS达标 |
+
 截至 2026-09-25。覆盖当前需求及发布必须补齐的回归项；不是所有可能输入的穷举。**本表描述应执行的验收，不表示已经通过。** 每次执行须在 [VALIDATION.md](VALIDATION.md) 记录 ID、代码提交、环境和证据。现有逐条测试见 [AUTOMATED_TESTS.md](AUTOMATED_TESTS.md)。
 
 ## 优先级、方法和数据

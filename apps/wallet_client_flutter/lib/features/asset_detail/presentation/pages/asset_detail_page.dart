@@ -88,7 +88,7 @@ class AssetDetailPage extends ConsumerWidget {
       title: '',
       showTopBar: false,
       child: ref
-          .watch(chainAssetsProvider(config.id))
+          .watch(chainAssetsDisplayProvider(config.id))
           .when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => ChainErrorCard(

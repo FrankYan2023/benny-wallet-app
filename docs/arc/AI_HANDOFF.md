@@ -1,5 +1,11 @@
 # AI 接手说明
 
+## 2026-10-03 Arc 加载性能
+
+先读 [PERFORMANCE](PERFORMANCE.md)。不要恢复UI线程同步BIP39/BIP32/签名，也不要让每次切链重新派生/绑定。evmAddressProvider只缓存解锁会话公开地址；资产通过chainAssetsDisplayProvider核对会话，2分钟短时保留、20秒刷新，离开暂停。普通portfolio不依赖tokens前置请求，但仍同步本地缺失custom token；刷新错误保留上次数据并标不完整，不假造0/价格。只读请求有限重试，广播/绑定/导币写入不重试。Seeker普通main调试已更新，持有人解锁后切链/FPS验收待观察；全量124/125通过，既有Swap本地化检查仍失败。
+
+后台4e4fe7e按原main自动发布，4并发余额/价格并行/1.2秒价格预算，后续请求重新验证chainId；无数据库迁移/配置变化。28项测试和build通过；生产发布结果见 [VALIDATION](VALIDATION.md)。本轮不改独立backfill/indexer问题。
+
 ## 2026-10-03 Android 真机调试启动
 
 Seeker Android16已独立安装普通full debug（Benny Wallet Full/com.benny.wallet），保留旧com.benny.wallet.lite，生产API/Arc主网5042。客户端运行a2bc494，欢迎页及热更新连接建立；等待持有人自行创建私有无资金软件钱包/PIN，不安装公开模拟器QA钱包。SeekerVault默认开启但未验收；Vault/MWA无本地根助记词仍不支持Arc。

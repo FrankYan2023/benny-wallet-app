@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:eth_sig_util/eth_sig_util.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart';
 
@@ -514,20 +513,18 @@ class EvmAdapter extends ChainAdapter {
     }
   }
 
-  Future<Uint8List> _keyForAccount(ChainAccount account) async {
+  Future<void> _ensureCurrentAccount(ChainAccount account) async {
     final current = await getAccount();
     if (!current.canSign ||
         !_sameAddress(current.address, account.address) ||
-        current.rootWalletId != account.rootWalletId)
+        current.rootWalletId != account.rootWalletId) {
       throw StateError('The selected wallet changed. Review again.');
-    final key = EvmKeyService.derivePrivateKey(await _mnemonicReader());
-    if (!_sameAddress(EthPrivateKey(key).address.hex, account.address)) {
-      key.fillRange(0, key.length, 0);
-      throw StateError(
-        'Recovery phrase does not match the selected EVM account.',
-      );
     }
-    return key;
+  }
+
+  Future<String> _mnemonicForAccount(ChainAccount account) async {
+    await _ensureCurrentAccount(account);
+    return _mnemonicReader();
   }
 
   @override
@@ -567,23 +564,22 @@ class EvmAdapter extends ChainAdapter {
         'Account activity changed. Request a new transaction preview.',
       );
     }
-    final key = await _keyForAccount(transaction.request.account);
-    try {
-      // web3dart 2.x returns signed RLP without EIP-2718's type byte.
-      final bytes = prependTransactionType(
-        2,
-        signTransactionRaw(tx, EthPrivateKey(key), chainId: config.chainId),
-      );
-      final hash = bytesToHex(keccak256(bytes), include0x: true);
-      _signedEnvelopes[hash] = transaction;
-      return SignedChainTransaction(
-        prepared: transaction,
-        encoded: bytesToHex(bytes, include0x: true),
-        transactionHash: hash,
-      );
-    } finally {
-      key.fillRange(0, key.length, 0);
-    }
+    final account = transaction.request.account;
+    final mnemonic = await _mnemonicForAccount(account);
+    final bytes = await EvmKeyService.signTransactionAsync(
+      mnemonic,
+      tx,
+      chainId: config.chainId!,
+      expectedAddress: account.address,
+    );
+    await _ensureCurrentAccount(account);
+    final hash = bytesToHex(keccak256(bytes), include0x: true);
+    _signedEnvelopes[hash] = transaction;
+    return SignedChainTransaction(
+      prepared: transaction,
+      encoded: bytesToHex(bytes, include0x: true),
+      transactionHash: hash,
+    );
   }
 
   @override
@@ -913,12 +909,14 @@ class EvmAdapter extends ChainAdapter {
   @override
   Future<Uint8List> signMessage(Uint8List message) async {
     final account = await getAccount();
-    final key = await _keyForAccount(account);
-    try {
-      return EthPrivateKey(key).signPersonalMessageToUint8List(message);
-    } finally {
-      key.fillRange(0, key.length, 0);
-    }
+    final mnemonic = await _mnemonicForAccount(account);
+    final signature = await EvmKeyService.signPersonalMessageAsync(
+      mnemonic,
+      message,
+      expectedAddress: account.address,
+    );
+    await _ensureCurrentAccount(account);
+    return signature;
   }
 
   /// Service capability only. Future dapp callers must obtain an explicit,
@@ -933,18 +931,17 @@ class EvmAdapter extends ChainAdapter {
         'Typed data must declare the selected network in its domain.',
       );
     }
-    if (jsonEncode(data).length > 65536)
+    final jsonData = jsonEncode(data);
+    if (jsonData.length > 65536)
       throw const FormatException('Typed data is too large.');
     final account = await getAccount();
-    final key = await _keyForAccount(account);
-    try {
-      return EthSigUtil.signTypedData(
-        privateKeyInBytes: key,
-        jsonData: jsonEncode(data),
-        version: TypedDataVersion.V4,
-      );
-    } finally {
-      key.fillRange(0, key.length, 0);
-    }
+    final mnemonic = await _mnemonicForAccount(account);
+    final signature = await EvmKeyService.signTypedDataAsync(
+      mnemonic,
+      jsonData,
+      expectedAddress: account.address,
+    );
+    await _ensureCurrentAccount(account);
+    return signature;
   }
 }

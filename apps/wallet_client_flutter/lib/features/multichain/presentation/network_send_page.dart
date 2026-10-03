@@ -95,7 +95,7 @@ class _NetworkSendPageState extends ConsumerState<NetworkSendPage> {
               () => ref.invalidate(chainAccountProvider(widget.chainId)),
             ),
             data: (account) => ref
-                .watch(chainAssetsProvider(widget.chainId))
+                .watch(chainAssetsDisplayProvider(widget.chainId))
                 .when(
                   loading: () => _loading(),
                   error: (error, _) => _failure(

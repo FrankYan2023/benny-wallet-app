@@ -1,5 +1,7 @@
 # Arc / Multichain 文档入口
 
+最新加载优化（2026-10-03）：[PERFORMANCE](PERFORMANCE.md)记录首次进入/切链卡顿原因、后台计算、会话缓存、刷新与失败重试及后台并发优化；125项客户端测试的当前结果和真机/生产发布状态以[VALIDATION](VALIDATION.md)为准。
+
 ## 最新真机调试：2026-10-03
 
 Seeker Android16普通full debug已启动，与旧Lite独立共存，生产API/Arc主网5042；等待持有人创建私有无资金测试钱包/PIN。电脑只读接口通过，生产历史索引健康报重试错误。启动命令、当前结果和待测顺序见 [ANDROID_PHYSICAL_DEBUG](ANDROID_PHYSICAL_DEBUG.md)；下面09-28结论是历史记录，最新状态以 [VALIDATION](VALIDATION.md) 为准。

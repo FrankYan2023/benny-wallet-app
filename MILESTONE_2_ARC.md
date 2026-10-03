@@ -1,10 +1,16 @@
 # Milestone 2 — Arc Support / Multichain Foundation
 
-Last updated: 2026-09-26. Base: `08cbed3` (`origin/main`, Release Android v0.0.50).
+Last updated: 2026-10-03. Original implementation base: `08cbed3` (`origin/main`, Release Android v0.0.50).
 Delivery branch: `arc`; original implementation branch: `codex/milestone-2-arc`.
 Repository: `FrankYan2023/benny-wallet-app`.
 App: `apps/wallet_client_flutter`.
 Checkout location is machine-specific; use the repository root. Do not depend on the original local worktree path.
+
+## 2026-10-03 Arc加载与页面流畅度更新
+
+地址派生/本地认证和EVM签名移到后台计算；按解锁会话缓存公开地址、短时保留资产查询，刷新失败保留上次数据并提供重试。客户端减少重复token请求并仅对安全只读请求有限重试；后台并行余额/报价、限制并发与报价等待。原Solana派生和加密存储不变，没有数据迁移。实现、文件和限制见 [PERFORMANCE](docs/arc/PERFORMANCE.md)。
+
+客户端125项测试124通过、1个既有Swap本地化失败；源码/测试静态分析与后台28项测试/build通过。Android Seeker已更新生产API调试包，后台`4e4fe7e`自动部署并通过只读接口探测；手机自行解锁后的连续交互/FPS、iOS及资金验收仍待执行，历史索引独立错误未解决。实际记录见 [VALIDATION](docs/arc/VALIDATION.md)。
 
 ## 2026-10-03 Send交互统一更新
 

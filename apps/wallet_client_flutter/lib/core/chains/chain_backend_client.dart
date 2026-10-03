@@ -14,6 +14,7 @@ class ChainBackendClient {
     required this.proofSigner,
     required this.guard,
     Dio? dio,
+    Future<void> Function(Duration)? retryDelay,
   }) : _dio =
            dio ??
            Dio(
@@ -22,7 +23,9 @@ class ChainBackendClient {
                receiveTimeout: const Duration(seconds: 30),
                sendTimeout: const Duration(seconds: 15),
              ),
-           ) {
+           ),
+       _retryDelay =
+           retryDelay ?? ((duration) => Future<void>.delayed(duration)) {
     if (Uri.tryParse(baseUrl)?.scheme != 'https') {
       throw ArgumentError('Wallet backend must use HTTPS.');
     }
@@ -34,53 +37,100 @@ class ChainBackendClient {
   final Future<String> Function(String message) proofSigner;
   final void Function() guard;
   final Dio _dio;
+  final Future<void> Function(Duration) _retryDelay;
   Future<void>? _binding;
   String? _boundAddress;
   int _sequence = 0;
+  static const _readRpcMethods = {
+    'eth_chainId',
+    'eth_blockNumber',
+    'eth_gasPrice',
+    'eth_maxPriorityFeePerGas',
+    'eth_getBalance',
+    'eth_getTransactionCount',
+    'eth_getCode',
+    'eth_call',
+    'eth_estimateGas',
+    'eth_feeHistory',
+    'eth_getTransactionByHash',
+    'eth_getTransactionReceipt',
+    'eth_getBlockByNumber',
+    'eth_getLogs',
+  };
+
+  Duration? _readRetryDelay(DioException error) {
+    final transient = const {
+      DioExceptionType.connectionTimeout,
+      DioExceptionType.sendTimeout,
+      DioExceptionType.receiveTimeout,
+      DioExceptionType.connectionError,
+    }.contains(error.type);
+    final status = error.response?.statusCode;
+    if (!transient && !const {429, 502, 503, 504}.contains(status)) return null;
+    final values = error.response?.headers.map['retry-after'];
+    if (values != null && values.isNotEmpty) {
+      final seconds = int.tryParse(values.first.trim());
+      // A long or unrecognized Retry-After must not trigger an early request.
+      if (seconds == null || seconds < 0 || seconds > 2) return null;
+      return Duration(seconds: seconds);
+    }
+    return const Duration(milliseconds: 400);
+  }
 
   Future<Map<String, dynamic>> request(
     String path, {
     Map<String, dynamic>? body,
     Map<String, dynamic>? query,
   }) async {
-    guard();
-    final headers = await headersReader();
-    guard();
-    try {
-      final response = await _dio.request<dynamic>(
-        '$baseUrl$path',
-        data: body,
-        queryParameters: query,
-        options: Options(
-          method: body == null ? 'GET' : 'POST',
-          followRedirects: false,
-          headers: {...headers, 'X-Chain-Id': '${config.chainId}'},
-        ),
-      );
+    final readOnly =
+        body == null ||
+        (path == '/v1/arc-rpc' && _readRpcMethods.contains(body['method']));
+    for (var attempt = 0; ; attempt++) {
       guard();
-      if (response.data is! Map)
-        throw const EvmRpcException('Invalid wallet service response.');
-      return Map<String, dynamic>.from(response.data as Map);
-    } on DioException catch (error) {
+      final headers = await headersReader();
       guard();
-      final status = error.response?.statusCode;
-      if (status == 409 &&
-          error.response?.data is Map &&
-          error.response?.data['error'] == 'network_mismatch')
-        throw const EvmNetworkMismatch();
-      if (status == 401)
-        throw const EvmRpcException('Wallet session expired. Unlock again.');
-      if (status == 403)
-        throw const EvmRpcException(
-          'Wallet service denied this action. Check the account and permissions.',
+      try {
+        final response = await _dio.request<dynamic>(
+          '$baseUrl$path',
+          data: body,
+          queryParameters: query,
+          options: Options(
+            method: body == null ? 'GET' : 'POST',
+            followRedirects: false,
+            headers: {...headers, 'X-Chain-Id': '${config.chainId}'},
+          ),
         );
-      if (status == 429)
+        guard();
+        if (response.data is! Map)
+          throw const EvmRpcException('Invalid wallet service response.');
+        return Map<String, dynamic>.from(response.data as Map);
+      } on DioException catch (error) {
+        guard();
+        final delay = readOnly && attempt == 0 ? _readRetryDelay(error) : null;
+        if (delay != null) {
+          await _retryDelay(delay);
+          guard();
+          continue;
+        }
+        final status = error.response?.statusCode;
+        if (status == 409 &&
+            error.response?.data is Map &&
+            error.response?.data['error'] == 'network_mismatch')
+          throw const EvmNetworkMismatch();
+        if (status == 401)
+          throw const EvmRpcException('Wallet session expired. Unlock again.');
+        if (status == 403)
+          throw const EvmRpcException(
+            'Wallet service denied this action. Check the account and permissions.',
+          );
+        if (status == 429)
+          throw const EvmRpcException(
+            'Wallet service is busy. Try again shortly.',
+          );
         throw const EvmRpcException(
-          'Wallet service is busy. Try again shortly.',
+          'Wallet service unavailable. A submitted transaction may still complete; check activity before sending again.',
         );
-      throw const EvmRpcException(
-        'Wallet service unavailable. A submitted transaction may still complete; check activity before sending again.',
-      );
+      }
     }
   }
 

@@ -50,7 +50,7 @@ final additionalPortfolioValueProvider = Provider<AdditionalPortfolioValue>((
       hasData = false;
   for (final config in ref.watch(visibleAdditionalNetworksProvider)) {
     if (config.isTestnet) continue;
-    final result = ref.watch(chainAssetsProvider(config.id));
+    final result = ref.watch(chainAssetsDisplayProvider(config.id));
     loading = loading || result.isLoading;
     unavailable = unavailable || result.hasError;
     final assets = result.valueOrNull;
@@ -253,57 +253,117 @@ class AdditionalAssetRows extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => Column(
     children: [
       for (final config in ref.watch(visibleAdditionalNetworksProvider))
-        ref
-            .watch(chainAssetsProvider(config.id))
-            .when(
-              loading: () => ListTile(
-                title: NetworkBadge.fromConfig(config, compact: false),
-                subtitle: const LinearProgressIndicator(),
-              ),
-              error: (error, _) => ListTile(
-                title: NetworkBadge.fromConfig(config, compact: false),
-                subtitle: Text('$error'),
-                trailing: IconButton(
-                  tooltip: chainText(context, 'Retry', '重试'),
-                  icon: const Icon(Icons.refresh_rounded),
-                  onPressed: () =>
-                      ref.invalidate(chainAccountProvider(config.id)),
-                ),
-              ),
-              data: (assets) => Column(
-                children: [
-                  for (final asset in assets) ...[
-                    TokenRow(
-                      name: asset.name,
-                      symbol: asset.symbol,
-                      change: '--',
-                      isPositiveChange: null,
-                      balanceLine: '${asset.balanceText} ${asset.symbol}',
-                      networkLabel: config.displayName,
-                      networkIconAsset: config.iconAsset,
-                      value: config.isTestnet
-                          ? chainText(context, 'Testnet', '测试网')
-                          : !asset.balanceAvailable || asset.fiatPrice == null
-                          ? '--'
-                          : Formatters.usd(
-                              double.parse(asset.balanceText) *
-                                  asset.fiatPrice!,
-                            ),
-                      secondaryValue: config.isTestnet
-                          ? chainText(context, 'Excluded from total', '不计入总额')
-                          : !asset.balanceAvailable ||
-                                asset.fiatPrice == null &&
-                                    asset.rawBalance > BigInt.zero
-                          ? chainText(context, 'Price unavailable', '暂无价格')
-                          : null,
-                      iconUrl: asset.logoUrl,
-                      onTap: () => context.push(walletAssetPath(asset)),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                ],
-              ),
-            ),
+        _networkRows(context, ref, config),
     ],
   );
+
+  Widget _networkRows(BuildContext context, WidgetRef ref, ChainConfig config) {
+    final state = ref.watch(chainAssetsDisplayProvider(config.id));
+    final assets = state.valueOrNull;
+    if (assets == null) {
+      return state.when(
+        loading: () => ListTile(
+          title: NetworkBadge.fromConfig(config, compact: false),
+          subtitle: const LinearProgressIndicator(),
+        ),
+        error: (error, _) => ListTile(
+          title: NetworkBadge.fromConfig(config, compact: false),
+          subtitle: Text('$error'),
+          trailing: IconButton(
+            tooltip: chainText(context, 'Retry', '重试'),
+            icon: const Icon(Icons.refresh_rounded),
+            onPressed: () => ref.invalidate(chainAssetsProvider(config.id)),
+          ),
+        ),
+        data: (_) => const SizedBox.shrink(),
+      );
+    }
+    return Column(
+      children: [
+        if (state.isLoading || state.hasError)
+          ChainBalanceRefreshNotice(
+            state: state,
+            onRetry: () => ref.invalidate(chainAssetsProvider(config.id)),
+          ),
+        for (final asset in assets) ...[
+          TokenRow(
+            name: asset.name,
+            symbol: asset.symbol,
+            change: '--',
+            isPositiveChange: null,
+            balanceLine: '${asset.balanceText} ${asset.symbol}',
+            networkLabel: config.displayName,
+            networkIconAsset: config.iconAsset,
+            value: config.isTestnet
+                ? chainText(context, 'Testnet', '测试网')
+                : !asset.balanceAvailable || asset.fiatPrice == null
+                ? '--'
+                : Formatters.usd(
+                    double.parse(asset.balanceText) * asset.fiatPrice!,
+                  ),
+            secondaryValue: config.isTestnet
+                ? chainText(context, 'Excluded from total', '不计入总额')
+                : !asset.balanceAvailable ||
+                      asset.fiatPrice == null && asset.rawBalance > BigInt.zero
+                ? !asset.balanceAvailable
+                      ? chainText(context, 'Balance unavailable', '余额暂不可用')
+                      : chainText(context, 'Price unavailable', '暂无价格')
+                : null,
+            iconUrl: asset.logoUrl,
+            onTap: () => context.push(walletAssetPath(asset)),
+          ),
+          const SizedBox(height: 12),
+        ],
+      ],
+    );
+  }
+}
+
+/// Cached balances stay visible while refreshing, with their freshness explicit.
+class ChainBalanceRefreshNotice extends StatelessWidget {
+  const ChainBalanceRefreshNotice({
+    super.key,
+    required this.state,
+    required this.onRetry,
+  });
+  final AsyncValue<List<ChainAsset>> state;
+  final VoidCallback onRetry;
+  @override
+  Widget build(BuildContext context) {
+    if (!state.isLoading && !state.hasError) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          if (state.isLoading)
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else
+            const Icon(Icons.info_outline_rounded, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              state.isLoading
+                  ? chainText(context, 'Updating balance…', '正在更新余额…')
+                  : chainText(
+                      context,
+                      'Balance update failed. Showing previous data.',
+                      '余额更新失败，当前显示上次数据。',
+                    ),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+          if (!state.isLoading)
+            IconButton(
+              tooltip: chainText(context, 'Retry', '重试'),
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+            ),
+        ],
+      ),
+    );
+  }
 }

@@ -37,6 +37,12 @@ String abiString(String value) {
 
 class FakeRpc implements EvmRpc {
   final calls = <String>[];
+  final _waitingCalls = <String, Completer<void>>{};
+  Future<void> waitForCall(String method) {
+    if (calls.contains(method)) return Future.value();
+    return _waitingCalls.putIfAbsent(method, Completer<void>.new).future;
+  }
+
   final parameters = <String, List<List<dynamic>>>{};
   final handlers = <String, FutureOr<dynamic> Function(List<dynamic>)>{};
   bool wrongNetwork = false;
@@ -52,6 +58,7 @@ class FakeRpc implements EvmRpc {
   @override
   Future<dynamic> call(String method, List<dynamic> params) async {
     calls.add(method);
+    _waitingCalls.remove(method)?.complete();
     parameters.putIfAbsent(method, () => []).add(params);
     if (handlers.containsKey(method)) return handlers[method]!(params);
     switch (method) {

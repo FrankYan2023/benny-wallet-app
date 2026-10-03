@@ -268,4 +268,195 @@ void main() {
       expect(merged.map((e) => e.logIndex), [1, 2]);
     },
   );
+  test(
+    'transient read retries once with fresh headers and identical RPC payload',
+    () async {
+      var attempts = 0, headers = 0;
+      final seen = <RequestOptions>[];
+      final dio = Dio()
+        ..interceptors.add(
+          InterceptorsWrapper(
+            onRequest: (options, handler) {
+              seen.add(options);
+              if (++attempts == 1) {
+                handler.reject(
+                  DioException(
+                    requestOptions: options,
+                    type: DioExceptionType.receiveTimeout,
+                  ),
+                );
+              } else {
+                handler.resolve(
+                  Response(
+                    requestOptions: options,
+                    data: {'jsonrpc': '2.0', 'id': 1, 'result': '0x1'},
+                  ),
+                );
+              }
+            },
+          ),
+        );
+      final client = ChainBackendClient(
+        config: arcMainnetConfig,
+        baseUrl: 'https://example.test',
+        dio: dio,
+        accountReader: () async => account,
+        headersReader: () async => {
+          'Authorization': 'Bearer fixture-${++headers}',
+        },
+        proofSigner: (_) async => '',
+        guard: () {},
+        retryDelay: (_) async {},
+      );
+      expect(
+        await client.rpc('eth_getBalance', [account.address, 'latest']),
+        '0x1',
+      );
+      expect(attempts, 2);
+      expect(headers, 2);
+      expect(seen[0].data, seen[1].data);
+      expect(seen[1].headers['Authorization'], 'Bearer fixture-2');
+    },
+  );
+
+  test(
+    'reads honor short Retry-After and never retry long throttles or permanent errors',
+    () async {
+      for (final (status, after, expected) in [
+        (429, '1', 2),
+        (429, '30', 1),
+        (401, null, 1),
+        (403, null, 1),
+        (409, null, 1),
+        (503, null, 2),
+      ]) {
+        var attempts = 0;
+        final delays = <Duration>[];
+        final dio = Dio()
+          ..interceptors.add(
+            InterceptorsWrapper(
+              onRequest: (options, handler) {
+                attempts++;
+                handler.reject(
+                  DioException(
+                    requestOptions: options,
+                    type: DioExceptionType.badResponse,
+                    response: Response(
+                      requestOptions: options,
+                      statusCode: status,
+                      data: {
+                        'error': status == 409 ? 'network_mismatch' : 'fixture',
+                      },
+                      headers: Headers.fromMap({
+                        if (after != null) 'retry-after': [after],
+                      }),
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        final client = ChainBackendClient(
+          config: arcMainnetConfig,
+          baseUrl: 'https://example.test',
+          dio: dio,
+          accountReader: () async => account,
+          headersReader: () async => {},
+          proofSigner: (_) async => '',
+          guard: () {},
+          retryDelay: (delay) async {
+            delays.add(delay);
+          },
+        );
+        await expectLater(
+          client.request('/v1/chains/arc/config'),
+          throwsA(isA<EvmRpcException>()),
+        );
+        expect(attempts, expected, reason: '$status / $after');
+        if (after == '1') expect(delays, [const Duration(seconds: 1)]);
+      }
+    },
+  );
+
+  test(
+    'token import and account verification writes are never retried',
+    () async {
+      for (final path in [
+        '/v1/chains/arc/tokens',
+        '/v1/chains/arc/account/verify',
+        '/v1/chains/arc/account/challenge',
+      ]) {
+        var attempts = 0;
+        final dio = Dio()
+          ..interceptors.add(
+            InterceptorsWrapper(
+              onRequest: (options, handler) {
+                attempts++;
+                handler.reject(
+                  DioException(
+                    requestOptions: options,
+                    type: DioExceptionType.receiveTimeout,
+                  ),
+                );
+              },
+            ),
+          );
+        final client = ChainBackendClient(
+          config: arcMainnetConfig,
+          baseUrl: 'https://example.test',
+          dio: dio,
+          accountReader: () async => account,
+          headersReader: () async => {},
+          proofSigner: (_) async => '',
+          guard: () {},
+          retryDelay: (_) async {},
+        );
+        await expectLater(
+          client.request(path, body: {'fixture': true}),
+          throwsA(isA<EvmRpcException>()),
+        );
+        expect(attempts, 1);
+      }
+    },
+  );
+
+  test(
+    'a wallet switch during retry delay stops before the second request',
+    () async {
+      var attempts = 0, changed = false;
+      final dio = Dio()
+        ..interceptors.add(
+          InterceptorsWrapper(
+            onRequest: (options, handler) {
+              attempts++;
+              handler.reject(
+                DioException(
+                  requestOptions: options,
+                  type: DioExceptionType.connectionTimeout,
+                ),
+              );
+            },
+          ),
+        );
+      final client = ChainBackendClient(
+        config: arcMainnetConfig,
+        baseUrl: 'https://example.test',
+        dio: dio,
+        accountReader: () async => account,
+        headersReader: () async => {},
+        proofSigner: (_) async => '',
+        guard: () {
+          if (changed) throw StateError('session changed');
+        },
+        retryDelay: (_) async {
+          changed = true;
+        },
+      );
+      await expectLater(
+        client.request('/v1/chains/arc/config'),
+        throwsStateError,
+      );
+      expect(attempts, 1);
+    },
+  );
 }
