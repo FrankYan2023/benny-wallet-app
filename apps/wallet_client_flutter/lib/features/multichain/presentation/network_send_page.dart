@@ -1,3 +1,4 @@
+import '../../../core/widgets/wallet_dropdown.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -213,30 +214,81 @@ class _NetworkSendPageState extends ConsumerState<NetworkSendPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            DropdownButtonFormField<String>(
-              key: ValueKey(asset.id),
-              initialValue: asset.id,
-              isExpanded: true,
-              decoration: InputDecoration(
-                labelText: chainText(context, 'Asset', '资产'),
-              ),
-              items: [
+            WalletDropdown<String>(
+              enabled: !_busy,
+              tooltip: chainText(context, 'Choose asset', '选择资产'),
+              onSelected: (value) => setState(() {
+                _selectedAssetId = value;
+                _error = null;
+              }),
+              itemBuilder: (context) => [
                 for (final item in assets)
-                  DropdownMenuItem(
+                  PopupMenuItem<String>(
                     value: item.id,
-                    child: Text(
-                      item.symbol,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    height: 56,
+                    padding: EdgeInsets.zero,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: item.id == asset.id
+                            ? Theme.of(
+                                context,
+                              ).colorScheme.primary.withValues(alpha: .08)
+                            : null,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item.symbol,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (item.id == asset.id)
+                            Icon(
+                              Icons.check_rounded,
+                              size: 20,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                        ],
+                      ),
                     ),
                   ),
               ],
-              onChanged: _busy
-                  ? null
-                  : (value) => setState(() {
-                      _selectedAssetId = value;
-                      _error = null;
-                    }),
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  enabled: !_busy,
+                  labelText: chainText(context, 'Asset', '资产'),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surface,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 18,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        asset.symbol,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Icon(
+                      Icons.expand_more_rounded,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 10),
             Text(

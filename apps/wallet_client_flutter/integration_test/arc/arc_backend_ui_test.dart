@@ -353,6 +353,6 @@ Future<void> selectNetworkMenu(WidgetTester tester, String label) => tap(
   tester,
   find.ancestor(
     of: find.text(label).last,
-    matching: find.byType(CheckedPopupMenuItem<String>),
+    matching: find.byType(PopupMenuItem<String>),
   ),
 );

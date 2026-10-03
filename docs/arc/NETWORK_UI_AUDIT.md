@@ -2,9 +2,20 @@
 
 日期：2026-09-29；基线：`595efa2`。仅修改既有 Flutter 客户端，未修改后端、网络配置或钱包存储。
 
-## 2026-10-03 布局调整
+## 2026-10-03 下拉框统一同宽（当前实现）
 
-Send/Receive 及共享活动页的网络选择框与页面内容等宽；展开菜单独立为224px，位于框下方并留8px间距。框保持白色、圆角与右侧箭头；菜单细边框，选中项暖色底与勾号。此实现替代同日208px窄选择框。最终14项相关组件测试通过，Android热更新成功；[展开效果](evidence/receive-fullwidth-control-menu-20261003.png)、[关闭效果](evidence/receive-fullwidth-control-20261003.png)，见[本次验证](VALIDATION.md)。
+按最新反馈，展开菜单与触发选择框等宽、左右对齐，替代之前固定224px的独立菜单。所有实际下拉框统一使用 `core/widgets/wallet_dropdown.dart` 的 WalletDropdown：按父布局读取控件宽度，下方8px展开、22px圆角、细边框无重阴影，选中项暖色底与勾号。
+
+| 实际下拉框 / 页面 | 宽度与覆盖 | 源码 |
+| --- | --- | --- |
+| 网络选择 / Send、Receive、共享活动页 | 框与页面内容等宽，菜单与框等宽 | chain_widgets.dart → WalletDropdown |
+| 首页网络筛选 | 按钮和菜单均120px，保留地球/链图标、网络名称和勾号；全部网络文字可换行 | portfolio_network_widgets.dart → WalletDropdown |
+| Arc发送币种选择 | 选择框与卡片内容等宽，菜单随框宽度；保留资产切换及忙碌禁用 | network_send_page.dart → WalletDropdown |
+| 设置语言 / 自动锁定、Swap选择面板 | 使用底部面板/对话框/独立币种页面，不是下拉菜单，保持现有交互 | settings_page.dart、swap_page.dart |
+
+检查范围：客户端全部 lib 和 packages/design_system/lib；搜索 DropdownButton、DropdownMenu、PopupMenuButton、showMenu、MenuAnchor、MenuItemButton，当前仅统一组件含实际菜单实现。14项现有组件测试通过、7个受影响文件静态分析通过。已有两份集成测试同步首页选项匹配，本轮未运行设备集成测试。
+
+人工查看390px公开组件fixture截图：[接收网络菜单](evidence/receive-matched-width-menu-20261003.png)、[首页筛选菜单](evidence/home-matched-width-menu-20261003.png)、[发送币种菜单](evidence/send-asset-matched-width-menu-20261003.png)。首页截图为菜单/资产组合fixture，并非完整真实首页；Arc Testnet仅是测试数据，Android调试仍使用既有生产主网接口。先前截图和历史验证保留在 CHANGELOG / VALIDATION。
 
 ## 一致规则
 

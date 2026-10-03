@@ -1,5 +1,11 @@
 # Arc 完整修改记录
 
+## 2026-10-03 · 所有下拉菜单与触发框同宽
+
+根据最新反馈，取消224px独立菜单宽度。新增共享 `core/widgets/wallet_dropdown.dart`：展开菜单读取触发控件所在布局宽度，下方8px展开，统一白底、22px圆角、细边框及选中项暖色底/勾号。Send/Receive/活动网络选择保持完整页面内容宽；首页筛选框及菜单固定120px；Arc发送币种选择同卡片内容宽，保留忙碌禁用和原资产切换。首页菜单从 CheckedPopupMenuItem 改用 PopupMenuItem，两份集成测试匹配同步。
+
+全客户端和设计组件库审查发现三处实际下拉入口，均迁入 WalletDropdown；设置/Swap 的底部面板及对话框保留。已有14项组件测试通过，无增删测试，补充三处展开截图；7个受影响文件静态分析通过，Android生产API调试热更新成功。未修改协议、后台、密钥、网络配置；完整Android/iOS重建、设备端到端和资金链路本轮未重跑。文件及证据见 [NETWORK_UI_AUDIT](NETWORK_UI_AUDIT.md)，实际结果见 [VALIDATION](VALIDATION.md)。
+
 ## 2026-10-03 · 完整宽选择框与独立紧凑菜单
 
 根据进一步反馈，收发网络选择框应与页面内容等宽，仅展开菜单需要紧凑。共享 ChainNetworkSelector 改用 PopupMenuButton：完整宽度白色选择框、浮动 Network 标签和右侧箭头；下方8px间距展开224px圆角菜单，细边框、无重阴影，选中项暖色底与勾号。框宽与菜单宽独立，沿用本地图标和原回调/忙碌保护。

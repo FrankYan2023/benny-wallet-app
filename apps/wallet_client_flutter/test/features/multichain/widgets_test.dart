@@ -1,3 +1,4 @@
+import 'package:wallet_client_flutter/core/widgets/wallet_dropdown.dart';
 import 'package:wallet_client_flutter/features/send/presentation/pages/send_history_page.dart';
 import 'package:wallet_client_flutter/core/network/api_client.dart';
 import 'dart:async';
@@ -310,6 +311,7 @@ void main() {
     expect(find.textContaining('Arc Testnet'), findsWidgets);
     await tester.tap(find.byKey(const Key('portfolio-network-menu')));
     await tester.pumpAndSettle();
+    await screenshot(tester, 'home-network-menu-matched');
     await tester.tap(find.text('Arc Testnet').last);
     await tester.pumpAndSettle();
     expect(find.text('Primary asset row'), findsNothing);
@@ -429,7 +431,7 @@ void main() {
       expect(find.text(solana.address), findsOneWidget);
       await tester.tap(find.byType(ChainNetworkSelector));
       await tester.pumpAndSettle();
-      await screenshot(tester, 'receive-network-menu-compact');
+      await screenshot(tester, 'receive-network-menu-matched');
       await tester.tap(find.text('Arc Testnet').last);
       await tester.pumpAndSettle();
       expect(find.text(fixture.address), findsOneWidget);
@@ -464,6 +466,11 @@ void main() {
         const NetworkSendPage(chainId: 'arc-testnet'),
         rpc: rpc,
       );
+      await tester.tap(find.byType(WalletDropdown<String>));
+      await tester.pumpAndSettle();
+      await screenshot(tester, 'send-asset-menu-matched');
+      await tester.tap(find.text('USDC').last);
+      await tester.pumpAndSettle();
       await tester.enterText(
         find.byType(TextFormField).at(0),
         fixture.recipient,

@@ -1,6 +1,14 @@
 # 验证记录与待验收事项
 
-## 2026-10-03 选择框与菜单分别布局（最新）
+## 2026-10-03 所有下拉菜单同宽（最新）
+
+- 客户端全 lib 与设计组件库静态搜索审查：三处下拉入口共用 WalletDropdown；网络字段/币种字段按页面/卡片内容宽度，首页筛选框和菜单120px。菜单在框下方8px，统一圆角/细边框/选中底色与勾号。
+- `flutter test --no-pub test/features/multichain/widgets_test.dart`：最终14项通过，无新增/移除测试；已有首页/接收/发送用例补展开菜单截图，资产选择匹配同步新组件。覆盖网络切换、表单清空、收款地址/二维码、发送确认与显式广播、锁定/儿童限制和交易所属链标识。
+- `flutter analyze --no-pub lib/core/widgets/wallet_dropdown.dart lib/features/multichain/presentation/chain_widgets.dart lib/features/multichain/presentation/portfolio_network_widgets.dart lib/features/multichain/presentation/network_send_page.dart integration_test/arc/arc_backend_ui_test.dart integration_test/arc/arc_emulator_smoke_test.dart test/features/multichain/widgets_test.dart`：No issues found。设备集成测试仅同步匹配，未重新运行。
+- 三张390px组件截图人工查看，无文字/图标溢出，菜单与框左右对齐：[接收](evidence/receive-matched-width-menu-20261003.png)、[首页菜单fixture](evidence/home-matched-width-menu-20261003.png)、[发送币种](evidence/send-asset-matched-width-menu-20261003.png)。公开无资金Arc Testnet fixture；运行app仍使用生产主网配置。
+- Android普通生产API full debug 热更新成功，调试连接保留；本轮无完整Android重建/安装、iOS构建、资金交易或后台变更。
+
+## 2026-10-03 选择框与菜单分别布局（上一版）
 
 - 完整宽选择框 + 224px紧凑菜单，PopupMenuPosition.under + 8px间距；选中项图标/名称/暖色底/勾号，细边框无重阴影。
 - `flutter test --no-pub test/features/multichain/widgets_test.dart`：最终14项通过，无新增测试。首次替换集成测试 finder 静态检查发现缺少组件 import，补齐后通过。

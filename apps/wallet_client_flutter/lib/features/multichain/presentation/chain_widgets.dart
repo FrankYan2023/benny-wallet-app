@@ -1,3 +1,4 @@
+import '../../../core/widgets/wallet_dropdown.dart';
 import '../../../core/widgets/network_badge.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
@@ -73,21 +74,8 @@ class ChainNetworkSelector extends ConsumerWidget {
     final configs = ref.watch(chainConfigsProvider);
     final selected = findChain(configs, value);
     final theme = Theme.of(context);
-    return PopupMenuButton<String>(
+    return WalletDropdown<String>(
       tooltip: chainText(context, 'Choose network', '选择网络'),
-      position: PopupMenuPosition.under,
-      offset: const Offset(0, 8),
-      constraints: const BoxConstraints.tightFor(width: 224),
-      menuPadding: const EdgeInsets.all(8),
-      color: theme.colorScheme.surface,
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(22),
-        side: BorderSide(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: .65),
-        ),
-      ),
       onSelected: onChanged,
       itemBuilder: (_) => [
         for (final config in configs)

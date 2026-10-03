@@ -1,5 +1,9 @@
 # AI 接手说明
 
+## 2026-10-03 下拉菜单同宽
+
+当前所有实际下拉入口复用 `core/widgets/wallet_dropdown.dart` 的 WalletDropdown，菜单必须与触发选择框同宽、左右对齐。Send/Receive/活动及发送币种框跟随页面/卡片内容宽度，首页按钮和菜单120px；保留链图标、选中暖色底及勾号。后续页面请继续复用该组件，不恢复固定224px菜单或旧灰色Dropdown。14项组件回归、静态检查通过，Android生产接口调试热更新成功；本轮无iOS/完整构建/资金重测。详情与截图见 [NETWORK_UI_AUDIT](NETWORK_UI_AUDIT.md) 和 [VALIDATION](VALIDATION.md)。
+
 ## 2026-09-29 网络标识统一
 
 网络图标、交易历史来源与逐页覆盖见 [NETWORK_UI_AUDIT](NETWORK_UI_AUDIT.md)。后续新增网络标签复用 NetworkBadge / ChainNetworkIdentity；历史必须取记录 chainId，不取当前筛选值。20 项相关测试及 Android debug 更新通过，后端和钱包存储未变。

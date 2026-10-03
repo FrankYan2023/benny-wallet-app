@@ -1,3 +1,4 @@
+import '../../../core/widgets/wallet_dropdown.dart';
 import '../../../core/widgets/network_badge.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
@@ -106,77 +107,111 @@ class PortfolioNetworkMenu extends ConsumerWidget {
     final selected = ref.watch(portfolioNetworkFilterProvider);
     final configs = ref.watch(chainConfigsProvider);
     final config = selected == null ? null : findChain(configs, selected);
-    return PopupMenuButton<String>(
-      key: const Key('portfolio-network-menu'),
-      tooltip:
-          '${chainText(context, 'Choose networks', '选择网络')}: '
-          '${config?.displayName ?? chainText(context, 'All networks', '全部网络')}',
-      initialValue: selected ?? 'all',
-      onSelected: (value) {
-        ref.read(portfolioNetworkFilterProvider.notifier).state = value == 'all'
-            ? null
-            : value;
-        if (value != 'all')
-          ref.read(selectedChainIdProvider.notifier).state = value;
-      },
-      itemBuilder: (_) => [
-        CheckedPopupMenuItem(
-          value: 'all',
-          checked: selected == null,
-          child: Row(
-            children: [
-              const Icon(Icons.public_rounded, size: 24),
-              const SizedBox(width: 12),
-              Flexible(child: Text(chainText(context, 'All networks', '全部网络'))),
-            ],
-          ),
-        ),
-        for (final item in configs)
-          CheckedPopupMenuItem(
-            value: item.id,
-            checked: selected == item.id,
-            child: NetworkBadge.fromConfig(item, compact: false),
-          ),
-      ],
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 44, maxWidth: 116),
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: .18),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (config == null)
-              Icon(
-                Icons.public_rounded,
-                key: const Key('portfolio-all-networks-icon'),
-                size: 24,
-                color: Theme.of(context).colorScheme.onPrimary,
-              )
-            else ...[
-              NetworkIcon(iconAsset: config.iconAsset, size: 20),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  config.displayName.split(' ').first,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    fontWeight: FontWeight.w700,
-                  ),
+    final theme = Theme.of(context);
+    const menuWidth = 120.0;
+    return SizedBox(
+      width: menuWidth,
+      child: WalletDropdown<String>(
+        key: const Key('portfolio-network-menu'),
+        tooltip:
+            '${chainText(context, 'Choose networks', '选择网络')}: '
+            '${config?.displayName ?? chainText(context, 'All networks', '全部网络')}',
+        menuPadding: const EdgeInsets.all(4),
+        onSelected: (value) {
+          ref.read(portfolioNetworkFilterProvider.notifier).state =
+              value == 'all' ? null : value;
+          if (value != 'all')
+            ref.read(selectedChainIdProvider.notifier).state = value;
+        },
+        itemBuilder: (_) => [
+          for (final id in ['all', ...configs.map((item) => item.id)])
+            PopupMenuItem<String>(
+              value: id,
+              height: 56,
+              padding: EdgeInsets.zero,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: id == (selected ?? 'all')
+                      ? theme.colorScheme.primary.withValues(alpha: .08)
+                      : null,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    NetworkIcon(
+                      iconAsset: id == 'all'
+                          ? null
+                          : findChain(configs, id)?.iconAsset,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        id == 'all'
+                            ? chainText(context, 'All networks', '全部网络')
+                            : findChain(configs, id)!.displayName,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ),
+                    if (id == (selected ?? 'all')) ...[
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.check_rounded,
+                        size: 16,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            ],
-            const SizedBox(width: 4),
-            Icon(
-              Icons.expand_more_rounded,
-              color: Theme.of(context).colorScheme.onPrimary,
-              size: 20,
             ),
-          ],
+        ],
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 44),
+          width: menuWidth,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: .18),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (config == null)
+                Icon(
+                  Icons.public_rounded,
+                  key: const Key('portfolio-all-networks-icon'),
+                  size: 24,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                )
+              else ...[
+                NetworkIcon(iconAsset: config.iconAsset, size: 20),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    config.displayName.split(' ').first,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(width: 4),
+              Icon(
+                Icons.expand_more_rounded,
+                color: Theme.of(context).colorScheme.onPrimary,
+                size: 20,
+              ),
+            ],
+          ),
         ),
       ),
     );
