@@ -1,5 +1,9 @@
 import 'package:design_system/design_system.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wallet_client_flutter/features/notifications/presentation/providers/notification_inbox_provider.dart';
+import 'package:wallet_client_flutter/features/portfolio/domain/entities/defi_position_view_data.dart';
+import 'package:wallet_client_flutter/features/portfolio/presentation/pages/portfolio_page.dart';
 import 'package:wallet_client_flutter/features/send/presentation/pages/send_history_page.dart';
 import 'package:wallet_client_flutter/core/network/api_client.dart';
 import 'dart:async';
@@ -75,9 +79,12 @@ Future<void> show(
   bool arcUnavailable = false,
   List<ChainAsset>? arcAssets,
   bool withSendRouter = false,
+  PortfolioViewData? portfolioData,
+  Size viewport = const Size(390, 844),
+  double textScale = 1,
   List<ChainActivity> activity = const [],
 }) async {
-  tester.view.physicalSize = const Size(390, 844);
+  tester.view.physicalSize = viewport;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
@@ -109,6 +116,12 @@ Future<void> show(
         )
       : null;
   if (router != null) addTearDown(router.dispose);
+  Widget scaledText(BuildContext context, Widget? child) => MediaQuery(
+    data: MediaQuery.of(
+      context,
+    ).copyWith(textScaler: TextScaler.linear(textScale)),
+    child: child!,
+  );
   final app = router == null
       ? MaterialApp(
           debugShowCheckedModeBanner: false,
@@ -116,6 +129,7 @@ Future<void> show(
           locale: const Locale('en'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
+          builder: scaledText,
           home: Scaffold(body: page),
         )
       : MaterialApp.router(
@@ -124,6 +138,7 @@ Future<void> show(
           locale: const Locale('en'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
+          builder: scaledText,
           routerConfig: router,
         );
   await tester.pumpWidget(
@@ -132,14 +147,26 @@ Future<void> show(
         walletRepositoryProvider.overrideWithValue(PendingRepository()),
         activePortfolioProvider.overrideWith(
           (ref) => AsyncData(
-            PortfolioViewData(
+            portfolioData ??
+                PortfolioViewData(
+                  address: 'root-1',
+                  assets: [],
+                  totalValueUsd: 0,
+                  lastUpdatedAt: DateTime(2026),
+                ),
+          ),
+        ),
+        activeDefiPortfolioProvider.overrideWith(
+          (ref) => AsyncData(
+            DefiPortfolioViewData(
               address: 'root-1',
-              assets: [],
+              positions: const [],
               totalValueUsd: 0,
               lastUpdatedAt: DateTime(2026),
             ),
           ),
         ),
+        unreadNotificationCountProvider.overrideWithValue(0),
         walletControllerProvider.overrideWith(
           (ref) => TestWalletController(ref, state),
         ),
@@ -326,39 +353,72 @@ void main() {
   testWidgets('home defaults to both networks and filters shared asset rows', (
     tester,
   ) async {
+    final today = DateTime.now();
+    SharedPreferences.setMockInitialValues({
+      'app_update.dismissed_date':
+          '${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}',
+    });
+    await show(tester, const PortfolioPage());
+    expect(
+      find.byKey(const Key('portfolio-all-networks-icon')),
+      findsOneWidget,
+    );
+    expect(find.text('Total Balance'), findsOneWidget);
+    expect(find.byType(TokenRow), findsNWidgets(2));
+    expect(find.text('Solana'), findsWidgets);
+    expect(find.textContaining('Arc Testnet'), findsWidgets);
+    await screenshot(tester, 'home-balance-all');
+    await tester.tap(find.byKey(const Key('portfolio-network-menu')));
+    await tester.pumpAndSettle();
+    await screenshot(tester, 'home-network-menu-matched');
+    await tester.tap(
+      find.ancestor(
+        of: find.text('Arc Testnet').last,
+        matching: find.byType(PopupMenuItem<String>),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Solana'), findsNothing);
+    expect(find.byType(TokenRow), findsOneWidget);
+    expect(find.textContaining('Arc Testnet'), findsWidgets);
+    await screenshot(tester, 'home-balance-arc');
+    await tester.tap(find.byKey(const Key('portfolio-network-menu')));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.ancestor(
+        of: find.text('Solana').last,
+        matching: find.byType(PopupMenuItem<String>),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Solana'), findsWidgets);
+    expect(find.byType(TokenRow), findsOneWidget);
+    expect(find.textContaining('Arc Testnet'), findsNothing);
+    await screenshot(tester, 'home-balance-solana');
+    expect(tester.takeException(), isNull);
+    // Render the real balance card in a narrow viewport with a larger font
+    // and a long total. A new scope restores the default all-networks filter.
+    await tester.pumpWidget(const SizedBox.shrink());
     await show(
       tester,
-      Column(
-        children: [
-          const PortfolioNetworkMenu(),
-          Consumer(
-            builder: (_, ref, _) => ref.watch(showPrimaryPortfolioProvider)
-                ? const Text('Primary asset row')
-                : const SizedBox.shrink(),
-          ),
-          const AdditionalAssetRows(),
-        ],
+      const PortfolioPage(),
+      portfolioData: PortfolioViewData(
+        address: 'root-1',
+        assets: const [],
+        totalValueUsd: 123456789.12,
+        lastUpdatedAt: DateTime(2026),
       ),
+      viewport: const Size(320, 844),
+      textScale: 1.25,
     );
     expect(
       find.byKey(const Key('portfolio-all-networks-icon')),
       findsOneWidget,
     );
-    expect(find.text('Primary asset row'), findsOneWidget);
-    expect(find.textContaining('Arc Testnet'), findsWidgets);
-    await tester.tap(find.byKey(const Key('portfolio-network-menu')));
-    await tester.pumpAndSettle();
-    await screenshot(tester, 'home-network-menu-matched');
-    await tester.tap(find.text('Arc Testnet').last);
-    await tester.pumpAndSettle();
-    expect(find.text('Primary asset row'), findsNothing);
-    expect(find.textContaining('Arc Testnet'), findsWidgets);
-    await tester.tap(find.byKey(const Key('portfolio-network-menu')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Solana').last);
-    await tester.pumpAndSettle();
-    expect(find.text('Primary asset row'), findsOneWidget);
-    expect(find.textContaining('Arc Testnet'), findsNothing);
+    expect(find.text(r'$123456789.12'), findsOneWidget);
+    await screenshot(tester, 'home-balance-narrow-large-text');
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
   });
   testWidgets(
     'Arc outage does not hide primary assets or prevent network selection',

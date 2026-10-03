@@ -2,6 +2,10 @@
 
 日期：2026-09-29；基线：`595efa2`。仅修改既有 Flutter 客户端，未修改后端、网络配置或钱包存储。
 
+## 2026-10-03 首页筛选避免遮挡
+
+网络筛选移到余额卡片独立顶部行右侧，左侧为Total Balance标签；金额另行居中，取消原Stack及88px左右预留。All与两条链的筛选行为、同宽下拉和图标保留，长数字/窄屏不再与按钮重叠。真实页面fixture [All](evidence/home-balance-all-20261003.png) / [Solana](evidence/home-balance-solana-20261003.png) / [Arc](evidence/home-balance-arc-20261003.png) / [窄屏长金额](evidence/home-balance-narrow-large-text-20261003.png) 已复核，结果见 [VALIDATION](VALIDATION.md)。
+
 ## 2026-10-03 Swap标题栏
 
 Swap与xStocks使用左侧标题、右侧链图标/名称，同一44px顶栏垂直居中；24px图标与同级字号改善原混排错位。加载/空态/儿童/错误/正常状态统一，[截图](evidence/swap-network-header-aligned-20261003.png)已复核。兑换仍限Solana，首次Arc提示未改变。

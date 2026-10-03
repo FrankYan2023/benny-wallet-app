@@ -1,5 +1,13 @@
 # 验证记录与待验收事项
 
+## 2026-10-03 首页网络筛选与余额避免重叠（最新）
+
+- 基线c994139。首页卡片取消金额/网络控件Stack：Total Balance标签与筛选在独立顶部行，金额在下行完整内容宽度居中缩放。All/Solana/Arc下拉继续与按钮同宽；筛选/总额逻辑不变。
+- `flutter test --no-pub test/features/multichain/widgets_test.dart`：最终18项通过，无新增/删除测试。将已有首页简化Column fixture换成真实PortfolioPage，覆盖默认两链、切链资产列表与返回；截图包含三种筛选及320px/字体1.25/123456789.12长金额。测试辅助覆写空DeFi、未读数、更新提示，避免后台请求/计时器；首轮仅金额期望的千位分隔格式写错，按实际Formatter修正后全文件通过。
+- 源码portfolio_page.dart及修改组件测试分别静态分析No issues found；`git diff --check`通过。
+- 已人工查看真实页面组件fixture：[All](evidence/home-balance-all-20261003.png)、[Solana](evidence/home-balance-solana-20261003.png)、[Arc](evidence/home-balance-arc-20261003.png)、[窄屏/长余额](evidence/home-balance-narrow-large-text-20261003.png)。按钮背景与余额分区，无覆盖/余额裁切。Arc Testnet/100USDC及长总额为公开测试数据，不代表生产持仓；320px/放大字体下既有顶部品牌与资产行会截短，本轮余额布局没有扩大该修改范围。
+- Android普通main.dart生产API调试热更新559ms成功，连接保留；本轮无完整Android/iOS重建、设备联调或资金操作。UI保留PIN会话锁定规则，不自动解锁。先前全量本地化/构建缓存检查问题没有重测或宣称消除。
+
 ## 2026-10-03 Swap顶部网络标识对齐（最新）
 
 - Swap/xStocks标题左侧、Solana标识右侧，同一顶栏垂直居中；标识44px高、24px图标、字号采用titleLarge，所有主页面状态统一。源码及兑换协议/范围无其他变化。

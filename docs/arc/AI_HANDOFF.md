@@ -1,5 +1,9 @@
 # AI 接手说明
 
+## 2026-10-03 首页余额卡片筛选布局
+
+首页网络选择放在余额卡片独立顶部行，与Total Balance标签同一行；总金额在下一行居中显示，不再与按钮共用Stack。不要恢复88px侧边预留或金额上的覆盖层。All/Solana/Arc筛选和同宽菜单规则不变。真实页面组件截图与窄屏/长金额验证见 [VALIDATION](VALIDATION.md)。
+
 ## 2026-10-03 Send交互对齐
 
 Arc现在按原Solana流程：共享Send币种列表 → 锁定币种的填写页 → 独立确认路由 → 发送中/结果。复用 `features/send/presentation/widgets/send_widgets.dart`，不要恢复内嵌Arc发送表单或币种下拉。`NetworkSendPage.composePathFor`保留network/asset/recipient；详情页可直达。Max走ChainTransferController.maximumAmount与EvmAdapter实时精确费用预留；扫码通过recipient_decoder拒绝显式错误EVM链和合约transfer URI。完整地址和最高USDC费用在确认页可读。原Solana派生/存储/交易逻辑未改，服务端无变更。当前结果、已知全量检查问题与实机限制见 [VALIDATION](VALIDATION.md)，对齐说明见 [SEND_UX_PARITY](SEND_UX_PARITY.md)。

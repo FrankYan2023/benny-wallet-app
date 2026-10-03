@@ -371,7 +371,7 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
         ),
       ],
       Container(
-        padding: const EdgeInsets.fromLTRB(16, 26, 16, 20),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(32),
           gradient: LinearGradient(
@@ -392,35 +392,41 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
         ),
         child: Column(
           children: [
-            Stack(
-              alignment: Alignment.center,
+            Row(
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 88),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      (data == null &&
-                                  ref.watch(showPrimaryPortfolioProvider)) ||
-                              (!ref.watch(showPrimaryPortfolioProvider) &&
-                                  additionalValue.incomplete &&
-                                  !additionalValue.hasData)
-                          ? '--'
-                          : Formatters.usd(totalValueUsd),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.displayLarge?.copyWith(
-                        color: theme.colorScheme.onPrimary,
-                        fontSize: 48,
-                        letterSpacing: -1.8,
-                      ),
+                Expanded(
+                  child: Text(
+                    context.l10n.childTotalBalance,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onPrimary.withValues(alpha: .85),
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                const Align(
-                  alignment: Alignment.centerRight,
-                  child: PortfolioNetworkMenu(),
-                ),
+                const SizedBox(width: 12),
+                const PortfolioNetworkMenu(),
               ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  (data == null && ref.watch(showPrimaryPortfolioProvider)) ||
+                          (!ref.watch(showPrimaryPortfolioProvider) &&
+                              additionalValue.incomplete &&
+                              !additionalValue.hasData)
+                      ? '--'
+                      : Formatters.usd(totalValueUsd),
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.displayLarge?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                    fontSize: 48,
+                    letterSpacing: -1.8,
+                  ),
+                ),
+              ),
             ),
             if (additionalValue.incomplete)
               Padding(
