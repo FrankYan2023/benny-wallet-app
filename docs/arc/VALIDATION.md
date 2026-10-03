@@ -1,5 +1,13 @@
 # 验证记录与待验收事项
 
+## 2026-10-03 Seeker 真机调试启动（最新）
+
+- 代码基线a2bc494；Seeker/Android16/API36/ARM64，普通main.dart、full/STORE_MODE=full、生产API。独立构建16.6s、安装5.4s、同步196ms，欢迎页与调试连接成功；没有覆盖/卸载旧Lite，其0.0.51/51版本和安装更新时间不变。没有钱包数据迁移、集成harness或公开QA钱包导入。
+- 默认Arc主网5042，经生产/v1/arc-rpc；SeekerVault保留默认开启但未执行授权/签名。电脑只读探测的认证/config/RPC/USDC精度/费用/receipt/logs/原Solana余额通过；不是手机认证后验收。
+- **索引健康未通过**：16:42/16:43Z观察到 `Arc index pass failed; cursors retained for retry.`，最后成功16:38:40Z，启用为true。带indexer断言探测失败；只读接口探测通过不能隐藏该问题。
+- 手机欢迎页等待持有人创建私有无资金测试钱包/PIN。两链首页/余额/收发/历史、生物识别、扫码、资金、FCM和旧版升级尚未执行；Firebase runtime options未配置。检查时AndroidRuntime/Flutter错误级崩溃日志无输出，不能代替完整运行验收。
+- 启动方式与待测表见 [ANDROID_PHYSICAL_DEBUG](ANDROID_PHYSICAL_DEBUG.md)。本轮仅启动联调与文档，没有应用源码/后台/数据库改动，未重跑单元测试或iOS；工具自动追加Gradle属性已恢复。
+
 ## 2026-10-03 首页网络筛选与余额避免重叠（最新）
 
 - 基线c994139。首页卡片取消金额/网络控件Stack：Total Balance标签与筛选在独立顶部行，金额在下行完整内容宽度居中缩放。All/Solana/Arc下拉继续与按钮同宽；筛选/总额逻辑不变。

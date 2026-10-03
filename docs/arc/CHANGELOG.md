@@ -1,5 +1,11 @@
 # Arc 完整修改记录
 
+## 2026-10-03 · Seeker 真机调试与生产复查
+
+Seeker Android16独立新装普通full debug，保留旧Lite，生产API/Arc默认主网5042；构建/安装/欢迎页/调试连接通过。SeekerVault默认开启但未验收，持有人私有无资金钱包/PIN初始化待完成。运行基线a2bc494，无应用源码/后台/数据库改动。
+
+电脑只读认证/config/RPC/USDC精度/费用/receipt/logs/原Solana余额通过；索引health报重试失败，带indexer断言的探测失败，未用只读通过覆盖故障。新增ANDROID_PHYSICAL_DEBUG，更新AI_HANDOFF、DEVELOPMENT、README与VALIDATION，记录启动参数、包隔离/旧版升级边界及真机待测顺序。未增删自动测试或重跑iOS。
+
 ## 2026-10-03 · 首页网络筛选与余额分行
 
 修复首页120px网络筛选框与总余额共用Stack而互相覆盖的问题。余额卡片顶部改为独立行：左侧使用已有本地化Total Balance标签，右侧All/链筛选；总金额在下一行使用完整内容宽度居中缩放。移除金额左右88px预留，卡片顶部内边距调整为16px。控件蒙版不再叠在余额上，长金额也不与控件争用空间。

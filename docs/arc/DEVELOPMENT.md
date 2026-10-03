@@ -1,5 +1,9 @@
 # 开发、构建与复测
 
+## 2026-10-03 Android 真机
+
+Seeker Android16普通full debug已独立启动，生产API/Arc主网5042，保留原Lite。真机命令、默认SeekerVault功能与Arc软件钱包边界，以及尚需持有人完成的钱包初始化见 [ANDROID_PHYSICAL_DEBUG](ANDROID_PHYSICAL_DEBUG.md)。下面含模拟器专用QA的历史命令，不能照搬到个人设备；真实接口与索引最新结果见 [VALIDATION](VALIDATION.md)。
+
 ## 环境与目录
 
 以下命令从仓库根目录进入 `apps/wallet_client_flutter` 执行。验证机使用 Flutter 3.41.6 / Dart 3.11.4 / macOS，Android Pixel 7 API 36 ARM64 专用模拟器。Dart最低版本与依赖看 `pubspec.yaml` / `pubspec.lock`。本仓库尚无 GitHub Actions 配置，GitHub分支存在不代表CI已经运行。

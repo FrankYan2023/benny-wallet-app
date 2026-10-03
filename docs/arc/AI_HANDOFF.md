@@ -1,5 +1,11 @@
 # AI 接手说明
 
+## 2026-10-03 Android 真机调试启动
+
+Seeker Android16已独立安装普通full debug（Benny Wallet Full/com.benny.wallet），保留旧com.benny.wallet.lite，生产API/Arc主网5042。客户端运行a2bc494，欢迎页及热更新连接建立；等待持有人自行创建私有无资金软件钱包/PIN，不安装公开模拟器QA钱包。SeekerVault默认开启但未验收；Vault/MWA无本地根助记词仍不支持Arc。
+
+电脑只读RPC通过，但索引健康16:42/16:43Z返回重试错误、最后成功16:38:40Z。不要用09-28历史通过声称当前索引正常，也不把电脑接口检查当成手机收发通过。启动与待测步骤见 [ANDROID_PHYSICAL_DEBUG](ANDROID_PHYSICAL_DEBUG.md)、[VALIDATION](VALIDATION.md)。
+
 ## 2026-10-03 首页余额卡片筛选布局
 
 首页网络选择放在余额卡片独立顶部行，与Total Balance标签同一行；总金额在下一行居中显示，不再与按钮共用Stack。不要恢复88px侧边预留或金额上的覆盖层。All/Solana/Arc筛选和同宽菜单规则不变。真实页面组件截图与窄屏/长金额验证见 [VALIDATION](VALIDATION.md)。

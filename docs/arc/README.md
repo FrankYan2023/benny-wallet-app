@@ -1,5 +1,9 @@
 # Arc / Multichain 文档入口
 
+## 最新真机调试：2026-10-03
+
+Seeker Android16普通full debug已启动，与旧Lite独立共存，生产API/Arc主网5042；等待持有人创建私有无资金测试钱包/PIN。电脑只读接口通过，生产历史索引健康报重试错误。启动命令、当前结果和待测顺序见 [ANDROID_PHYSICAL_DEBUG](ANDROID_PHYSICAL_DEBUG.md)；下面09-28结论是历史记录，最新状态以 [VALIDATION](VALIDATION.md) 为准。
+
 更新时间：2026-09-28。开发保留 `arc` 分支，交付快进合并到 `main`。先读 [MAINNET_PARITY](MAINNET_PARITY.md) 与 [后台实施文档](https://github.com/FrankYan2023/benny-wallet/blob/arc/docs/ARC_MULTICHAIN.md)；客户端默认主网/后台模式，数据库增量和后台 main 自动发布已完成，生产只读/索引验证通过，详见 [发布记录](https://github.com/FrankYan2023/benny-wallet/blob/main/docs/ARC_RELEASE_2026_09_27.md)；资金与设备验收仍待完成。下表中标注 2026-09-25 的记录保留为历史证据。
 
 ## 阅读顺序
