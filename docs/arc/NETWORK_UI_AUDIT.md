@@ -2,6 +2,10 @@
 
 日期：2026-09-29；基线：`595efa2`。仅修改既有 Flutter 客户端，未修改后端、网络配置或钱包存储。
 
+## 2026-10-03 Swap标题栏
+
+Swap与xStocks使用左侧标题、右侧链图标/名称，同一44px顶栏垂直居中；24px图标与同级字号改善原混排错位。加载/空态/儿童/错误/正常状态统一，[截图](evidence/swap-network-header-aligned-20261003.png)已复核。兑换仍限Solana，首次Arc提示未改变。
+
 ## 2026-10-03 Send 交互按 Solana 统一（当前实现）
 
 Arc移除独立币种下拉和首页内嵌发送表单，改为与原Solana相同的持仓币种列表 → 专属填写页 → 独立确认页 → 发送中/结果。填写和确认共用原Solana展示组件，网络图标持续可见；币种行保留链角标、仅可用正余额进入列表，零余额同原Solana空态。资产详情Send直接打开对应币种填写页。
@@ -51,7 +55,7 @@ Arc移除独立币种下拉和首页内嵌发送表单，改为与原Solana相�
 | Arc 活动/交易详情 | 列表状态附近和展开详情均按交易 chainId 显示；修复新版 Flutter 的 ExpansionTile 点击效果背景遮挡断言 | features/multichain/presentation/network_page.dart |
 | 收款通知列表/详情 | 有 chainId 按记录显示；旧 incoming_funds 无 chainId 按旧 Solana 来源显示；未知链不冒充 Solana | features/notifications/presentation/pages/notifications_page.dart |
 | 钱包导入账户选择 | 原通用 hub 图标换为 Solana 标识 | features/onboarding/presentation/pages/import_wallet_selection_page.dart |
-| Swap / xStocks | 标题配 Solana 标识；付款/收款币种选择页、确认页、处理/结果页补网络标识；Arc Swap 仍不支持，首次提示保留 | features/swap/presentation/pages/swap_page.dart、swap_review_page.dart、swap_execute_page.dart |
+| Swap / xStocks | 主标题栏右侧显示 Solana 标识，44px高并与Swap/xStocks居中对齐，各主页面状态统一；付款/收款币种选择页、确认页、处理/结果页补网络标识；Arc Swap 仍不支持，首次提示保留 | features/swap/presentation/pages/swap_page.dart、swap_review_page.dart、swap_execute_page.dart |
 
 ## 验证与证据
 

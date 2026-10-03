@@ -1,5 +1,11 @@
 # Arc 完整修改记录
 
+## 2026-10-03 · Swap标题与右侧网络标识对齐
+
+按反馈把Solana网络图标/名称从Swap标题旁的混排移至AppScaffold右侧actions区域。标题恢复Swap/xStocks，链标识固定44px高度、24px图标，与标题同级字号并垂直居中；加载、空态、儿童限制、错误和正常状态全部复用。正常状态原右侧装饰swap图标由链标识替代，没有删掉可操作按钮。兑换/链限制/首次提示逻辑未改。
+
+文件：swap_page.dart；已有solana_swap_scope_test首次提示用例补实际字体/390px截图，未新增/删除测试。3项Swap测试通过，两个文件静态检查通过，Android热更新2369ms成功，生产API调试继续保留。[截图](evidence/swap-network-header-aligned-20261003.png)已人工查看，范围见 [VALIDATION](VALIDATION.md)。
+
 ## 2026-10-03 · Arc Send沿用原Solana流程
 
 修复两链不同交互：Arc不再在Send选择网络后直接展示一页表单。两链先显示正余额币种列表，Arc点击进入锁定币种填写页，再通过Next估费进入独立确认页，Cancel/返回保留填写内容，Send显式签名广播并展示发送中/结果。原Solana填写和确认的外观抽成共享send_widgets，业务逻辑不改；Arc沿用头像、扫码、金额/Max、可用余额、取消/下一步、确认摘要和结果样式。

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_types/shared_types.dart';
 import 'package:wallet_client_flutter/app/di/providers.dart';
+import 'package:wallet_client_flutter/app/theme/app_theme.dart';
 import 'package:wallet_client_flutter/core/network/api_client.dart';
 import 'package:wallet_client_flutter/features/auth/presentation/providers/wallet_controller.dart';
 import 'package:wallet_client_flutter/features/portfolio/domain/entities/portfolio_view_data.dart';
@@ -78,6 +80,19 @@ class MixedCatalogApi extends BackendApiClient {
 }
 
 void main() {
+  setUpAll(() async {
+    for (final entry in {
+      'Manrope': 'assets/fonts/Manrope/Manrope-wght.ttf',
+      'Sora': 'assets/fonts/Sora/Sora-wght.ttf',
+      'Plus Jakarta Sans':
+          'assets/fonts/PlusJakartaSans/PlusJakartaSans-wght.ttf',
+      'MaterialIcons': 'fonts/MaterialIcons-Regular.otf',
+    }.entries) {
+      await (FontLoader(
+        entry.key,
+      )..addFont(rootBundle.load(entry.value))).load();
+    }
+  });
   test(
     'Solana swap excludes EVM holdings, catalog and search results',
     () async {
@@ -130,6 +145,10 @@ void main() {
   testWidgets('Arc swap notice is acknowledged once across page recreation', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     SharedPreferences.setMockInitialValues({});
     Future<void> openSwap() async {
       await tester.pumpWidget(
@@ -143,10 +162,15 @@ void main() {
             ),
             activePortfolioProvider.overrideWith((ref) => const AsyncLoading()),
           ],
-          child: const MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: SwapPage(),
+          child: RepaintBoundary(
+            key: fixture.screenshotKey,
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light(),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: const SwapPage(),
+            ),
           ),
         ),
       );
@@ -164,6 +188,7 @@ void main() {
       await AppSettingsRepository().hasAcknowledgedArcSwapNotice(),
       isTrue,
     );
+    await fixture.screenshot(tester, 'swap-network-header-aligned');
     await tester.pumpWidget(const SizedBox.shrink());
     await openSwap();
     expect(find.text('ARC Swap coming soon'), findsNothing);

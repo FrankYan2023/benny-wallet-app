@@ -1,5 +1,13 @@
 # 验证记录与待验收事项
 
+## 2026-10-03 Swap顶部网络标识对齐（最新）
+
+- Swap/xStocks标题左侧、Solana标识右侧，同一顶栏垂直居中；标识44px高、24px图标、字号采用titleLarge，所有主页面状态统一。源码及兑换协议/范围无其他变化。
+- `flutter test --no-pub test/features/swap/solana_swap_scope_test.dart`：最终3项通过，无新增/删除测试。现有首次提示用例加载真实字体、390×844 viewport，补顶部对齐截图；初版截图使用测试默认字形，补字体后重跑通过。
+- `flutter analyze --no-pub lib/features/swap/presentation/pages/swap_page.dart test/features/swap/solana_swap_scope_test.dart`：No issues found。
+- [字体加载后的组件截图](evidence/swap-network-header-aligned-20261003.png)人工查看：标题与图标/网络名居中对齐，右侧清晰，无裁切。截图是加载状态fixture；正常/空态/错误等使用同一标识构建方法，未逐状态真机截图。
+- Android普通main.dart生产API full debug热更新2369ms成功，调试连接保留；本轮未重新完整构建Android/iOS、未跑设备QA或兑换资金。上一轮记录的全量本地化/构建缓存问题不因本轮局部测试通过而消除。
+
 ## 2026-10-03 Send交互按原Solana统一（最新）
 
 代码基线 `a9c9fb3`；本轮Send对齐改动，提交可从 [CHANGELOG](CHANGELOG.md) / Git历史追溯。没有后台/数据库/密钥/链常量改动。
