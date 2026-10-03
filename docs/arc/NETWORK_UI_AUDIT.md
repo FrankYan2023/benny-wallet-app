@@ -4,7 +4,7 @@
 
 ## 2026-10-03 布局调整
 
-Send/Receive 及共享活动页的网络选择框改为左对齐紧凑宽度208px；展开菜单同宽，圆角保留，小屏以父约束缩小，避免占满页面。最终14项相关组件测试通过，Android 热更新成功，见 [本次验证](VALIDATION.md)。
+Send/Receive 及共享活动页的网络选择框与页面内容等宽；展开菜单独立为224px，位于框下方并留8px间距。框保持白色、圆角与右侧箭头；菜单细边框，选中项暖色底与勾号。此实现替代同日208px窄选择框。最终14项相关组件测试通过，Android热更新成功；[展开效果](evidence/receive-fullwidth-control-menu-20261003.png)、[关闭效果](evidence/receive-fullwidth-control-20261003.png)，见[本次验证](VALIDATION.md)。
 
 ## 一致规则
 

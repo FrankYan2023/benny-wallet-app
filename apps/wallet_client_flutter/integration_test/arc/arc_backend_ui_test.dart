@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:wallet_client_flutter/features/multichain/presentation/chain_widgets.dart';
 import 'package:wallet_client_flutter/features/portfolio/presentation/providers/portfolio_provider.dart';
 import 'package:wallet_client_flutter/features/portfolio/domain/entities/portfolio_view_data.dart';
 import 'package:wallet_client_flutter/features/portfolio/domain/entities/defi_position_view_data.dart';
@@ -239,7 +240,7 @@ void main() {
       await selectNetworkMenu(tester, 'All networks');
       await tap(tester, find.text('Receive').first);
       await waitFor(tester, find.text(solanaAddress));
-      await tap(tester, find.byType(DropdownButtonFormField<String>));
+      await tap(tester, find.byType(ChainNetworkSelector));
       await tap(tester, find.text('Arc').last);
       await waitFor(tester, find.text(evmAddress));
       expect(find.text(solanaAddress), findsNothing);

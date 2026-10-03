@@ -1,5 +1,13 @@
 # 验证记录与待验收事项
 
+## 2026-10-03 选择框与菜单分别布局（最新）
+
+- 完整宽选择框 + 224px紧凑菜单，PopupMenuPosition.under + 8px间距；选中项图标/名称/暖色底/勾号，细边框无重阴影。
+- `flutter test --no-pub test/features/multichain/widgets_test.dart`：最终14项通过，无新增测试。首次替换集成测试 finder 静态检查发现缺少组件 import，补齐后通过。
+- `dart analyze lib/features/multichain/presentation/chain_widgets.dart integration_test/arc/arc_backend_ui_test.dart integration_test/arc/arc_emulator_smoke_test.dart`：No issues found；两份设备集成测试仅同步 finder，本轮未重跑生产资金或端到端链路。
+- Android普通生产 API full debug 热更新成功（515ms），调试连接保留，无重新构建/安装或iOS验证。
+- 已人工查看[展开菜单](evidence/receive-fullwidth-control-menu-20261003.png)和[关闭选择框](evidence/receive-fullwidth-control-20261003.png)，宽度、图标、选中项无溢出。截图为公开 Arc Testnet 组件fixture，模拟器仍连接既有主网配置。
+
 ## 2026-10-03 网络选择框宽度
 
 - `flutter test --no-pub test/features/multichain/widgets_test.dart`：最终14项通过，包含 Send/Receive 切换、地址/二维码一致性、表单清空、网络历史标识；既有菜单文字点击警告保留。对齐菜单时一次构造函数参数错误导致编译失败，修正后重新全文件通过。

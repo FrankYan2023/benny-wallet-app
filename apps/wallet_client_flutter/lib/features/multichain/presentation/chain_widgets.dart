@@ -69,41 +69,89 @@ class ChainNetworkSelector extends ConsumerWidget {
   final ValueChanged<String> onChanged;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Align(
-    alignment: Alignment.centerLeft,
-    child: SizedBox(
-      width: 208,
-      child: ButtonTheme.fromButtonThemeData(
-        data: ButtonTheme.of(context).copyWith(alignedDropdown: true),
-        child: DropdownButtonFormField<String>(
-          initialValue: value,
-          key: ValueKey(value),
-          isExpanded: true,
-          borderRadius: BorderRadius.circular(20),
-          menuMaxHeight: 280,
-          icon: const Icon(Icons.expand_more_rounded),
-          decoration: InputDecoration(
-            labelText: chainText(context, 'Network', '网络'),
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 12,
-            ),
-          ),
-          items: [
-            for (final config in ref.watch(chainConfigsProvider))
-              DropdownMenuItem(
-                value: config.id,
-                child: NetworkBadge.fromConfig(config, compact: false),
-              ),
-          ],
-          onChanged: (value) {
-            if (value != null) onChanged(value);
-          },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final configs = ref.watch(chainConfigsProvider);
+    final selected = findChain(configs, value);
+    final theme = Theme.of(context);
+    return PopupMenuButton<String>(
+      tooltip: chainText(context, 'Choose network', '选择网络'),
+      position: PopupMenuPosition.under,
+      offset: const Offset(0, 8),
+      constraints: const BoxConstraints.tightFor(width: 224),
+      menuPadding: const EdgeInsets.all(8),
+      color: theme.colorScheme.surface,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: BorderSide(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: .65),
         ),
       ),
-    ),
-  );
+      onSelected: onChanged,
+      itemBuilder: (_) => [
+        for (final config in configs)
+          PopupMenuItem<String>(
+            value: config.id,
+            height: 56,
+            padding: EdgeInsets.zero,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              decoration: BoxDecoration(
+                color: config.id == value
+                    ? theme.colorScheme.primary.withValues(alpha: .08)
+                    : null,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: NetworkBadge.fromConfig(config, compact: false),
+                  ),
+                  if (config.id == value) ...[
+                    const SizedBox(width: 10),
+                    Icon(
+                      Icons.check_rounded,
+                      size: 20,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+      ],
+      child: SizedBox(
+        width: double.infinity,
+        child: InputDecorator(
+          decoration: InputDecoration(
+            labelText: chainText(context, 'Network', '网络'),
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            filled: true,
+            fillColor: theme.colorScheme.surface,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 18,
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: selected == null
+                    ? NetworkBadge(name: value, compact: false)
+                    : NetworkBadge.fromConfig(selected, compact: false),
+              ),
+              const SizedBox(width: 12),
+              Icon(
+                Icons.expand_more_rounded,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class ChainErrorCard extends StatelessWidget {

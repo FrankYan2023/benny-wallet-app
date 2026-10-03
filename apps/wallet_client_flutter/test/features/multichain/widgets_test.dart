@@ -427,7 +427,7 @@ void main() {
     (tester) async {
       await show(tester, const ReceivePage());
       expect(find.text(solana.address), findsOneWidget);
-      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      await tester.tap(find.byType(ChainNetworkSelector));
       await tester.pumpAndSettle();
       await screenshot(tester, 'receive-network-menu-compact');
       await tester.tap(find.text('Arc Testnet').last);

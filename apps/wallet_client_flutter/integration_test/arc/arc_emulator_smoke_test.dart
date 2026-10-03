@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:wallet_client_flutter/features/multichain/presentation/chain_widgets.dart';
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter/material.dart';
@@ -133,7 +134,7 @@ void main() {
       await selectNetworkMenu(tester, 'All networks');
       await tap(tester, find.text('Receive').first);
       await waitFor(tester, find.text(solanaAddress));
-      await tap(tester, find.byType(DropdownButtonFormField<String>));
+      await tap(tester, find.byType(ChainNetworkSelector));
       await tap(tester, find.text(networkName).last);
       await waitFor(tester, find.text(evmAddress));
       expect(find.text(solanaAddress), findsNothing);
