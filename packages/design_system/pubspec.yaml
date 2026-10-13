@@ -1,0 +1,14 @@
+name: design_system
+description: Shared UI primitives for Benny Wallet.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: "^3.8.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
