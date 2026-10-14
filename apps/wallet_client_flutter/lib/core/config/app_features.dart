@@ -108,11 +108,18 @@ abstract final class AppFeatures {
 
   static bool get isLiteStore => storeMode == StoreMode.lite;
 
+  // Lite release builds (Google Play, iOS) also pass FEATURE_SWAP_*=false.
+  // The hidden unlock switches to the full feature set, so it overrides
+  // those lite-only flags.
+  static bool get _unlockedLite =>
+      buildStoreMode == StoreMode.lite && fullUnlocked.value;
+
   static bool get canOpenSwap =>
-      !isLiteStore && swapEnabled && tokenExchangeEnabled;
+      !isLiteStore &&
+      (_unlockedLite || (swapEnabled && tokenExchangeEnabled));
 
   static bool get canOpenXStocks =>
-      !isLiteStore && swapEnabled && xstocksEnabled;
+      !isLiteStore && (_unlockedLite || (swapEnabled && xstocksEnabled));
 
   static bool get canOpenAirdrop => airdropEnabled;
 
