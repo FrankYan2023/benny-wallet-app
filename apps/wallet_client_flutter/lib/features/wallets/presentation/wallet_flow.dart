@@ -284,6 +284,12 @@ Future<void> startAddWallet(BuildContext context, WidgetRef ref) async {
     ).showSnackBar(SnackBar(content: Text(l10n.walletChildModeLocked)));
     return;
   }
+  if (walletState.travelGuardSession) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.walletActionFailed)));
+    return;
+  }
   if (walletState.wallets.length >= AppConstants.maxWalletCount) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

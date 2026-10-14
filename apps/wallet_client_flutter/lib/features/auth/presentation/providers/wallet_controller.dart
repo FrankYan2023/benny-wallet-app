@@ -41,6 +41,15 @@ class ChildModeRestrictionException implements Exception {
   String toString() => 'Turn off child mode to manage wallets.';
 }
 
+/// Biometric unlock would skip the PIN choice between the app PIN and the
+/// travel guard PIN, so it stays off while the guard is set.
+class TravelGuardBlocksBiometricsException implements Exception {
+  const TravelGuardBlocksBiometricsException();
+
+  @override
+  String toString() => 'Turn off the travel guard to use biometric unlock.';
+}
+
 /// What the add-wallet flow collected before the name step.
 class NewWalletInput {
   const NewWalletInput.mnemonic({
@@ -94,6 +103,9 @@ class WalletController extends StateNotifier<WalletControllerState> {
   /// Ephemeral-store token for the base64 master key; never in state.
   String? _masterKeyToken;
 
+  /// Whether a travel guard PIN is set; mirrored into every state.
+  bool _travelGuardArmed = false;
+
   WalletRepository get _repository => ref.read(walletRepositoryProvider);
 
   MnemonicEphemeralStore get _ephemeralStore =>
@@ -114,7 +126,13 @@ class WalletController extends StateNotifier<WalletControllerState> {
       return;
     }
 
-    final sanitized = await _sanitizeBiometricRecords(records);
+    _travelGuardArmed = await _repository.travelGuardPublicKey() != null;
+    var sanitized = await _sanitizeBiometricRecords(records);
+    if (_travelGuardArmed && sanitized.any((r) => r.biometricEnabled)) {
+      await _repository.clearBiometricSession();
+      await _repository.setBiometricEnabledForAll(false);
+      sanitized = await _repository.readRecords();
+    }
     final record = await _repository.readSelectedRecordFrom(sanitized);
     if (record == null) {
       state = WalletControllerState.noWallet;
@@ -371,7 +389,7 @@ class WalletController extends StateNotifier<WalletControllerState> {
   /// Makes [publicKey] the active wallet. While unlocked this is instant
   /// (one AES decrypt, no PIN); when locked it only changes the selection.
   Future<void> selectWallet(String publicKey) async {
-    if (publicKey == state.publicKey) {
+    if (publicKey == state.publicKey || state.travelGuardSession) {
       return;
     }
     if (state.isUnlocked && state.childModeEnabled) {
@@ -400,7 +418,16 @@ class WalletController extends StateNotifier<WalletControllerState> {
   Future<void> renameWallet(String publicKey, String name) async {
     await _repository.renameWallet(publicKey: publicKey, name: name);
     final records = await _repository.readRecords();
-    state = state.copyWith(wallets: _summaries(records));
+    state = state.copyWith(
+      wallets: _summaries(
+        state.travelGuardSession
+            ? [
+                for (final r in records)
+                  if (r.publicKey == state.publicKey) r,
+              ]
+            : records,
+      ),
+    );
   }
 
   Future<String> nextDefaultWalletName() async {
@@ -427,8 +454,8 @@ class WalletController extends StateNotifier<WalletControllerState> {
   }
 
   /// Seed Vault signed for [publicKey] only with [newToken] / [derivationPath]
-  /// (what it lists now). Every wallet on [oldToken] moves to the new token,
-  /// and [publicKey] keeps the working path.
+  /// (what it lists now). If [oldToken] was [publicKey]'s stored token, every
+  /// wallet on it moves to the new token; [publicKey] keeps the working path.
   Future<void> updateSeedVaultAccount({
     required String publicKey,
     required String oldToken,
@@ -441,15 +468,22 @@ class WalletController extends StateNotifier<WalletControllerState> {
       publicKey: publicKey,
       derivationPath: derivationPath,
     );
-    if (state.custody == WalletCustody.seedVault) {
-      state = state.copyWith(
-        mwaAuthToken: state.mwaAuthToken == oldToken ? newToken : null,
-        seedVaultDerivationPath: state.publicKey == publicKey
-            ? derivationPath
-            : null,
-        clearError: true,
-      );
+    if (state.custody != WalletCustody.seedVault) {
+      return;
     }
+    // Mirror what was stored for the current wallet, which may not be
+    // [publicKey] if the user switched while signing.
+    final current = (await _repository.readRecords())
+        .where((record) => record.publicKey == state.publicKey)
+        .firstOrNull;
+    if (current == null || current.custody != WalletCustody.seedVault) {
+      return;
+    }
+    state = state.copyWith(
+      mwaAuthToken: current.mwaAuthToken,
+      seedVaultDerivationPath: current.seedVaultDerivationPath,
+      clearError: true,
+    );
   }
 
   Future<void> updateMobileWalletAdapterAuthToken(String authToken) async {
@@ -462,6 +496,48 @@ class WalletController extends StateNotifier<WalletControllerState> {
       authToken: authToken,
     );
     state = state.copyWith(mwaAuthToken: authToken, clearError: true);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Travel guard
+  // ---------------------------------------------------------------------------
+
+  /// Wallet the travel guard PIN opens, or null when it is off.
+  Future<String?> travelGuardPublicKey() => _repository.travelGuardPublicKey();
+
+  /// Sets [guardPin] to open [publicKey] alone and turns biometrics off.
+  /// Needs the master key in memory (verify the app PIN first).
+  Future<void> enableTravelGuard({
+    required String publicKey,
+    required String guardPin,
+  }) async {
+    final masterKey = _readMasterKey();
+    if (masterKey == null) {
+      throw const MasterKeyLockedException();
+    }
+    await _repository.setTravelGuard(
+      masterKey: masterKey,
+      publicKey: publicKey,
+      guardPin: guardPin,
+    );
+    await _repository.clearBiometricSession();
+    await _repository.setBiometricEnabledForAll(false);
+    _travelGuardArmed = true;
+    state = state.copyWith(
+      travelGuardArmed: true,
+      biometricEnabled: false,
+      clearError: true,
+    );
+  }
+
+  /// Turns the travel guard off. Needs the master key in memory.
+  Future<void> disableTravelGuard() async {
+    if (_readMasterKey() == null) {
+      throw const MasterKeyLockedException();
+    }
+    await _repository.clearTravelGuard();
+    _travelGuardArmed = false;
+    state = state.copyWith(travelGuardArmed: false, clearError: true);
   }
 
   // ---------------------------------------------------------------------------
@@ -482,6 +558,13 @@ class WalletController extends StateNotifier<WalletControllerState> {
       unawaited(_upgradeBiometricToMasterKey(masterKey));
       await _activate(record.publicKey, source: 'pin_unlock', pin: pin);
     } catch (error) {
+      final guard = _travelGuardArmed
+          ? await _repository.unlockTravelGuard(pin)
+          : null;
+      if (guard != null) {
+        _activateTravelGuard(guard);
+        return;
+      }
       debugPrint('[SECURITY] PIN unlock failed: $error');
       _clearSecrets();
       state = _lockedState(
@@ -500,9 +583,38 @@ class WalletController extends StateNotifier<WalletControllerState> {
     }
   }
 
+  /// Opens only the travel guard wallet: no master key, no other wallets,
+  /// no background work that would touch the other wallets.
+  void _activateTravelGuard(TravelGuardUnlock guard) {
+    _clearSecrets();
+    final mnemonic = guard.mnemonic;
+    _setUnlockedState(
+      guard.record,
+      records: [guard.record],
+      mnemonicTokenId: mnemonic == null ? null : _storeMnemonic(mnemonic),
+      travelGuardSession: true,
+    );
+    debugPrint('[SECURITY] Unlocked one wallet.');
+  }
+
+  Future<TravelGuardUnlock> _verifyTravelGuardPin(String pin) async {
+    final guard = await _repository.unlockTravelGuard(pin);
+    if (guard == null || guard.record.publicKey != state.publicKey) {
+      throw StateError('Incorrect PIN');
+    }
+    return guard;
+  }
+
   Future<bool> requiresPinSetup() => _repository.requiresPinSetup();
 
   Future<String> authenticate(String pin) async {
+    if (state.travelGuardSession) {
+      final mnemonic = (await _verifyTravelGuardPin(pin)).mnemonic;
+      if (mnemonic == null) {
+        throw StateError('This wallet is connected through Seeker Vault.');
+      }
+      return mnemonic;
+    }
     final record = await _repository.readRecord(publicKey: state.publicKey);
     if (record == null) {
       throw StateError('Wallet not found');
@@ -511,6 +623,10 @@ class WalletController extends StateNotifier<WalletControllerState> {
   }
 
   Future<void> verifyPin(String pin) async {
+    if (state.travelGuardSession) {
+      await _verifyTravelGuardPin(pin);
+      return;
+    }
     final masterKey = await _repository.unlockMasterKey(pin);
     _storeMasterKey(masterKey);
   }
@@ -523,6 +639,9 @@ class WalletController extends StateNotifier<WalletControllerState> {
         return false;
       }
 
+      if (_travelGuardArmed) {
+        return false;
+      }
       final records = await _repository.readRecords();
       final record = await _repository.readSelectedRecordFrom(records);
       if (record == null || !records.any((r) => r.biometricEnabled)) {
@@ -571,6 +690,9 @@ class WalletController extends StateNotifier<WalletControllerState> {
   Future<void> setBiometricEnabled(bool enabled) async {
     if (state.publicKey == null) {
       throw StateError('No wallet selected.');
+    }
+    if (enabled && (_travelGuardArmed || state.travelGuardSession)) {
+      throw const TravelGuardBlocksBiometricsException();
     }
     if (enabled && !_supportsPersistentBiometricSessions) {
       throw StateError(
@@ -861,6 +983,19 @@ class WalletController extends StateNotifier<WalletControllerState> {
       state = WalletControllerState.noWallet;
       return;
     }
+    if (state.travelGuardSession) {
+      // Back to the real wallet list behind the lock screen.
+      state = state.copyWith(
+        status: WalletStatus.locked,
+        clearMnemonic: true,
+        clearMnemonicToken: true,
+        clearError: true,
+        travelGuardSession: false,
+        travelGuardArmed: _travelGuardArmed,
+      );
+      unawaited(_restoreLockedState());
+      return;
+    }
     state = state.copyWith(
       status: WalletStatus.locked,
       clearMnemonic: true,
@@ -870,7 +1005,22 @@ class WalletController extends StateNotifier<WalletControllerState> {
     );
   }
 
+  Future<void> _restoreLockedState() async {
+    final records = await _repository.readRecords();
+    final record = await _repository.readSelectedRecordFrom(records);
+    if (record == null || state.status != WalletStatus.locked) {
+      return;
+    }
+    state = _lockedState(record, records: records);
+  }
+
+  /// Wipes every wallet, except in a travel guard session, where it only
+  /// locks: the session must never be able to delete the hidden wallets.
   Future<void> logOut() async {
+    if (state.travelGuardSession) {
+      lock();
+      return;
+    }
     final records = await _repository.readRecords();
     await _deauthorizeSeedVaultRecords(records);
     await _prunePushWallets(const []);
@@ -902,6 +1052,9 @@ class WalletController extends StateNotifier<WalletControllerState> {
   /// Removes one wallet. If it was active, the next wallet becomes active
   /// (without asking for the PIN while unlocked).
   Future<void> removeWallet(String publicKey) async {
+    if (state.travelGuardSession) {
+      throw StateError('Wallet cannot be removed right now.');
+    }
     final records = await _repository.readRecords();
     final record = records.where((r) => r.publicKey == publicKey).firstOrNull;
     if (record == null) {
@@ -1067,6 +1220,7 @@ class WalletController extends StateNotifier<WalletControllerState> {
     StoredWalletRecord record, {
     required List<StoredWalletRecord> records,
     String? mnemonicTokenId,
+    bool travelGuardSession = false,
   }) {
     final previousToken = state.mnemonicTokenId;
     state = WalletControllerState(
@@ -1083,11 +1237,15 @@ class WalletController extends StateNotifier<WalletControllerState> {
           ? null
           : record.seedVaultDerivationPath,
       walletLabel: record.walletLabel.isEmpty ? null : record.walletLabel,
-      biometricEnabled: _resolvedBiometricEnabled(records),
+      biometricEnabled:
+          !_travelGuardArmed && _resolvedBiometricEnabled(records),
       childModeEnabled: record.childModeEnabled,
       hasChildModePin: record.hasChildModePin,
       childWallets: _loadChildWallets(record),
       loggedOut: false,
+      // A guard session looks like an ordinary wallet without the guard.
+      travelGuardArmed: _travelGuardArmed && !travelGuardSession,
+      travelGuardSession: travelGuardSession,
     );
     if (previousToken != null && previousToken != mnemonicTokenId) {
       _ephemeralStore.clear(previousToken);
@@ -1105,6 +1263,9 @@ class WalletController extends StateNotifier<WalletControllerState> {
   /// Throttled: skipped when the same wallets were synced recently, unless
   /// [force] (new wallet, notifications turned on, FCM token changed).
   Future<void> syncPushForAllWallets({bool force = false}) async {
+    if (state.travelGuardSession) {
+      return;
+    }
     try {
       final settings = await ref.read(appSettingsRepositoryProvider).load();
       if (!settings.notificationsEnabled || !state.isUnlocked) {
@@ -1605,12 +1766,14 @@ class WalletController extends StateNotifier<WalletControllerState> {
           ? null
           : record.seedVaultDerivationPath,
       walletLabel: record.walletLabel.isEmpty ? null : record.walletLabel,
-      biometricEnabled: _resolvedBiometricEnabled(records),
+      biometricEnabled:
+          !_travelGuardArmed && _resolvedBiometricEnabled(records),
       childModeEnabled: record.childModeEnabled,
       hasChildModePin: record.hasChildModePin,
       childWallets: _loadChildWallets(record),
       loggedOut: false,
       errorMessage: errorMessage,
+      travelGuardArmed: _travelGuardArmed,
     );
   }
 }

@@ -89,6 +89,7 @@
   "settingsSeedPhraseBackupDescription": "物理コピーを安全な場所に保管することをお勧めします。",
   "settingsSecureNow": "今すぐ安全を確保",
   "settingsCheckingUpdates": "チェック中...",
+  "settingsFullFeaturesUnlocked": "全機能が解放されました",
   "settingsCheckForUpdates": "アップデートをチェックする",
   "settingsVersion": "バージョン {version}",
   "@settingsVersion": {
@@ -654,5 +655,19 @@
   "settingsLogOutAllWallets": "この端末から {count} 個のウォレットをすべて削除します。先に各リカバリーフレーズをバックアップしてください。",
   "importAccountLabel": "アカウント {number}",
   "importAccountAltLabel": "アカウント {number} · 代替パス",
-  "importLegacyLabel": "レガシー"
+  "importLegacyLabel": "レガシー",
+  "travelGuardTitle": "旅行用防犯モード",
+  "travelGuardOffSubtitle": "1 つのウォレットだけを開く特別な PIN",
+  "travelGuardOnSubtitle": "オン：特別な PIN は 1 つのウォレットだけを開きます",
+  "travelGuardInfoTitle": "旅行用防犯モードとは",
+  "travelGuardInfoBody": "ウォレットを開くよう脅されたときのための機能です。\n\n特別な PIN を設定し、ウォレットを 1 つ選びます（少額だけ入れておくのがおすすめ）。特別な PIN で解除するとそのウォレットだけが開き、他のウォレットや残高、メッセージはウォレット一覧や送金を含めてすべて非表示になり、この設定も表示されません。\n\nオンの間は生体認証が無効になり、有効にできません。\n\nアプリをロックして通常の PIN で解除すると、すべてのウォレットに戻ります。",
+  "travelGuardChooseWallet": "特別な PIN で開くウォレットを選択",
+  "travelGuardNewPin": "特別な PIN を設定",
+  "travelGuardConfirmPin": "特別な PIN をもう一度入力",
+  "travelGuardPinHint": "通常の PIN とは別の番号にしてください。",
+  "travelGuardPinSameAsApp": "これは通常の PIN です。別の番号にしてください。",
+  "travelGuardEnabled": "旅行用防犯モードをオンにしました",
+  "travelGuardDisabled": "旅行用防犯モードをオフにしました",
+  "travelGuardActiveBadge": "旅行用防犯モード オン",
+  "travelGuardBiometricsOff": "旅行用防犯モード中は使用できません"
 }

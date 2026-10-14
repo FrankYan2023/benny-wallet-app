@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app.dart';
+import 'core/config/app_features.dart';
 import 'features/settings/data/app_settings_repository.dart';
 import 'features/settings/presentation/providers/app_settings_controller.dart';
 
@@ -18,6 +19,7 @@ Future<void> main() async {
     debugPrint = (String? message, {int? wrapWidth}) {};
   }
   final initialSettings = await AppSettingsRepository().load();
+  await AppFeatures.loadFullUnlock();
   runApp(
     ProviderScope(
       overrides: [

@@ -253,6 +253,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsCheckingUpdates => 'Checking...';
 
   @override
+  String get settingsFullFeaturesUnlocked => 'Full features unlocked';
+
+  @override
   String get settingsCheckForUpdates => 'Check for updates';
 
   @override
@@ -2030,4 +2033,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importLegacyLabel => 'Legacy';
+
+  @override
+  String get travelGuardTitle => 'Travel guard';
+
+  @override
+  String get travelGuardOffSubtitle =>
+      'A special PIN that opens only one wallet';
+
+  @override
+  String get travelGuardOnSubtitle => 'On: the special PIN opens one wallet';
+
+  @override
+  String get travelGuardInfoTitle => 'What is travel guard?';
+
+  @override
+  String get travelGuardInfoBody =>
+      'For when someone forces you to open your wallet.\n\nSet a special PIN and pick one wallet (keep a small amount in it). Unlocking with the special PIN opens only that wallet: your other wallets, their balances and messages are hidden everywhere, including wallet lists and send, and this setting is hidden too. It looks like an ordinary wallet.\n\nWhile travel guard is on, biometric unlock is turned off and cannot be turned on, so the PIN is always asked.\n\nLock the app (or let it lock) and unlock with your normal PIN to see all your wallets again.';
+
+  @override
+  String get travelGuardChooseWallet =>
+      'Choose the wallet the special PIN opens';
+
+  @override
+  String get travelGuardNewPin => 'Set the special PIN';
+
+  @override
+  String get travelGuardConfirmPin => 'Enter the special PIN again';
+
+  @override
+  String get travelGuardPinHint => 'It must differ from your normal PIN.';
+
+  @override
+  String get travelGuardPinSameAsApp =>
+      'This is your normal PIN. Choose another one.';
+
+  @override
+  String get travelGuardEnabled => 'Travel guard is on';
+
+  @override
+  String get travelGuardDisabled => 'Travel guard is off';
+
+  @override
+  String get travelGuardActiveBadge => 'Travel guard is on';
+
+  @override
+  String get travelGuardBiometricsOff => 'Unavailable while travel guard is on';
 }

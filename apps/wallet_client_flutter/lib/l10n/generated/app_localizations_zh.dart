@@ -239,6 +239,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsCheckingUpdates => '檢查中...';
 
   @override
+  String get settingsFullFeaturesUnlocked => '已開啟全功能版';
+
+  @override
   String get settingsCheckForUpdates => '檢查更新';
 
   @override
@@ -1926,6 +1929,49 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get importLegacyLabel => '舊版路徑';
+
+  @override
+  String get travelGuardTitle => '旅行防搶劫';
+
+  @override
+  String get travelGuardOffSubtitle => '設定一組只打開一個錢包的特殊 PIN';
+
+  @override
+  String get travelGuardOnSubtitle => '已開啟：特殊 PIN 只打開一個錢包';
+
+  @override
+  String get travelGuardInfoTitle => '什麼是旅行防搶劫？';
+
+  @override
+  String get travelGuardInfoBody =>
+      '用於被人脅迫打開錢包的時候。\n\n設定一組特殊 PIN 並選擇一個錢包（建議只放少量資金）。用特殊 PIN 解鎖時只會打開這個錢包：其他錢包、它們的餘額和訊息在所有地方都會隱藏，包括錢包列表和轉帳，這個設定本身也會隱藏，看起來就像普通錢包。\n\n開啟後生物辨識解鎖會自動關閉且無法開啟，每次都需要輸入 PIN。\n\n鎖定 App（或等待自動鎖定）後用正常 PIN 解鎖，就會回到所有錢包。';
+
+  @override
+  String get travelGuardChooseWallet => '選擇特殊 PIN 要打開的錢包';
+
+  @override
+  String get travelGuardNewPin => '設定特殊 PIN';
+
+  @override
+  String get travelGuardConfirmPin => '再輸入一次特殊 PIN';
+
+  @override
+  String get travelGuardPinHint => '不能和正常解鎖 PIN 相同。';
+
+  @override
+  String get travelGuardPinSameAsApp => '這是你的正常 PIN，請換一組。';
+
+  @override
+  String get travelGuardEnabled => '旅行防搶劫已開啟';
+
+  @override
+  String get travelGuardDisabled => '旅行防搶劫已關閉';
+
+  @override
+  String get travelGuardActiveBadge => '旅行防搶劫已開啟';
+
+  @override
+  String get travelGuardBiometricsOff => '旅行防搶劫開啟時無法使用';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2163,6 +2209,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get settingsCheckingUpdates => '檢查中...';
 
   @override
+  String get settingsFullFeaturesUnlocked => '已開啟全功能版';
+
+  @override
   String get settingsCheckForUpdates => '檢查更新';
 
   @override
@@ -3850,4 +3899,47 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get importLegacyLabel => '舊版路徑';
+
+  @override
+  String get travelGuardTitle => '旅行防搶劫';
+
+  @override
+  String get travelGuardOffSubtitle => '設定一組只打開一個錢包的特殊 PIN';
+
+  @override
+  String get travelGuardOnSubtitle => '已開啟：特殊 PIN 只打開一個錢包';
+
+  @override
+  String get travelGuardInfoTitle => '什麼是旅行防搶劫？';
+
+  @override
+  String get travelGuardInfoBody =>
+      '用於被人脅迫打開錢包的時候。\n\n設定一組特殊 PIN 並選擇一個錢包（建議只放少量資金）。用特殊 PIN 解鎖時只會打開這個錢包：其他錢包、它們的餘額和訊息在所有地方都會隱藏，包括錢包列表和轉帳，這個設定本身也會隱藏，看起來就像普通錢包。\n\n開啟後生物辨識解鎖會自動關閉且無法開啟，每次都需要輸入 PIN。\n\n鎖定 App（或等待自動鎖定）後用正常 PIN 解鎖，就會回到所有錢包。';
+
+  @override
+  String get travelGuardChooseWallet => '選擇特殊 PIN 要打開的錢包';
+
+  @override
+  String get travelGuardNewPin => '設定特殊 PIN';
+
+  @override
+  String get travelGuardConfirmPin => '再輸入一次特殊 PIN';
+
+  @override
+  String get travelGuardPinHint => '不能和正常解鎖 PIN 相同。';
+
+  @override
+  String get travelGuardPinSameAsApp => '這是你的正常 PIN，請換一組。';
+
+  @override
+  String get travelGuardEnabled => '旅行防搶劫已開啟';
+
+  @override
+  String get travelGuardDisabled => '旅行防搶劫已關閉';
+
+  @override
+  String get travelGuardActiveBadge => '旅行防搶劫已開啟';
+
+  @override
+  String get travelGuardBiometricsOff => '旅行防搶劫開啟時無法使用';
 }

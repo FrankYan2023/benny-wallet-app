@@ -516,6 +516,79 @@ class SolanaWalletService {
         lamportsPerSol;
   }
 
+  /// Exact on-chain base-unit balance of [token] in the account a transfer
+  /// sends from. "Send max" uses it instead of converting the displayed UI
+  /// amount back, which rounds (and Token-2022 scaled amounts such as
+  /// xStocks do not convert 1:1), leaving dust behind.
+  Future<int> tokenRawBalance({
+    required String ownerAddress,
+    required TokenInfo token,
+  }) async {
+    final balance = await _senderTokenBalance(
+      ownerAddress: ownerAddress,
+      token: token,
+    );
+    return balance?.raw.toInt() ?? 0;
+  }
+
+  /// Base units for sending [uiAmount] of [token] as the wallet displays it.
+  /// Scaled Token-2022 mints (xStocks) show `raw × multiplier / 10^decimals`,
+  /// so `uiAmount × 10^decimals` would ask for more than the account holds
+  /// and the transfer fails with "insufficient funds". Uses the account's
+  /// own raw/UI ratio and never exceeds its raw balance.
+  Future<int> tokenRawAmountForUi({
+    required String ownerAddress,
+    required TokenInfo token,
+    required double uiAmount,
+  }) async {
+    final balance = await _senderTokenBalance(
+      ownerAddress: ownerAddress,
+      token: token,
+    );
+    final plain = tokenUiToAmount(uiAmount, token.decimals);
+    if (balance == null || balance.raw <= BigInt.zero || balance.ui <= 0) {
+      return plain;
+    }
+    final raw = balance.raw.toDouble();
+    // Within display rounding of the whole balance: send all of it.
+    if (uiAmount >= balance.ui * (1 - 1e-6)) {
+      return balance.raw.toInt();
+    }
+    final scaled = (uiAmount * raw / balance.ui).floor();
+    return scaled > balance.raw.toInt() ? balance.raw.toInt() : scaled;
+  }
+
+  Future<({BigInt raw, double ui})?> _senderTokenBalance({
+    required String ownerAddress,
+    required TokenInfo token,
+  }) async {
+    final rpcClient = await _getRpcClient();
+    final owner = Ed25519HDPublicKey.fromBase58(ownerAddress);
+    final mint = Ed25519HDPublicKey.fromBase58(token.mintAddress);
+    final tokenProgramType = await _resolveTokenProgramType(
+      rpcClient: rpcClient,
+      owner: owner,
+      mint: mint,
+      fallback: token.tokenProgramType,
+    );
+    final account = await _getAssociatedTokenAccount(
+      rpcClient: rpcClient,
+      owner: owner,
+      mint: mint,
+      tokenProgramType: tokenProgramType,
+      commitment: Commitment.confirmed,
+    );
+    if (account == null) {
+      return null;
+    }
+    final info = _readTokenAccountInfo(account.account.data);
+    final raw = _tokenAccountRawAmount(account);
+    final ui =
+        double.tryParse(info?.tokenAmount.uiAmountString ?? '') ??
+        raw.toDouble() / _pow10(token.decimals);
+    return (raw: raw, ui: ui);
+  }
+
   /// Lamports a "send all SOL" transfer can move so the wallet ends at exactly
   /// 0 (a system account may be emptied completely; only a balance between 0
   /// and the rent-exempt minimum is rejected). Subtracts the exact fee the

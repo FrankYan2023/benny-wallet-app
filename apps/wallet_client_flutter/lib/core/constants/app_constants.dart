@@ -25,6 +25,7 @@ abstract final class AppConstants {
 
   static const walletRecordsKey = 'wallet_records_v1';
   static const walletMasterKeyEnvelopeKey = 'wallet_master_key_envelope_v1';
+  static const travelGuardConfigKey = 'travel_guard_config_v1';
   static const maxWalletCount = 5;
   static const selectedWalletPublicKeyKey = 'selected_wallet_public_key';
   static const unlockedSessionPublicKeyKey = 'unlocked_session_public_key';

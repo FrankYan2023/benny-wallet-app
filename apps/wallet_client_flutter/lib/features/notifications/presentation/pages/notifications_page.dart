@@ -74,7 +74,7 @@ class NotificationsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final inbox = ref.watch(notificationInboxProvider);
+    final inbox = ref.watch(visibleNotificationInboxProvider);
     final receivedTransfers = ref.watch(receivedTransfersProvider);
     final unreadCount = ref.watch(unreadNotificationCountProvider);
     final l10n = context.l10n;

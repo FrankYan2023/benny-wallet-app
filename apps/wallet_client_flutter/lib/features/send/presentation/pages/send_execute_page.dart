@@ -42,6 +42,8 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
 
   /// Exact amount for a "send all SOL" transfer, so no rounding is left over.
   int? _exactLamports;
+  // SPL tokens: exact base units resolved at send time.
+  int? _exactTokenAmount;
   bool _sending = true;
 
   @override
@@ -211,6 +213,23 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
         }
         _exactLamports = maxLamports;
         amountToSend = solana.lamportsToSol(maxLamports);
+      } else if (!widget.draft.token.isNative) {
+        // Exact base units: the whole raw balance for max, otherwise the
+        // typed amount converted with the account's own scale (xStocks).
+        final rawAmount = widget.draft.isMaxAmount
+            ? await solana.tokenRawBalance(
+                ownerAddress: currentAddress,
+                token: widget.draft.token,
+              )
+            : await solana.tokenRawAmountForUi(
+                ownerAddress: currentAddress,
+                token: widget.draft.token,
+                uiAmount: widget.draft.amount,
+              );
+        if (rawAmount <= 0) {
+          throw StateError('Nothing to send.');
+        }
+        _exactTokenAmount = rawAmount;
       } else if (widget.draft.token.isNative &&
           widget.draft.amount +
                   widget.draft.estimatedNetworkFeeSol +
@@ -236,6 +255,14 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
               walletState: walletState,
               amountToSend: amountToSend,
             );
+
+      // Sender submissions return before the transaction lands; a transfer
+      // that fails on chain must not be shown as sent.
+      try {
+        await solana.waitForConfirmation(signature);
+      } on TimeoutException {
+        // Still pending: keep the submitted result, balances refresh later.
+      }
 
       _recordPendingTransfer(
         fromAddress: currentAddress,
@@ -301,10 +328,12 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
             mnemonic: mnemonic,
             token: widget.draft.token,
             destinationAddress: widget.draft.destinationAddress,
-            amount: solana.tokenUiToAmount(
-              widget.draft.amount,
-              widget.draft.token.decimals,
-            ),
+            amount:
+                _exactTokenAmount ??
+                solana.tokenUiToAmount(
+                  widget.draft.amount,
+                  widget.draft.token.decimals,
+                ),
             derivation: walletState.derivation,
             submissionAmount:
                 '${Formatters.amount(widget.draft.amount)} ${Formatters.tokenSymbol(widget.draft.token.symbol)}',
@@ -331,10 +360,12 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
             ownerAddress: ownerAddress,
             token: widget.draft.token,
             destinationAddress: widget.draft.destinationAddress,
-            amount: solana.tokenUiToAmount(
-              widget.draft.amount,
-              widget.draft.token.decimals,
-            ),
+            amount:
+                _exactTokenAmount ??
+                solana.tokenUiToAmount(
+                  widget.draft.amount,
+                  widget.draft.token.decimals,
+                ),
           );
     final result = await ref
         .read(mobileWalletAdapterServiceProvider)
@@ -375,10 +406,12 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
             ownerAddress: ownerAddress,
             token: widget.draft.token,
             destinationAddress: widget.draft.destinationAddress,
-            amount: solana.tokenUiToAmount(
-              widget.draft.amount,
-              widget.draft.token.decimals,
-            ),
+            amount:
+                _exactTokenAmount ??
+                solana.tokenUiToAmount(
+                  widget.draft.amount,
+                  widget.draft.token.decimals,
+                ),
           );
     final messages = [
       solana.signableTransactionMessageBytes(encodedTransaction),
@@ -638,6 +671,17 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
     }
     if (lower.contains('timed out') || lower.contains('timeout')) {
       return l10n.sendNetworkTakingLonger;
+    }
+    // The token program refused the amount (simulated by the backend before
+    // sending, or the landed transaction's InstructionError Custom 1).
+    if (!widget.draft.token.isNative &&
+        (lower.contains('would fail: insufficient funds') ||
+            (lower.contains('transaction failed') &&
+                lower.contains('custom: 1')))) {
+      return l10n.sendInsufficientBalance;
+    }
+    if (lower.contains('transaction failed')) {
+      return genericSendFailure;
     }
     if (lower.contains('insufficient') ||
         lower.contains('insufficient funds') ||

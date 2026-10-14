@@ -258,6 +258,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsCheckingUpdates => 'Проверка...';
 
   @override
+  String get settingsFullFeaturesUnlocked => 'Все функции разблокированы';
+
+  @override
   String get settingsCheckForUpdates => 'Проверьте наличие обновлений';
 
   @override
@@ -2063,4 +2066,50 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get importLegacyLabel => 'Устаревший путь';
+
+  @override
+  String get travelGuardTitle => 'Защита в поездке';
+
+  @override
+  String get travelGuardOffSubtitle =>
+      'Особый PIN, открывающий только один кошелёк';
+
+  @override
+  String get travelGuardOnSubtitle =>
+      'Включено: особый PIN открывает один кошелёк';
+
+  @override
+  String get travelGuardInfoTitle => 'Что такое защита в поездке?';
+
+  @override
+  String get travelGuardInfoBody =>
+      'На случай, если вас заставляют открыть кошелёк.\n\nЗадайте особый PIN и выберите один кошелёк (держите в нём немного средств). При разблокировке особым PIN откроется только он: остальные кошельки, их балансы и сообщения скрыты везде, включая списки кошельков и отправку, и эта настройка тоже скрыта.\n\nПока защита включена, биометрия отключена и не может быть включена.\n\nЗаблокируйте приложение и войдите обычным PIN, чтобы снова видеть все кошельки.';
+
+  @override
+  String get travelGuardChooseWallet => 'Выберите кошелёк для особого PIN';
+
+  @override
+  String get travelGuardNewPin => 'Задайте особый PIN';
+
+  @override
+  String get travelGuardConfirmPin => 'Повторите особый PIN';
+
+  @override
+  String get travelGuardPinHint => 'Он должен отличаться от обычного PIN.';
+
+  @override
+  String get travelGuardPinSameAsApp => 'Это ваш обычный PIN. Выберите другой.';
+
+  @override
+  String get travelGuardEnabled => 'Защита в поездке включена';
+
+  @override
+  String get travelGuardDisabled => 'Защита в поездке выключена';
+
+  @override
+  String get travelGuardActiveBadge => 'Защита в поездке включена';
+
+  @override
+  String get travelGuardBiometricsOff =>
+      'Недоступно, пока включена защита в поездке';
 }

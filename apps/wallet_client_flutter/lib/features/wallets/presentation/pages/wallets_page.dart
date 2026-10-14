@@ -66,7 +66,7 @@ class WalletsPage extends ConsumerWidget {
             ),
             const SizedBox(height: 10),
           ],
-          if (!childLocked) ...[
+          if (!childLocked && !walletState.travelGuardSession) ...[
             const SizedBox(height: 6),
             WalletActionRow(
               leading: const WalletIconCircle(icon: Icons.add_rounded),

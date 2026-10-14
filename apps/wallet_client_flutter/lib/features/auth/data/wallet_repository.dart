@@ -452,6 +452,9 @@ class WalletRepository {
     required String currentPin,
     required String newPin,
   }) async {
+    if (await unlockTravelGuard(newPin) != null) {
+      throw const TravelGuardPinConflictException();
+    }
     final masterKey = await unlockMasterKey(currentPin);
     await _writeMasterKeyEnvelope(masterKey, newPin);
   }
@@ -616,12 +619,20 @@ class WalletRepository {
     if (records.isEmpty) {
       return;
     }
+    // [oldToken] only says something about the other wallets when it is the
+    // token [publicKey] had stored; otherwise it came from another wallet and
+    // moving that wallet would pair its path with a foreign seed.
+    final owner = publicKey == null
+        ? null
+        : records.where((r) => r.publicKey == publicKey).firstOrNull;
+    final moveSharedToken = owner == null || owner.mwaAuthToken == oldToken;
     final updatedRecords = [
       for (final record in records)
         if (record.custody == WalletCustody.seedVault &&
-            (record.mwaAuthToken == oldToken || record.publicKey == publicKey))
+            ((moveSharedToken && record.mwaAuthToken == oldToken) ||
+                record.publicKey == publicKey))
           record.copyWith(
-            mwaAuthToken: record.mwaAuthToken == oldToken ? newToken : null,
+            mwaAuthToken: newToken,
             seedVaultDerivationPath: record.publicKey == publicKey
                 ? derivationPath
                 : null,
@@ -1102,6 +1113,9 @@ class WalletRepository {
   }
 
   Future<void> removeWallet(String publicKey) async {
+    if (await travelGuardPublicKey() == publicKey) {
+      await clearTravelGuard();
+    }
     final records = await readRecords();
     final updatedRecords = [
       for (final record in records)
@@ -1141,12 +1155,109 @@ class WalletRepository {
     return clearAll();
   }
 
+  // ---------------------------------------------------------------------------
+  // Travel guard: a second PIN that opens only one chosen wallet
+  // ---------------------------------------------------------------------------
+
+  /// Wallet the travel guard PIN opens, or null when the guard is off. Does
+  /// not need the PIN.
+  Future<String?> travelGuardPublicKey() async {
+    final json = await _store.read(AppConstants.travelGuardConfigKey);
+    if (json == null) {
+      return null;
+    }
+    try {
+      final config = jsonDecode(json) as Map<String, dynamic>;
+      final publicKey = config['publicKey'] as String?;
+      return publicKey == null || publicKey.isEmpty ? null : publicKey;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Arms the guard: [guardPin] will open [publicKey] alone. The wallet's
+  /// secret (if it has one) is copied under a key derived from [guardPin], so
+  /// a guard session never holds the master key that opens the other wallets.
+  Future<void> setTravelGuard({
+    required List<int> masterKey,
+    required String publicKey,
+    required String guardPin,
+  }) async {
+    final record = await readRecord(publicKey: publicKey);
+    if (record == null || record.publicKey != publicKey) {
+      throw StateError('Wallet not found.');
+    }
+    if (await _isMasterPin(guardPin)) {
+      throw const TravelGuardPinConflictException();
+    }
+    final mnemonic = record.custody == WalletCustody.localMnemonic
+        ? await decryptMnemonicWithKey(record: record, masterKey: masterKey)
+        : '';
+    final encrypted = await _cipher.encryptText(
+      jsonEncode({'publicKey': publicKey, 'mnemonic': mnemonic}),
+      guardPin,
+    );
+    await _store.write(
+      AppConstants.travelGuardConfigKey,
+      jsonEncode({
+        'publicKey': publicKey,
+        'cipherText': encrypted.cipherText,
+        'nonce': encrypted.nonce,
+        'salt': encrypted.salt,
+      }),
+    );
+  }
+
+  /// What [pin] opens as the travel guard PIN, or null if it is not that PIN
+  /// (or the guard is off).
+  Future<TravelGuardUnlock?> unlockTravelGuard(String pin) async {
+    final json = await _store.read(AppConstants.travelGuardConfigKey);
+    if (json == null) {
+      return null;
+    }
+    try {
+      final config = jsonDecode(json) as Map<String, dynamic>;
+      final clear = await _cipher.decryptText(
+        cipherText: config['cipherText'] as String,
+        nonce: config['nonce'] as String,
+        salt: config['salt'] as String,
+        pin: pin,
+      );
+      final payload = jsonDecode(clear) as Map<String, dynamic>;
+      final publicKey = payload['publicKey'] as String;
+      final record = await readRecord(publicKey: publicKey);
+      if (record == null || record.publicKey != publicKey) {
+        return null;
+      }
+      final mnemonic = payload['mnemonic'] as String? ?? '';
+      return TravelGuardUnlock(
+        record: record,
+        mnemonic: mnemonic.isEmpty ? null : mnemonic,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> clearTravelGuard() =>
+      _store.deleteAll(const [AppConstants.travelGuardConfigKey]);
+
+  Future<bool> _isMasterPin(String pin) async {
+    try {
+      await unlockMasterKey(pin);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<void> clearAll() async {
     _recordsCache = null;
     await _biometricSessionProtector.clear();
     await _store.deleteAll(const [
       AppConstants.walletRecordsKey,
       AppConstants.walletMasterKeyEnvelopeKey,
+      AppConstants.travelGuardConfigKey,
       AppConstants.biometricMasterKeyKey,
       AppConstants.selectedWalletPublicKeyKey,
       AppConstants.backendAccessSessionKey,
@@ -1250,4 +1361,21 @@ class WalletRepository {
     }
     return null;
   }
+}
+
+/// A travel guard PIN opened [record]; [mnemonic] is its secret for local
+/// wallets (null for Seed Vault / Mobile Wallet Adapter wallets).
+class TravelGuardUnlock {
+  const TravelGuardUnlock({required this.record, this.mnemonic});
+
+  final StoredWalletRecord record;
+  final String? mnemonic;
+}
+
+/// The travel guard PIN and the app PIN must differ.
+class TravelGuardPinConflictException implements Exception {
+  const TravelGuardPinConflictException();
+
+  @override
+  String toString() => 'The travel guard PIN must differ from the app PIN.';
 }

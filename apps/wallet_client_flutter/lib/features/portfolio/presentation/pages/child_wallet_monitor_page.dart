@@ -69,7 +69,7 @@ class ChildWalletMonitorPage extends ConsumerWidget {
 
           return RefreshIndicator(
             onRefresh: () async {
-              ref.invalidate(portfolioProvider(childWallet.address));
+              reloadPortfolioFreshFromRef(ref, childWallet.address);
               await ref.read(portfolioProvider(childWallet.address).future);
             },
             child: ListView(

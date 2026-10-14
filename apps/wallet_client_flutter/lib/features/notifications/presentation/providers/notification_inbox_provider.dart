@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_client.dart';
+import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../data/notification_inbox_repository.dart';
 import '../../domain/notification_message.dart';
 
@@ -20,8 +21,28 @@ final notificationInboxProvider =
       )..load();
     });
 
+/// The inbox as shown: in a travel guard session, messages about the hidden
+/// wallets are left out.
+final visibleNotificationInboxProvider =
+    Provider<AsyncValue<List<NotificationMessage>>>((ref) {
+      final inbox = ref.watch(notificationInboxProvider);
+      final walletState = ref.watch(walletControllerProvider);
+      if (!walletState.travelGuardSession) {
+        return inbox;
+      }
+      final visible = walletState.walletPublicKeys.toSet();
+      return inbox.whenData(
+        (messages) => [
+          for (final message in messages)
+            if (message.recipientAddress == null ||
+                visible.contains(message.recipientAddress))
+              message,
+        ],
+      );
+    });
+
 final unreadNotificationCountProvider = Provider<int>((ref) {
-  final messages = ref.watch(notificationInboxProvider).valueOrNull;
+  final messages = ref.watch(visibleNotificationInboxProvider).valueOrNull;
   if (messages == null) {
     return 0;
   }

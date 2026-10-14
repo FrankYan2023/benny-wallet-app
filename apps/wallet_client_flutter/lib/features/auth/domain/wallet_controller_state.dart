@@ -81,6 +81,8 @@ class WalletControllerState {
     this.childModeEnabled = false,
     this.hasChildModePin = false,
     this.childWallets = const [],
+    this.travelGuardArmed = false,
+    this.travelGuardSession = false,
   });
 
   final WalletStatus status;
@@ -116,6 +118,13 @@ class WalletControllerState {
 
   /// 🏠 Parent mode: List of child wallets to monitor
   final List<ChildWallet> childWallets;
+
+  /// A travel guard PIN is set (it opens one chosen wallet alone).
+  final bool travelGuardArmed;
+
+  /// Unlocked with the travel guard PIN: only that wallet exists for this
+  /// session and nothing hints at the others or at the guard itself.
+  final bool travelGuardSession;
 
   bool get hasWallet => walletPublicKeys.isNotEmpty;
 
@@ -153,6 +162,8 @@ class WalletControllerState {
     bool? childModeEnabled,
     bool? hasChildModePin,
     List<ChildWallet>? childWallets,
+    bool? travelGuardArmed,
+    bool? travelGuardSession,
     bool clearMnemonic = false,
     bool clearMnemonicToken = false,
     bool clearError = false,
@@ -178,6 +189,8 @@ class WalletControllerState {
       childModeEnabled: childModeEnabled ?? this.childModeEnabled,
       hasChildModePin: hasChildModePin ?? this.hasChildModePin,
       childWallets: childWallets ?? this.childWallets,
+      travelGuardArmed: travelGuardArmed ?? this.travelGuardArmed,
+      travelGuardSession: travelGuardSession ?? this.travelGuardSession,
     );
   }
 

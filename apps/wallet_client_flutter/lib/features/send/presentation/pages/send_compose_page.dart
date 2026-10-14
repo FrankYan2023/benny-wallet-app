@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -328,7 +329,9 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
       return;
     }
 
-    if (amountValue > asset.balance) {
+    // Max sends the exact on-chain balance at send time; its text is only a
+    // display of it, so it is not compared against the (rounded) balance.
+    if (!_isMaxAmount && amountValue > asset.balance) {
       await _showValidationDialog(
         context,
         message: context.l10n.sendInsufficientBalance,
@@ -427,7 +430,13 @@ class _SendComposePageState extends ConsumerState<SendComposePage> {
     }
 
     if (!asset.token.isNative) {
-      _amountController.text = Formatters.amount(asset.balance);
+      // Round down: rounding up (6 decimals) showed more than the balance.
+      final decimals = asset.token.decimals.clamp(0, 9);
+      final factor = math.pow(10, decimals);
+      _amountController.text = Formatters.amount(
+        (asset.balance * factor).floor() / factor,
+        maxDecimals: decimals,
+      );
       _isMaxAmount = true;
       setState(() {});
       return;

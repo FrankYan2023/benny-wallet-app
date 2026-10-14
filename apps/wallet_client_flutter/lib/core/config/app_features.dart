@@ -1,3 +1,7 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 enum StoreMode { lite, full }
 
 class FeatureReviewItem {
@@ -18,8 +22,44 @@ abstract final class AppFeatures {
     defaultValue: 'full',
   );
 
-  static StoreMode get storeMode =>
+  static const _fullUnlockedKey = 'hidden_full_features_unlocked';
+
+  /// Mode the build was compiled for. A lite build can be switched to full
+  /// at runtime through the hidden unlock in Settings.
+  static StoreMode get buildStoreMode =>
       _storeModeRaw.toLowerCase() == 'lite' ? StoreMode.lite : StoreMode.full;
+
+  /// True once the hidden unlock ran on a lite build; persisted.
+  static final fullUnlocked = ValueNotifier<bool>(false);
+
+  static StoreMode get storeMode =>
+      buildStoreMode == StoreMode.lite && !fullUnlocked.value
+      ? StoreMode.lite
+      : StoreMode.full;
+
+  /// Whether Settings should offer the hidden unlock (lite builds only).
+  static bool get canUnlockFullFeatures => isLiteStore;
+
+  static Future<void> loadFullUnlock() async {
+    if (buildStoreMode != StoreMode.lite) {
+      return;
+    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      fullUnlocked.value = prefs.getBool(_fullUnlockedKey) ?? false;
+    } catch (_) {
+      // Stay lite if preferences cannot be read.
+    }
+  }
+
+  static Future<void> unlockFullFeatures() async {
+    if (!canUnlockFullFeatures) {
+      return;
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_fullUnlockedKey, true);
+    fullUnlocked.value = true;
+  }
 
   static const webviewEnabled = bool.fromEnvironment(
     'FEATURE_WEBVIEW_ENABLED',
@@ -162,3 +202,12 @@ abstract final class AppFeatures {
     ),
   ];
 }
+
+/// Current store mode; widgets that gate features watch this so they
+/// rebuild when the hidden unlock switches a lite build to full.
+final storeModeProvider = Provider<StoreMode>((ref) {
+  void listener() => ref.invalidateSelf();
+  AppFeatures.fullUnlocked.addListener(listener);
+  ref.onDispose(() => AppFeatures.fullUnlocked.removeListener(listener));
+  return AppFeatures.storeMode;
+});

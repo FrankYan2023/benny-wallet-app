@@ -258,6 +258,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsCheckingUpdates => 'Buscando...';
 
   @override
+  String get settingsFullFeaturesUnlocked =>
+      'Funciones completas desbloqueadas';
+
+  @override
   String get settingsCheckForUpdates => 'Buscar actualizaciones';
 
   @override
@@ -2060,4 +2064,51 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get importLegacyLabel => 'Heredada';
+
+  @override
+  String get travelGuardTitle => 'Protección de viaje';
+
+  @override
+  String get travelGuardOffSubtitle =>
+      'Un PIN especial que abre solo una billetera';
+
+  @override
+  String get travelGuardOnSubtitle =>
+      'Activada: el PIN especial abre una billetera';
+
+  @override
+  String get travelGuardInfoTitle => '¿Qué es la protección de viaje?';
+
+  @override
+  String get travelGuardInfoBody =>
+      'Para cuando alguien te obliga a abrir tu billetera.\n\nDefine un PIN especial y elige una billetera (con poco saldo). Al desbloquear con el PIN especial solo se abre esa billetera: las demás, sus saldos y mensajes quedan ocultos en todas partes, incluidas las listas y los envíos, y este ajuste también se oculta.\n\nMientras está activada, el desbloqueo biométrico se desactiva y no se puede activar.\n\nBloquea la app y desbloquéala con tu PIN normal para volver a ver todas tus billeteras.';
+
+  @override
+  String get travelGuardChooseWallet =>
+      'Elige la billetera que abre el PIN especial';
+
+  @override
+  String get travelGuardNewPin => 'Define el PIN especial';
+
+  @override
+  String get travelGuardConfirmPin => 'Repite el PIN especial';
+
+  @override
+  String get travelGuardPinHint => 'Debe ser distinto de tu PIN normal.';
+
+  @override
+  String get travelGuardPinSameAsApp => 'Ese es tu PIN normal. Elige otro.';
+
+  @override
+  String get travelGuardEnabled => 'Protección de viaje activada';
+
+  @override
+  String get travelGuardDisabled => 'Protección de viaje desactivada';
+
+  @override
+  String get travelGuardActiveBadge => 'Protección de viaje activada';
+
+  @override
+  String get travelGuardBiometricsOff =>
+      'No disponible con la protección de viaje';
 }

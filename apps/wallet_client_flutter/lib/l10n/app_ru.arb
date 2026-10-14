@@ -89,6 +89,7 @@
   "settingsSeedPhraseBackupDescription": "Мы рекомендуем хранить физическую копию в безопасном месте.",
   "settingsSecureNow": "Защитите сейчас",
   "settingsCheckingUpdates": "Проверка...",
+  "settingsFullFeaturesUnlocked": "Все функции разблокированы",
   "settingsCheckForUpdates": "Проверьте наличие обновлений",
   "settingsVersion": "Версия {version}",
   "@settingsVersion": {
@@ -654,5 +655,19 @@
   "settingsLogOutAllWallets": "С устройства будут удалены все кошельки ({count}). Сначала сохраните все фразы восстановления.",
   "importAccountLabel": "Аккаунт {number}",
   "importAccountAltLabel": "Аккаунт {number} · другой путь",
-  "importLegacyLabel": "Устаревший путь"
+  "importLegacyLabel": "Устаревший путь",
+  "travelGuardTitle": "Защита в поездке",
+  "travelGuardOffSubtitle": "Особый PIN, открывающий только один кошелёк",
+  "travelGuardOnSubtitle": "Включено: особый PIN открывает один кошелёк",
+  "travelGuardInfoTitle": "Что такое защита в поездке?",
+  "travelGuardInfoBody": "На случай, если вас заставляют открыть кошелёк.\n\nЗадайте особый PIN и выберите один кошелёк (держите в нём немного средств). При разблокировке особым PIN откроется только он: остальные кошельки, их балансы и сообщения скрыты везде, включая списки кошельков и отправку, и эта настройка тоже скрыта.\n\nПока защита включена, биометрия отключена и не может быть включена.\n\nЗаблокируйте приложение и войдите обычным PIN, чтобы снова видеть все кошельки.",
+  "travelGuardChooseWallet": "Выберите кошелёк для особого PIN",
+  "travelGuardNewPin": "Задайте особый PIN",
+  "travelGuardConfirmPin": "Повторите особый PIN",
+  "travelGuardPinHint": "Он должен отличаться от обычного PIN.",
+  "travelGuardPinSameAsApp": "Это ваш обычный PIN. Выберите другой.",
+  "travelGuardEnabled": "Защита в поездке включена",
+  "travelGuardDisabled": "Защита в поездке выключена",
+  "travelGuardActiveBadge": "Защита в поездке включена",
+  "travelGuardBiometricsOff": "Недоступно, пока включена защита в поездке"
 }

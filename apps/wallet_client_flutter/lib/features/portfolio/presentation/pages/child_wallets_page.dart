@@ -13,6 +13,7 @@ import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../send/presentation/pages/scan_address_page.dart';
 import '../../../wallets/presentation/widgets/wallet_balance_text.dart';
 import '../../../wallets/presentation/widgets/wallet_visuals.dart';
+import '../providers/portfolio_provider.dart';
 import 'child_wallet_monitor_page.dart';
 
 class ChildWalletsPage extends ConsumerStatefulWidget {
@@ -26,6 +27,21 @@ class ChildWalletsPage extends ConsumerStatefulWidget {
 }
 
 class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Balances listed here may be from an earlier visit; reload them so
+    // tokens just sent to a child account are counted.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      for (final child in ref.read(walletControllerProvider).childWallets) {
+        reloadPortfolioFreshFromRef(ref, child.address);
+      }
+    });
+  }
+
   Future<String?> _requestPin() {
     return showDialog<String>(
       context: context,
@@ -372,10 +388,16 @@ class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _ChildWalletListTile(
                   child: child,
-                  onOpen: () => context.push(
-                    ChildWalletMonitorPage.routePath,
-                    extra: child.id,
-                  ),
+                  onOpen: () {
+                    // The child's balances may be held from an earlier visit
+                    // or a backend cache; tokens sent to it (e.g. a stock)
+                    // must show up when the page opens.
+                    reloadPortfolioFreshFromRef(ref, child.address);
+                    context.push(
+                      ChildWalletMonitorPage.routePath,
+                      extra: child.id,
+                    );
+                  },
                   onEdit: () => _editChildWallet(child),
                   onDelete: () => _deleteChildWallet(child),
                 ),

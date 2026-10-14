@@ -557,6 +557,12 @@ abstract class AppLocalizations {
   /// **'Checking...'**
   String get settingsCheckingUpdates;
 
+  /// No description provided for @settingsFullFeaturesUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Full features unlocked'**
+  String get settingsFullFeaturesUnlocked;
+
   /// No description provided for @settingsCheckForUpdates.
   ///
   /// In en, this message translates to:
@@ -3585,6 +3591,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Legacy'**
   String get importLegacyLabel;
+
+  /// No description provided for @travelGuardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel guard'**
+  String get travelGuardTitle;
+
+  /// No description provided for @travelGuardOffSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A special PIN that opens only one wallet'**
+  String get travelGuardOffSubtitle;
+
+  /// No description provided for @travelGuardOnSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'On: the special PIN opens one wallet'**
+  String get travelGuardOnSubtitle;
+
+  /// No description provided for @travelGuardInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What is travel guard?'**
+  String get travelGuardInfoTitle;
+
+  /// No description provided for @travelGuardInfoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'For when someone forces you to open your wallet.\n\nSet a special PIN and pick one wallet (keep a small amount in it). Unlocking with the special PIN opens only that wallet: your other wallets, their balances and messages are hidden everywhere, including wallet lists and send, and this setting is hidden too. It looks like an ordinary wallet.\n\nWhile travel guard is on, biometric unlock is turned off and cannot be turned on, so the PIN is always asked.\n\nLock the app (or let it lock) and unlock with your normal PIN to see all your wallets again.'**
+  String get travelGuardInfoBody;
+
+  /// No description provided for @travelGuardChooseWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the wallet the special PIN opens'**
+  String get travelGuardChooseWallet;
+
+  /// No description provided for @travelGuardNewPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the special PIN'**
+  String get travelGuardNewPin;
+
+  /// No description provided for @travelGuardConfirmPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the special PIN again'**
+  String get travelGuardConfirmPin;
+
+  /// No description provided for @travelGuardPinHint.
+  ///
+  /// In en, this message translates to:
+  /// **'It must differ from your normal PIN.'**
+  String get travelGuardPinHint;
+
+  /// No description provided for @travelGuardPinSameAsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your normal PIN. Choose another one.'**
+  String get travelGuardPinSameAsApp;
+
+  /// No description provided for @travelGuardEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel guard is on'**
+  String get travelGuardEnabled;
+
+  /// No description provided for @travelGuardDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel guard is off'**
+  String get travelGuardDisabled;
+
+  /// No description provided for @travelGuardActiveBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel guard is on'**
+  String get travelGuardActiveBadge;
+
+  /// No description provided for @travelGuardBiometricsOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable while travel guard is on'**
+  String get travelGuardBiometricsOff;
 }
 
 class _AppLocalizationsDelegate

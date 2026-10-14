@@ -89,6 +89,7 @@
   "settingsSeedPhraseBackupDescription": "We recommend a physical copy stored in a secure spot.",
   "settingsSecureNow": "Secure Now",
   "settingsCheckingUpdates": "Checking...",
+  "settingsFullFeaturesUnlocked": "Full features unlocked",
   "settingsCheckForUpdates": "Check for updates",
   "settingsVersion": "Version {version}",
   "@settingsVersion": {
@@ -689,5 +690,19 @@
   "@importAccountLabel": {"placeholders": {"number": {"type": "int"}}},
   "importAccountAltLabel": "Account {number} · alt path",
   "@importAccountAltLabel": {"placeholders": {"number": {"type": "int"}}},
-  "importLegacyLabel": "Legacy"
+  "importLegacyLabel": "Legacy",
+  "travelGuardTitle": "Travel guard",
+  "travelGuardOffSubtitle": "A special PIN that opens only one wallet",
+  "travelGuardOnSubtitle": "On: the special PIN opens one wallet",
+  "travelGuardInfoTitle": "What is travel guard?",
+  "travelGuardInfoBody": "For when someone forces you to open your wallet.\n\nSet a special PIN and pick one wallet (keep a small amount in it). Unlocking with the special PIN opens only that wallet: your other wallets, their balances and messages are hidden everywhere, including wallet lists and send, and this setting is hidden too. It looks like an ordinary wallet.\n\nWhile travel guard is on, biometric unlock is turned off and cannot be turned on, so the PIN is always asked.\n\nLock the app (or let it lock) and unlock with your normal PIN to see all your wallets again.",
+  "travelGuardChooseWallet": "Choose the wallet the special PIN opens",
+  "travelGuardNewPin": "Set the special PIN",
+  "travelGuardConfirmPin": "Enter the special PIN again",
+  "travelGuardPinHint": "It must differ from your normal PIN.",
+  "travelGuardPinSameAsApp": "This is your normal PIN. Choose another one.",
+  "travelGuardEnabled": "Travel guard is on",
+  "travelGuardDisabled": "Travel guard is off",
+  "travelGuardActiveBadge": "Travel guard is on",
+  "travelGuardBiometricsOff": "Unavailable while travel guard is on"
 }

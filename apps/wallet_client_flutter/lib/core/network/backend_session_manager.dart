@@ -273,6 +273,13 @@ class BackendSessionManager {
     required String message,
   }) async {
     final walletState = _ref.read(walletControllerProvider);
+    // The challenge was requested for [ownerAddress]; if the user switched
+    // wallets meanwhile, the current credentials belong to another wallet.
+    // Signing with them fails verification, and a Seed Vault retry would
+    // move the other wallet onto this wallet's auth token.
+    if (walletState.publicKey != ownerAddress) {
+      throw StateError('Wallet changed while signing in; try again.');
+    }
     if (walletState.custody == WalletCustody.mobileWalletAdapter) {
       final authToken = walletState.mwaAuthToken;
       if (authToken == null || authToken.isEmpty) {

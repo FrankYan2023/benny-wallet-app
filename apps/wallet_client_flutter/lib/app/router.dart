@@ -30,6 +30,7 @@ import '../features/send/presentation/pages/send_execute_page.dart';
 import '../features/send/presentation/pages/send_history_page.dart';
 import '../features/send/domain/send_result_data.dart';
 import '../features/send/presentation/pages/send_result_page.dart';
+import '../features/settings/presentation/pages/travel_guard_setup_page.dart';
 import '../features/settings/presentation/pages/settings_page.dart';
 import '../features/settings/presentation/pages/contact_feedback_page.dart';
 import '../features/settings/presentation/pages/rent_reclaim_page.dart';
@@ -118,6 +119,16 @@ class AppRouter {
           currentLocation: state.matchedLocation,
           requireUnlocked: true,
           child: const WalletsPage(),
+        ),
+      ),
+      GoRoute(
+        path: TravelGuardSetupPage.routePath,
+        name: TravelGuardSetupPage.routeName,
+        builder: (context, state) => _RouteAccessGuard(
+          currentLocation: state.matchedLocation,
+          allowInChildMode: false,
+          requireUnlocked: true,
+          child: const TravelGuardSetupPage(),
         ),
       ),
       GoRoute(

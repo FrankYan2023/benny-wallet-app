@@ -42,12 +42,17 @@ class PortfolioPage extends ConsumerStatefulWidget {
 
 class _PortfolioPageState extends ConsumerState<PortfolioPage> {
   _PortfolioAssetTab _selectedTab = _PortfolioAssetTab.tokens;
+  // While the pull-to-refresh spinner shows, the inline progress bars stay
+  // hidden; they would push the content down and back up mid-refresh.
+  bool _pullRefreshing = false;
 
   @override
   Widget build(BuildContext context) {
     final walletState = ref.watch(walletControllerProvider);
     final theme = Theme.of(context);
     final l10n = context.l10n;
+    // Rebuild when the hidden unlock turns a lite build into full.
+    ref.watch(storeModeProvider);
     final canOpenSwap = AppFeatures.canOpenSwap;
     final canOpenXStocks = AppFeatures.canOpenXStocks;
     final canOpenAirdrop = AppFeatures.canOpenAirdrop;
@@ -160,7 +165,8 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
 
     Future<void> refreshPortfolio() async {
       try {
-        ref.invalidate(portfolioProvider(ownerAddress));
+        setState(() => _pullRefreshing = true);
+        reloadPortfolioFreshFromRef(ref, ownerAddress);
         ref.invalidate(defiPortfolioProvider(ownerAddress));
         await Future.wait([
           ref.read(portfolioProvider(ownerAddress).future),
@@ -184,6 +190,10 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
             .syncReceivedTransfers(receivedTransfers);
       } catch (_) {
         // Keep the current screen visible and surface the failure through the dialog listener.
+      } finally {
+        if (mounted) {
+          setState(() => _pullRefreshing = false);
+        }
       }
     }
 
@@ -198,6 +208,9 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
         title: l10n.brandShortName,
         showBackButton: false,
         enableTitleNavigation: false,
+        travelGuardTooltip: walletState.travelGuardArmed
+            ? l10n.travelGuardActiveBadge
+            : null,
         actions: [
           if (canOpenAirdrop)
             IconButton(
@@ -234,9 +247,19 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                       data: displayData,
                       defiData: displayDefiData,
                       hasDefiPositions: hasDefiPositions,
-                      isRefreshing: state.isLoading && displayData != null,
+                      // Only flag a reload while an older cached copy is on
+                      // screen; background reloads of live data (pull to
+                      // refresh, after a transaction) update in place.
+                      isRefreshing:
+                          !_pullRefreshing &&
+                          state.isLoading &&
+                          liveData == null &&
+                          displayData != null,
                       isDefiRefreshing:
-                          defiState.isLoading && displayDefiData != null,
+                          !_pullRefreshing &&
+                          defiState.isLoading &&
+                          liveDefiData == null &&
+                          displayDefiData != null,
                       hasLoadError: state.hasError && displayData == null,
                       hasDefiLoadError:
                           defiState.hasError && displayDefiData == null,

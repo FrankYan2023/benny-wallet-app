@@ -399,11 +399,16 @@ class BackendApiClient {
   final List<Dio> _fallbackDios;
   final BackendSessionManager? _sessionManager;
 
-  Future<Map<String, dynamic>> getPortfolio(String ownerAddress) async {
+  /// [fresh] asks the backend to skip its balance caches (right after a
+  /// transaction or an explicit pull to refresh).
+  Future<Map<String, dynamic>> getPortfolio(
+    String ownerAddress, {
+    bool fresh = false,
+  }) async {
     return _requestJsonMap(
       (dio) => dio.post<Map<String, dynamic>>(
         '/v1/portfolio',
-        data: {'ownerAddress': ownerAddress},
+        data: {'ownerAddress': ownerAddress, if (fresh) 'fresh': true},
       ),
       fallback: 'Unable to load your wallet right now.',
     );

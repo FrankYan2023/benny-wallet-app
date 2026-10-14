@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme/app_colors.dart';
 import '../../l10n/l10n.dart';
 import 'brand_logo.dart';
+import 'travel_guard_badge.dart';
 
 class AppScaffold extends StatelessWidget {
   const AppScaffold({
@@ -15,6 +16,7 @@ class AppScaffold extends StatelessWidget {
     this.enableTitleNavigation = true,
     this.showTopBar = true,
     this.showBackgroundDecorations = true,
+    this.travelGuardTooltip,
   });
 
   final String title;
@@ -24,6 +26,10 @@ class AppScaffold extends StatelessWidget {
   final bool enableTitleNavigation;
   final bool showTopBar;
   final bool showBackgroundDecorations;
+
+  /// When set, the travel guard badge replaces the brand logo (top left) and
+  /// this is its tooltip.
+  final String? travelGuardTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +83,8 @@ class AppScaffold extends StatelessWidget {
                                   icon: const Icon(Icons.arrow_back_rounded),
                                 ),
                               )
+                            else if (travelGuardTooltip != null)
+                              TravelGuardBadge(tooltip: travelGuardTooltip)
                             else
                               const BrandLogo(size: 44, radius: 22),
                             const SizedBox(width: 12),

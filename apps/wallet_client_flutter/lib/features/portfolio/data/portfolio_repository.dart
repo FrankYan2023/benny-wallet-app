@@ -8,8 +8,11 @@ class PortfolioRepository {
 
   final BackendApiClient _apiClient;
 
-  Future<PortfolioViewData> loadPortfolio(String ownerAddress) async {
-    final payload = await _apiClient.getPortfolio(ownerAddress);
+  Future<PortfolioViewData> loadPortfolio(
+    String ownerAddress, {
+    bool fresh = false,
+  }) async {
+    final payload = await _apiClient.getPortfolio(ownerAddress, fresh: fresh);
     final items = (payload['assets'] as List<dynamic>? ?? const []);
     final assets = items
         .map(

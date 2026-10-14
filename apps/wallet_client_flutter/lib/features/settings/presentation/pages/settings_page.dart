@@ -14,12 +14,14 @@ import '../../../../core/security/secure_screen.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/app_update_gate.dart';
 import '../../../../core/widgets/error_alert_dialog.dart';
+import '../../../../core/widgets/fireworks_overlay.dart';
 import '../../../../core/widgets/pin_prompt_dialog.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../l10n/l10n.dart';
 import '../../domain/app_settings.dart';
 import '../providers/app_settings_controller.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
+import '../../../auth/presentation/pages/unlock_page.dart';
 import '../../../onboarding/presentation/pages/welcome_page.dart';
 import '../../../portfolio/presentation/pages/child_wallets_page.dart';
 import '../../../portfolio/presentation/pages/portfolio_page.dart';
@@ -27,6 +29,7 @@ import '../../../portfolio/presentation/providers/portfolio_provider.dart';
 import 'child_mode_pin_page.dart';
 import 'contact_feedback_page.dart';
 import 'rent_reclaim_page.dart';
+import 'travel_guard_setup_page.dart';
 import '../../../wallets/presentation/pages/change_pin_page.dart';
 import '../../../wallets/presentation/pages/wallets_page.dart';
 import '../../../wallets/presentation/widgets/wallet_visuals.dart';
@@ -44,6 +47,39 @@ class SettingsPage extends ConsumerStatefulWidget {
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _checkingForUpdates = false;
+
+  // Hidden unlock: 12 quick taps on the version label turn a lite build
+  // into the full one.
+  static const _unlockTapCount = 12;
+  static const _unlockTapWindow = Duration(milliseconds: 1500);
+  int _versionTaps = 0;
+  DateTime? _lastVersionTap;
+
+  Future<void> _handleVersionTap() async {
+    if (!AppFeatures.canUnlockFullFeatures) {
+      return;
+    }
+    final now = DateTime.now();
+    final last = _lastVersionTap;
+    _versionTaps = last != null && now.difference(last) <= _unlockTapWindow
+        ? _versionTaps + 1
+        : 1;
+    _lastVersionTap = now;
+    if (_versionTaps < _unlockTapCount) {
+      return;
+    }
+    _versionTaps = 0;
+    await AppFeatures.unlockFullFeatures();
+    if (!mounted) {
+      return;
+    }
+    showFireworks(context);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text(context.l10n.settingsFullFeaturesUnlocked)),
+      );
+  }
 
   Future<String?> _requestPin(BuildContext context) {
     return showDialog<String>(
@@ -344,6 +380,65 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     }
   }
 
+  Future<void> _showTravelGuardInfo() {
+    final l10n = context.l10n;
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        icon: const Icon(Icons.shield_rounded, color: Color(0xFF9A5C08)),
+        title: Text(l10n.travelGuardInfoTitle),
+        content: SingleChildScrollView(child: Text(l10n.travelGuardInfoBody)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.commonClose),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// On: app PIN → choose a wallet → special PIN. Off: app PIN.
+  Future<void> _handleTravelGuardToggle(bool enabled) async {
+    final l10n = context.l10n;
+    final controller = ref.read(walletControllerProvider.notifier);
+    final pin = await _requestPin(context);
+    if (pin == null || !mounted) {
+      return;
+    }
+    try {
+      await controller.verifyPin(pin);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.settingsIncorrectPin)));
+      }
+      return;
+    }
+    if (!mounted) {
+      return;
+    }
+    if (enabled) {
+      await context.push(TravelGuardSetupPage.routePath);
+      return;
+    }
+    try {
+      await controller.disableTravelGuard();
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.travelGuardDisabled)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.walletActionFailed)));
+      }
+    }
+  }
+
   Future<void> _handleNotificationsToggle(bool enabled) async {
     final l10n = context.l10n;
     final notifier = ref.read(appSettingsControllerProvider.notifier);
@@ -580,6 +675,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final canToggleChildMode =
         walletState.isUnlocked &&
         (walletState.childModeEnabled || !hasChildAccounts);
+    // The guard itself stays invisible inside a guard session.
+    final showTravelGuard =
+        walletState.isUnlocked &&
+        !isChildMode &&
+        !walletState.travelGuardSession;
+    final travelGuardBlocksBiometrics =
+        walletState.travelGuardArmed || walletState.travelGuardSession;
 
     if (!walletState.hasWallet) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -659,13 +761,29 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 icon: Icons.fingerprint_rounded,
                 iconColor: const Color(0xFF4096C9),
                 title: l10n.settingsBiometricUnlock,
-                subtitle: walletState.isUnlocked
+                subtitle: travelGuardBlocksBiometrics
+                    ? l10n.travelGuardBiometricsOff
+                    : walletState.isUnlocked
                     ? l10n.settingsUseFingerprint
                     : l10n.settingsUnlockWalletToEnable,
                 value: walletState.biometricEnabled,
                 onChanged: _handleBiometricToggle,
-                enabled: walletState.isUnlocked,
+                enabled: walletState.isUnlocked && !travelGuardBlocksBiometrics,
               ),
+              if (showTravelGuard) ...[
+                const SizedBox(height: 10),
+                _SettingsToggleTile(
+                  icon: Icons.shield_rounded,
+                  iconColor: const Color(0xFF9A5C08),
+                  title: l10n.travelGuardTitle,
+                  subtitle: walletState.travelGuardArmed
+                      ? l10n.travelGuardOnSubtitle
+                      : l10n.travelGuardOffSubtitle,
+                  value: walletState.travelGuardArmed,
+                  onChanged: _handleTravelGuardToggle,
+                  onInfoTap: _showTravelGuardInfo,
+                ),
+              ],
               const SizedBox(height: 10),
               _SettingsActionTile(
                 icon: Icons.lock_clock_rounded,
@@ -676,7 +794,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 onTap: () =>
                     _showAutoLockPicker(context, settings.autoLockOption),
               ),
-              if (walletState.isUnlocked && !isChildMode) ...[
+              if (walletState.isUnlocked &&
+                  !isChildMode &&
+                  !walletState.travelGuardSession) ...[
                 const SizedBox(height: 10),
                 _SettingsActionTile(
                   icon: Icons.password_rounded,
@@ -780,7 +900,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       if (!context.mounted) {
                         return;
                       }
-                      context.go(WelcomePage.routePath);
+                      // A travel guard session only locks on log out.
+                      context.go(
+                        ref.read(walletControllerProvider).hasWallet
+                            ? UnlockPage.routePath
+                            : WelcomePage.routePath,
+                      );
                     },
                   ),
                 ),
@@ -794,6 +919,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     value.buildNumber,
                   ),
                   isChecking: _checkingForUpdates,
+                  onVersionTap: _handleVersionTap,
                   onCheckUpdatesTap: AppFeatures.canCheckForUpdates
                       ? _handleManualUpdateCheck
                       : null,
@@ -932,6 +1058,7 @@ class _SettingsToggleTile extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.enabled = true,
+    this.onInfoTap,
   });
 
   final IconData icon;
@@ -941,6 +1068,9 @@ class _SettingsToggleTile extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
   final bool enabled;
+
+  /// Shows an "!" button after the title that opens an explanation.
+  final VoidCallback? onInfoTap;
 
   @override
   Widget build(BuildContext context) {
@@ -962,15 +1092,33 @@ class _SettingsToggleTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: enabled
-                        ? const Color(0xFF2D2A23)
-                        : const Color(0xFF8A7D6A),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 19,
-                  ),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        title,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: enabled
+                              ? const Color(0xFF2D2A23)
+                              : const Color(0xFF8A7D6A),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 19,
+                        ),
+                      ),
+                    ),
+                    if (onInfoTap != null) ...[
+                      const SizedBox(width: 6),
+                      InkResponse(
+                        onTap: onInfoTap,
+                        radius: 18,
+                        child: const Icon(
+                          Icons.error_outline_rounded,
+                          size: 20,
+                          color: Color(0xFFA46708),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -1152,11 +1300,13 @@ class _SettingsVersionFooter extends StatelessWidget {
   const _SettingsVersionFooter({
     required this.versionLabel,
     required this.isChecking,
+    required this.onVersionTap,
     this.onCheckUpdatesTap,
   });
 
   final String versionLabel;
   final bool isChecking;
+  final VoidCallback onVersionTap;
   final VoidCallback? onCheckUpdatesTap;
 
   @override
@@ -1174,7 +1324,15 @@ class _SettingsVersionFooter extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(versionLabel, textAlign: TextAlign.center, style: textStyle),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onVersionTap,
+            child: Text(
+              versionLabel,
+              textAlign: TextAlign.center,
+              style: textStyle,
+            ),
+          ),
           if (onCheckUpdatesTap != null) ...[
             const SizedBox(width: 10),
             GestureDetector(

@@ -102,6 +102,10 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       'AGk1gQfsSRZ8sfS16LUYuBm69iMfHTbCksLUZWJNpump';
   static const _presetSlippageBps = [5, 50, 100, 300, 500];
   static const _balanceTolerance = 0.000000001;
+
+  /// Exact base units chosen with the 25/50/100% buttons, valid while the
+  /// input token and the amount text are unchanged.
+  ({String mint, String text, BigInt raw})? _presetInput;
   static const _minimumSwapFeeReserveSol = 0.0015;
   static const _minimumSwapSetupReserveSol = 0.01;
   static const _suggestedOutputMints = [
@@ -1293,7 +1297,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         inputAmount <= 0) {
       return null;
     }
-    return _rawToUiAmount(quote.outAmount, output.token.decimals);
+    return _rawToTokenUi(quote.outAmount, output);
   }
 
   double? get _minReceiveAmountUi {
@@ -1302,7 +1306,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     if (output == null || quote == null) {
       return null;
     }
-    return _rawToUiAmount(quote.otherAmountThreshold, output.token.decimals);
+    return _rawToTokenUi(quote.otherAmountThreshold, output);
   }
 
   int get _slippageBps {
@@ -1322,12 +1326,55 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     return '${(bps / 100).toStringAsFixed(decimals)}%';
   }
 
+  /// Base units for the typed amount. xStocks (Token-2022 scaled UI amount)
+  /// show `raw × multiplier`, so the text is divided by the multiplier;
+  /// converting it 1:1 would ask for more than the wallet holds. Never more
+  /// than the raw balance, and the whole balance when the text is all of it.
   String? _rawAmountForCurrentInput(SwapTokenOption inputToken) {
-    return _decimalTextToRawAmount(
-      _amountController.text,
-      inputToken.token.decimals,
+    final text = _amountController.text;
+    final preset = _presetInput;
+    if (preset != null &&
+        preset.mint == inputToken.token.mintAddress &&
+        preset.text == text) {
+      return preset.raw.toString();
+    }
+    final scale = _uiScale(inputToken);
+    final rawBalance = BigInt.tryParse(inputToken.rawAvailableAmount ?? '');
+    final amount = AmountParser.parse(text);
+    if (scale == 1 || amount == null) {
+      return _decimalTextToRawAmount(text, inputToken.token.decimals);
+    }
+    if (rawBalance != null &&
+        rawBalance > BigInt.zero &&
+        amount >= inputToken.availableBalance * (1 - 1e-6)) {
+      return rawBalance.toString();
+    }
+    var raw = BigInt.from(
+      (amount / scale * _pow10(inputToken.token.decimals)).floor(),
     );
+    if (rawBalance != null && raw > rawBalance) {
+      raw = rawBalance;
+    }
+    return raw.toString();
   }
+
+  /// Shown units per base unit, relative to `10^decimals`: 1 for ordinary
+  /// tokens, the scaled-UI multiplier for xStocks (from the wallet's own
+  /// balance; 1 when the token is not held).
+  double _uiScale(SwapTokenOption token) {
+    final raw = BigInt.tryParse(token.rawAvailableAmount ?? '');
+    if (raw == null || raw <= BigInt.zero || token.availableBalance <= 0) {
+      return 1;
+    }
+    final scale =
+        token.availableBalance /
+        (raw.toDouble() / _pow10(token.token.decimals));
+    // Display rounding is far below any real multiplier change.
+    return (scale - 1).abs() < 1e-7 ? 1 : scale;
+  }
+
+  double _rawToTokenUi(String rawAmount, SwapTokenOption token) =>
+      _rawToUiAmount(rawAmount, token.token.decimals) * _uiScale(token);
 
   String? _decimalTextToRawAmount(String amountText, int decimals) {
     final rawAmount = AmountParser.toRawUnits(amountText, decimals);
@@ -1358,10 +1405,20 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     final rawBalance = BigInt.tryParse(inputToken.rawAvailableAmount ?? '');
     if (rawBalance != null && rawBalance > BigInt.zero) {
       final rawAmount = _rawShareAmount(rawBalance, share);
-      _amountController.text = AmountParser.formatRawUnits(
-        rawAmount,
-        inputToken.token.decimals,
+      final scale = _uiScale(inputToken);
+      final text = scale == 1
+          ? AmountParser.formatRawUnits(rawAmount, inputToken.token.decimals)
+          : Formatters.amount(
+              _rawToTokenUi(rawAmount.toString(), inputToken),
+              maxDecimals: min(inputToken.token.decimals, 9),
+            );
+      // The shown text may be rounded; swap exactly this share.
+      _presetInput = (
+        mint: inputToken.token.mintAddress,
+        text: text,
+        raw: rawAmount,
       );
+      _amountController.text = text;
       return;
     }
     final amount = inputToken.availableBalance * share;
@@ -1415,14 +1472,8 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       return '--';
     }
 
-    final quotedInput = _rawToUiAmount(
-      quote.inAmount,
-      inputToken.token.decimals,
-    );
-    final quotedOutput = _rawToUiAmount(
-      quote.outAmount,
-      outputToken.token.decimals,
-    );
+    final quotedInput = _rawToTokenUi(quote.inAmount, inputToken);
+    final quotedOutput = _rawToTokenUi(quote.outAmount, outputToken);
     if (quotedInput <= 0 || quotedOutput <= 0) {
       return '--';
     }
@@ -1672,7 +1723,10 @@ class _SwapPageState extends ConsumerState<SwapPage> {
       return;
     }
 
-    if (amount > inputToken.availableBalance) {
+    // With the raw balance known, the raw amount decides (shown amounts are
+    // rounded, and scaled for xStocks).
+    if (inputToken.rawAvailableAmount == null &&
+        amount > inputToken.availableBalance) {
       await _showDialog(message: context.l10n.sendInsufficientBalance);
       return;
     }
@@ -1724,10 +1778,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         inputToken: inputToken,
         outputToken: outputToken,
         inputAmountUi: amount,
-        outputAmountUi: _rawToUiAmount(
-          buildResult.outAmount,
-          outputToken.token.decimals,
-        ),
+        outputAmountUi: _rawToTokenUi(buildResult.outAmount, outputToken),
         buildResult: buildResult,
         priorityPreset: _priorityPreset,
         slippageBps: buildResult.slippageBps,
@@ -1805,7 +1856,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         requestedRawAmount > inputRawBalance) {
       return context.l10n.sendInsufficientBalance;
     }
-    if (amount > inputBalance + _balanceTolerance) {
+    if (inputRawBalance == null && amount > inputBalance + _balanceTolerance) {
       return context.l10n.sendInsufficientBalance;
     }
 

@@ -23,13 +23,20 @@ class WalletSwitcherChip extends ConsumerWidget {
     final childMode = ref.watch(
       walletControllerProvider.select((state) => state.childModeEnabled),
     );
+    // A travel guard session cannot add wallets (no master key).
+    final guardSession = ref.watch(
+      walletControllerProvider.select((state) => state.travelGuardSession),
+    );
     // Child mode hides wallet switching entirely.
     if (active == null || childMode) {
       return const SizedBox.shrink();
     }
 
     final l10n = context.l10n;
-    final canAdd = !childMode && walletCount < AppConstants.maxWalletCount;
+    final canAdd =
+        !childMode &&
+        !guardSession &&
+        walletCount < AppConstants.maxWalletCount;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),

@@ -245,6 +245,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsCheckingUpdates => 'チェック中...';
 
   @override
+  String get settingsFullFeaturesUnlocked => '全機能が解放されました';
+
+  @override
   String get settingsCheckForUpdates => 'アップデートをチェックする';
 
   @override
@@ -1957,4 +1960,47 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get importLegacyLabel => 'レガシー';
+
+  @override
+  String get travelGuardTitle => '旅行用防犯モード';
+
+  @override
+  String get travelGuardOffSubtitle => '1 つのウォレットだけを開く特別な PIN';
+
+  @override
+  String get travelGuardOnSubtitle => 'オン：特別な PIN は 1 つのウォレットだけを開きます';
+
+  @override
+  String get travelGuardInfoTitle => '旅行用防犯モードとは';
+
+  @override
+  String get travelGuardInfoBody =>
+      'ウォレットを開くよう脅されたときのための機能です。\n\n特別な PIN を設定し、ウォレットを 1 つ選びます（少額だけ入れておくのがおすすめ）。特別な PIN で解除するとそのウォレットだけが開き、他のウォレットや残高、メッセージはウォレット一覧や送金を含めてすべて非表示になり、この設定も表示されません。\n\nオンの間は生体認証が無効になり、有効にできません。\n\nアプリをロックして通常の PIN で解除すると、すべてのウォレットに戻ります。';
+
+  @override
+  String get travelGuardChooseWallet => '特別な PIN で開くウォレットを選択';
+
+  @override
+  String get travelGuardNewPin => '特別な PIN を設定';
+
+  @override
+  String get travelGuardConfirmPin => '特別な PIN をもう一度入力';
+
+  @override
+  String get travelGuardPinHint => '通常の PIN とは別の番号にしてください。';
+
+  @override
+  String get travelGuardPinSameAsApp => 'これは通常の PIN です。別の番号にしてください。';
+
+  @override
+  String get travelGuardEnabled => '旅行用防犯モードをオンにしました';
+
+  @override
+  String get travelGuardDisabled => '旅行用防犯モードをオフにしました';
+
+  @override
+  String get travelGuardActiveBadge => '旅行用防犯モード オン';
+
+  @override
+  String get travelGuardBiometricsOff => '旅行用防犯モード中は使用できません';
 }

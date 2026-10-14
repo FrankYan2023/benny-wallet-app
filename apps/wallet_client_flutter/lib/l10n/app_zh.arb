@@ -75,6 +75,7 @@
   "settingsSeedPhraseBackupDescription": "建議製作實體副本，並存放在安全位置。",
   "settingsSecureNow": "立即保護",
   "settingsCheckingUpdates": "檢查中...",
+  "settingsFullFeaturesUnlocked": "已開啟全功能版",
   "settingsCheckForUpdates": "檢查更新",
   "settingsVersion": "版本 {version}",
   "settingsVersionBuild": "版本 {version}+{buildNumber}",
@@ -578,5 +579,19 @@
   "updateDefaultMessage": "Benny Wallet 有新版本可用。",
   "importAccountLabel": "帳戶 {number}",
   "importAccountAltLabel": "帳戶 {number} · 備用路徑",
-  "importLegacyLabel": "舊版路徑"
+  "importLegacyLabel": "舊版路徑",
+  "travelGuardTitle": "旅行防搶劫",
+  "travelGuardOffSubtitle": "設定一組只打開一個錢包的特殊 PIN",
+  "travelGuardOnSubtitle": "已開啟：特殊 PIN 只打開一個錢包",
+  "travelGuardInfoTitle": "什麼是旅行防搶劫？",
+  "travelGuardInfoBody": "用於被人脅迫打開錢包的時候。\n\n設定一組特殊 PIN 並選擇一個錢包（建議只放少量資金）。用特殊 PIN 解鎖時只會打開這個錢包：其他錢包、它們的餘額和訊息在所有地方都會隱藏，包括錢包列表和轉帳，這個設定本身也會隱藏，看起來就像普通錢包。\n\n開啟後生物辨識解鎖會自動關閉且無法開啟，每次都需要輸入 PIN。\n\n鎖定 App（或等待自動鎖定）後用正常 PIN 解鎖，就會回到所有錢包。",
+  "travelGuardChooseWallet": "選擇特殊 PIN 要打開的錢包",
+  "travelGuardNewPin": "設定特殊 PIN",
+  "travelGuardConfirmPin": "再輸入一次特殊 PIN",
+  "travelGuardPinHint": "不能和正常解鎖 PIN 相同。",
+  "travelGuardPinSameAsApp": "這是你的正常 PIN，請換一組。",
+  "travelGuardEnabled": "旅行防搶劫已開啟",
+  "travelGuardDisabled": "旅行防搶劫已關閉",
+  "travelGuardActiveBadge": "旅行防搶劫已開啟",
+  "travelGuardBiometricsOff": "旅行防搶劫開啟時無法使用"
 }

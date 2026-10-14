@@ -243,6 +243,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsCheckingUpdates => '확인 중...';
 
   @override
+  String get settingsFullFeaturesUnlocked => '전체 기능이 활성화되었습니다';
+
+  @override
   String get settingsCheckForUpdates => '업데이트 확인';
 
   @override
@@ -1951,4 +1954,47 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get importLegacyLabel => '레거시';
+
+  @override
+  String get travelGuardTitle => '여행 강도 방지';
+
+  @override
+  String get travelGuardOffSubtitle => '지갑 하나만 여는 특별 PIN';
+
+  @override
+  String get travelGuardOnSubtitle => '켜짐: 특별 PIN은 지갑 하나만 엽니다';
+
+  @override
+  String get travelGuardInfoTitle => '여행 강도 방지란?';
+
+  @override
+  String get travelGuardInfoBody =>
+      '누군가 지갑을 열라고 강요할 때를 위한 기능입니다.\n\n특별 PIN을 설정하고 지갑 하나를 고르세요(소액만 보관 권장). 특별 PIN으로 잠금 해제하면 그 지갑만 열리고, 다른 지갑과 잔액, 메시지는 지갑 목록과 송금을 포함한 모든 곳에서 숨겨지며 이 설정도 보이지 않습니다.\n\n켜져 있는 동안 생체 인증 잠금 해제는 꺼지며 켤 수 없습니다.\n\n앱을 잠근 뒤 원래 PIN으로 해제하면 모든 지갑이 다시 보입니다.';
+
+  @override
+  String get travelGuardChooseWallet => '특별 PIN으로 열 지갑 선택';
+
+  @override
+  String get travelGuardNewPin => '특별 PIN 설정';
+
+  @override
+  String get travelGuardConfirmPin => '특별 PIN 다시 입력';
+
+  @override
+  String get travelGuardPinHint => '원래 PIN과 달라야 합니다.';
+
+  @override
+  String get travelGuardPinSameAsApp => '원래 PIN입니다. 다른 번호를 고르세요.';
+
+  @override
+  String get travelGuardEnabled => '여행 강도 방지를 켰습니다';
+
+  @override
+  String get travelGuardDisabled => '여행 강도 방지를 껐습니다';
+
+  @override
+  String get travelGuardActiveBadge => '여행 강도 방지 켜짐';
+
+  @override
+  String get travelGuardBiometricsOff => '여행 강도 방지가 켜져 있어 사용할 수 없습니다';
 }

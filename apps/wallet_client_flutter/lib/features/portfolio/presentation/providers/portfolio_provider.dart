@@ -16,12 +16,31 @@ final portfolioCacheProvider = StateProvider<Map<String, PortfolioViewData>>(
 final defiPortfolioCacheProvider =
     StateProvider<Map<String, DefiPortfolioViewData>>((ref) => const {});
 
+/// Addresses whose next portfolio load should bypass the backend caches.
+final _freshPortfolioLoadsProvider = Provider<Set<String>>((ref) => <String>{});
+
 final portfolioProvider = FutureProvider.family<PortfolioViewData, String>((
   ref,
   ownerAddress,
 ) async {
-  return ref.read(portfolioRepositoryProvider).loadPortfolio(ownerAddress);
+  final fresh = ref.read(_freshPortfolioLoadsProvider).remove(ownerAddress);
+  return ref
+      .read(portfolioRepositoryProvider)
+      .loadPortfolio(ownerAddress, fresh: fresh);
 });
+
+/// Reloads [address] skipping the backend's balance caches, so a token that
+/// just arrived (e.g. a stock bought a moment ago) shows up at once.
+void reloadPortfolioFresh(ProviderContainer container, String address) {
+  container.read(_freshPortfolioLoadsProvider).add(address);
+  container.invalidate(portfolioProvider(address));
+}
+
+/// [reloadPortfolioFresh] for widgets.
+void reloadPortfolioFreshFromRef(WidgetRef ref, String address) {
+  ref.read(_freshPortfolioLoadsProvider).add(address);
+  ref.invalidate(portfolioProvider(address));
+}
 
 /// A transfer this app just sent, shown in balances right away. The backend
 /// and its RPC proxy cache balances for several seconds, so a fresh load can
@@ -157,9 +176,10 @@ final activeDefiPortfolioProvider = Provider<AsyncValue<DefiPortfolioViewData>>(
   },
 );
 
-/// Reloads [addresses] now, once [signature] is confirmed, and again after the
-/// backend caches (portfolio 8 s, RPC proxy up to 15 s) have expired, so the
-/// real balance replaces stale or pending figures. Outlives the calling page.
+/// Reloads [addresses] now, and with the backend caches bypassed once
+/// [signature] is confirmed and once more shortly after (RPC nodes can lag a
+/// moment behind confirmation), so the real balance replaces stale or pending
+/// figures. Outlives the calling page.
 void refreshBalancesAfterTransaction(
   ProviderContainer container, {
   required String signature,
@@ -168,7 +188,7 @@ void refreshBalancesAfterTransaction(
   final solana = container.read(solanaWalletServiceProvider);
   void refresh() {
     for (final address in addresses) {
-      container.invalidate(portfolioProvider(address));
+      reloadPortfolioFresh(container, address);
     }
   }
 
@@ -180,9 +200,7 @@ void refreshBalancesAfterTransaction(
       debugPrint('[PORTFOLIO] Confirmation wait failed: $error');
     }
     refresh();
-    for (final wait in const [Duration(seconds: 10), Duration(seconds: 15)]) {
-      await Future<void>.delayed(wait);
-      refresh();
-    }
+    await Future<void>.delayed(const Duration(seconds: 4));
+    refresh();
   }());
 }

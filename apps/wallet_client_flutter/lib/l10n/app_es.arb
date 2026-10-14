@@ -75,6 +75,7 @@
   "settingsSeedPhraseBackupDescription": "Recomendamos guardar una copia física en un lugar seguro.",
   "settingsSecureNow": "Proteger ahora",
   "settingsCheckingUpdates": "Buscando...",
+  "settingsFullFeaturesUnlocked": "Funciones completas desbloqueadas",
   "settingsCheckForUpdates": "Buscar actualizaciones",
   "settingsVersion": "Versión {version}",
   "settingsVersionBuild": "Versión {version}+{buildNumber}",
@@ -578,5 +579,19 @@
   "settingsLogOutAllWallets": "Esto elimina las {count} billeteras de este dispositivo. Respalda antes cada frase de recuperación.",
   "importAccountLabel": "Cuenta {number}",
   "importAccountAltLabel": "Cuenta {number} · ruta alternativa",
-  "importLegacyLabel": "Heredada"
+  "importLegacyLabel": "Heredada",
+  "travelGuardTitle": "Protección de viaje",
+  "travelGuardOffSubtitle": "Un PIN especial que abre solo una billetera",
+  "travelGuardOnSubtitle": "Activada: el PIN especial abre una billetera",
+  "travelGuardInfoTitle": "¿Qué es la protección de viaje?",
+  "travelGuardInfoBody": "Para cuando alguien te obliga a abrir tu billetera.\n\nDefine un PIN especial y elige una billetera (con poco saldo). Al desbloquear con el PIN especial solo se abre esa billetera: las demás, sus saldos y mensajes quedan ocultos en todas partes, incluidas las listas y los envíos, y este ajuste también se oculta.\n\nMientras está activada, el desbloqueo biométrico se desactiva y no se puede activar.\n\nBloquea la app y desbloquéala con tu PIN normal para volver a ver todas tus billeteras.",
+  "travelGuardChooseWallet": "Elige la billetera que abre el PIN especial",
+  "travelGuardNewPin": "Define el PIN especial",
+  "travelGuardConfirmPin": "Repite el PIN especial",
+  "travelGuardPinHint": "Debe ser distinto de tu PIN normal.",
+  "travelGuardPinSameAsApp": "Ese es tu PIN normal. Elige otro.",
+  "travelGuardEnabled": "Protección de viaje activada",
+  "travelGuardDisabled": "Protección de viaje desactivada",
+  "travelGuardActiveBadge": "Protección de viaje activada",
+  "travelGuardBiometricsOff": "No disponible con la protección de viaje"
 }
