@@ -1997,4 +1997,849 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get travelGuardBiometricsOff => '여행 강도 방지가 켜져 있어 사용할 수 없습니다';
+
+  @override
+  String get welcomeUseAsSigner => '이 휴대폰을 오프라인 서명 기기로 사용';
+
+  @override
+  String get walletAddAirGap => '오프라인 서명 기기 연결';
+
+  @override
+  String get walletAddAirGapSubtitle => '키는 인터넷에 연결되지 않는 다른 휴대폰에 보관됩니다';
+
+  @override
+  String createWalletWordCount(int count) {
+    return '$count개 단어';
+  }
+
+  @override
+  String get signerAppTitle => 'Benny Signer';
+
+  @override
+  String get signerNeedsNoWalletsTitle => '먼저 모든 지갑을 삭제하세요';
+
+  @override
+  String get signerNeedsNoWalletsBody =>
+      '서명 기기에는 자체 오프라인 복구 문구만 보관됩니다. 설정 > 지갑에서 이 휴대폰의 모든 지갑을 백업한 후 삭제하고 다시 시도하세요.';
+
+  @override
+  String get signerEnterTitle => '이 휴대폰을 서명 기기로 전환할까요?';
+
+  @override
+  String get signerEnterBody =>
+      '이 휴대폰은 오프라인 상태를 유지하며 서명만 합니다. 지갑 화면은 표시되지 않습니다. 다시 지갑으로 사용하려면 초기화해야 합니다.';
+
+  @override
+  String get signerIntroTitle => '오프라인 서명 기기';
+
+  @override
+  String get signerIntroPoint1 => '이 휴대폰에 복구 문구를 보관하며 다시는 온라인에 연결하지 않습니다.';
+
+  @override
+  String get signerIntroPoint2 =>
+      'Benny Wallet이 설치된 다른 휴대폰에서 거래를 생성하고, 이 기기에서 QR 코드를 스캔해 서명합니다.';
+
+  @override
+  String get signerIntroPoint3 => '복구 문구를 생성하기 전에 모든 네트워크를 끄도록 안내해 드립니다.';
+
+  @override
+  String get signerIntroPoint4 => '복구 문구를 종이에 적어 두세요. 유일한 백업입니다.';
+
+  @override
+  String get signerIntroStart => '시작';
+
+  @override
+  String get signerIntroCancel => '나중에 하기, 지갑으로 사용';
+
+  @override
+  String get signerOfflineTitle => '이 휴대폰을 오프라인으로 전환';
+
+  @override
+  String get signerOfflineBody =>
+      '비행기 모드를 켜고 Wi-Fi, 블루투스, NFC를 끄세요. 모든 필수 항목이 초록색이 되면 계속할 수 있습니다.';
+
+  @override
+  String get signerCheckAirplane => '비행기 모드 켜짐';
+
+  @override
+  String get signerCheckWifi => 'Wi-Fi 꺼짐';
+
+  @override
+  String get signerCheckBluetooth => '블루투스 꺼짐';
+
+  @override
+  String get signerCheckNfc => 'NFC 꺼짐';
+
+  @override
+  String get signerCheckNoNetwork => '네트워크 연결 없음';
+
+  @override
+  String get signerCheckUsbDebugging => 'USB 디버깅 꺼짐';
+
+  @override
+  String get signerCheckSim => 'SIM 카드 제거됨 (권장)';
+
+  @override
+  String get signerCheckManualHint => '이 항목은 자동으로 확인할 수 없습니다. 직접 확인하세요.';
+
+  @override
+  String get signerOpenSettings => '설정 열기';
+
+  @override
+  String get signerNetworkDetected => '네트워크 연결이 감지되었습니다. 계속하려면 연결을 끄세요.';
+
+  @override
+  String get signerPinTitle => '서명 기기 PIN 설정';
+
+  @override
+  String get signerPinBody => '이 서명 기기에 사용할 6자리 PIN을 설정하세요.';
+
+  @override
+  String get signerPinConfirmTitle => 'PIN 확인';
+
+  @override
+  String get signerPinConfirmBody => 'PIN을 한 번 더 입력하세요.';
+
+  @override
+  String get signerPinMismatch => 'PIN이 일치하지 않습니다. 다시 시도하세요.';
+
+  @override
+  String get signerSourceTitle => '복구 문구';
+
+  @override
+  String get signerSourceBody => '이 오프라인 휴대폰에서 새 복구 문구를 생성하거나 기존 복구 문구를 입력하세요.';
+
+  @override
+  String get signerSourceCreate24 => '24개 단어 생성';
+
+  @override
+  String get signerSourceCreate24Subtitle => '서명 기기에 권장';
+
+  @override
+  String get signerSourceCreate12 => '12개 단어 생성';
+
+  @override
+  String get signerSourceCreate12Subtitle => '적기 더 간편함';
+
+  @override
+  String get signerSourceImport => '기존 복구 문구 가져오기';
+
+  @override
+  String get signerSourceImportSubtitle => '12개 또는 24개 단어';
+
+  @override
+  String get signerWordsTitle => '이 단어들을 적어 두세요';
+
+  @override
+  String get signerWordsWarning =>
+      '단어를 순서대로 종이에 적으세요. 사진이나 스크린샷을 찍거나 다른 곳에 입력하지 마세요. 이 단어를 아는 사람은 누구나 자산을 가져갈 수 있습니다.';
+
+  @override
+  String get signerWordsDone => '다 적었습니다';
+
+  @override
+  String get signerVerifyTitle => '백업 확인';
+
+  @override
+  String get signerImportTitle => '복구 문구 가져오기';
+
+  @override
+  String get signerImportBody => '12개 또는 24개 단어를 공백으로 구분하여 입력하세요.';
+
+  @override
+  String get signerImportInvalid => '유효한 12개 또는 24개 단어 복구 문구가 아닙니다.';
+
+  @override
+  String get signerFinishTitle => '설정 완료';
+
+  @override
+  String get signerDeviceNameLabel => '서명 기기 이름';
+
+  @override
+  String get signerDeviceNameHelper => '연결 후 지갑에 표시됩니다.';
+
+  @override
+  String get signerBiometricToggle => '생체 인증으로 잠금 해제';
+
+  @override
+  String get signerFinishButton => '완료';
+
+  @override
+  String get signerSetupFailed => '설정을 저장하지 못했습니다. 다시 시도하세요.';
+
+  @override
+  String get signerUnlockSubtitle => '서명 기기 PIN을 입력하세요';
+
+  @override
+  String get signerUnlockNetworkBlocked =>
+      '네트워크 연결이 켜져 있습니다. 잠금을 해제하려면 비행기 모드를 켜세요.';
+
+  @override
+  String signerWrongPin(int count) {
+    return 'PIN이 올바르지 않습니다. $count회 더 틀리면 서명 기기가 초기화됩니다.';
+  }
+
+  @override
+  String get signerUnlockFailed => '잠금을 해제하지 못했습니다. 다시 시도하세요.';
+
+  @override
+  String get signerUseBiometric => '생체 인증 사용';
+
+  @override
+  String get signerBiometricReason => 'Benny 서명 기기 잠금 해제';
+
+  @override
+  String get signerBiometricFailed => '생체 인증 설정을 변경하지 못했습니다.';
+
+  @override
+  String get signerRecheckTitle => '오프라인 확인';
+
+  @override
+  String get signerRecheckBody =>
+      '앱이 업데이트되었습니다. 잠금을 해제하기 전에 이 휴대폰이 다시 완전히 오프라인 상태인지 확인하세요.';
+
+  @override
+  String get signerLockNow => '잠금';
+
+  @override
+  String get signerOfflineChip => '오프라인 서명 기기';
+
+  @override
+  String get signerScanToSign => '스캔하여 서명';
+
+  @override
+  String get signerPairWallet => '지갑 연결';
+
+  @override
+  String get signerAccountsTitle => '계정';
+
+  @override
+  String signerAccountName(int number) {
+    return '계정 $number';
+  }
+
+  @override
+  String get signerPairBody =>
+      '다른 휴대폰의 Benny Wallet에서 \'오프라인 서명 기기 연결\'을 선택하고 이 코드를 스캔하세요.';
+
+  @override
+  String get signerPairPublicOnly => '이 코드에는 공개 주소만 포함되며, 복구 문구는 절대 포함되지 않습니다.';
+
+  @override
+  String get signerScanBody => '다른 휴대폰의 Benny Wallet에 표시된 QR 코드를 스캔하세요.';
+
+  @override
+  String get signerScanWrongCode => 'Benny Wallet의 서명 요청이 아닙니다.';
+
+  @override
+  String get signerScanAgain => '다시 스캔';
+
+  @override
+  String get signerRejectUnknownAccount => '이 서명 기기에 없는 계정에 대한 요청입니다.';
+
+  @override
+  String get signerRejectNotASigner => '이 계정은 이 거래에 서명할 필요가 없습니다.';
+
+  @override
+  String get signerRejectUnreadable => '이 거래를 읽을 수 없어 서명하지 않습니다.';
+
+  @override
+  String get signerRejectMessageIsTransaction => '이 메시지는 실제로 거래이므로 서명하지 않습니다.';
+
+  @override
+  String get signerRejectInvalidCode => '유효한 서명 요청 QR 코드가 아닙니다.';
+
+  @override
+  String get signerReviewTitle => '검토 및 서명';
+
+  @override
+  String get signerReviewAccount => '서명 계정';
+
+  @override
+  String get signerReviewFee => '네트워크 수수료';
+
+  @override
+  String get signerReviewMessage => '메시지';
+
+  @override
+  String signerBinaryMessage(int count) {
+    return '바이너리 데이터 ($count바이트)';
+  }
+
+  @override
+  String get signerThisAccount => '이 계정';
+
+  @override
+  String signerActionSendSol(String amount) {
+    return '$amount SOL 보내기';
+  }
+
+  @override
+  String signerActionSendToken(String amount, String symbol) {
+    return '$amount $symbol 보내기';
+  }
+
+  @override
+  String signerActionSendUnverified(String amount) {
+    return '확인되지 않은 토큰 $amount개 보내기';
+  }
+
+  @override
+  String signerActionTo(String address) {
+    return '받는 주소: $address';
+  }
+
+  @override
+  String signerActionToTokenAccount(String address) {
+    return '받는 토큰 계정: $address';
+  }
+
+  @override
+  String signerActionMint(String mint) {
+    return '토큰 주소: $mint';
+  }
+
+  @override
+  String signerActionOwner(String address) {
+    return '소유자: $address';
+  }
+
+  @override
+  String signerActionRentTo(String address) {
+    return '렌트 반환 주소: $address';
+  }
+
+  @override
+  String get signerActionCreateTokenAccount => '토큰 계정 생성';
+
+  @override
+  String get signerActionCloseTokenAccount => '토큰 계정 닫기';
+
+  @override
+  String get signerActionMemo => '메모';
+
+  @override
+  String get signerActionApprove => '다른 계정이 내 토큰을 사용하도록 허용';
+
+  @override
+  String get signerActionSetAuthority => '계정 권한 변경';
+
+  @override
+  String get signerActionAssign => '계정 소유자 변경';
+
+  @override
+  String get signerActionCreateAccount => '계정 생성';
+
+  @override
+  String signerActionProgram(String program) {
+    return '프로그램 $program';
+  }
+
+  @override
+  String get signerHoldToSign => '길게 눌러 서명';
+
+  @override
+  String get signerReject => '거부';
+
+  @override
+  String get signerSignFailed => '서명에 실패했습니다. 다시 시도하세요.';
+
+  @override
+  String get signerSignatureTitle => '서명';
+
+  @override
+  String get signerSignatureBody => '다른 휴대폰의 Benny Wallet으로 이 코드를 스캔하면 완료됩니다.';
+
+  @override
+  String get signerSettingsTitle => '서명 기기 설정';
+
+  @override
+  String get signerAccountCount => '표시할 계정 수';
+
+  @override
+  String get signerAccountCountHint => '이 복구 문구에서 최대 5개 계정';
+
+  @override
+  String get signerUpgradeTitle => '서명 기기 업데이트';
+
+  @override
+  String get signerUpgradeIntro =>
+      '앱을 업데이트하려면 네트워크가 필요하므로 미리 계획하세요. 온라인 상태인 동안에도 복구 문구는 이 휴대폰에 암호화되어 보관되며, 휴대폰이 다시 오프라인이 될 때까지 서명 기기는 이를 열지 않습니다.';
+
+  @override
+  String get signerUpgradeStep0 => '1. 종이 백업 확인';
+
+  @override
+  String get signerUpgradeVerifyBackup => '백업 확인';
+
+  @override
+  String get signerUpgradeBackupOk => '백업 확인 완료';
+
+  @override
+  String get signerUpgradeOnlineTitle => '2a. 일반 업데이트';
+
+  @override
+  String get signerUpgradeOnlineBody =>
+      '서명 기기를 잠그세요. 네트워크를 켜고 설치했던 스토어에서 Benny Wallet을 업데이트하세요. 비행기 모드를 다시 켜세요. 잠금을 해제하기 전에 서명 기기가 오프라인 확인을 다시 진행합니다.';
+
+  @override
+  String get signerUpgradeSecureTitle => '2b. 가장 안전한 업데이트';
+
+  @override
+  String get signerUpgradeSecureBody =>
+      '설정에서 서명 기기를 초기화한 후 온라인으로 앱을 업데이트하세요. 다시 오프라인으로 전환하고 서명 기기를 설정한 뒤 복구 문구를 가져오세요. 계정과 주소는 그대로 유지됩니다.';
+
+  @override
+  String get signerUpgradeOfflineApkTitle => 'Android: 온라인 연결 없이 업데이트';
+
+  @override
+  String get signerUpgradeOfflineApkBody =>
+      'benny-wallet.com에서 받은 새 APK를 USB 케이블이나 SD 카드로 이 휴대폰에 복사해 오프라인 상태로 설치할 수도 있습니다. 같은 출처의 버전 위에만 설치하세요.';
+
+  @override
+  String get signerUpgradeCompatTitle => '이전 서명 기기도 계속 사용 가능';
+
+  @override
+  String get signerUpgradeCompatBody =>
+      '최신 지갑 앱은 이전 버전의 서명 기기와도 함께 작동합니다. 지갑은 이 서명 기기가 지원하는 기능만 요청하므로 편할 때 업데이트하면 됩니다.';
+
+  @override
+  String get signerVersionTitle => '버전';
+
+  @override
+  String signerVersionDetail(String app, int protocol, int tokens) {
+    return '앱 $app · 프로토콜 $protocol · 토큰 목록 $tokens';
+  }
+
+  @override
+  String get signerEraseTitle => '서명 기기 초기화';
+
+  @override
+  String get signerEraseSubtitle => '이 휴대폰에서 복구 문구를 삭제합니다';
+
+  @override
+  String get signerEraseBody =>
+      '이 휴대폰에서 복구 문구가 삭제됩니다. 종이 백업이 없으면 자산을 복구할 수 없습니다.';
+
+  @override
+  String get signerEraseConfirm => '초기화';
+
+  @override
+  String get signerEraseWrongPin => 'PIN이 올바르지 않습니다. 아무것도 삭제되지 않았습니다.';
+
+  @override
+  String get airGapConnectTitle => '오프라인 서명 기기 연결';
+
+  @override
+  String get airGapConnectBody => '서명 기기 휴대폰에서 \'지갑 연결\'을 탭한 후 표시되는 코드를 스캔하세요.';
+
+  @override
+  String get airGapConnectInvalid => '서명 기기 페어링 코드가 아닙니다.';
+
+  @override
+  String airGapConnectChoose(String device) {
+    return '$device에서 계정 선택';
+  }
+
+  @override
+  String airGapConnectAccount(int number) {
+    return '계정 $number';
+  }
+
+  @override
+  String airGapConnectAccountAdded(int number) {
+    return '계정 $number (이미 추가됨)';
+  }
+
+  @override
+  String get airGapConnectCompare => '주소가 서명 기기에 표시된 주소와 일치하는지 확인하세요.';
+
+  @override
+  String get airGapConnectScanAgain => '다시 스캔';
+
+  @override
+  String get airGapSignTitle => '서명 기기로 서명';
+
+  @override
+  String get airGapSignShowRequestAgain => '요청 다시 표시';
+
+  @override
+  String get airGapSignMayHaveExpired =>
+      '이 거래가 만료되었을 수 있습니다. 전송에 실패하면 처음부터 다시 시작하세요.';
+
+  @override
+  String get airGapSignWrongRequest => '이 서명은 다른 요청에 대한 것입니다.';
+
+  @override
+  String get airGapSignInvalidCode => '내 서명 기기에서 생성된 서명이 아닙니다.';
+
+  @override
+  String get airGapSignerOutdated =>
+      '서명 기기가 이전 버전을 사용 중입니다. 계속 사용할 수 있으며, 편할 때 업데이트하세요.';
+
+  @override
+  String get signerIntroSubtitle => '개인 키를 다시는 인터넷에 연결하지 않는 휴대폰에 보관하세요.';
+
+  @override
+  String get signerFinishSubtitle => '이 서명기의 이름을 정하고 PIN을 설정하세요.';
+
+  @override
+  String signerQuizBody(int count) {
+    return '종이 백업을 보고 $count개 위치의 올바른 단어를 고르세요.';
+  }
+
+  @override
+  String signerQuizProgress(int current, int total) {
+    return '$total문항 중 $current번째';
+  }
+
+  @override
+  String signerQuizQuestion(int position) {
+    return '$position번째 단어는 무엇인가요?';
+  }
+
+  @override
+  String get signerQuizCorrect => '정답입니다!';
+
+  @override
+  String get signerQuizWrong => '틀렸습니다. 종이를 확인하세요. 새 단어로 다시 시작합니다.';
+
+  @override
+  String get signerQuizShowWords => '단어 다시 보기';
+
+  @override
+  String get signerScanToSignSubtitle => '지갑에 표시된 요청을 스캔하세요';
+
+  @override
+  String get signerPairWalletSubtitle => 'Benny Wallet이 스캔할 코드를 표시';
+
+  @override
+  String get signerWalletPhoneLabel => 'Benny Wallet';
+
+  @override
+  String get signerScanRefusedTitle => '서명할 수 없습니다';
+
+  @override
+  String get airGapSignerLabel => '서명기';
+
+  @override
+  String get airGapThisPhone => '이 휴대폰';
+
+  @override
+  String get airGapConnectFound => '서명기를 인식했습니다';
+
+  @override
+  String get airGapSignNeedsSigner => '서명기에서 확인하고 서명해야 합니다';
+
+  @override
+  String get airGapSignStepShort1 => '서명기가 스캔';
+
+  @override
+  String get airGapSignStepShort2 => '서명 스캔';
+
+  @override
+  String airGapSignStep1Named(String device) {
+    return '1단계: “$device”(으)로 이 코드를 스캔하세요';
+  }
+
+  @override
+  String airGapSignStep1BodyNamed(String device) {
+    return '“$device”에서 스캔하여 서명을 누르고 내용을 확인한 뒤 승인하세요.';
+  }
+
+  @override
+  String airGapSignStep2Named(String device) {
+    return '2단계: “$device”의 서명 코드를 스캔하세요';
+  }
+
+  @override
+  String airGapSignStep2BodyNamed(String device) {
+    return '승인하면 “$device”에 서명 코드가 표시됩니다. 이 휴대폰으로 스캔하세요.';
+  }
+
+  @override
+  String airGapSignScanSignatureNamed(String device) {
+    return '다음: $device의 서명 스캔';
+  }
+
+  @override
+  String signerActionSwapPair(String from, String to) {
+    return '스왑 $from → $to';
+  }
+
+  @override
+  String signerSwapPay(String amount) {
+    return '지불 $amount';
+  }
+
+  @override
+  String signerSwapPayAtMost(String amount) {
+    return '최대 지불 $amount';
+  }
+
+  @override
+  String signerSwapReceive(String amount) {
+    return '받는 금액 $amount';
+  }
+
+  @override
+  String signerSwapReceiveAtLeast(String amount) {
+    return '최소 받는 금액 $amount';
+  }
+
+  @override
+  String get signerSwapUnverifiedToken => '미확인 토큰';
+
+  @override
+  String airGapSignTimeLeft(int seconds) {
+    return '$seconds초 남음. 시간이 지나면 새 코드가 자동으로 표시됩니다.';
+  }
+
+  @override
+  String get airGapSignRefreshing => '시간이 지났습니다. 새 견적과 코드를 받는 중…';
+
+  @override
+  String airGapSignRefreshed(String device) {
+    return '이전 코드가 만료되어 새 코드로 바꿨습니다. “$device”(으)로 다시 스캔하세요.';
+  }
+
+  @override
+  String get airGapSignRefreshFailed => '새 코드를 받지 못했습니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
+  String get airGapSignOldRequest => '만료된 코드의 서명입니다. 먼저 서명기로 새 코드를 스캔하세요.';
+
+  @override
+  String get scanHintRoleShows => '코드 표시';
+
+  @override
+  String get scanHintRoleScans => '스캔';
+
+  @override
+  String signerTokenUnchecked(String symbol) {
+    return '$symbol(미확인)';
+  }
+
+  @override
+  String get signerReviewActions => '거래 내용';
+
+  @override
+  String get signerNewerWalletNotice =>
+      '지갑이 서명기보다 최신 버전입니다. 시간 될 때 서명기를 업데이트하세요.';
+
+  @override
+  String get signerDangerBanner => '고위험입니다. 본인이 시작한 것이 아니면 서명하지 마세요.';
+
+  @override
+  String get signerActionSwap => '스왑';
+
+  @override
+  String get signerActionSwapDetail => '수량은 지갑에서 확인하세요.';
+
+  @override
+  String get signerActionDangerDetail => '위험한 작업입니다. 잘 모르면 서명하지 마세요.';
+
+  @override
+  String get signerActionAdvanceNonce => '거래 번호 업데이트';
+
+  @override
+  String get signerActionSyncNative => 'SOL 잔액 업데이트';
+
+  @override
+  String get signerHoldLongHint => '꼼꼼히 확인한 뒤 3초간 누르세요.';
+
+  @override
+  String signerTokenVerified(String token) {
+    return '$token · Benny Wallet 확인됨';
+  }
+
+  @override
+  String signerTokenWalletProvided(String symbol) {
+    return '$symbol · Benny Wallet 미확인';
+  }
+
+  @override
+  String signerSwapWalletQuote(String pay, String receive) {
+    return '예상: $pay 지불, 약 $receive 받음';
+  }
+
+  @override
+  String get signerActionUnknown => '알 수 없는 작업';
+
+  @override
+  String signerActionCreateTokenAccountFor(String symbol) {
+    return '$symbol 계정 개설';
+  }
+
+  @override
+  String get signerUnresolvedAccounts =>
+      '서명기가 이 거래 전체를 볼 수 없습니다. 방금 직접 시작한 경우에만 서명하세요.';
+
+  @override
+  String get signerTokenNotVerified => 'Benny Wallet 미확인';
+
+  @override
+  String get signerKindSwap => '스왑';
+
+  @override
+  String get signerKindSend => '보내기';
+
+  @override
+  String signerAbout(String amount) {
+    return '약 $amount';
+  }
+
+  @override
+  String get signerAmountsFromWallet => '수량은 지갑이 제공';
+
+  @override
+  String get signerTrustSafe => '모든 토큰이 Benny Wallet에서 확인됨';
+
+  @override
+  String get signerTrustCaution => '토큰 하나가 Benny Wallet에서 확인되지 않았습니다. 주의하세요.';
+
+  @override
+  String get signerTrustDangerSwap =>
+      '두 토큰 모두 Benny Wallet에서 확인되지 않았습니다. 고위험입니다.';
+
+  @override
+  String get signerTrustDangerSend =>
+      '이 토큰은 Benny Wallet에서 확인되지 않았습니다. 고위험입니다.';
+
+  @override
+  String get signerReviewOtherSteps => '기타 단계';
+
+  @override
+  String get signerPay => '지불';
+
+  @override
+  String get signerPayAtMost => '최대 지불';
+
+  @override
+  String get signerGet => '받음';
+
+  @override
+  String get signerGetAtLeast => '최소 받음';
+
+  @override
+  String get signerGetAbout => '약 받음';
+
+  @override
+  String get signerRecipient => '받는 사람';
+
+  @override
+  String get signerRecipientTokenAccount => '받는 사람 토큰 계정';
+
+  @override
+  String get signerUsdFromWallet => '달러 금액은 지갑의 추정치입니다';
+
+  @override
+  String signerActionCreateTokenAccountForRecipient(String symbol) {
+    return '받는 사람의 $symbol 계정 개설';
+  }
+
+  @override
+  String get signerCreateAccountSkipIfOpen =>
+      '(처음에만 약 0.002 SOL; 이미 있으면 자동으로 건너뛰고 비용 없음)';
+
+  @override
+  String get signerCreateAccountNotOpen => '(아직 없음; 약 0.002 SOL 필요)';
+
+  @override
+  String get signerAddressFromWallet => '이 주소는 지갑이 제공한 것으로, 서명기가 확인할 수 없습니다.';
+
+  @override
+  String get signerSwapOutputUnchecked => '교환한 토큰이 내 계정으로 오는지 확인할 수 없습니다.';
+
+  @override
+  String get signerExtraOutflow => '이 거래는 다른 주소로도 자금을 보냅니다.';
+
+  @override
+  String signerHighFee(String amount) {
+    return '네트워크 수수료가 매우 높음: $amount SOL';
+  }
+
+  @override
+  String get signerDurableNonce => '이 서명은 만료되지 않아 나중에도 사용될 수 있습니다.';
+
+  @override
+  String get signerSwapFromWallet => '토큰 또는 수량은 지갑이 제공한 것이라 확인할 수 없습니다.';
+
+  @override
+  String signerActionCloseTo(String address) {
+    return '잔액과 렌트 받는 주소: $address';
+  }
+
+  @override
+  String signerWalletNote(String name) {
+    return '지갑 메모: $name';
+  }
+
+  @override
+  String get signerReviewFeePayer => '수수료 지불 계정';
+
+  @override
+  String signerActionOwnerProgram(String program) {
+    return '프로그램 $program이(가) 관리';
+  }
+
+  @override
+  String get signerSlippageAll => '슬리피지 100% 이상: 아무것도 받지 못할 수 있습니다.';
+
+  @override
+  String get signerQuizTooManyWrong => '오답이 너무 많습니다. PIN을 입력한 뒤 다시 시도하세요.';
+
+  @override
+  String get signerSignInTitle => '로그인 요청';
+
+  @override
+  String get signerKindSignIn => '로그인';
+
+  @override
+  String get signerSignInBenny => 'Benny Wallet 로그인';
+
+  @override
+  String signerSignInOtherSite(String site) {
+    return '“$site”에서 로그인을 요청합니다. 직접 시작한 경우에만 서명하세요.';
+  }
+
+  @override
+  String get signerSignInExpired =>
+      '이 로그인 요청은 만료되었습니다. 이 기기의 시간을 확인하거나 지갑에서 다시 시작하세요.';
+
+  @override
+  String get signerSignInOtherAccount => '다른 계정의 로그인입니다. 서명하지 마세요.';
+
+  @override
+  String get signerSignInWhat =>
+      '이 계정이 본인 것임을 증명해 Benny가 잔액, 기록, 알림을 보여 줄 수 있게 합니다.';
+
+  @override
+  String get signerSignInNoFunds => '자금이 이동하지 않고 수수료도 없습니다.';
+
+  @override
+  String get signerSignInShowText => '원문 보기';
+
+  @override
+  String get airGapSignInTitle => '서명 기기로 로그인';
+
+  @override
+  String get airGapSignInWhy => '왜 서명하나요?';
+
+  @override
+  String get airGapSignInWhyBody =>
+      '잔액, 기록, 알림을 불러오기 전에 Benny가 이 계정이 본인 것인지 확인해야 합니다. 보통 지갑마다 한 번만 하면 됩니다.';
+
+  @override
+  String get airGapSignInSafe => '로그인일 뿐입니다. 자금이 이동하지 않고 수수료도 없습니다.';
+
+  @override
+  String airGapSignInSignerShows(String device) {
+    return '“$device”에 “Benny Wallet 로그인”이 표시됩니다.';
+  }
+
+  @override
+  String airGapSignInSignerShowsText(String device) {
+    return '“$device”에 “Benny Wallet wants you to sign in”으로 시작하는 영어 문장이 표시됩니다. 이것이 이번 로그인입니다. 서명 기기를 업데이트하면 “Benny Wallet 로그인”으로 표시됩니다.';
+  }
 }

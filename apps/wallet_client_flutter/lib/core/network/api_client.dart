@@ -85,6 +85,7 @@ class RemoteTokenCatalogItem {
     required this.isNative,
     required this.isVisible,
     required this.category,
+    this.signerAttestation,
   });
 
   final String mintAddress;
@@ -96,6 +97,9 @@ class RemoteTokenCatalogItem {
   final bool isVisible;
   final String category;
 
+  /// Offline token-key signature (base64) for offline signers.
+  final String? signerAttestation;
+
   factory RemoteTokenCatalogItem.fromJson(Map<String, dynamic> json) {
     return RemoteTokenCatalogItem(
       mintAddress: json['mintAddress'] as String,
@@ -106,6 +110,7 @@ class RemoteTokenCatalogItem {
       isNative: json['isNative'] as bool? ?? false,
       isVisible: json['isVisible'] as bool? ?? true,
       category: json['category'] as String? ?? 'core',
+      signerAttestation: json['signerAttestation'] as String?,
     );
   }
 }

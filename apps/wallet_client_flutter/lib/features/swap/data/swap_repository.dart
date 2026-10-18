@@ -39,6 +39,7 @@ class SwapRepository {
           decimals: catalogItem?.decimals ?? asset.token.decimals,
           isNative: catalogItem?.isNative ?? asset.token.isNative,
           isVisible: catalogItem?.isVisible ?? asset.token.isVisible,
+          signerAttestation: catalogItem?.signerAttestation,
         ),
         category: catalogItem?.category ?? asset.category,
         logoUrl: (asset.logoUrl != null && asset.logoUrl!.isNotEmpty)
@@ -64,6 +65,7 @@ class SwapRepository {
             decimals: item.decimals,
             isNative: item.isNative,
             isVisible: item.isVisible,
+            signerAttestation: item.signerAttestation,
           ),
           category: item.category,
           logoUrl: item.logoUrl.isEmpty ? null : item.logoUrl,
@@ -127,6 +129,7 @@ class SwapRepository {
               decimals: item.decimals,
               isNative: item.isNative,
               isVisible: item.isVisible,
+              signerAttestation: item.signerAttestation,
             ),
             category: item.category,
             logoUrl: item.logoUrl.isEmpty ? null : item.logoUrl,

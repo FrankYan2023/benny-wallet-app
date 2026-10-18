@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:solana/base58.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/di/providers.dart';
+import '../../../../core/airgap/airgap_protocol.dart';
 import '../../../../core/services/mobile_wallet_adapter_service.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
@@ -37,6 +39,31 @@ class SendExecutePage extends ConsumerStatefulWidget {
 
 class _SendExecutePageState extends ConsumerState<SendExecutePage> {
   static const _balanceTolerance = 0.000000001;
+  static const _wrappedSolMint = 'So11111111111111111111111111111111111111112';
+
+  /// The recipient for the offline signer, named when it is one of the
+  /// user's own wallets.
+  AirGapRecipient? _airGapRecipient() {
+    final address = widget.draft.destinationAddress;
+    final Uint8List bytes;
+    try {
+      bytes = Uint8List.fromList(base58decode(address));
+    } on Object {
+      return null;
+    }
+    if (bytes.length != 32) {
+      return null;
+    }
+    final wallet = ref
+        .read(walletControllerProvider)
+        .wallets
+        .where((wallet) => wallet.publicKey == address)
+        .firstOrNull;
+    return AirGapRecipient(
+      address: bytes,
+      name: wallet == null ? '' : wallet.name.trim(),
+    );
+  }
 
   SendResultData? _result;
 
@@ -251,6 +278,11 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
               ownerAddress: currentAddress,
               amountToSend: amountToSend,
             )
+          : walletState.custody == WalletCustody.airGap
+          ? await _sendWithAirGap(
+              ownerAddress: currentAddress,
+              amountToSend: amountToSend,
+            )
           : await _sendWithLocalMnemonic(
               walletState: walletState,
               amountToSend: amountToSend,
@@ -338,6 +370,56 @@ class _SendExecutePageState extends ConsumerState<SendExecutePage> {
             submissionAmount:
                 '${Formatters.amount(widget.draft.amount)} ${Formatters.tokenSymbol(widget.draft.token.symbol)}',
           );
+  }
+
+  Future<String> _sendWithAirGap({
+    required String ownerAddress,
+    required double amountToSend,
+  }) async {
+    final solana = ref.read(solanaWalletServiceProvider);
+    final draft = widget.draft;
+    Future<String> build() => widget.draft.token.isNative
+        ? solana.buildSolTransferTransaction(
+            ownerAddress: ownerAddress,
+            destinationAddress: widget.draft.destinationAddress,
+            lamports: _exactLamports ?? solana.solToLamports(amountToSend),
+          )
+        : solana.buildSplTokenTransferTransaction(
+            ownerAddress: ownerAddress,
+            token: widget.draft.token,
+            destinationAddress: widget.draft.destinationAddress,
+            amount:
+                _exactTokenAmount ??
+                solana.tokenUiToAmount(
+                  widget.draft.amount,
+                  widget.draft.token.decimals,
+                ),
+          );
+    final signed = await ref
+        .read(airGapSigningServiceProvider)
+        .signTransaction(
+          ownerAddress: ownerAddress,
+          encodedTransaction: await build(),
+          rebuild: build,
+          tokens: [widget.draft.token],
+          usdPrices: () => {
+            if (draft.amount > 0 && draft.approximateUsd > 0)
+              draft.token.isNative ? _wrappedSolMint : draft.token.mintAddress:
+                  draft.approximateUsd / draft.amount,
+          },
+          recipient: _airGapRecipient(),
+        );
+    return solana.sendExternallySignedTransaction(
+      encodedTransaction: signed.transaction,
+      signature: signed.signature,
+      submitViaSender: true,
+      txType: 'send',
+      fromMint: widget.draft.token.mintAddress,
+      toMint: widget.draft.token.mintAddress,
+      amount:
+          '${Formatters.amount(amountToSend)} ${Formatters.tokenSymbol(widget.draft.token.symbol)}',
+      destinationAddress: widget.draft.destinationAddress,
+    );
   }
 
   Future<String> _sendWithMobileWalletAdapter({

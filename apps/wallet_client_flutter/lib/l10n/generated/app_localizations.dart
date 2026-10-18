@@ -3675,6 +3675,1464 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unavailable while travel guard is on'**
   String get travelGuardBiometricsOff;
+
+  /// No description provided for @welcomeUseAsSigner.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this phone as an offline signer'**
+  String get welcomeUseAsSigner;
+
+  /// No description provided for @walletAddAirGap.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect offline signer'**
+  String get walletAddAirGap;
+
+  /// No description provided for @walletAddAirGapSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keys stay on another phone that never goes online'**
+  String get walletAddAirGapSubtitle;
+
+  /// No description provided for @createWalletWordCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} words'**
+  String createWalletWordCount(int count);
+
+  /// No description provided for @signerAppTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Benny Signer'**
+  String get signerAppTitle;
+
+  /// No description provided for @signerNeedsNoWalletsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove all wallets first'**
+  String get signerNeedsNoWalletsTitle;
+
+  /// No description provided for @signerNeedsNoWalletsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A signer phone holds only its own offline recovery phrase. Back up and remove every wallet on this phone in Settings > Wallets, then try again.'**
+  String get signerNeedsNoWalletsBody;
+
+  /// No description provided for @signerEnterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn this phone into a signer?'**
+  String get signerEnterTitle;
+
+  /// No description provided for @signerEnterBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone will stay offline and only sign. It will have no wallet screens. To use it as a wallet again you will have to erase it.'**
+  String get signerEnterBody;
+
+  /// No description provided for @signerIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline signer'**
+  String get signerIntroTitle;
+
+  /// No description provided for @signerIntroPoint1.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone keeps your recovery phrase and never goes online again.'**
+  String get signerIntroPoint1;
+
+  /// No description provided for @signerIntroPoint2.
+  ///
+  /// In en, this message translates to:
+  /// **'Your other phone with Benny Wallet builds transactions. You sign them here by scanning QR codes.'**
+  String get signerIntroPoint2;
+
+  /// No description provided for @signerIntroPoint3.
+  ///
+  /// In en, this message translates to:
+  /// **'Before a recovery phrase is created, we will help you switch off every network.'**
+  String get signerIntroPoint3;
+
+  /// No description provided for @signerIntroPoint4.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the recovery phrase on paper. It is the only backup.'**
+  String get signerIntroPoint4;
+
+  /// No description provided for @signerIntroStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get signerIntroStart;
+
+  /// No description provided for @signerIntroCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now, use as a wallet'**
+  String get signerIntroCancel;
+
+  /// No description provided for @signerOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Take this phone offline'**
+  String get signerOfflineTitle;
+
+  /// No description provided for @signerOfflineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on airplane mode and switch off Wi-Fi, Bluetooth and NFC. You can continue once every required item is green.'**
+  String get signerOfflineBody;
+
+  /// No description provided for @signerCheckAirplane.
+  ///
+  /// In en, this message translates to:
+  /// **'Airplane mode on'**
+  String get signerCheckAirplane;
+
+  /// No description provided for @signerCheckWifi.
+  ///
+  /// In en, this message translates to:
+  /// **'Wi-Fi off'**
+  String get signerCheckWifi;
+
+  /// No description provided for @signerCheckBluetooth.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth off'**
+  String get signerCheckBluetooth;
+
+  /// No description provided for @signerCheckNfc.
+  ///
+  /// In en, this message translates to:
+  /// **'NFC off'**
+  String get signerCheckNfc;
+
+  /// No description provided for @signerCheckNoNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'No network connection'**
+  String get signerCheckNoNetwork;
+
+  /// No description provided for @signerCheckUsbDebugging.
+  ///
+  /// In en, this message translates to:
+  /// **'USB debugging off'**
+  String get signerCheckUsbDebugging;
+
+  /// No description provided for @signerCheckSim.
+  ///
+  /// In en, this message translates to:
+  /// **'SIM card removed (recommended)'**
+  String get signerCheckSim;
+
+  /// No description provided for @signerCheckManualHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone can\'t check this. Confirm it yourself.'**
+  String get signerCheckManualHint;
+
+  /// No description provided for @signerOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get signerOpenSettings;
+
+  /// No description provided for @signerNetworkDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'A network connection was detected. Switch it off to continue.'**
+  String get signerNetworkDetected;
+
+  /// No description provided for @signerPinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set signer PIN'**
+  String get signerPinTitle;
+
+  /// No description provided for @signerPinBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a 6-digit PIN for this signer.'**
+  String get signerPinBody;
+
+  /// No description provided for @signerPinConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm PIN'**
+  String get signerPinConfirmTitle;
+
+  /// No description provided for @signerPinConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the PIN again.'**
+  String get signerPinConfirmBody;
+
+  /// No description provided for @signerPinMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The PINs don\'t match. Try again.'**
+  String get signerPinMismatch;
+
+  /// No description provided for @signerSourceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery phrase'**
+  String get signerSourceTitle;
+
+  /// No description provided for @signerSourceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new recovery phrase on this offline phone, or enter one you already have.'**
+  String get signerSourceBody;
+
+  /// No description provided for @signerSourceCreate24.
+  ///
+  /// In en, this message translates to:
+  /// **'Create 24 words'**
+  String get signerSourceCreate24;
+
+  /// No description provided for @signerSourceCreate24Subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended for a signer'**
+  String get signerSourceCreate24Subtitle;
+
+  /// No description provided for @signerSourceCreate12.
+  ///
+  /// In en, this message translates to:
+  /// **'Create 12 words'**
+  String get signerSourceCreate12;
+
+  /// No description provided for @signerSourceCreate12Subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shorter to write down'**
+  String get signerSourceCreate12Subtitle;
+
+  /// No description provided for @signerSourceImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import existing phrase'**
+  String get signerSourceImport;
+
+  /// No description provided for @signerSourceImportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'12 or 24 words'**
+  String get signerSourceImportSubtitle;
+
+  /// No description provided for @signerWordsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Write these words down'**
+  String get signerWordsTitle;
+
+  /// No description provided for @signerWordsWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the words on paper in order. Never take a photo, screenshot or type them anywhere else. Anyone with these words can take your funds.'**
+  String get signerWordsWarning;
+
+  /// No description provided for @signerWordsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'I wrote them down'**
+  String get signerWordsDone;
+
+  /// No description provided for @signerVerifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your backup'**
+  String get signerVerifyTitle;
+
+  /// No description provided for @signerImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import recovery phrase'**
+  String get signerImportTitle;
+
+  /// No description provided for @signerImportBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your 12 or 24 words separated by spaces.'**
+  String get signerImportBody;
+
+  /// No description provided for @signerImportInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This isn\'t a valid 12 or 24 word recovery phrase.'**
+  String get signerImportInvalid;
+
+  /// No description provided for @signerFinishTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish setup'**
+  String get signerFinishTitle;
+
+  /// No description provided for @signerDeviceNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Signer name'**
+  String get signerDeviceNameLabel;
+
+  /// No description provided for @signerDeviceNameHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown in your wallet after you connect.'**
+  String get signerDeviceNameHelper;
+
+  /// No description provided for @signerBiometricToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with biometrics'**
+  String get signerBiometricToggle;
+
+  /// No description provided for @signerFinishButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get signerFinishButton;
+
+  /// No description provided for @signerSetupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup couldn\'t be saved. Try again.'**
+  String get signerSetupFailed;
+
+  /// No description provided for @signerUnlockSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your signer PIN'**
+  String get signerUnlockSubtitle;
+
+  /// No description provided for @signerUnlockNetworkBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'A network connection is on. Turn on airplane mode to unlock.'**
+  String get signerUnlockNetworkBlocked;
+
+  /// No description provided for @signerWrongPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong PIN. {count} attempts left before the signer is erased.'**
+  String signerWrongPin(int count);
+
+  /// No description provided for @signerUnlockFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t unlock. Try again.'**
+  String get signerUnlockFailed;
+
+  /// No description provided for @signerUseBiometric.
+  ///
+  /// In en, this message translates to:
+  /// **'Use biometrics'**
+  String get signerUseBiometric;
+
+  /// No description provided for @signerBiometricReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock your Benny signer'**
+  String get signerBiometricReason;
+
+  /// No description provided for @signerBiometricFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometrics couldn\'t be changed.'**
+  String get signerBiometricFailed;
+
+  /// No description provided for @signerRecheckTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline check'**
+  String get signerRecheckTitle;
+
+  /// No description provided for @signerRecheckBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The app was updated. Make sure this phone is fully offline again before you unlock it.'**
+  String get signerRecheckBody;
+
+  /// No description provided for @signerLockNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock'**
+  String get signerLockNow;
+
+  /// No description provided for @signerOfflineChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline signer'**
+  String get signerOfflineChip;
+
+  /// No description provided for @signerScanToSign.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to sign'**
+  String get signerScanToSign;
+
+  /// No description provided for @signerPairWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect wallet'**
+  String get signerPairWallet;
+
+  /// No description provided for @signerAccountsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts'**
+  String get signerAccountsTitle;
+
+  /// No description provided for @signerAccountName.
+  ///
+  /// In en, this message translates to:
+  /// **'Account {number}'**
+  String signerAccountName(int number);
+
+  /// No description provided for @signerPairBody.
+  ///
+  /// In en, this message translates to:
+  /// **'In Benny Wallet on your other phone, choose Connect offline signer and scan this code.'**
+  String get signerPairBody;
+
+  /// No description provided for @signerPairPublicOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'This code contains only public addresses, never your recovery phrase.'**
+  String get signerPairPublicOnly;
+
+  /// No description provided for @signerScanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the QR code shown by Benny Wallet on your other phone.'**
+  String get signerScanBody;
+
+  /// No description provided for @signerScanWrongCode.
+  ///
+  /// In en, this message translates to:
+  /// **'This isn\'t a signing request from Benny Wallet.'**
+  String get signerScanWrongCode;
+
+  /// No description provided for @signerScanAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan again'**
+  String get signerScanAgain;
+
+  /// No description provided for @signerRejectUnknownAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'This request is for an account that isn\'t on this signer.'**
+  String get signerRejectUnknownAccount;
+
+  /// No description provided for @signerRejectNotASigner.
+  ///
+  /// In en, this message translates to:
+  /// **'This account doesn\'t need to sign this transaction.'**
+  String get signerRejectNotASigner;
+
+  /// No description provided for @signerRejectUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'This transaction can\'t be read, so it won\'t be signed.'**
+  String get signerRejectUnreadable;
+
+  /// No description provided for @signerRejectMessageIsTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'This message is actually a transaction, so it won\'t be signed.'**
+  String get signerRejectMessageIsTransaction;
+
+  /// No description provided for @signerRejectInvalidCode.
+  ///
+  /// In en, this message translates to:
+  /// **'This QR code isn\'t a valid signing request.'**
+  String get signerRejectInvalidCode;
+
+  /// No description provided for @signerReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and sign'**
+  String get signerReviewTitle;
+
+  /// No description provided for @signerReviewAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing account'**
+  String get signerReviewAccount;
+
+  /// No description provided for @signerReviewFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Network fee'**
+  String get signerReviewFee;
+
+  /// No description provided for @signerReviewMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get signerReviewMessage;
+
+  /// No description provided for @signerBinaryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Binary data ({count} bytes)'**
+  String signerBinaryMessage(int count);
+
+  /// No description provided for @signerThisAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'this account'**
+  String get signerThisAccount;
+
+  /// No description provided for @signerActionSendSol.
+  ///
+  /// In en, this message translates to:
+  /// **'Send {amount} SOL'**
+  String signerActionSendSol(String amount);
+
+  /// No description provided for @signerActionSendToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Send {amount} {symbol}'**
+  String signerActionSendToken(String amount, String symbol);
+
+  /// No description provided for @signerActionSendUnverified.
+  ///
+  /// In en, this message translates to:
+  /// **'Send {amount} of an unverified token'**
+  String signerActionSendUnverified(String amount);
+
+  /// No description provided for @signerActionTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To {address}'**
+  String signerActionTo(String address);
+
+  /// No description provided for @signerActionToTokenAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'To token account {address}'**
+  String signerActionToTokenAccount(String address);
+
+  /// No description provided for @signerActionMint.
+  ///
+  /// In en, this message translates to:
+  /// **'Token address {mint}'**
+  String signerActionMint(String mint);
+
+  /// No description provided for @signerActionOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner {address}'**
+  String signerActionOwner(String address);
+
+  /// No description provided for @signerActionRentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Rent returned to {address}'**
+  String signerActionRentTo(String address);
+
+  /// No description provided for @signerActionCreateTokenAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create token account'**
+  String get signerActionCreateTokenAccount;
+
+  /// No description provided for @signerActionCloseTokenAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Close token account'**
+  String get signerActionCloseTokenAccount;
+
+  /// No description provided for @signerActionMemo.
+  ///
+  /// In en, this message translates to:
+  /// **'Memo'**
+  String get signerActionMemo;
+
+  /// No description provided for @signerActionApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow another account to spend your tokens'**
+  String get signerActionApprove;
+
+  /// No description provided for @signerActionSetAuthority.
+  ///
+  /// In en, this message translates to:
+  /// **'Change account authority'**
+  String get signerActionSetAuthority;
+
+  /// No description provided for @signerActionAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Change account owner'**
+  String get signerActionAssign;
+
+  /// No description provided for @signerActionCreateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get signerActionCreateAccount;
+
+  /// No description provided for @signerActionProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Program {program}'**
+  String signerActionProgram(String program);
+
+  /// No description provided for @signerHoldToSign.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to sign'**
+  String get signerHoldToSign;
+
+  /// No description provided for @signerReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get signerReject;
+
+  /// No description provided for @signerSignFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing failed. Try again.'**
+  String get signerSignFailed;
+
+  /// No description provided for @signerSignatureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Signature'**
+  String get signerSignatureTitle;
+
+  /// No description provided for @signerSignatureBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan this code with Benny Wallet on your other phone to finish.'**
+  String get signerSignatureBody;
+
+  /// No description provided for @signerSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Signer settings'**
+  String get signerSettingsTitle;
+
+  /// No description provided for @signerAccountCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts shown'**
+  String get signerAccountCount;
+
+  /// No description provided for @signerAccountCountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 5 accounts from this recovery phrase'**
+  String get signerAccountCountHint;
+
+  /// No description provided for @signerUpgradeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update the signer'**
+  String get signerUpgradeTitle;
+
+  /// No description provided for @signerUpgradeIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating the app needs a network, so plan it. Your recovery phrase stays encrypted on this phone while it is online, and the signer will not open it until the phone is offline again.'**
+  String get signerUpgradeIntro;
+
+  /// No description provided for @signerUpgradeStep0.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Check your paper backup'**
+  String get signerUpgradeStep0;
+
+  /// No description provided for @signerUpgradeVerifyBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Check backup'**
+  String get signerUpgradeVerifyBackup;
+
+  /// No description provided for @signerUpgradeBackupOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup checked'**
+  String get signerUpgradeBackupOk;
+
+  /// No description provided for @signerUpgradeOnlineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'2a. Standard update'**
+  String get signerUpgradeOnlineTitle;
+
+  /// No description provided for @signerUpgradeOnlineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock the signer. Turn the network on and update Benny Wallet from the same store you installed it from. Turn airplane mode back on. The signer runs the offline check again before you can unlock it.'**
+  String get signerUpgradeOnlineBody;
+
+  /// No description provided for @signerUpgradeSecureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'2b. Most secure update'**
+  String get signerUpgradeSecureTitle;
+
+  /// No description provided for @signerUpgradeSecureBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase the signer in settings, then update the app online. Go offline again, set up the signer and import your recovery phrase. Your accounts and addresses stay the same.'**
+  String get signerUpgradeSecureBody;
+
+  /// No description provided for @signerUpgradeOfflineApkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Android: update without going online'**
+  String get signerUpgradeOfflineApkTitle;
+
+  /// No description provided for @signerUpgradeOfflineApkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can also copy the new APK to this phone by USB cable or SD card and install it while staying offline. Use an APK from the same source you installed from, otherwise it won\'t install over this one.'**
+  String get signerUpgradeOfflineApkBody;
+
+  /// No description provided for @signerUpgradeCompatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Older signers keep working'**
+  String get signerUpgradeCompatTitle;
+
+  /// No description provided for @signerUpgradeCompatBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A newer wallet app still works with an older signer. The wallet only asks for what this signer supports, so you can update when it suits you.'**
+  String get signerUpgradeCompatBody;
+
+  /// No description provided for @signerVersionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get signerVersionTitle;
+
+  /// No description provided for @signerVersionDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'App {app} · protocol {protocol} · token list {tokens}'**
+  String signerVersionDetail(String app, int protocol, int tokens);
+
+  /// No description provided for @signerEraseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase signer'**
+  String get signerEraseTitle;
+
+  /// No description provided for @signerEraseSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Removes the recovery phrase from this phone'**
+  String get signerEraseSubtitle;
+
+  /// No description provided for @signerEraseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The recovery phrase will be deleted from this phone. Without your paper backup the funds can\'t be recovered.'**
+  String get signerEraseBody;
+
+  /// No description provided for @signerEraseConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase'**
+  String get signerEraseConfirm;
+
+  /// No description provided for @signerEraseWrongPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong PIN. Nothing was erased.'**
+  String get signerEraseWrongPin;
+
+  /// No description provided for @airGapConnectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect offline signer'**
+  String get airGapConnectTitle;
+
+  /// No description provided for @airGapConnectBody.
+  ///
+  /// In en, this message translates to:
+  /// **'On your signer phone tap Connect wallet, then scan the code it shows.'**
+  String get airGapConnectBody;
+
+  /// No description provided for @airGapConnectInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This isn\'t a signer pairing code.'**
+  String get airGapConnectInvalid;
+
+  /// No description provided for @airGapConnectChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an account on {device}'**
+  String airGapConnectChoose(String device);
+
+  /// No description provided for @airGapConnectAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account {number}'**
+  String airGapConnectAccount(int number);
+
+  /// No description provided for @airGapConnectAccountAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Account {number} (already added)'**
+  String airGapConnectAccountAdded(int number);
+
+  /// No description provided for @airGapConnectCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Check that the address matches the one shown on your signer.'**
+  String get airGapConnectCompare;
+
+  /// No description provided for @airGapConnectScanAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan again'**
+  String get airGapConnectScanAgain;
+
+  /// No description provided for @airGapSignTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign with your signer'**
+  String get airGapSignTitle;
+
+  /// No description provided for @airGapSignShowRequestAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the request again'**
+  String get airGapSignShowRequestAgain;
+
+  /// No description provided for @airGapSignMayHaveExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This transaction may have expired. If sending fails, start again.'**
+  String get airGapSignMayHaveExpired;
+
+  /// No description provided for @airGapSignWrongRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'This signature belongs to a different request.'**
+  String get airGapSignWrongRequest;
+
+  /// No description provided for @airGapSignInvalidCode.
+  ///
+  /// In en, this message translates to:
+  /// **'This isn\'t a signature from your signer.'**
+  String get airGapSignInvalidCode;
+
+  /// No description provided for @airGapSignerOutdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Your signer runs an older version. It still works; update it when convenient.'**
+  String get airGapSignerOutdated;
+
+  /// No description provided for @signerIntroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your keys on a phone that never goes online.'**
+  String get signerIntroSubtitle;
+
+  /// No description provided for @signerFinishSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Give this signer a name and set a PIN.'**
+  String get signerFinishSubtitle;
+
+  /// No description provided for @signerQuizBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the right word for {count} positions. Use your paper backup.'**
+  String signerQuizBody(int count);
+
+  /// No description provided for @signerQuizProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {current} of {total}'**
+  String signerQuizProgress(int current, int total);
+
+  /// No description provided for @signerQuizQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Which is word #{position}?'**
+  String signerQuizQuestion(int position);
+
+  /// No description provided for @signerQuizCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct!'**
+  String get signerQuizCorrect;
+
+  /// No description provided for @signerQuizWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s not right. Check your paper; we picked new words to try again.'**
+  String get signerQuizWrong;
+
+  /// No description provided for @signerQuizShowWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the words again'**
+  String get signerQuizShowWords;
+
+  /// No description provided for @signerScanToSignSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the request shown by your wallet'**
+  String get signerScanToSignSubtitle;
+
+  /// No description provided for @signerPairWalletSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show a code for Benny Wallet to scan'**
+  String get signerPairWalletSubtitle;
+
+  /// No description provided for @signerWalletPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Benny Wallet'**
+  String get signerWalletPhoneLabel;
+
+  /// No description provided for @signerScanRefusedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t sign this'**
+  String get signerScanRefusedTitle;
+
+  /// No description provided for @airGapSignerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Signer'**
+  String get airGapSignerLabel;
+
+  /// No description provided for @airGapThisPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone'**
+  String get airGapThisPhone;
+
+  /// No description provided for @airGapConnectFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Signer recognized'**
+  String get airGapConnectFound;
+
+  /// No description provided for @airGapSignNeedsSigner.
+  ///
+  /// In en, this message translates to:
+  /// **'This needs to be verified and signed by your signer'**
+  String get airGapSignNeedsSigner;
+
+  /// No description provided for @airGapSignStepShort1.
+  ///
+  /// In en, this message translates to:
+  /// **'Signer scans'**
+  String get airGapSignStepShort1;
+
+  /// No description provided for @airGapSignStepShort2.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan signature'**
+  String get airGapSignStepShort2;
+
+  /// No description provided for @airGapSignStep1Named.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 1: scan this code with “{device}”'**
+  String airGapSignStep1Named(String device);
+
+  /// No description provided for @airGapSignStep1BodyNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'On “{device}”, tap Scan to sign, check the details, then confirm.'**
+  String airGapSignStep1BodyNamed(String device);
+
+  /// No description provided for @airGapSignStep2Named.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 2: scan the signature from “{device}”'**
+  String airGapSignStep2Named(String device);
+
+  /// No description provided for @airGapSignStep2BodyNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'After you confirm, “{device}” shows a signature code. Scan it with this phone.'**
+  String airGapSignStep2BodyNamed(String device);
+
+  /// No description provided for @airGapSignScanSignatureNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: scan signature from {device}'**
+  String airGapSignScanSignatureNamed(String device);
+
+  /// No description provided for @signerActionSwapPair.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap {from} → {to}'**
+  String signerActionSwapPair(String from, String to);
+
+  /// No description provided for @signerSwapPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount}'**
+  String signerSwapPay(String amount);
+
+  /// No description provided for @signerSwapPayAtMost.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay at most {amount}'**
+  String signerSwapPayAtMost(String amount);
+
+  /// No description provided for @signerSwapReceive.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive {amount}'**
+  String signerSwapReceive(String amount);
+
+  /// No description provided for @signerSwapReceiveAtLeast.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive at least {amount}'**
+  String signerSwapReceiveAtLeast(String amount);
+
+  /// No description provided for @signerSwapUnverifiedToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Unverified token'**
+  String get signerSwapUnverifiedToken;
+
+  /// No description provided for @airGapSignTimeLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds} s left. If time runs out, a fresh code appears automatically.'**
+  String airGapSignTimeLeft(int seconds);
+
+  /// No description provided for @airGapSignRefreshing.
+  ///
+  /// In en, this message translates to:
+  /// **'Time is up. Getting a fresh quote and code…'**
+  String get airGapSignRefreshing;
+
+  /// No description provided for @airGapSignRefreshed.
+  ///
+  /// In en, this message translates to:
+  /// **'The last code expired, so here is a new one. Scan it again with “{device}”.'**
+  String airGapSignRefreshed(String device);
+
+  /// No description provided for @airGapSignRefreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t get a fresh code. Check your connection and try again.'**
+  String get airGapSignRefreshFailed;
+
+  /// No description provided for @airGapSignOldRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'This signature is for the expired code. Scan the new code on your signer first.'**
+  String get airGapSignOldRequest;
+
+  /// No description provided for @scanHintRoleShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows code'**
+  String get scanHintRoleShows;
+
+  /// No description provided for @scanHintRoleScans.
+  ///
+  /// In en, this message translates to:
+  /// **'Scans'**
+  String get scanHintRoleScans;
+
+  /// No description provided for @signerTokenUnchecked.
+  ///
+  /// In en, this message translates to:
+  /// **'{symbol} (unverified)'**
+  String signerTokenUnchecked(String symbol);
+
+  /// No description provided for @signerReviewActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction'**
+  String get signerReviewActions;
+
+  /// No description provided for @signerNewerWalletNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Your wallet app is newer than this signer. Update the signer when you can.'**
+  String get signerNewerWalletNotice;
+
+  /// No description provided for @signerDangerBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'High risk. Don\'t sign unless you started this yourself.'**
+  String get signerDangerBanner;
+
+  /// No description provided for @signerActionSwap.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap'**
+  String get signerActionSwap;
+
+  /// No description provided for @signerActionSwapDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the amounts in your wallet.'**
+  String get signerActionSwapDetail;
+
+  /// No description provided for @signerActionDangerDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Dangerous. If you\'re not sure, don\'t sign.'**
+  String get signerActionDangerDetail;
+
+  /// No description provided for @signerActionAdvanceNonce.
+  ///
+  /// In en, this message translates to:
+  /// **'Update transaction number'**
+  String get signerActionAdvanceNonce;
+
+  /// No description provided for @signerActionSyncNative.
+  ///
+  /// In en, this message translates to:
+  /// **'Update SOL balance'**
+  String get signerActionSyncNative;
+
+  /// No description provided for @signerHoldLongHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check carefully, then hold for 3 seconds.'**
+  String get signerHoldLongHint;
+
+  /// No description provided for @signerTokenVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'{token} · Verified by Benny Wallet'**
+  String signerTokenVerified(String token);
+
+  /// No description provided for @signerTokenWalletProvided.
+  ///
+  /// In en, this message translates to:
+  /// **'{symbol} · Not verified by Benny Wallet'**
+  String signerTokenWalletProvided(String symbol);
+
+  /// No description provided for @signerSwapWalletQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate: pay {pay}, get about {receive}'**
+  String signerSwapWalletQuote(String pay, String receive);
+
+  /// No description provided for @signerActionUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrecognized step'**
+  String get signerActionUnknown;
+
+  /// No description provided for @signerActionCreateTokenAccountFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {symbol} account'**
+  String signerActionCreateTokenAccountFor(String symbol);
+
+  /// No description provided for @signerUnresolvedAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'The signer can\'t see all of this transaction. Only sign if you just started it.'**
+  String get signerUnresolvedAccounts;
+
+  /// No description provided for @signerTokenNotVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Not verified by Benny Wallet'**
+  String get signerTokenNotVerified;
+
+  /// No description provided for @signerKindSwap.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap'**
+  String get signerKindSwap;
+
+  /// No description provided for @signerKindSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get signerKindSend;
+
+  /// No description provided for @signerAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About {amount}'**
+  String signerAbout(String amount);
+
+  /// No description provided for @signerAmountsFromWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Amounts come from the wallet'**
+  String get signerAmountsFromWallet;
+
+  /// No description provided for @signerTrustSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'All tokens verified by Benny Wallet'**
+  String get signerTrustSafe;
+
+  /// No description provided for @signerTrustCaution.
+  ///
+  /// In en, this message translates to:
+  /// **'One token is not verified by Benny Wallet. Be careful.'**
+  String get signerTrustCaution;
+
+  /// No description provided for @signerTrustDangerSwap.
+  ///
+  /// In en, this message translates to:
+  /// **'Neither token is verified by Benny Wallet. High risk.'**
+  String get signerTrustDangerSwap;
+
+  /// No description provided for @signerTrustDangerSend.
+  ///
+  /// In en, this message translates to:
+  /// **'This token is not verified by Benny Wallet. High risk.'**
+  String get signerTrustDangerSend;
+
+  /// No description provided for @signerReviewOtherSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Other steps'**
+  String get signerReviewOtherSteps;
+
+  /// No description provided for @signerPay.
+  ///
+  /// In en, this message translates to:
+  /// **'You pay'**
+  String get signerPay;
+
+  /// No description provided for @signerPayAtMost.
+  ///
+  /// In en, this message translates to:
+  /// **'You pay at most'**
+  String get signerPayAtMost;
+
+  /// No description provided for @signerGet.
+  ///
+  /// In en, this message translates to:
+  /// **'You get'**
+  String get signerGet;
+
+  /// No description provided for @signerGetAtLeast.
+  ///
+  /// In en, this message translates to:
+  /// **'You get at least'**
+  String get signerGetAtLeast;
+
+  /// No description provided for @signerGetAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'You get about'**
+  String get signerGetAbout;
+
+  /// No description provided for @signerRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient'**
+  String get signerRecipient;
+
+  /// No description provided for @signerRecipientTokenAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient token account'**
+  String get signerRecipientTokenAccount;
+
+  /// No description provided for @signerUsdFromWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'USD values are the wallet\'s estimate'**
+  String get signerUsdFromWallet;
+
+  /// No description provided for @signerActionCreateTokenAccountForRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {symbol} account for the recipient'**
+  String signerActionCreateTokenAccountForRecipient(String symbol);
+
+  /// No description provided for @signerCreateAccountSkipIfOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'(First time costs about 0.002 SOL; skipped for free if already open)'**
+  String get signerCreateAccountSkipIfOpen;
+
+  /// No description provided for @signerCreateAccountNotOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'(Not open yet; costs about 0.002 SOL)'**
+  String get signerCreateAccountNotOpen;
+
+  /// No description provided for @signerAddressFromWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'This address comes from the wallet. The signer can\'t check it.'**
+  String get signerAddressFromWallet;
+
+  /// No description provided for @signerSwapOutputUnchecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t confirm the swapped tokens come to you.'**
+  String get signerSwapOutputUnchecked;
+
+  /// No description provided for @signerExtraOutflow.
+  ///
+  /// In en, this message translates to:
+  /// **'This also sends funds to another address.'**
+  String get signerExtraOutflow;
+
+  /// No description provided for @signerHighFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Very high network fee: {amount} SOL'**
+  String signerHighFee(String amount);
+
+  /// No description provided for @signerDurableNonce.
+  ///
+  /// In en, this message translates to:
+  /// **'This signature never expires. It can be used later.'**
+  String get signerDurableNonce;
+
+  /// No description provided for @signerSwapFromWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Token or amount comes from the wallet and can\'t be checked.'**
+  String get signerSwapFromWallet;
+
+  /// No description provided for @signerActionCloseTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance and rent go to {address}'**
+  String signerActionCloseTo(String address);
+
+  /// No description provided for @signerWalletNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet note: {name}'**
+  String signerWalletNote(String name);
+
+  /// No description provided for @signerReviewFeePayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee paid by'**
+  String get signerReviewFeePayer;
+
+  /// No description provided for @signerActionOwnerProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Controlled by program {program}'**
+  String signerActionOwnerProgram(String program);
+
+  /// No description provided for @signerSlippageAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Slippage 100% or more: you may get nothing.'**
+  String get signerSlippageAll;
+
+  /// No description provided for @signerQuizTooManyWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many wrong answers. Enter your PIN to try again.'**
+  String get signerQuizTooManyWrong;
+
+  /// No description provided for @signerSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Login request'**
+  String get signerSignInTitle;
+
+  /// No description provided for @signerKindSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get signerKindSignIn;
+
+  /// No description provided for @signerSignInBenny.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to Benny Wallet'**
+  String get signerSignInBenny;
+
+  /// No description provided for @signerSignInOtherSite.
+  ///
+  /// In en, this message translates to:
+  /// **'“{site}” asks you to sign in. Sign only if you started it.'**
+  String signerSignInOtherSite(String site);
+
+  /// No description provided for @signerSignInExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This login request has expired. Check this phone\'s time, or start again in the wallet.'**
+  String get signerSignInExpired;
+
+  /// No description provided for @signerSignInOtherAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'This login is for another account. Don\'t sign.'**
+  String get signerSignInOtherAccount;
+
+  /// No description provided for @signerSignInWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'Proves this account is yours, so Benny can show its balance, history and alerts.'**
+  String get signerSignInWhat;
+
+  /// No description provided for @signerSignInNoFunds.
+  ///
+  /// In en, this message translates to:
+  /// **'Moves no funds and costs no fee.'**
+  String get signerSignInNoFunds;
+
+  /// No description provided for @signerSignInShowText.
+  ///
+  /// In en, this message translates to:
+  /// **'Show original text'**
+  String get signerSignInShowText;
+
+  /// No description provided for @airGapSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your signer'**
+  String get airGapSignInTitle;
+
+  /// No description provided for @airGapSignInWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Why sign this?'**
+  String get airGapSignInWhy;
+
+  /// No description provided for @airGapSignInWhyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Benny needs to confirm this account is yours before it can load your balance, history and alerts. Usually you do this only once per wallet.'**
+  String get airGapSignInWhyBody;
+
+  /// No description provided for @airGapSignInSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'This is only a login. It moves no funds and costs no fee.'**
+  String get airGapSignInSafe;
+
+  /// No description provided for @airGapSignInSignerShows.
+  ///
+  /// In en, this message translates to:
+  /// **'“{device}” will show “Sign in to Benny Wallet”.'**
+  String airGapSignInSignerShows(String device);
+
+  /// No description provided for @airGapSignInSignerShowsText.
+  ///
+  /// In en, this message translates to:
+  /// **'“{device}” will show English text starting with “Benny Wallet wants you to sign in”. That is this login. After updating the signer it shows “Sign in to Benny Wallet” instead.'**
+  String airGapSignInSignerShowsText(String device);
 }
 
 class _AppLocalizationsDelegate

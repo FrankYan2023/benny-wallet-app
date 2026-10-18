@@ -1,4 +1,5 @@
 import 'package:design_system/design_system.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,9 +14,11 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/responsive_action_group.dart';
 import '../../../../l10n/l10n.dart';
+import '../../../airgap/presentation/pages/connect_signer_page.dart';
 import '../../../auth/presentation/pages/pin_setup_page.dart';
 import 'import_wallet_loading_page.dart';
 import '../../../wallets/presentation/pages/wallet_name_page.dart';
+import '../../../wallets/presentation/widgets/wallet_visuals.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../wallets/data/seed_vault_seed_names.dart';
 
@@ -380,6 +383,12 @@ class _ImportMnemonicPageState extends ConsumerState<ImportMnemonicPage> {
                       ),
                       const SizedBox(height: 16),
                     ],
+                    if (!kIsWeb) ...[
+                      _AirGapSignerCard(
+                        onTap: () => context.push(ConnectSignerPage.routePath),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                     WalletCard(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -483,8 +492,8 @@ class _SeekerVaultCard extends StatelessWidget {
               color: theme.colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(18),
             ),
-            child: Icon(
-              Icons.security_rounded,
+            child: SeekerMark(
+              size: 22,
               color: theme.colorScheme.onPrimaryContainer,
             ),
           ),
@@ -515,6 +524,67 @@ class _SeekerVaultCard extends StatelessWidget {
                 : Text(l10n.seekerVaultConnect),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Entry to watch-and-sign with an offline signer phone (keys never leave
+/// that phone).
+class _AirGapSignerCard extends StatelessWidget {
+  const _AirGapSignerCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(30),
+        onTap: onTap,
+        child: WalletCard(
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.tertiaryContainer,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Icon(
+                  Icons.qr_code_scanner_rounded,
+                  color: theme.colorScheme.onTertiaryContainer,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.walletAddAirGap,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.walletAddAirGapSubtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right_rounded),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -1,11 +1,15 @@
 import 'dart:developer' as developer;
+import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:solana/base58.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/di/providers.dart';
+import '../../../../core/airgap/airgap_protocol.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../l10n/generated/app_localizations.dart';
@@ -15,7 +19,10 @@ import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../auth/presentation/providers/ephemeral_store.dart';
 import '../../../portfolio/presentation/pages/portfolio_page.dart';
 import '../../../portfolio/presentation/providers/portfolio_provider.dart';
+import '../../domain/swap_build_result.dart';
+import '../../domain/swap_quote_result.dart';
 import '../../domain/swap_review_data.dart';
+import '../../domain/swap_token_option.dart';
 
 class SwapExecutePage extends ConsumerStatefulWidget {
   const SwapExecutePage({super.key, required this.review});
@@ -227,12 +234,17 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
         ? await _signAndSendSwapWithMobileWalletAdapter(refreshedTransactions)
         : custody == WalletCustody.seedVault
         ? await _signAndSendSwapWithSeedVault(refreshedTransactions)
+        : custody == WalletCustody.airGap
+        ? await _signAndSendSwapWithAirGap(
+            ownerAddress: ownerAddress,
+            encodedTransactions: refreshedTransactions,
+          )
         : await _signAndSendSwapWithLocalMnemonic(
             encodedTransactions: refreshedTransactions,
           );
   }
 
-  Future<List<String>> _buildFreshSwapTransactions({
+  Future<SwapBuildResult> _buildFreshSwap({
     required String ownerAddress,
   }) async {
     final review = widget.review;
@@ -249,7 +261,116 @@ class _SwapExecutePageState extends ConsumerState<SwapExecutePage> {
     if (buildResult.swapTransactions.isEmpty) {
       throw StateError('Swap transaction is unavailable.');
     }
-    return buildResult.swapTransactions;
+    return buildResult;
+  }
+
+  Future<List<String>> _buildFreshSwapTransactions({
+    required String ownerAddress,
+  }) async =>
+      (await _buildFreshSwap(ownerAddress: ownerAddress)).swapTransactions;
+
+  /// The quote shown on the offline signer next to the swap.
+  AirGapSwapSummary? _swapSummary(SwapQuoteResult quote) {
+    final inputAmount = BigInt.tryParse(quote.inAmount);
+    final outputAmount = BigInt.tryParse(quote.outAmount);
+    if (inputAmount == null || outputAmount == null) {
+      return null;
+    }
+    try {
+      return AirGapSwapSummary(
+        // The swap API names native SOL by the wrapped SOL mint.
+        inputMint: Uint8List.fromList(base58decode(quote.inputMint)),
+        inputAmount: inputAmount,
+        outputMint: Uint8List.fromList(base58decode(quote.outputMint)),
+        outputAmount: outputAmount,
+      );
+    } on Object {
+      return null;
+    }
+  }
+
+  /// USD per whole token for the offline signer, keyed like the quote
+  /// (native SOL as wrapped SOL). A token the wallet holds none of has no
+  /// price of its own, so it is valued at what the quote pays for it.
+  Map<String, double> _usdPrices(SwapQuoteResult quote) {
+    final review = widget.review;
+    double? unit(SwapTokenOption token) =>
+        token.availableBalance > 0 && token.totalValueUsd > 0
+        ? token.totalValueUsd / token.availableBalance
+        : null;
+    double? whole(String raw, SwapTokenOption token) {
+      final value = double.tryParse(raw);
+      return value == null ? null : value / pow(10, token.token.decimals);
+    }
+
+    var inPrice = unit(review.inputToken);
+    var outPrice = unit(review.outputToken);
+    final inAmount = whole(quote.inAmount, review.inputToken);
+    final outAmount = whole(quote.outAmount, review.outputToken);
+    if (inAmount != null &&
+        outAmount != null &&
+        inAmount > 0 &&
+        outAmount > 0) {
+      if (outPrice == null && inPrice != null) {
+        outPrice = inPrice * inAmount / outAmount;
+      } else if (inPrice == null && outPrice != null) {
+        inPrice = outPrice * outAmount / inAmount;
+      }
+    }
+    return {
+      if (inPrice != null) quote.inputMint: inPrice,
+      if (outPrice != null) quote.outputMint: outPrice,
+    };
+  }
+
+  /// One QR round trip per transaction; each is sent before the next is
+  /// signed. If time runs out while signing, a single-transaction swap is
+  /// quoted and built again; otherwise the blockhash is renewed.
+  Future<String> _signAndSendSwapWithAirGap({
+    required String ownerAddress,
+    required List<String> encodedTransactions,
+  }) async {
+    final solana = ref.read(solanaWalletServiceProvider);
+    final signer = ref.read(airGapSigningServiceProvider);
+    final review = widget.review;
+    final tokens = [review.inputToken.token, review.outputToken.token];
+    var summary = _swapSummary(review.buildResult);
+    var prices = _usdPrices(review.buildResult);
+    String? lastSignature;
+    for (final encodedTransaction in encodedTransactions) {
+      final requote = encodedTransactions.length == 1;
+      final signed = await signer.signTransaction(
+        ownerAddress: ownerAddress,
+        encodedTransaction: encodedTransaction,
+        tokens: tokens,
+        swap: () => summary,
+        usdPrices: () => prices,
+        rebuild: () async {
+          if (!requote) {
+            return solana.refreshPreparedTransactionBlockhash(
+              encodedTransaction: encodedTransaction,
+            );
+          }
+          final fresh = await _buildFreshSwap(ownerAddress: ownerAddress);
+          if (fresh.swapTransactions.length != 1) {
+            throw StateError('The new quote needs a different route.');
+          }
+          summary = _swapSummary(fresh);
+          prices = _usdPrices(fresh);
+          return solana.refreshPreparedTransactionBlockhash(
+            encodedTransaction: fresh.swapTransactions.single,
+          );
+        },
+      );
+      lastSignature = await solana.sendExternallySignedTransaction(
+        encodedTransaction: signed.transaction,
+        signature: signed.signature,
+      );
+    }
+    if (lastSignature == null) {
+      throw StateError('Swap transaction is unavailable.');
+    }
+    return lastSignature;
   }
 
   Future<String> _signAndSendSwapWithLocalMnemonic({

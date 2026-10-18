@@ -1972,6 +1972,835 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get travelGuardBiometricsOff => '旅行防搶劫開啟時無法使用';
+
+  @override
+  String get welcomeUseAsSigner => '把這台手機設為離線簽名機';
+
+  @override
+  String get walletAddAirGap => '連接離線簽名機';
+
+  @override
+  String get walletAddAirGapSubtitle => '私鑰留在另一台永不聯網的手機上';
+
+  @override
+  String createWalletWordCount(int count) {
+    return '$count 個詞';
+  }
+
+  @override
+  String get signerAppTitle => 'Benny 簽名機';
+
+  @override
+  String get signerNeedsNoWalletsTitle => '請先刪除所有錢包';
+
+  @override
+  String get signerNeedsNoWalletsBody =>
+      '簽名機只保存自己離線產生或匯入的助記詞。請先備份，並在「設定 > 錢包」刪除這台手機上的所有錢包，然後再試一次。';
+
+  @override
+  String get signerEnterTitle => '把這台手機設為簽名機？';
+
+  @override
+  String get signerEnterBody =>
+      '這台手機會一直保持離線，只負責簽名，不再顯示錢包頁面。之後如果要改回錢包，必須先清除簽名機。';
+
+  @override
+  String get signerIntroTitle => '離線簽名機';
+
+  @override
+  String get signerIntroPoint1 => '這台手機保存你的助記詞，之後不再聯網。';
+
+  @override
+  String get signerIntroPoint2 => '另一台手機上的 Benny Wallet 負責建立交易，你在這裡掃碼確認並簽名。';
+
+  @override
+  String get signerIntroPoint3 => '產生助記詞之前，會先引導你關閉所有網路。';
+
+  @override
+  String get signerIntroPoint4 => '請把助記詞抄在紙上，這是唯一的備份。';
+
+  @override
+  String get signerIntroStart => '開始設定';
+
+  @override
+  String get signerIntroCancel => '暫不設定，繼續當錢包使用';
+
+  @override
+  String get signerOfflineTitle => '讓手機完全離線';
+
+  @override
+  String get signerOfflineBody => '請開啟飛航模式，並關閉 Wi-Fi、藍牙和 NFC。所有必要項目都通過後才能繼續。';
+
+  @override
+  String get signerCheckAirplane => '已開啟飛航模式';
+
+  @override
+  String get signerCheckWifi => 'Wi-Fi 已關閉';
+
+  @override
+  String get signerCheckBluetooth => '藍牙已關閉';
+
+  @override
+  String get signerCheckNfc => 'NFC 已關閉';
+
+  @override
+  String get signerCheckNoNetwork => '沒有任何網路連線';
+
+  @override
+  String get signerCheckUsbDebugging => 'USB 偵錯已關閉';
+
+  @override
+  String get signerCheckSim => '已取出 SIM 卡（建議）';
+
+  @override
+  String get signerCheckManualHint => '此項無法自動偵測，請自行確認。';
+
+  @override
+  String get signerOpenSettings => '打開設定';
+
+  @override
+  String get signerNetworkDetected => '偵測到網路連線，請關閉後再繼續。';
+
+  @override
+  String get signerPinTitle => '設定簽名機 PIN 碼';
+
+  @override
+  String get signerPinBody => '請為簽名機設定 6 位數 PIN 碼。';
+
+  @override
+  String get signerPinConfirmTitle => '確認 PIN 碼';
+
+  @override
+  String get signerPinConfirmBody => '請再輸入一次 PIN 碼。';
+
+  @override
+  String get signerPinMismatch => '兩次輸入的 PIN 碼不一致，請重試。';
+
+  @override
+  String get signerSourceTitle => '助記詞';
+
+  @override
+  String get signerSourceBody => '在這台離線手機上產生新的助記詞，或輸入你已有的助記詞。';
+
+  @override
+  String get signerSourceCreate24 => '產生 24 個詞';
+
+  @override
+  String get signerSourceCreate24Subtitle => '簽名機建議使用';
+
+  @override
+  String get signerSourceCreate12 => '產生 12 個詞';
+
+  @override
+  String get signerSourceCreate12Subtitle => '抄寫較短';
+
+  @override
+  String get signerSourceImport => '匯入已有助記詞';
+
+  @override
+  String get signerSourceImportSubtitle => '支援 12 或 24 個詞';
+
+  @override
+  String get signerWordsTitle => '抄下這些詞';
+
+  @override
+  String get signerWordsWarning => '請按順序抄在紙上。不要拍照、截圖或輸入到其他地方。任何人拿到這些詞都能轉走你的資產。';
+
+  @override
+  String get signerWordsDone => '我已抄好';
+
+  @override
+  String get signerVerifyTitle => '核對備份';
+
+  @override
+  String get signerImportTitle => '匯入助記詞';
+
+  @override
+  String get signerImportBody => '請輸入 12 或 24 個詞，以空格分隔。';
+
+  @override
+  String get signerImportInvalid => '這不是有效的 12 或 24 個詞助記詞。';
+
+  @override
+  String get signerFinishTitle => '完成設定';
+
+  @override
+  String get signerDeviceNameLabel => '簽名機名稱';
+
+  @override
+  String get signerDeviceNameHelper => '連接後會顯示在錢包中。';
+
+  @override
+  String get signerBiometricToggle => '使用生物辨識解鎖';
+
+  @override
+  String get signerFinishButton => '完成';
+
+  @override
+  String get signerSetupFailed => '設定無法儲存，請重試。';
+
+  @override
+  String get signerUnlockSubtitle => '請輸入簽名機 PIN 碼';
+
+  @override
+  String get signerUnlockNetworkBlocked => '目前有網路連線，請開啟飛航模式後再解鎖。';
+
+  @override
+  String signerWrongPin(int count) {
+    return 'PIN 碼錯誤。再錯 $count 次簽名機將被清除。';
+  }
+
+  @override
+  String get signerUnlockFailed => '無法解鎖，請重試。';
+
+  @override
+  String get signerUseBiometric => '使用生物辨識';
+
+  @override
+  String get signerBiometricReason => '解鎖 Benny 簽名機';
+
+  @override
+  String get signerBiometricFailed => '無法更改生物辨識設定。';
+
+  @override
+  String get signerRecheckTitle => '離線檢查';
+
+  @override
+  String get signerRecheckBody => '應用已更新。解鎖前請確認這台手機已重新完全離線。';
+
+  @override
+  String get signerLockNow => '鎖定';
+
+  @override
+  String get signerOfflineChip => '離線簽名機';
+
+  @override
+  String get signerScanToSign => '掃碼簽名';
+
+  @override
+  String get signerPairWallet => '連接錢包';
+
+  @override
+  String get signerAccountsTitle => '帳戶';
+
+  @override
+  String signerAccountName(int number) {
+    return '帳戶 $number';
+  }
+
+  @override
+  String get signerPairBody => '在另一台手機的 Benny Wallet 選擇「連接離線簽名機」，然後掃描這個二維碼。';
+
+  @override
+  String get signerPairPublicOnly => '這個二維碼只包含公開地址，不含助記詞。';
+
+  @override
+  String get signerScanBody => '掃描另一台手機上 Benny Wallet 顯示的二維碼。';
+
+  @override
+  String get signerScanWrongCode => '這不是 Benny Wallet 的簽名請求。';
+
+  @override
+  String get signerScanAgain => '重新掃描';
+
+  @override
+  String get signerRejectUnknownAccount => '這個請求的帳戶不在這台簽名機上。';
+
+  @override
+  String get signerRejectNotASigner => '這筆交易不需要這個帳戶簽名。';
+
+  @override
+  String get signerRejectUnreadable => '無法解析這筆交易，因此不會簽名。';
+
+  @override
+  String get signerRejectMessageIsTransaction => '這則訊息實際上是一筆交易，因此不會簽名。';
+
+  @override
+  String get signerRejectInvalidCode => '這不是有效的簽名請求二維碼。';
+
+  @override
+  String get signerReviewTitle => '核對並簽名';
+
+  @override
+  String get signerReviewAccount => '簽名帳戶';
+
+  @override
+  String get signerReviewFee => '網路手續費';
+
+  @override
+  String get signerReviewMessage => '訊息';
+
+  @override
+  String signerBinaryMessage(int count) {
+    return '二進位資料（$count 位元組）';
+  }
+
+  @override
+  String get signerThisAccount => '本帳戶';
+
+  @override
+  String signerActionSendSol(String amount) {
+    return '發送 $amount SOL';
+  }
+
+  @override
+  String signerActionSendToken(String amount, String symbol) {
+    return '發送 $amount $symbol';
+  }
+
+  @override
+  String signerActionSendUnverified(String amount) {
+    return '發送 $amount 個未驗證代幣';
+  }
+
+  @override
+  String signerActionTo(String address) {
+    return '至 $address';
+  }
+
+  @override
+  String signerActionToTokenAccount(String address) {
+    return '至代幣帳戶 $address';
+  }
+
+  @override
+  String signerActionMint(String mint) {
+    return '代幣地址 $mint';
+  }
+
+  @override
+  String signerActionOwner(String address) {
+    return '擁有者 $address';
+  }
+
+  @override
+  String signerActionRentTo(String address) {
+    return '租金退回至 $address';
+  }
+
+  @override
+  String get signerActionCreateTokenAccount => '建立代幣帳戶';
+
+  @override
+  String get signerActionCloseTokenAccount => '關閉代幣帳戶';
+
+  @override
+  String get signerActionMemo => '備註';
+
+  @override
+  String get signerActionApprove => '允許其他帳戶動用你的代幣';
+
+  @override
+  String get signerActionSetAuthority => '更改帳戶權限';
+
+  @override
+  String get signerActionAssign => '更改帳戶擁有者';
+
+  @override
+  String get signerActionCreateAccount => '建立帳戶';
+
+  @override
+  String signerActionProgram(String program) {
+    return '程式 $program';
+  }
+
+  @override
+  String get signerHoldToSign => '按住簽名';
+
+  @override
+  String get signerReject => '拒絕';
+
+  @override
+  String get signerSignFailed => '簽名失敗，請重試。';
+
+  @override
+  String get signerSignatureTitle => '簽名結果';
+
+  @override
+  String get signerSignatureBody => '用另一台手機上的 Benny Wallet 掃描這個二維碼即可完成。';
+
+  @override
+  String get signerSettingsTitle => '簽名機設定';
+
+  @override
+  String get signerAccountCount => '顯示帳戶數';
+
+  @override
+  String get signerAccountCountHint => '此助記詞最多 5 個帳戶';
+
+  @override
+  String get signerUpgradeTitle => '更新簽名機';
+
+  @override
+  String get signerUpgradeIntro =>
+      '更新應用需要聯網，請事先準備。聯網期間助記詞仍加密保存在手機中，簽名機要等手機重新離線後才會開啟。';
+
+  @override
+  String get signerUpgradeStep0 => '1. 核對紙本備份';
+
+  @override
+  String get signerUpgradeVerifyBackup => '核對備份';
+
+  @override
+  String get signerUpgradeBackupOk => '備份已核對';
+
+  @override
+  String get signerUpgradeOnlineTitle => '2a. 一般更新';
+
+  @override
+  String get signerUpgradeOnlineBody =>
+      '先鎖定簽名機，再開啟網路，從原本安裝的商店更新 Benny Wallet。更新後重新開啟飛航模式。解鎖前簽名機會再次進行離線檢查。';
+
+  @override
+  String get signerUpgradeSecureTitle => '2b. 最高安全更新';
+
+  @override
+  String get signerUpgradeSecureBody =>
+      '先在設定中清除簽名機，然後聯網更新應用。更新後重新離線，再次設定簽名機並匯入助記詞。帳戶和地址都不會改變。';
+
+  @override
+  String get signerUpgradeOfflineApkTitle => 'Android：不聯網更新';
+
+  @override
+  String get signerUpgradeOfflineApkBody =>
+      '也可以用 USB 線或 SD 卡把新版 APK 複製到這台手機，在離線狀態下安裝。請使用與原本安裝相同來源的 APK，否則無法覆蓋安裝。';
+
+  @override
+  String get signerUpgradeCompatTitle => '舊版簽名機仍可使用';
+
+  @override
+  String get signerUpgradeCompatBody =>
+      '新版錢包仍能配合舊版簽名機使用。錢包只會使用簽名機支援的功能，你可以在方便時再更新。';
+
+  @override
+  String get signerVersionTitle => '版本';
+
+  @override
+  String signerVersionDetail(String app, int protocol, int tokens) {
+    return '應用 $app · 協議 $protocol · 代幣清單 $tokens';
+  }
+
+  @override
+  String get signerEraseTitle => '清除簽名機';
+
+  @override
+  String get signerEraseSubtitle => '從這台手機刪除助記詞';
+
+  @override
+  String get signerEraseBody => '助記詞將從這台手機刪除。沒有紙本備份將無法找回資產。';
+
+  @override
+  String get signerEraseConfirm => '清除';
+
+  @override
+  String get signerEraseWrongPin => 'PIN 碼錯誤，未清除任何資料。';
+
+  @override
+  String get airGapConnectTitle => '連接離線簽名機';
+
+  @override
+  String get airGapConnectBody => '在簽名機上點「連接錢包」，然後掃描顯示的二維碼。';
+
+  @override
+  String get airGapConnectInvalid => '這不是簽名機的配對二維碼。';
+
+  @override
+  String airGapConnectChoose(String device) {
+    return '選擇 $device 上的帳戶';
+  }
+
+  @override
+  String airGapConnectAccount(int number) {
+    return '帳戶 $number';
+  }
+
+  @override
+  String airGapConnectAccountAdded(int number) {
+    return '帳戶 $number（已新增）';
+  }
+
+  @override
+  String get airGapConnectCompare => '請確認地址與簽名機上顯示的一致。';
+
+  @override
+  String get airGapConnectScanAgain => '重新掃描';
+
+  @override
+  String get airGapSignTitle => '用簽名機簽名';
+
+  @override
+  String get airGapSignShowRequestAgain => '重新顯示請求';
+
+  @override
+  String get airGapSignMayHaveExpired => '這筆交易可能已過期，若發送失敗請重新開始。';
+
+  @override
+  String get airGapSignWrongRequest => '這個簽名屬於另一個請求。';
+
+  @override
+  String get airGapSignInvalidCode => '這不是簽名機產生的簽名。';
+
+  @override
+  String get airGapSignerOutdated => '簽名機版本較舊，仍可正常使用，方便時再更新即可。';
+
+  @override
+  String get signerIntroSubtitle => '把私鑰放在一台永不聯網的手機上。';
+
+  @override
+  String get signerFinishSubtitle => '為這台簽名機取個名字，並設定 PIN 碼。';
+
+  @override
+  String signerQuizBody(int count) {
+    return '請對照紙本備份，為 $count 個位置選出正確的詞。';
+  }
+
+  @override
+  String signerQuizProgress(int current, int total) {
+    return '第 $current / $total 題';
+  }
+
+  @override
+  String signerQuizQuestion(int position) {
+    return '第 $position 個詞是哪一個？';
+  }
+
+  @override
+  String get signerQuizCorrect => '答對了！';
+
+  @override
+  String get signerQuizWrong => '選錯了。請再對照紙本，我們換了新的位置重新開始。';
+
+  @override
+  String get signerQuizShowWords => '再看一次助記詞';
+
+  @override
+  String get signerScanToSignSubtitle => '掃描錢包顯示的簽名請求';
+
+  @override
+  String get signerPairWalletSubtitle => '顯示二維碼讓 Benny Wallet 掃描';
+
+  @override
+  String get signerWalletPhoneLabel => 'Benny Wallet';
+
+  @override
+  String get signerScanRefusedTitle => '無法簽名';
+
+  @override
+  String get airGapSignerLabel => '簽名機';
+
+  @override
+  String get airGapThisPhone => '本機';
+
+  @override
+  String get airGapConnectFound => '已識別簽名機';
+
+  @override
+  String get airGapSignNeedsSigner => '需要由您的簽名機驗證並簽名';
+
+  @override
+  String get airGapSignStepShort1 => '簽名機掃碼';
+
+  @override
+  String get airGapSignStepShort2 => '掃描簽名';
+
+  @override
+  String airGapSignStep1Named(String device) {
+    return '第一步：用簽名機「$device」掃描這個二維碼';
+  }
+
+  @override
+  String airGapSignStep1BodyNamed(String device) {
+    return '在「$device」點「掃碼簽名」，核對內容後確認。';
+  }
+
+  @override
+  String airGapSignStep2Named(String device) {
+    return '第二步：掃描簽名機「$device」上的簽名碼';
+  }
+
+  @override
+  String airGapSignStep2BodyNamed(String device) {
+    return '「$device」確認後會顯示簽名碼，用本機掃描。';
+  }
+
+  @override
+  String airGapSignScanSignatureNamed(String device) {
+    return '下一步：掃描「$device」的簽名';
+  }
+
+  @override
+  String signerActionSwapPair(String from, String to) {
+    return '兌換 $from → $to';
+  }
+
+  @override
+  String signerSwapPay(String amount) {
+    return '支付 $amount';
+  }
+
+  @override
+  String signerSwapPayAtMost(String amount) {
+    return '最多支付 $amount';
+  }
+
+  @override
+  String signerSwapReceive(String amount) {
+    return '收到 $amount';
+  }
+
+  @override
+  String signerSwapReceiveAtLeast(String amount) {
+    return '至少收到 $amount';
+  }
+
+  @override
+  String get signerSwapUnverifiedToken => '未驗證代幣';
+
+  @override
+  String airGapSignTimeLeft(int seconds) {
+    return '還剩 $seconds 秒，超時會自動換新的二維碼。';
+  }
+
+  @override
+  String get airGapSignRefreshing => '時間到了，正在取得新的報價和二維碼…';
+
+  @override
+  String airGapSignRefreshed(String device) {
+    return '上一個二維碼已過期，已自動換新。請用簽名機「$device」重新掃碼。';
+  }
+
+  @override
+  String get airGapSignRefreshFailed => '無法取得新的二維碼，請檢查網路後重試。';
+
+  @override
+  String get airGapSignOldRequest => '這是舊二維碼的簽名，已經過期。請先用簽名機掃描新的二維碼。';
+
+  @override
+  String get scanHintRoleShows => '出示二維碼';
+
+  @override
+  String get scanHintRoleScans => '掃碼';
+
+  @override
+  String signerTokenUnchecked(String symbol) {
+    return '$symbol（未驗證）';
+  }
+
+  @override
+  String get signerReviewActions => '交易內容';
+
+  @override
+  String get signerNewerWalletNotice => '錢包版本比簽名機新，方便時請更新簽名機。';
+
+  @override
+  String get signerDangerBanner => '高風險操作。不是你本人發起的，不要簽。';
+
+  @override
+  String get signerActionSwap => '兌換';
+
+  @override
+  String get signerActionSwapDetail => '請在錢包上核對數量。';
+
+  @override
+  String get signerActionDangerDetail => '危險操作，看不懂就不要簽。';
+
+  @override
+  String get signerActionAdvanceNonce => '更新交易編號';
+
+  @override
+  String get signerActionSyncNative => '更新 SOL 餘額';
+
+  @override
+  String get signerHoldLongHint => '請仔細核對，按住 3 秒簽名。';
+
+  @override
+  String signerTokenVerified(String token) {
+    return '$token · Benny Wallet 已驗證';
+  }
+
+  @override
+  String signerTokenWalletProvided(String symbol) {
+    return '$symbol · Benny Wallet 未驗證';
+  }
+
+  @override
+  String signerSwapWalletQuote(String pay, String receive) {
+    return '預計支付 $pay，收到約 $receive';
+  }
+
+  @override
+  String get signerActionUnknown => '看不懂的操作';
+
+  @override
+  String signerActionCreateTokenAccountFor(String symbol) {
+    return '開通 $symbol 帳戶';
+  }
+
+  @override
+  String get signerUnresolvedAccounts => '簽名機看不全這筆交易。只有你本人剛發起時才簽。';
+
+  @override
+  String get signerTokenNotVerified => '未經 Benny Wallet 驗證';
+
+  @override
+  String get signerKindSwap => '兌換';
+
+  @override
+  String get signerKindSend => '發送';
+
+  @override
+  String signerAbout(String amount) {
+    return '約 $amount';
+  }
+
+  @override
+  String get signerAmountsFromWallet => '數量由錢包提供';
+
+  @override
+  String get signerTrustSafe => '幣都已通過 Benny Wallet 驗證';
+
+  @override
+  String get signerTrustCaution => '有一種幣未經 Benny Wallet 驗證，請小心。';
+
+  @override
+  String get signerTrustDangerSwap => '兩種幣都未經 Benny Wallet 驗證，高風險交易。';
+
+  @override
+  String get signerTrustDangerSend => '這個幣未經 Benny Wallet 驗證，高風險交易。';
+
+  @override
+  String get signerReviewOtherSteps => '其他步驟';
+
+  @override
+  String get signerPay => '支付';
+
+  @override
+  String get signerPayAtMost => '最多支付';
+
+  @override
+  String get signerGet => '獲得';
+
+  @override
+  String get signerGetAtLeast => '至少獲得';
+
+  @override
+  String get signerGetAbout => '約獲得';
+
+  @override
+  String get signerRecipient => '收款人';
+
+  @override
+  String get signerRecipientTokenAccount => '收款代幣帳戶';
+
+  @override
+  String get signerUsdFromWallet => '美金價值由錢包估算';
+
+  @override
+  String signerActionCreateTokenAccountForRecipient(String symbol) {
+    return '幫收款人開通 $symbol 帳戶';
+  }
+
+  @override
+  String get signerCreateAccountSkipIfOpen => '（第一次需付約 0.002 SOL；已開通會自動跳過，不扣費）';
+
+  @override
+  String get signerCreateAccountNotOpen => '（還沒開通，需付約 0.002 SOL）';
+
+  @override
+  String get signerAddressFromWallet => '此地址由錢包提供，簽名機無法核對。';
+
+  @override
+  String get signerSwapOutputUnchecked => '無法確認換到的幣會進入你的帳戶。';
+
+  @override
+  String get signerExtraOutflow => '這筆交易還會把資金轉到其他地址。';
+
+  @override
+  String signerHighFee(String amount) {
+    return '網路費異常高：$amount SOL';
+  }
+
+  @override
+  String get signerDurableNonce => '這個簽名永不過期，之後仍可被使用。';
+
+  @override
+  String get signerSwapFromWallet => '幣種或數量由錢包提供，無法核對。';
+
+  @override
+  String signerActionCloseTo(String address) {
+    return '餘額和租金轉給 $address';
+  }
+
+  @override
+  String signerWalletNote(String name) {
+    return '錢包備註：$name';
+  }
+
+  @override
+  String get signerReviewFeePayer => '手續費付款方';
+
+  @override
+  String signerActionOwnerProgram(String program) {
+    return '由程式 $program 控制';
+  }
+
+  @override
+  String get signerSlippageAll => '滑點達 100% 以上：可能什麼都換不到。';
+
+  @override
+  String get signerQuizTooManyWrong => '答錯太多次。請輸入 PIN 後再試。';
+
+  @override
+  String get signerSignInTitle => '登入請求';
+
+  @override
+  String get signerKindSignIn => '登入';
+
+  @override
+  String get signerSignInBenny => '登入 Benny Wallet';
+
+  @override
+  String signerSignInOtherSite(String site) {
+    return '「$site」請求登入。只有你自己發起時才簽。';
+  }
+
+  @override
+  String get signerSignInExpired => '這個登入請求已過期。請檢查本機時間，或在錢包重新開始。';
+
+  @override
+  String get signerSignInOtherAccount => '這是另一個帳戶的登入，不要簽。';
+
+  @override
+  String get signerSignInWhat => '證明這個帳戶是你的，Benny 才能顯示餘額、紀錄和通知。';
+
+  @override
+  String get signerSignInNoFunds => '不會轉帳，也不花手續費。';
+
+  @override
+  String get signerSignInShowText => '查看原文';
+
+  @override
+  String get airGapSignInTitle => '用簽名機登入';
+
+  @override
+  String get airGapSignInWhy => '為什麼要簽名？';
+
+  @override
+  String get airGapSignInWhyBody =>
+      'Benny 要先確認這個帳戶是你的，才能讀取餘額、交易紀錄和通知。每個錢包通常只需做一次。';
+
+  @override
+  String get airGapSignInSafe => '這只是登入，不會轉帳，也不花手續費。';
+
+  @override
+  String airGapSignInSignerShows(String device) {
+    return '「$device」上會顯示「登入 Benny Wallet」。';
+  }
+
+  @override
+  String airGapSignInSignerShowsText(String device) {
+    return '「$device」上會顯示一段英文，開頭是 “Benny Wallet wants you to sign in”，這就是這次登入。更新簽名機後會直接顯示「登入 Benny Wallet」。';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -3942,4 +4771,833 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get travelGuardBiometricsOff => '旅行防搶劫開啟時無法使用';
+
+  @override
+  String get welcomeUseAsSigner => '把這台手機設為離線簽名機';
+
+  @override
+  String get walletAddAirGap => '連接離線簽名機';
+
+  @override
+  String get walletAddAirGapSubtitle => '私鑰留在另一台永不聯網的手機上';
+
+  @override
+  String createWalletWordCount(int count) {
+    return '$count 個詞';
+  }
+
+  @override
+  String get signerAppTitle => 'Benny 簽名機';
+
+  @override
+  String get signerNeedsNoWalletsTitle => '請先刪除所有錢包';
+
+  @override
+  String get signerNeedsNoWalletsBody =>
+      '簽名機只保存自己離線產生或匯入的助記詞。請先備份，並在「設定 > 錢包」刪除這台手機上的所有錢包，然後再試一次。';
+
+  @override
+  String get signerEnterTitle => '把這台手機設為簽名機？';
+
+  @override
+  String get signerEnterBody =>
+      '這台手機會一直保持離線，只負責簽名，不再顯示錢包頁面。之後如果要改回錢包，必須先清除簽名機。';
+
+  @override
+  String get signerIntroTitle => '離線簽名機';
+
+  @override
+  String get signerIntroPoint1 => '這台手機保存你的助記詞，之後不再聯網。';
+
+  @override
+  String get signerIntroPoint2 => '另一台手機上的 Benny Wallet 負責建立交易，你在這裡掃碼確認並簽名。';
+
+  @override
+  String get signerIntroPoint3 => '產生助記詞之前，會先引導你關閉所有網路。';
+
+  @override
+  String get signerIntroPoint4 => '請把助記詞抄在紙上，這是唯一的備份。';
+
+  @override
+  String get signerIntroStart => '開始設定';
+
+  @override
+  String get signerIntroCancel => '暫不設定，繼續當錢包使用';
+
+  @override
+  String get signerOfflineTitle => '讓手機完全離線';
+
+  @override
+  String get signerOfflineBody => '請開啟飛航模式，並關閉 Wi-Fi、藍牙和 NFC。所有必要項目都通過後才能繼續。';
+
+  @override
+  String get signerCheckAirplane => '已開啟飛航模式';
+
+  @override
+  String get signerCheckWifi => 'Wi-Fi 已關閉';
+
+  @override
+  String get signerCheckBluetooth => '藍牙已關閉';
+
+  @override
+  String get signerCheckNfc => 'NFC 已關閉';
+
+  @override
+  String get signerCheckNoNetwork => '沒有任何網路連線';
+
+  @override
+  String get signerCheckUsbDebugging => 'USB 偵錯已關閉';
+
+  @override
+  String get signerCheckSim => '已取出 SIM 卡（建議）';
+
+  @override
+  String get signerCheckManualHint => '此項無法自動偵測，請自行確認。';
+
+  @override
+  String get signerOpenSettings => '打開設定';
+
+  @override
+  String get signerNetworkDetected => '偵測到網路連線，請關閉後再繼續。';
+
+  @override
+  String get signerPinTitle => '設定簽名機 PIN 碼';
+
+  @override
+  String get signerPinBody => '請為簽名機設定 6 位數 PIN 碼。';
+
+  @override
+  String get signerPinConfirmTitle => '確認 PIN 碼';
+
+  @override
+  String get signerPinConfirmBody => '請再輸入一次 PIN 碼。';
+
+  @override
+  String get signerPinMismatch => '兩次輸入的 PIN 碼不一致，請重試。';
+
+  @override
+  String get signerSourceTitle => '助記詞';
+
+  @override
+  String get signerSourceBody => '在這台離線手機上產生新的助記詞，或輸入你已有的助記詞。';
+
+  @override
+  String get signerSourceCreate24 => '產生 24 個詞';
+
+  @override
+  String get signerSourceCreate24Subtitle => '簽名機建議使用';
+
+  @override
+  String get signerSourceCreate12 => '產生 12 個詞';
+
+  @override
+  String get signerSourceCreate12Subtitle => '抄寫較短';
+
+  @override
+  String get signerSourceImport => '匯入已有助記詞';
+
+  @override
+  String get signerSourceImportSubtitle => '支援 12 或 24 個詞';
+
+  @override
+  String get signerWordsTitle => '抄下這些詞';
+
+  @override
+  String get signerWordsWarning => '請按順序抄在紙上。不要拍照、截圖或輸入到其他地方。任何人拿到這些詞都能轉走你的資產。';
+
+  @override
+  String get signerWordsDone => '我已抄好';
+
+  @override
+  String get signerVerifyTitle => '核對備份';
+
+  @override
+  String get signerImportTitle => '匯入助記詞';
+
+  @override
+  String get signerImportBody => '請輸入 12 或 24 個詞，以空格分隔。';
+
+  @override
+  String get signerImportInvalid => '這不是有效的 12 或 24 個詞助記詞。';
+
+  @override
+  String get signerFinishTitle => '完成設定';
+
+  @override
+  String get signerDeviceNameLabel => '簽名機名稱';
+
+  @override
+  String get signerDeviceNameHelper => '連接後會顯示在錢包中。';
+
+  @override
+  String get signerBiometricToggle => '使用生物辨識解鎖';
+
+  @override
+  String get signerFinishButton => '完成';
+
+  @override
+  String get signerSetupFailed => '設定無法儲存，請重試。';
+
+  @override
+  String get signerUnlockSubtitle => '請輸入簽名機 PIN 碼';
+
+  @override
+  String get signerUnlockNetworkBlocked => '目前有網路連線，請開啟飛航模式後再解鎖。';
+
+  @override
+  String signerWrongPin(int count) {
+    return 'PIN 碼錯誤。再錯 $count 次簽名機將被清除。';
+  }
+
+  @override
+  String get signerUnlockFailed => '無法解鎖，請重試。';
+
+  @override
+  String get signerUseBiometric => '使用生物辨識';
+
+  @override
+  String get signerBiometricReason => '解鎖 Benny 簽名機';
+
+  @override
+  String get signerBiometricFailed => '無法更改生物辨識設定。';
+
+  @override
+  String get signerRecheckTitle => '離線檢查';
+
+  @override
+  String get signerRecheckBody => '應用已更新。解鎖前請確認這台手機已重新完全離線。';
+
+  @override
+  String get signerLockNow => '鎖定';
+
+  @override
+  String get signerOfflineChip => '離線簽名機';
+
+  @override
+  String get signerScanToSign => '掃碼簽名';
+
+  @override
+  String get signerPairWallet => '連接錢包';
+
+  @override
+  String get signerAccountsTitle => '帳戶';
+
+  @override
+  String signerAccountName(int number) {
+    return '帳戶 $number';
+  }
+
+  @override
+  String get signerPairBody => '在另一台手機的 Benny Wallet 選擇「連接離線簽名機」，然後掃描這個二維碼。';
+
+  @override
+  String get signerPairPublicOnly => '這個二維碼只包含公開地址，不含助記詞。';
+
+  @override
+  String get signerScanBody => '掃描另一台手機上 Benny Wallet 顯示的二維碼。';
+
+  @override
+  String get signerScanWrongCode => '這不是 Benny Wallet 的簽名請求。';
+
+  @override
+  String get signerScanAgain => '重新掃描';
+
+  @override
+  String get signerRejectUnknownAccount => '這個請求的帳戶不在這台簽名機上。';
+
+  @override
+  String get signerRejectNotASigner => '這筆交易不需要這個帳戶簽名。';
+
+  @override
+  String get signerRejectUnreadable => '無法解析這筆交易，因此不會簽名。';
+
+  @override
+  String get signerRejectMessageIsTransaction => '這則訊息實際上是一筆交易，因此不會簽名。';
+
+  @override
+  String get signerRejectInvalidCode => '這不是有效的簽名請求二維碼。';
+
+  @override
+  String get signerReviewTitle => '核對並簽名';
+
+  @override
+  String get signerReviewAccount => '簽名帳戶';
+
+  @override
+  String get signerReviewFee => '網路手續費';
+
+  @override
+  String get signerReviewMessage => '訊息';
+
+  @override
+  String signerBinaryMessage(int count) {
+    return '二進位資料（$count 位元組）';
+  }
+
+  @override
+  String get signerThisAccount => '本帳戶';
+
+  @override
+  String signerActionSendSol(String amount) {
+    return '發送 $amount SOL';
+  }
+
+  @override
+  String signerActionSendToken(String amount, String symbol) {
+    return '發送 $amount $symbol';
+  }
+
+  @override
+  String signerActionSendUnverified(String amount) {
+    return '發送 $amount 個未驗證代幣';
+  }
+
+  @override
+  String signerActionTo(String address) {
+    return '至 $address';
+  }
+
+  @override
+  String signerActionToTokenAccount(String address) {
+    return '至代幣帳戶 $address';
+  }
+
+  @override
+  String signerActionMint(String mint) {
+    return '代幣地址 $mint';
+  }
+
+  @override
+  String signerActionOwner(String address) {
+    return '擁有者 $address';
+  }
+
+  @override
+  String signerActionRentTo(String address) {
+    return '租金退回至 $address';
+  }
+
+  @override
+  String get signerActionCreateTokenAccount => '建立代幣帳戶';
+
+  @override
+  String get signerActionCloseTokenAccount => '關閉代幣帳戶';
+
+  @override
+  String get signerActionMemo => '備註';
+
+  @override
+  String get signerActionApprove => '允許其他帳戶動用你的代幣';
+
+  @override
+  String get signerActionSetAuthority => '更改帳戶權限';
+
+  @override
+  String get signerActionAssign => '更改帳戶擁有者';
+
+  @override
+  String get signerActionCreateAccount => '建立帳戶';
+
+  @override
+  String signerActionProgram(String program) {
+    return '程式 $program';
+  }
+
+  @override
+  String get signerHoldToSign => '按住簽名';
+
+  @override
+  String get signerReject => '拒絕';
+
+  @override
+  String get signerSignFailed => '簽名失敗，請重試。';
+
+  @override
+  String get signerSignatureTitle => '簽名結果';
+
+  @override
+  String get signerSignatureBody => '用另一台手機上的 Benny Wallet 掃描這個二維碼即可完成。';
+
+  @override
+  String get signerSettingsTitle => '簽名機設定';
+
+  @override
+  String get signerAccountCount => '顯示帳戶數';
+
+  @override
+  String get signerAccountCountHint => '此助記詞最多 5 個帳戶';
+
+  @override
+  String get signerUpgradeTitle => '更新簽名機';
+
+  @override
+  String get signerUpgradeIntro =>
+      '更新應用需要聯網，請事先準備。聯網期間助記詞仍加密保存在手機中，簽名機要等手機重新離線後才會開啟。';
+
+  @override
+  String get signerUpgradeStep0 => '1. 核對紙本備份';
+
+  @override
+  String get signerUpgradeVerifyBackup => '核對備份';
+
+  @override
+  String get signerUpgradeBackupOk => '備份已核對';
+
+  @override
+  String get signerUpgradeOnlineTitle => '2a. 一般更新';
+
+  @override
+  String get signerUpgradeOnlineBody =>
+      '先鎖定簽名機，再開啟網路，從原本安裝的商店更新 Benny Wallet。更新後重新開啟飛航模式。解鎖前簽名機會再次進行離線檢查。';
+
+  @override
+  String get signerUpgradeSecureTitle => '2b. 最高安全更新';
+
+  @override
+  String get signerUpgradeSecureBody =>
+      '先在設定中清除簽名機，然後聯網更新應用。更新後重新離線，再次設定簽名機並匯入助記詞。帳戶和地址都不會改變。';
+
+  @override
+  String get signerUpgradeOfflineApkTitle => 'Android：不聯網更新';
+
+  @override
+  String get signerUpgradeOfflineApkBody =>
+      '也可以用 USB 線或 SD 卡把新版 APK 複製到這台手機，在離線狀態下安裝。請使用與原本安裝相同來源的 APK，否則無法覆蓋安裝。';
+
+  @override
+  String get signerUpgradeCompatTitle => '舊版簽名機仍可使用';
+
+  @override
+  String get signerUpgradeCompatBody =>
+      '新版錢包仍能配合舊版簽名機使用。錢包只會使用簽名機支援的功能，你可以在方便時再更新。';
+
+  @override
+  String get signerVersionTitle => '版本';
+
+  @override
+  String signerVersionDetail(String app, int protocol, int tokens) {
+    return '應用 $app · 協議 $protocol · 代幣清單 $tokens';
+  }
+
+  @override
+  String get signerEraseTitle => '清除簽名機';
+
+  @override
+  String get signerEraseSubtitle => '從這台手機刪除助記詞';
+
+  @override
+  String get signerEraseBody => '助記詞將從這台手機刪除。沒有紙本備份將無法找回資產。';
+
+  @override
+  String get signerEraseConfirm => '清除';
+
+  @override
+  String get signerEraseWrongPin => 'PIN 碼錯誤，未清除任何資料。';
+
+  @override
+  String get airGapConnectTitle => '連接離線簽名機';
+
+  @override
+  String get airGapConnectBody => '在簽名機上點「連接錢包」，然後掃描顯示的二維碼。';
+
+  @override
+  String get airGapConnectInvalid => '這不是簽名機的配對二維碼。';
+
+  @override
+  String airGapConnectChoose(String device) {
+    return '選擇 $device 上的帳戶';
+  }
+
+  @override
+  String airGapConnectAccount(int number) {
+    return '帳戶 $number';
+  }
+
+  @override
+  String airGapConnectAccountAdded(int number) {
+    return '帳戶 $number（已新增）';
+  }
+
+  @override
+  String get airGapConnectCompare => '請確認地址與簽名機上顯示的一致。';
+
+  @override
+  String get airGapConnectScanAgain => '重新掃描';
+
+  @override
+  String get airGapSignTitle => '用簽名機簽名';
+
+  @override
+  String get airGapSignShowRequestAgain => '重新顯示請求';
+
+  @override
+  String get airGapSignMayHaveExpired => '這筆交易可能已過期，若發送失敗請重新開始。';
+
+  @override
+  String get airGapSignWrongRequest => '這個簽名屬於另一個請求。';
+
+  @override
+  String get airGapSignInvalidCode => '這不是簽名機產生的簽名。';
+
+  @override
+  String get airGapSignerOutdated => '簽名機版本較舊，仍可正常使用，方便時再更新即可。';
+
+  @override
+  String get signerIntroSubtitle => '把私鑰放在一台永不聯網的手機上。';
+
+  @override
+  String get signerFinishSubtitle => '為這台簽名機取個名字，並設定 PIN 碼。';
+
+  @override
+  String signerQuizBody(int count) {
+    return '請對照紙本備份，為 $count 個位置選出正確的詞。';
+  }
+
+  @override
+  String signerQuizProgress(int current, int total) {
+    return '第 $current / $total 題';
+  }
+
+  @override
+  String signerQuizQuestion(int position) {
+    return '第 $position 個詞是哪一個？';
+  }
+
+  @override
+  String get signerQuizCorrect => '答對了！';
+
+  @override
+  String get signerQuizWrong => '選錯了。請再對照紙本，我們換了新的位置重新開始。';
+
+  @override
+  String get signerQuizShowWords => '再看一次助記詞';
+
+  @override
+  String get signerScanToSignSubtitle => '掃描錢包顯示的簽名請求';
+
+  @override
+  String get signerPairWalletSubtitle => '顯示二維碼讓 Benny Wallet 掃描';
+
+  @override
+  String get signerWalletPhoneLabel => 'Benny Wallet';
+
+  @override
+  String get signerScanRefusedTitle => '無法簽名';
+
+  @override
+  String get airGapSignerLabel => '簽名機';
+
+  @override
+  String get airGapThisPhone => '本機';
+
+  @override
+  String get airGapConnectFound => '已識別簽名機';
+
+  @override
+  String get airGapSignNeedsSigner => '需要由您的簽名機驗證並簽名';
+
+  @override
+  String get airGapSignStepShort1 => '簽名機掃碼';
+
+  @override
+  String get airGapSignStepShort2 => '掃描簽名';
+
+  @override
+  String airGapSignStep1Named(String device) {
+    return '第一步：用簽名機「$device」掃描這個二維碼';
+  }
+
+  @override
+  String airGapSignStep1BodyNamed(String device) {
+    return '在「$device」點「掃碼簽名」，核對內容後確認。';
+  }
+
+  @override
+  String airGapSignStep2Named(String device) {
+    return '第二步：掃描簽名機「$device」上的簽名碼';
+  }
+
+  @override
+  String airGapSignStep2BodyNamed(String device) {
+    return '「$device」確認後會顯示簽名碼，用本機掃描。';
+  }
+
+  @override
+  String airGapSignScanSignatureNamed(String device) {
+    return '下一步：掃描「$device」的簽名';
+  }
+
+  @override
+  String signerActionSwapPair(String from, String to) {
+    return '兌換 $from → $to';
+  }
+
+  @override
+  String signerSwapPay(String amount) {
+    return '支付 $amount';
+  }
+
+  @override
+  String signerSwapPayAtMost(String amount) {
+    return '最多支付 $amount';
+  }
+
+  @override
+  String signerSwapReceive(String amount) {
+    return '收到 $amount';
+  }
+
+  @override
+  String signerSwapReceiveAtLeast(String amount) {
+    return '至少收到 $amount';
+  }
+
+  @override
+  String get signerSwapUnverifiedToken => '未驗證代幣';
+
+  @override
+  String airGapSignTimeLeft(int seconds) {
+    return '還剩 $seconds 秒，超時會自動換新的二維碼。';
+  }
+
+  @override
+  String get airGapSignRefreshing => '時間到了，正在取得新的報價和二維碼…';
+
+  @override
+  String airGapSignRefreshed(String device) {
+    return '上一個二維碼已過期，已自動換新。請用簽名機「$device」重新掃碼。';
+  }
+
+  @override
+  String get airGapSignRefreshFailed => '無法取得新的二維碼，請檢查網路後重試。';
+
+  @override
+  String get airGapSignOldRequest => '這是舊二維碼的簽名，已經過期。請先用簽名機掃描新的二維碼。';
+
+  @override
+  String get scanHintRoleShows => '出示二維碼';
+
+  @override
+  String get scanHintRoleScans => '掃碼';
+
+  @override
+  String signerTokenUnchecked(String symbol) {
+    return '$symbol（未驗證）';
+  }
+
+  @override
+  String get signerReviewActions => '交易內容';
+
+  @override
+  String get signerNewerWalletNotice => '錢包版本比簽名機新，方便時請更新簽名機。';
+
+  @override
+  String get signerDangerBanner => '高風險操作。不是你本人發起的，不要簽。';
+
+  @override
+  String get signerActionSwap => '兌換';
+
+  @override
+  String get signerActionSwapDetail => '請在錢包上核對數量。';
+
+  @override
+  String get signerActionDangerDetail => '危險操作，看不懂就不要簽。';
+
+  @override
+  String get signerActionAdvanceNonce => '更新交易編號';
+
+  @override
+  String get signerActionSyncNative => '更新 SOL 餘額';
+
+  @override
+  String get signerHoldLongHint => '請仔細核對，按住 3 秒簽名。';
+
+  @override
+  String signerTokenVerified(String token) {
+    return '$token · Benny Wallet 已驗證';
+  }
+
+  @override
+  String signerTokenWalletProvided(String symbol) {
+    return '$symbol · Benny Wallet 未驗證';
+  }
+
+  @override
+  String signerSwapWalletQuote(String pay, String receive) {
+    return '預計支付 $pay，收到約 $receive';
+  }
+
+  @override
+  String get signerActionUnknown => '看不懂的操作';
+
+  @override
+  String signerActionCreateTokenAccountFor(String symbol) {
+    return '開通 $symbol 帳戶';
+  }
+
+  @override
+  String get signerUnresolvedAccounts => '簽名機看不全這筆交易。只有你本人剛發起時才簽。';
+
+  @override
+  String get signerTokenNotVerified => '未經 Benny Wallet 驗證';
+
+  @override
+  String get signerKindSwap => '兌換';
+
+  @override
+  String get signerKindSend => '發送';
+
+  @override
+  String signerAbout(String amount) {
+    return '約 $amount';
+  }
+
+  @override
+  String get signerAmountsFromWallet => '數量由錢包提供';
+
+  @override
+  String get signerTrustSafe => '幣都已通過 Benny Wallet 驗證';
+
+  @override
+  String get signerTrustCaution => '有一種幣未經 Benny Wallet 驗證，請小心。';
+
+  @override
+  String get signerTrustDangerSwap => '兩種幣都未經 Benny Wallet 驗證，高風險交易。';
+
+  @override
+  String get signerTrustDangerSend => '這個幣未經 Benny Wallet 驗證，高風險交易。';
+
+  @override
+  String get signerReviewOtherSteps => '其他步驟';
+
+  @override
+  String get signerPay => '支付';
+
+  @override
+  String get signerPayAtMost => '最多支付';
+
+  @override
+  String get signerGet => '獲得';
+
+  @override
+  String get signerGetAtLeast => '至少獲得';
+
+  @override
+  String get signerGetAbout => '約獲得';
+
+  @override
+  String get signerRecipient => '收款人';
+
+  @override
+  String get signerRecipientTokenAccount => '收款代幣帳戶';
+
+  @override
+  String get signerUsdFromWallet => '美金價值由錢包估算';
+
+  @override
+  String signerActionCreateTokenAccountForRecipient(String symbol) {
+    return '幫收款人開通 $symbol 帳戶';
+  }
+
+  @override
+  String get signerCreateAccountSkipIfOpen => '（第一次需付約 0.002 SOL；已開通會自動跳過，不扣費）';
+
+  @override
+  String get signerCreateAccountNotOpen => '（還沒開通，需付約 0.002 SOL）';
+
+  @override
+  String get signerAddressFromWallet => '此地址由錢包提供，簽名機無法核對。';
+
+  @override
+  String get signerSwapOutputUnchecked => '無法確認換到的幣會進入你的帳戶。';
+
+  @override
+  String get signerExtraOutflow => '這筆交易還會把資金轉到其他地址。';
+
+  @override
+  String signerHighFee(String amount) {
+    return '網路費異常高：$amount SOL';
+  }
+
+  @override
+  String get signerDurableNonce => '這個簽名永不過期，之後仍可被使用。';
+
+  @override
+  String get signerSwapFromWallet => '幣種或數量由錢包提供，無法核對。';
+
+  @override
+  String signerActionCloseTo(String address) {
+    return '餘額和租金轉給 $address';
+  }
+
+  @override
+  String signerWalletNote(String name) {
+    return '錢包備註：$name';
+  }
+
+  @override
+  String get signerReviewFeePayer => '手續費付款方';
+
+  @override
+  String signerActionOwnerProgram(String program) {
+    return '由程式 $program 控制';
+  }
+
+  @override
+  String get signerSlippageAll => '滑點達 100% 以上：可能什麼都換不到。';
+
+  @override
+  String get signerQuizTooManyWrong => '答錯太多次。請輸入 PIN 後再試。';
+
+  @override
+  String get signerSignInTitle => '登入請求';
+
+  @override
+  String get signerKindSignIn => '登入';
+
+  @override
+  String get signerSignInBenny => '登入 Benny Wallet';
+
+  @override
+  String signerSignInOtherSite(String site) {
+    return '「$site」請求登入。只有你自己發起時才簽。';
+  }
+
+  @override
+  String get signerSignInExpired => '這個登入請求已過期。請檢查本機時間，或在錢包重新開始。';
+
+  @override
+  String get signerSignInOtherAccount => '這是另一個帳戶的登入，不要簽。';
+
+  @override
+  String get signerSignInWhat => '證明這個帳戶是你的，Benny 才能顯示餘額、紀錄和通知。';
+
+  @override
+  String get signerSignInNoFunds => '不會轉帳，也不花手續費。';
+
+  @override
+  String get signerSignInShowText => '查看原文';
+
+  @override
+  String get airGapSignInTitle => '用簽名機登入';
+
+  @override
+  String get airGapSignInWhy => '為什麼要簽名？';
+
+  @override
+  String get airGapSignInWhyBody =>
+      'Benny 要先確認這個帳戶是你的，才能讀取餘額、交易紀錄和通知。每個錢包通常只需做一次。';
+
+  @override
+  String get airGapSignInSafe => '這只是登入，不會轉帳，也不花手續費。';
+
+  @override
+  String airGapSignInSignerShows(String device) {
+    return '「$device」上會顯示「登入 Benny Wallet」。';
+  }
+
+  @override
+  String airGapSignInSignerShowsText(String device) {
+    return '「$device」上會顯示一段英文，開頭是 “Benny Wallet wants you to sign in”，這就是這次登入。更新簽名機後會直接顯示「登入 Benny Wallet」。';
+  }
 }

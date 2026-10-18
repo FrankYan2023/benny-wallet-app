@@ -22,6 +22,8 @@ class PinSetupFlowData {
     this.seedVaultDerivationPath,
     this.walletLabel,
     this.walletName,
+    this.airGapDerivationPath,
+    this.airGapMeta,
   });
 
   final String? mnemonic;
@@ -35,6 +37,13 @@ class PinSetupFlowData {
 
   /// Name chosen on the wallet name step.
   final String? walletName;
+
+  /// Account path and signer metadata of an air-gapped signer account.
+  final String? airGapDerivationPath;
+  final String? airGapMeta;
+
+  bool get isAirGapSetup =>
+      airGapDerivationPath != null && airGapDerivationPath!.isNotEmpty;
 
   bool get isMobileWalletAdapterSetup =>
       mobileWalletAuthToken != null && mobileWalletAuthToken!.isNotEmpty;
@@ -54,6 +63,8 @@ class PinSetupFlowData {
     String? seedVaultDerivationPath,
     String? walletLabel,
     String? walletName,
+    String? airGapDerivationPath,
+    String? airGapMeta,
   }) {
     return PinSetupFlowData(
       mnemonic: mnemonic ?? this.mnemonic,
@@ -67,6 +78,8 @@ class PinSetupFlowData {
           seedVaultDerivationPath ?? this.seedVaultDerivationPath,
       walletLabel: walletLabel ?? this.walletLabel,
       walletName: walletName ?? this.walletName,
+      airGapDerivationPath: airGapDerivationPath ?? this.airGapDerivationPath,
+      airGapMeta: airGapMeta ?? this.airGapMeta,
     );
   }
 }
@@ -83,6 +96,8 @@ class PinSetupPage extends ConsumerStatefulWidget {
     this.seedVaultDerivationPath,
     this.walletLabel,
     this.walletName,
+    this.airGapDerivationPath,
+    this.airGapMeta,
   });
 
   static const routeName = 'pinSetup';
@@ -96,6 +111,11 @@ class PinSetupPage extends ConsumerStatefulWidget {
   final String? seedVaultDerivationPath;
   final String? walletLabel;
   final String? walletName;
+  final String? airGapDerivationPath;
+  final String? airGapMeta;
+
+  bool get isAirGapSetup =>
+      airGapDerivationPath != null && airGapDerivationPath!.isNotEmpty;
 
   bool get isMobileWalletAdapterSetup =>
       mobileWalletAuthToken != null && mobileWalletAuthToken!.isNotEmpty;
@@ -165,7 +185,18 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
     }
 
     setState(() => _submitting = true);
-    if (widget.isSeedVaultSetup) {
+    if (widget.isAirGapSetup) {
+      await ref
+          .read(walletControllerProvider.notifier)
+          .importAirGapWallet(
+            publicKey: widget.publicKey!,
+            derivationPath: widget.airGapDerivationPath!,
+            airGapMeta: widget.airGapMeta ?? '',
+            pin: _pin,
+            walletLabel: widget.walletLabel,
+            name: widget.walletName,
+          );
+    } else if (widget.isSeedVaultSetup) {
       await ref
           .read(walletControllerProvider.notifier)
           .importSeedVaultWallet(

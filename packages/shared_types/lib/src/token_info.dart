@@ -15,6 +15,11 @@ abstract class TokenInfo with _$TokenInfo {
     required bool isNative,
     required bool isVisible,
     @Default(TokenProgramKind.tokenProgram) TokenProgramKind tokenProgramType,
+
+    /// Offline Benny token key's signature over this token (base64), passed
+    /// on to offline signers so they can trust its name. See
+    /// `token_attestation.dart` in the app.
+    String? signerAttestation,
   }) = _TokenInfo;
 
   factory TokenInfo.fromJson(Map<String, dynamic> json) =>

@@ -118,20 +118,26 @@ class WalletTypeLabel extends StatelessWidget {
   }
 }
 
-/// Small pill after the wallet name: "Standard", or a shield for Seed Vault
-/// wallets.
+/// Small pill after the wallet name: "Standard", an "S" mark for Seeker
+/// (Seed Vault) wallets, or a shield for offline-signer wallets.
 class WalletTypeTag extends StatelessWidget {
   const WalletTypeTag({super.key, required this.wallet});
 
   final WalletSummary wallet;
 
   static const _seedColor = Color(0xFF235E7A);
+  static const _signerColor = Color(0xFF854F00);
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final seed = wallet.isExternal;
-    final color = seed ? _seedColor : WalletPalette.muted;
+    final signer = wallet.custody == WalletCustody.airGap;
+    final seeker = wallet.isExternal && !signer;
+    final color = signer
+        ? _signerColor
+        : seeker
+        ? _seedColor
+        : WalletPalette.muted;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
       decoration: BoxDecoration(
@@ -141,11 +147,16 @@ class WalletTypeTag extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Seed Vault wallets show just the shield; the name says enough.
-          if (seed)
+          // External wallets show just a mark; the name says enough.
+          if (signer)
+            Semantics(
+              label: l10n.walletAddAirGap,
+              child: Icon(Icons.security_rounded, size: 13, color: color),
+            )
+          else if (seeker)
             Semantics(
               label: l10n.walletTypeSeedVault,
-              child: Icon(Icons.security_rounded, size: 13, color: color),
+              child: SeekerMark(size: 13, color: color),
             )
           else
             Text(
@@ -158,6 +169,34 @@ class WalletTypeTag extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Seeker / Seed Vault mark: a bold "S", kept apart from the signer shield.
+class SeekerMark extends StatelessWidget {
+  const SeekerMark({super.key, this.size = 18, this.color});
+
+  final double size;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = color ?? IconTheme.of(context).color ?? Colors.black;
+    return SizedBox.square(
+      dimension: size,
+      child: Center(
+        child: Text(
+          'S',
+          style: TextStyle(
+            color: ink,
+            fontSize: size * 0.92,
+            height: 1,
+            fontWeight: FontWeight.w900,
+            fontFamily: 'Sora',
+          ),
+        ),
       ),
     );
   }
@@ -342,10 +381,14 @@ class WalletActionRow extends StatelessWidget {
 }
 
 class WalletIconCircle extends StatelessWidget {
-  const WalletIconCircle({super.key, required this.icon, this.color});
+  const WalletIconCircle({super.key, this.icon, this.color, this.child})
+    : assert(icon != null || child != null);
 
-  final IconData icon;
+  final IconData? icon;
   final Color? color;
+
+  /// Drawn instead of [icon], e.g. a [SeekerMark].
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -358,7 +401,10 @@ class WalletIconCircle extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: iconColor.withValues(alpha: 0.18)),
       ),
-      child: Icon(icon, color: iconColor, size: 21),
+      child: IconTheme(
+        data: IconThemeData(color: iconColor, size: 21),
+        child: child ?? Icon(icon),
+      ),
     );
   }
 }

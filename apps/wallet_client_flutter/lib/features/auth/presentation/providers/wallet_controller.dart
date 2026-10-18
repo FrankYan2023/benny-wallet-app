@@ -59,7 +59,8 @@ class NewWalletInput {
   }) : custody = WalletCustody.localMnemonic,
        authToken = null,
        derivationPath = null,
-       walletLabel = null;
+       walletLabel = null,
+       airGapMeta = null;
 
   const NewWalletInput.mobileWalletAdapter({
     required String this.publicKey,
@@ -68,7 +69,8 @@ class NewWalletInput {
   }) : custody = WalletCustody.mobileWalletAdapter,
        mnemonic = null,
        derivation = WalletDerivation.legacy,
-       derivationPath = null;
+       derivationPath = null,
+       airGapMeta = null;
 
   const NewWalletInput.seedVault({
     required String this.publicKey,
@@ -77,7 +79,18 @@ class NewWalletInput {
     this.walletLabel,
   }) : custody = WalletCustody.seedVault,
        mnemonic = null,
-       derivation = WalletDerivation.legacy;
+       derivation = WalletDerivation.legacy,
+       airGapMeta = null;
+
+  const NewWalletInput.airGap({
+    required String this.publicKey,
+    required String this.derivationPath,
+    required String this.airGapMeta,
+    this.walletLabel,
+  }) : custody = WalletCustody.airGap,
+       mnemonic = null,
+       derivation = WalletDerivation.legacy,
+       authToken = null;
 
   final WalletCustody custody;
   final String? mnemonic;
@@ -86,6 +99,7 @@ class NewWalletInput {
   final String? authToken;
   final String? derivationPath;
   final String? walletLabel;
+  final String? airGapMeta;
 }
 
 class WalletController extends StateNotifier<WalletControllerState> {
@@ -266,6 +280,37 @@ class WalletController extends StateNotifier<WalletControllerState> {
     );
   }
 
+  Future<void> importAirGapWallet({
+    required String publicKey,
+    required String derivationPath,
+    required String airGapMeta,
+    required String pin,
+    String? walletLabel,
+    String? name,
+  }) async {
+    try {
+      await _repository.saveAirGapWallet(
+        publicKey: publicKey,
+        derivationPath: derivationPath,
+        airGapMeta: airGapMeta,
+        pin: pin,
+        walletLabel: walletLabel,
+        name: name,
+      );
+      _storeMasterKey(await _repository.unlockMasterKey(pin));
+    } catch (error) {
+      state = state.copyWith(errorMessage: _friendlyAddError(error));
+      return;
+    }
+
+    await _activate(
+      publicKey,
+      source: 'pin_setup',
+      activateLinkedChildMode: true,
+      enablePush: true,
+    );
+  }
+
   // ---------------------------------------------------------------------------
   // Multi-wallet
   // ---------------------------------------------------------------------------
@@ -314,14 +359,16 @@ class WalletController extends StateNotifier<WalletControllerState> {
         );
       case WalletCustody.mobileWalletAdapter:
       case WalletCustody.seedVault:
+      case WalletCustody.airGap:
         publicKey = input.publicKey!;
         await _repository.addExternalWallet(
           custody: input.custody,
           publicKey: publicKey,
-          authToken: input.authToken!,
+          authToken: input.authToken ?? '',
           derivationPath: input.derivationPath ?? '',
           walletLabel: input.walletLabel,
           name: name,
+          airGapMeta: input.airGapMeta ?? '',
         );
     }
 

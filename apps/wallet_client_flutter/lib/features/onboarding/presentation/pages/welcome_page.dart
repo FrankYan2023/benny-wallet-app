@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/app_root.dart';
 import '../../../../app/di/providers.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/widgets/app_scaffold.dart';
@@ -140,6 +142,50 @@ class _WelcomePageState extends ConsumerState<WelcomePage>
     context.push(routePath);
   }
 
+  Future<void> _startSignerMode(BuildContext context) async {
+    final l10n = context.l10n;
+    final records = await ref.read(walletRepositoryProvider).readRecords();
+    if (!context.mounted) {
+      return;
+    }
+    if (records.isNotEmpty) {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(l10n.signerNeedsNoWalletsTitle),
+          content: Text(l10n.signerNeedsNoWalletsBody),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(l10n.commonOk),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.signerEnterTitle),
+        content: Text(l10n.signerEnterBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.commonContinue),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await enterSignerMode(ref);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final walletState = ref.watch(walletControllerProvider);
@@ -190,6 +236,16 @@ class _WelcomePageState extends ConsumerState<WelcomePage>
           if (!isLoading) ...[
             const SizedBox(height: 14),
             _WelcomeLanguagePrompt(animation: _introController),
+            if (!kIsWeb) ...[
+              const SizedBox(height: 6),
+              Center(
+                child: TextButton.icon(
+                  onPressed: () => _startSignerMode(context),
+                  icon: const Icon(Icons.qr_code_2_rounded),
+                  label: Text(l10n.welcomeUseAsSigner),
+                ),
+              ),
+            ],
           ],
         ],
       ),

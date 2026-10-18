@@ -1,0 +1,3 @@
+void blockNetwork() {}
+
+void allowNetwork() {}

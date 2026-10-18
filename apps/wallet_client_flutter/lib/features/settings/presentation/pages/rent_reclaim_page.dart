@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:solana/solana.dart' show lamportsPerSol;
 
+import '../../../airgap/presentation/air_gap_signing.dart';
 import '../../../../app/di/providers.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
@@ -204,6 +205,10 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
       await _reclaimWithSeedVault(preview, walletState);
       return;
     }
+    if (walletState.custody == WalletCustody.airGap) {
+      await _reclaimWithAirGap(preview, walletState);
+      return;
+    }
 
     String? mnemonic;
     if (walletState.mnemonicTokenId != null) {
@@ -354,6 +359,71 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
       _reloadPreview();
     } catch (error) {
       debugPrint('Rent reclaim MWA failed: $error');
+      if (!mounted) {
+        return;
+      }
+      await showErrorAlertDialog(
+        context,
+        title: context.l10n.rentReclaimFailedTitle,
+        message: _normalizeError(error, context.l10n),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _submitting = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _reclaimWithAirGap(
+    RentReclaimPreview preview,
+    WalletControllerState walletState,
+  ) async {
+    final ownerAddress = walletState.publicKey;
+    if (ownerAddress == null || ownerAddress.isEmpty) {
+      return;
+    }
+    setState(() {
+      _submitting = true;
+    });
+    try {
+      final solana = ref.read(solanaWalletServiceProvider);
+      final signer = ref.read(airGapSigningServiceProvider);
+      final transactions = await solana.buildRentReclaimTransactions(
+        ownerAddress: ownerAddress,
+        accounts: preview.accounts,
+        includeSenderInstructions: false,
+      );
+      final signatures = <String>[];
+      for (final transaction in transactions) {
+        final signed = await signer.signTransaction(
+          ownerAddress: ownerAddress,
+          encodedTransaction: transaction,
+        );
+        signatures.add(
+          await solana.sendExternallySignedTransaction(
+            encodedTransaction: signed.transaction,
+            signature: signed.signature,
+          ),
+        );
+      }
+      ref.invalidate(portfolioProvider(ownerAddress));
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.rentSubmittedTransactions(signatures.length),
+          ),
+        ),
+      );
+      _reloadPreview();
+    } on AirGapSigningCancelled {
+      // The user closed the QR screen.
+    } catch (error) {
+      debugPrint('Rent reclaim air-gap failed: $error');
       if (!mounted) {
         return;
       }

@@ -19,6 +19,7 @@ _TokenInfo _$TokenInfoFromJson(Map<String, dynamic> json) => _TokenInfo(
         json['tokenProgramType'],
       ) ??
       TokenProgramKind.tokenProgram,
+  signerAttestation: json['signerAttestation'] as String?,
 );
 
 Map<String, dynamic> _$TokenInfoToJson(_TokenInfo instance) =>
@@ -30,6 +31,7 @@ Map<String, dynamic> _$TokenInfoToJson(_TokenInfo instance) =>
       'isNative': instance.isNative,
       'isVisible': instance.isVisible,
       'tokenProgramType': _$TokenProgramKindEnumMap[instance.tokenProgramType]!,
+      'signerAttestation': instance.signerAttestation,
     };
 
 const _$TokenProgramKindEnumMap = {

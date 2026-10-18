@@ -2,7 +2,14 @@ import 'wallet_derivation.dart';
 
 enum WalletStatus { loading, noWallet, locked, unlocked, error }
 
-enum WalletCustody { localMnemonic, mobileWalletAdapter, seedVault }
+enum WalletCustody {
+  localMnemonic,
+  mobileWalletAdapter,
+  seedVault,
+
+  /// Keys live on an offline signer phone; signing goes through QR codes.
+  airGap,
+}
 
 /// 👶 Child wallet information for parent monitoring
 class ChildWallet {
@@ -139,7 +146,8 @@ class WalletControllerState {
 
   bool get isExternalWallet =>
       custody == WalletCustody.mobileWalletAdapter ||
-      custody == WalletCustody.seedVault;
+      custody == WalletCustody.seedVault ||
+      custody == WalletCustody.airGap;
   bool get isUnlocked =>
       status == WalletStatus.unlocked &&
       (isExternalWallet || mnemonicTokenId != null || mnemonic != null);

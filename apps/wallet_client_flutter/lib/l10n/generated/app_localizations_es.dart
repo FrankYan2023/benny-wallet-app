@@ -2111,4 +2111,902 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get travelGuardBiometricsOff =>
       'No disponible con la protección de viaje';
+
+  @override
+  String get welcomeUseAsSigner =>
+      'Usar este teléfono como firmante sin conexión';
+
+  @override
+  String get walletAddAirGap => 'Conectar firmante sin conexión';
+
+  @override
+  String get walletAddAirGapSubtitle =>
+      'Las claves se quedan en otro teléfono que nunca se conecta a internet';
+
+  @override
+  String createWalletWordCount(int count) {
+    return '$count palabras';
+  }
+
+  @override
+  String get signerAppTitle => 'Benny Signer';
+
+  @override
+  String get signerNeedsNoWalletsTitle =>
+      'Primero elimina todas las billeteras';
+
+  @override
+  String get signerNeedsNoWalletsBody =>
+      'Un teléfono firmante solo guarda su propia frase de recuperación sin conexión. Haz una copia de seguridad y elimina todas las billeteras de este teléfono en Ajustes > Billeteras, y vuelve a intentarlo.';
+
+  @override
+  String get signerEnterTitle => '¿Convertir este teléfono en firmante?';
+
+  @override
+  String get signerEnterBody =>
+      'Este teléfono permanecerá sin conexión y solo firmará. No tendrá pantallas de billetera. Para volver a usarlo como billetera, tendrás que borrarlo.';
+
+  @override
+  String get signerIntroTitle => 'Firmante sin conexión';
+
+  @override
+  String get signerIntroPoint1 =>
+      'Este teléfono guarda tu frase de recuperación y no vuelve a conectarse a internet.';
+
+  @override
+  String get signerIntroPoint2 =>
+      'Tu otro teléfono con Benny Wallet crea las transacciones. Tú las firmas aquí escaneando códigos QR.';
+
+  @override
+  String get signerIntroPoint3 =>
+      'Antes de crear una frase de recuperación, te ayudaremos a desactivar todas las redes.';
+
+  @override
+  String get signerIntroPoint4 =>
+      'Escribe la frase de recuperación en papel. Es la única copia de seguridad.';
+
+  @override
+  String get signerIntroStart => 'Empezar';
+
+  @override
+  String get signerIntroCancel => 'Ahora no, usar como billetera';
+
+  @override
+  String get signerOfflineTitle => 'Desconecta este teléfono';
+
+  @override
+  String get signerOfflineBody =>
+      'Activa el modo avión y desactiva Wi-Fi, Bluetooth y NFC. Podrás continuar cuando todos los elementos obligatorios estén en verde.';
+
+  @override
+  String get signerCheckAirplane => 'Modo avión activado';
+
+  @override
+  String get signerCheckWifi => 'Wi-Fi desactivado';
+
+  @override
+  String get signerCheckBluetooth => 'Bluetooth desactivado';
+
+  @override
+  String get signerCheckNfc => 'NFC desactivado';
+
+  @override
+  String get signerCheckNoNetwork => 'Sin conexión de red';
+
+  @override
+  String get signerCheckUsbDebugging => 'Depuración USB desactivada';
+
+  @override
+  String get signerCheckSim => 'Tarjeta SIM retirada (recomendado)';
+
+  @override
+  String get signerCheckManualHint =>
+      'Este teléfono no puede comprobarlo. Confírmalo tú mismo.';
+
+  @override
+  String get signerOpenSettings => 'Abrir ajustes';
+
+  @override
+  String get signerNetworkDetected =>
+      'Se detectó una conexión de red. Desactívala para continuar.';
+
+  @override
+  String get signerPinTitle => 'Configurar PIN del firmante';
+
+  @override
+  String get signerPinBody => 'Elige un PIN de 6 dígitos para este firmante.';
+
+  @override
+  String get signerPinConfirmTitle => 'Confirmar PIN';
+
+  @override
+  String get signerPinConfirmBody => 'Vuelve a introducir el PIN.';
+
+  @override
+  String get signerPinMismatch => 'Los PIN no coinciden. Inténtalo de nuevo.';
+
+  @override
+  String get signerSourceTitle => 'Frase de recuperación';
+
+  @override
+  String get signerSourceBody =>
+      'Crea una nueva frase de recuperación en este teléfono sin conexión o introduce una que ya tengas.';
+
+  @override
+  String get signerSourceCreate24 => 'Crear 24 palabras';
+
+  @override
+  String get signerSourceCreate24Subtitle => 'Recomendado para un firmante';
+
+  @override
+  String get signerSourceCreate12 => 'Crear 12 palabras';
+
+  @override
+  String get signerSourceCreate12Subtitle => 'Más corta de anotar';
+
+  @override
+  String get signerSourceImport => 'Importar frase existente';
+
+  @override
+  String get signerSourceImportSubtitle => '12 o 24 palabras';
+
+  @override
+  String get signerWordsTitle => 'Anota estas palabras';
+
+  @override
+  String get signerWordsWarning =>
+      'Escribe las palabras en papel y en orden. Nunca les hagas una foto ni una captura de pantalla, ni las escribas en ningún otro lugar. Cualquiera que tenga estas palabras puede llevarse tus fondos.';
+
+  @override
+  String get signerWordsDone => 'Ya las anoté';
+
+  @override
+  String get signerVerifyTitle => 'Comprueba tu copia de seguridad';
+
+  @override
+  String get signerImportTitle => 'Importar frase de recuperación';
+
+  @override
+  String get signerImportBody =>
+      'Introduce tus 12 o 24 palabras separadas por espacios.';
+
+  @override
+  String get signerImportInvalid =>
+      'No es una frase de recuperación válida de 12 o 24 palabras.';
+
+  @override
+  String get signerFinishTitle => 'Finalizar configuración';
+
+  @override
+  String get signerDeviceNameLabel => 'Nombre del firmante';
+
+  @override
+  String get signerDeviceNameHelper =>
+      'Se muestra en tu billetera después de conectar.';
+
+  @override
+  String get signerBiometricToggle => 'Desbloquear con biometría';
+
+  @override
+  String get signerFinishButton => 'Finalizar';
+
+  @override
+  String get signerSetupFailed =>
+      'No se pudo guardar la configuración. Inténtalo de nuevo.';
+
+  @override
+  String get signerUnlockSubtitle => 'Introduce el PIN del firmante';
+
+  @override
+  String get signerUnlockNetworkBlocked =>
+      'Hay una conexión de red activa. Activa el modo avión para desbloquear.';
+
+  @override
+  String signerWrongPin(int count) {
+    return 'PIN incorrecto. Quedan $count intentos antes de que se borre el firmante.';
+  }
+
+  @override
+  String get signerUnlockFailed =>
+      'No se pudo desbloquear. Inténtalo de nuevo.';
+
+  @override
+  String get signerUseBiometric => 'Usar biometría';
+
+  @override
+  String get signerBiometricReason => 'Desbloquea tu firmante Benny';
+
+  @override
+  String get signerBiometricFailed => 'No se pudo cambiar la biometría.';
+
+  @override
+  String get signerRecheckTitle => 'Comprobación sin conexión';
+
+  @override
+  String get signerRecheckBody =>
+      'La app se actualizó. Asegúrate de que este teléfono vuelva a estar completamente sin conexión antes de desbloquearlo.';
+
+  @override
+  String get signerLockNow => 'Bloquear';
+
+  @override
+  String get signerOfflineChip => 'Firmante sin conexión';
+
+  @override
+  String get signerScanToSign => 'Escanear para firmar';
+
+  @override
+  String get signerPairWallet => 'Conectar billetera';
+
+  @override
+  String get signerAccountsTitle => 'Cuentas';
+
+  @override
+  String signerAccountName(int number) {
+    return 'Cuenta $number';
+  }
+
+  @override
+  String get signerPairBody =>
+      'En Benny Wallet de tu otro teléfono, elige Conectar firmante sin conexión y escanea este código.';
+
+  @override
+  String get signerPairPublicOnly =>
+      'Este código solo contiene direcciones públicas, nunca tu frase de recuperación.';
+
+  @override
+  String get signerScanBody =>
+      'Escanea el código QR que muestra Benny Wallet en tu otro teléfono.';
+
+  @override
+  String get signerScanWrongCode =>
+      'Esto no es una solicitud de firma de Benny Wallet.';
+
+  @override
+  String get signerScanAgain => 'Escanear de nuevo';
+
+  @override
+  String get signerRejectUnknownAccount =>
+      'Esta solicitud es para una cuenta que no está en este firmante.';
+
+  @override
+  String get signerRejectNotASigner =>
+      'Esta cuenta no necesita firmar esta transacción.';
+
+  @override
+  String get signerRejectUnreadable =>
+      'No se puede leer esta transacción, así que no se firmará.';
+
+  @override
+  String get signerRejectMessageIsTransaction =>
+      'Este mensaje es en realidad una transacción, así que no se firmará.';
+
+  @override
+  String get signerRejectInvalidCode =>
+      'Este código QR no es una solicitud de firma válida.';
+
+  @override
+  String get signerReviewTitle => 'Revisar y firmar';
+
+  @override
+  String get signerReviewAccount => 'Cuenta firmante';
+
+  @override
+  String get signerReviewFee => 'Comisión de red';
+
+  @override
+  String get signerReviewMessage => 'Mensaje';
+
+  @override
+  String signerBinaryMessage(int count) {
+    return 'Datos binarios ($count bytes)';
+  }
+
+  @override
+  String get signerThisAccount => 'esta cuenta';
+
+  @override
+  String signerActionSendSol(String amount) {
+    return 'Enviar $amount SOL';
+  }
+
+  @override
+  String signerActionSendToken(String amount, String symbol) {
+    return 'Enviar $amount $symbol';
+  }
+
+  @override
+  String signerActionSendUnverified(String amount) {
+    return 'Enviar $amount de un token no verificado';
+  }
+
+  @override
+  String signerActionTo(String address) {
+    return 'A $address';
+  }
+
+  @override
+  String signerActionToTokenAccount(String address) {
+    return 'A la cuenta de token $address';
+  }
+
+  @override
+  String signerActionMint(String mint) {
+    return 'Dirección del token $mint';
+  }
+
+  @override
+  String signerActionOwner(String address) {
+    return 'Propietario $address';
+  }
+
+  @override
+  String signerActionRentTo(String address) {
+    return 'Renta devuelta a $address';
+  }
+
+  @override
+  String get signerActionCreateTokenAccount => 'Crear cuenta de token';
+
+  @override
+  String get signerActionCloseTokenAccount => 'Cerrar cuenta de token';
+
+  @override
+  String get signerActionMemo => 'Memo';
+
+  @override
+  String get signerActionApprove => 'Permitir que otra cuenta gaste tus tokens';
+
+  @override
+  String get signerActionSetAuthority => 'Cambiar la autoridad de la cuenta';
+
+  @override
+  String get signerActionAssign => 'Cambiar el propietario de la cuenta';
+
+  @override
+  String get signerActionCreateAccount => 'Crear cuenta';
+
+  @override
+  String signerActionProgram(String program) {
+    return 'Programa $program';
+  }
+
+  @override
+  String get signerHoldToSign => 'Mantén pulsado para firmar';
+
+  @override
+  String get signerReject => 'Rechazar';
+
+  @override
+  String get signerSignFailed => 'No se pudo firmar. Inténtalo de nuevo.';
+
+  @override
+  String get signerSignatureTitle => 'Firma';
+
+  @override
+  String get signerSignatureBody =>
+      'Escanea este código con Benny Wallet en tu otro teléfono para terminar.';
+
+  @override
+  String get signerSettingsTitle => 'Ajustes del firmante';
+
+  @override
+  String get signerAccountCount => 'Cuentas mostradas';
+
+  @override
+  String get signerAccountCountHint =>
+      'Hasta 5 cuentas de esta frase de recuperación';
+
+  @override
+  String get signerUpgradeTitle => 'Actualizar el firmante';
+
+  @override
+  String get signerUpgradeIntro =>
+      'Actualizar la app requiere conexión, así que planifícalo. Tu frase de recuperación sigue cifrada en este teléfono mientras está conectado, y el firmante no la abrirá hasta que el teléfono vuelva a estar sin conexión.';
+
+  @override
+  String get signerUpgradeStep0 => '1. Comprueba tu copia en papel';
+
+  @override
+  String get signerUpgradeVerifyBackup => 'Comprobar copia';
+
+  @override
+  String get signerUpgradeBackupOk => 'Copia comprobada';
+
+  @override
+  String get signerUpgradeOnlineTitle => '2a. Actualización estándar';
+
+  @override
+  String get signerUpgradeOnlineBody =>
+      'Bloquea el firmante. Activa la red y actualiza Benny Wallet desde la misma tienda en la que lo instalaste. Vuelve a activar el modo avión. El firmante repetirá la comprobación sin conexión antes de que puedas desbloquearlo.';
+
+  @override
+  String get signerUpgradeSecureTitle => '2b. Actualización más segura';
+
+  @override
+  String get signerUpgradeSecureBody =>
+      'Borra el firmante en ajustes y luego actualiza la app con conexión. Vuelve a desconectarte, configura el firmante e importa tu frase de recuperación. Tus cuentas y direcciones no cambian.';
+
+  @override
+  String get signerUpgradeOfflineApkTitle => 'Android: actualizar sin conexión';
+
+  @override
+  String get signerUpgradeOfflineApkBody =>
+      'También puedes copiar el nuevo APK de benny-wallet.com a este teléfono por cable USB o tarjeta SD e instalarlo sin conectarte. Instálalo solo sobre una versión de la misma fuente.';
+
+  @override
+  String get signerUpgradeCompatTitle =>
+      'Los firmantes antiguos siguen funcionando';
+
+  @override
+  String get signerUpgradeCompatBody =>
+      'Una app de billetera más reciente sigue funcionando con un firmante antiguo. La billetera solo pide lo que este firmante admite, así que puedes actualizar cuando te convenga.';
+
+  @override
+  String get signerVersionTitle => 'Versión';
+
+  @override
+  String signerVersionDetail(String app, int protocol, int tokens) {
+    return 'App $app · protocolo $protocol · lista de tokens $tokens';
+  }
+
+  @override
+  String get signerEraseTitle => 'Borrar firmante';
+
+  @override
+  String get signerEraseSubtitle =>
+      'Elimina la frase de recuperación de este teléfono';
+
+  @override
+  String get signerEraseBody =>
+      'La frase de recuperación se eliminará de este teléfono. Sin tu copia en papel, los fondos no se podrán recuperar.';
+
+  @override
+  String get signerEraseConfirm => 'Borrar';
+
+  @override
+  String get signerEraseWrongPin => 'PIN incorrecto. No se borró nada.';
+
+  @override
+  String get airGapConnectTitle => 'Conectar firmante sin conexión';
+
+  @override
+  String get airGapConnectBody =>
+      'En tu teléfono firmante, toca Conectar billetera y escanea el código que muestra.';
+
+  @override
+  String get airGapConnectInvalid =>
+      'Esto no es un código de vinculación de firmante.';
+
+  @override
+  String airGapConnectChoose(String device) {
+    return 'Elige una cuenta en $device';
+  }
+
+  @override
+  String airGapConnectAccount(int number) {
+    return 'Cuenta $number';
+  }
+
+  @override
+  String airGapConnectAccountAdded(int number) {
+    return 'Cuenta $number (ya añadida)';
+  }
+
+  @override
+  String get airGapConnectCompare =>
+      'Comprueba que la dirección coincide con la que muestra tu firmante.';
+
+  @override
+  String get airGapConnectScanAgain => 'Escanear de nuevo';
+
+  @override
+  String get airGapSignTitle => 'Firmar con tu firmante';
+
+  @override
+  String get airGapSignShowRequestAgain => 'Mostrar la solicitud de nuevo';
+
+  @override
+  String get airGapSignMayHaveExpired =>
+      'Es posible que esta transacción haya caducado. Si el envío falla, vuelve a empezar.';
+
+  @override
+  String get airGapSignWrongRequest => 'Esta firma pertenece a otra solicitud.';
+
+  @override
+  String get airGapSignInvalidCode => 'Esta no es una firma de tu firmante.';
+
+  @override
+  String get airGapSignerOutdated =>
+      'Tu firmante usa una versión anterior. Sigue funcionando; actualízalo cuando te venga bien.';
+
+  @override
+  String get signerIntroSubtitle =>
+      'Guarda tus claves en un teléfono que nunca se conecta a internet.';
+
+  @override
+  String get signerFinishSubtitle =>
+      'Ponle un nombre a este firmante y crea un PIN.';
+
+  @override
+  String signerQuizBody(int count) {
+    return 'Elige la palabra correcta para $count posiciones. Usa tu copia en papel.';
+  }
+
+  @override
+  String signerQuizProgress(int current, int total) {
+    return 'Pregunta $current de $total';
+  }
+
+  @override
+  String signerQuizQuestion(int position) {
+    return '¿Cuál es la palabra n.º $position?';
+  }
+
+  @override
+  String get signerQuizCorrect => '¡Correcto!';
+
+  @override
+  String get signerQuizWrong =>
+      'No es correcto. Revisa tu papel; elegimos palabras nuevas para volver a intentarlo.';
+
+  @override
+  String get signerQuizShowWords => 'Ver las palabras otra vez';
+
+  @override
+  String get signerScanToSignSubtitle =>
+      'Escanea la solicitud que muestra tu billetera';
+
+  @override
+  String get signerPairWalletSubtitle =>
+      'Muestra un código para que Benny Wallet lo escanee';
+
+  @override
+  String get signerWalletPhoneLabel => 'Benny Wallet';
+
+  @override
+  String get signerScanRefusedTitle => 'No se puede firmar';
+
+  @override
+  String get airGapSignerLabel => 'Firmante';
+
+  @override
+  String get airGapThisPhone => 'Este teléfono';
+
+  @override
+  String get airGapConnectFound => 'Firmante reconocido';
+
+  @override
+  String get airGapSignNeedsSigner =>
+      'Tu firmante debe verificar y firmar esto';
+
+  @override
+  String get airGapSignStepShort1 => 'Escanea el firmante';
+
+  @override
+  String get airGapSignStepShort2 => 'Escanear firma';
+
+  @override
+  String airGapSignStep1Named(String device) {
+    return 'Paso 1: escanea este código con “$device”';
+  }
+
+  @override
+  String airGapSignStep1BodyNamed(String device) {
+    return 'En “$device”, toca Escanear para firmar, revisa los detalles y confirma.';
+  }
+
+  @override
+  String airGapSignStep2Named(String device) {
+    return 'Paso 2: escanea la firma de “$device”';
+  }
+
+  @override
+  String airGapSignStep2BodyNamed(String device) {
+    return 'Tras confirmar, “$device” muestra un código de firma. Escanéalo con este teléfono.';
+  }
+
+  @override
+  String airGapSignScanSignatureNamed(String device) {
+    return 'Siguiente: escanear la firma de $device';
+  }
+
+  @override
+  String signerActionSwapPair(String from, String to) {
+    return 'Intercambiar $from → $to';
+  }
+
+  @override
+  String signerSwapPay(String amount) {
+    return 'Pagas $amount';
+  }
+
+  @override
+  String signerSwapPayAtMost(String amount) {
+    return 'Pagas como máximo $amount';
+  }
+
+  @override
+  String signerSwapReceive(String amount) {
+    return 'Recibes $amount';
+  }
+
+  @override
+  String signerSwapReceiveAtLeast(String amount) {
+    return 'Recibes al menos $amount';
+  }
+
+  @override
+  String get signerSwapUnverifiedToken => 'Token no verificado';
+
+  @override
+  String airGapSignTimeLeft(int seconds) {
+    return 'Quedan $seconds s. Si se acaba el tiempo, aparecerá un código nuevo automáticamente.';
+  }
+
+  @override
+  String get airGapSignRefreshing =>
+      'Se acabó el tiempo. Obteniendo una cotización y un código nuevos…';
+
+  @override
+  String airGapSignRefreshed(String device) {
+    return 'El código anterior caducó; aquí tienes uno nuevo. Escanéalo de nuevo con “$device”.';
+  }
+
+  @override
+  String get airGapSignRefreshFailed =>
+      'No se pudo obtener un código nuevo. Revisa tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get airGapSignOldRequest =>
+      'Esta firma es del código caducado. Escanea primero el código nuevo en tu firmante.';
+
+  @override
+  String get scanHintRoleShows => 'Muestra el código';
+
+  @override
+  String get scanHintRoleScans => 'Escanea';
+
+  @override
+  String signerTokenUnchecked(String symbol) {
+    return '$symbol (no verificado)';
+  }
+
+  @override
+  String get signerReviewActions => 'Transacción';
+
+  @override
+  String get signerNewerWalletNotice =>
+      'Tu billetera es más nueva que este firmante. Actualiza el firmante cuando puedas.';
+
+  @override
+  String get signerDangerBanner =>
+      'Riesgo alto. No firmes si no lo iniciaste tú.';
+
+  @override
+  String get signerActionSwap => 'Intercambio';
+
+  @override
+  String get signerActionSwapDetail => 'Revisa las cantidades en tu billetera.';
+
+  @override
+  String get signerActionDangerDetail =>
+      'Peligroso. Si no estás seguro, no firmes.';
+
+  @override
+  String get signerActionAdvanceNonce => 'Actualizar número de transacción';
+
+  @override
+  String get signerActionSyncNative => 'Actualizar saldo de SOL';
+
+  @override
+  String get signerHoldLongHint =>
+      'Revisa con cuidado y mantén pulsado 3 segundos.';
+
+  @override
+  String signerTokenVerified(String token) {
+    return '$token · Verificado por Benny Wallet';
+  }
+
+  @override
+  String signerTokenWalletProvided(String symbol) {
+    return '$symbol · No verificado por Benny Wallet';
+  }
+
+  @override
+  String signerSwapWalletQuote(String pay, String receive) {
+    return 'Estimado: pagas $pay, recibes unos $receive';
+  }
+
+  @override
+  String get signerActionUnknown => 'Paso no reconocido';
+
+  @override
+  String signerActionCreateTokenAccountFor(String symbol) {
+    return 'Abrir cuenta de $symbol';
+  }
+
+  @override
+  String get signerUnresolvedAccounts =>
+      'El firmante no puede ver toda la transacción. Firma solo si acabas de iniciarla tú.';
+
+  @override
+  String get signerTokenNotVerified => 'No verificado por Benny Wallet';
+
+  @override
+  String get signerKindSwap => 'Intercambio';
+
+  @override
+  String get signerKindSend => 'Envío';
+
+  @override
+  String signerAbout(String amount) {
+    return 'Unos $amount';
+  }
+
+  @override
+  String get signerAmountsFromWallet => 'Las cantidades vienen de la billetera';
+
+  @override
+  String get signerTrustSafe => 'Todos los tokens verificados por Benny Wallet';
+
+  @override
+  String get signerTrustCaution =>
+      'Un token no está verificado por Benny Wallet. Ten cuidado.';
+
+  @override
+  String get signerTrustDangerSwap =>
+      'Ningún token está verificado por Benny Wallet. Riesgo alto.';
+
+  @override
+  String get signerTrustDangerSend =>
+      'Este token no está verificado por Benny Wallet. Riesgo alto.';
+
+  @override
+  String get signerReviewOtherSteps => 'Otros pasos';
+
+  @override
+  String get signerPay => 'Pagas';
+
+  @override
+  String get signerPayAtMost => 'Pagas como máximo';
+
+  @override
+  String get signerGet => 'Recibes';
+
+  @override
+  String get signerGetAtLeast => 'Recibes como mínimo';
+
+  @override
+  String get signerGetAbout => 'Recibes aprox.';
+
+  @override
+  String get signerRecipient => 'Destinatario';
+
+  @override
+  String get signerRecipientTokenAccount => 'Cuenta de token del destinatario';
+
+  @override
+  String get signerUsdFromWallet =>
+      'Los valores en USD son una estimación de la billetera';
+
+  @override
+  String signerActionCreateTokenAccountForRecipient(String symbol) {
+    return 'Abrir cuenta de $symbol para el destinatario';
+  }
+
+  @override
+  String get signerCreateAccountSkipIfOpen =>
+      '(La primera vez cuesta unos 0,002 SOL; si ya existe se omite sin coste)';
+
+  @override
+  String get signerCreateAccountNotOpen =>
+      '(Aún no existe; cuesta unos 0,002 SOL)';
+
+  @override
+  String get signerAddressFromWallet =>
+      'Esta dirección la da la billetera. El firmador no puede comprobarla.';
+
+  @override
+  String get signerSwapOutputUnchecked =>
+      'No se puede confirmar que los tokens del intercambio lleguen a ti.';
+
+  @override
+  String get signerExtraOutflow =>
+      'Esto también envía fondos a otra dirección.';
+
+  @override
+  String signerHighFee(String amount) {
+    return 'Comisión de red muy alta: $amount SOL';
+  }
+
+  @override
+  String get signerDurableNonce =>
+      'Esta firma no caduca nunca. Puede usarse más tarde.';
+
+  @override
+  String get signerSwapFromWallet =>
+      'El token o la cantidad vienen de la billetera y no se pueden comprobar.';
+
+  @override
+  String signerActionCloseTo(String address) {
+    return 'El saldo y la renta van a $address';
+  }
+
+  @override
+  String signerWalletNote(String name) {
+    return 'Nota de la billetera: $name';
+  }
+
+  @override
+  String get signerReviewFeePayer => 'Comisión pagada por';
+
+  @override
+  String signerActionOwnerProgram(String program) {
+    return 'Controlada por el programa $program';
+  }
+
+  @override
+  String get signerSlippageAll =>
+      'Deslizamiento del 100 % o más: puede que no recibas nada.';
+
+  @override
+  String get signerQuizTooManyWrong =>
+      'Demasiadas respuestas incorrectas. Introduce tu PIN para intentarlo de nuevo.';
+
+  @override
+  String get signerSignInTitle => 'Solicitud de inicio de sesión';
+
+  @override
+  String get signerKindSignIn => 'Iniciar sesión';
+
+  @override
+  String get signerSignInBenny => 'Iniciar sesión en Benny Wallet';
+
+  @override
+  String signerSignInOtherSite(String site) {
+    return '“$site” te pide iniciar sesión. Firma solo si lo iniciaste tú.';
+  }
+
+  @override
+  String get signerSignInExpired =>
+      'Esta solicitud ha caducado. Revisa la hora de este teléfono o empieza de nuevo en la billetera.';
+
+  @override
+  String get signerSignInOtherAccount =>
+      'Este inicio de sesión es de otra cuenta. No firmes.';
+
+  @override
+  String get signerSignInWhat =>
+      'Demuestra que esta cuenta es tuya para que Benny muestre su saldo, historial y avisos.';
+
+  @override
+  String get signerSignInNoFunds => 'No mueve fondos ni cuesta comisión.';
+
+  @override
+  String get signerSignInShowText => 'Ver texto original';
+
+  @override
+  String get airGapSignInTitle => 'Inicia sesión con tu firmante';
+
+  @override
+  String get airGapSignInWhy => '¿Por qué firmar esto?';
+
+  @override
+  String get airGapSignInWhyBody =>
+      'Benny necesita confirmar que esta cuenta es tuya antes de cargar tu saldo, historial y avisos. Normalmente solo se hace una vez por billetera.';
+
+  @override
+  String get airGapSignInSafe =>
+      'Es solo un inicio de sesión. No mueve fondos ni cuesta comisión.';
+
+  @override
+  String airGapSignInSignerShows(String device) {
+    return '“$device” mostrará “Iniciar sesión en Benny Wallet”.';
+  }
+
+  @override
+  String airGapSignInSignerShowsText(String device) {
+    return '“$device” mostrará un texto en inglés que empieza por “Benny Wallet wants you to sign in”. Es este inicio de sesión. Tras actualizar el firmante, mostrará “Iniciar sesión en Benny Wallet”.';
+  }
 }

@@ -1,7 +1,7 @@
 name: wallet_client_flutter
 description: Benny Wallet Flutter client for Web, iOS and Android.
 publish_to: none
-version: 0.0.53+54
+version: 0.1.0+56
 
 environment:
   sdk: "^3.8.0"
@@ -38,6 +38,7 @@ dependencies:
     path: ../../packages/shared_types
   firebase_core: ^4.7.0
   firebase_messaging: ^16.2.0
+  meta: ^1.19.0
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +57,7 @@ flutter:
     - assets/brand/benny_logo.png
     - assets/brand/pump_mark.svg
     - assets/market_logos/
+    - assets/signer_token_icons/
   fonts:
     - family: Manrope
       fonts:

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/config/app_features.dart';
 import '../l10n/l10n.dart';
+import '../features/airgap/presentation/pages/connect_signer_page.dart';
 import '../features/auth/presentation/providers/wallet_controller.dart';
 import '../features/auth/presentation/pages/pin_setup_page.dart';
 import '../features/auth/presentation/pages/unlock_page.dart';
@@ -92,6 +93,15 @@ class AppRouter {
           currentLocation: state.matchedLocation,
           blockWhenWalletExists: true,
           child: const ImportMnemonicPage(autoConnectSeedVault: true),
+        ),
+      ),
+      GoRoute(
+        path: ConnectSignerPage.routePath,
+        name: ConnectSignerPage.routeName,
+        builder: (context, state) => _RouteAccessGuard(
+          currentLocation: state.matchedLocation,
+          blockWhenWalletExists: true,
+          child: const ConnectSignerPage(),
         ),
       ),
       GoRoute(
@@ -198,6 +208,8 @@ class AppRouter {
                   seedVaultDerivationPath: extra.seedVaultDerivationPath,
                   walletLabel: extra.walletLabel,
                   walletName: extra.walletName,
+                  airGapDerivationPath: extra.airGapDerivationPath,
+                  airGapMeta: extra.airGapMeta,
                 )
               : PinSetupPage(mnemonic: extra as String);
 

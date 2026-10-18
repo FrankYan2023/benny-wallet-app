@@ -1170,10 +1170,14 @@ class _SeekerVaultCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const _SettingsIconCircle(
-              icon: Icons.security_rounded,
-              iconColor: Color(0xFF235E7A),
-              backgroundColor: Colors.white,
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const SeekerMark(size: 24, color: Color(0xFF235E7A)),
             ),
             const SizedBox(width: 14),
             Expanded(

@@ -14,6 +14,7 @@ import '../../core/services/push_notification_service.dart';
 import '../../core/storage/key_value_store.dart';
 import '../../core/storage/secure_store.dart';
 import '../../features/airdrop/data/airdrop_repository.dart';
+import '../../features/airgap/presentation/air_gap_signing.dart';
 import '../../features/analytics/data/install_analytics_repository.dart';
 import '../../features/asset_detail/data/asset_detail_repository.dart';
 import '../../features/auth/data/solana_wallet_service.dart';
@@ -157,4 +158,11 @@ final appUpdateRepositoryProvider = Provider<AppUpdateRepository>((ref) {
 
 final packageInfoProvider = FutureProvider<PackageInfo>((ref) {
   return PackageInfo.fromPlatform();
+});
+
+final airGapSigningServiceProvider = Provider<AirGapSigningService>((ref) {
+  return AirGapSigningService(
+    repository: ref.read(walletRepositoryProvider),
+    solana: ref.read(solanaWalletServiceProvider),
+  );
 });

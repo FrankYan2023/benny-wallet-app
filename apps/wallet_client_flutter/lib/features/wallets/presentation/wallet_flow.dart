@@ -340,8 +340,8 @@ Future<void> startAddWallet(BuildContext context, WidgetRef ref) async {
           const SizedBox(height: 10),
           WalletActionRow(
             leading: const WalletIconCircle(
-              icon: Icons.security_rounded,
               color: Color(0xFF235E7A),
+              child: SeekerMark(size: 20),
             ),
             title: l10n.walletAddSeedVault,
             subtitle: _RowSubtitle(l10n.walletAddSeedVaultSubtitle),

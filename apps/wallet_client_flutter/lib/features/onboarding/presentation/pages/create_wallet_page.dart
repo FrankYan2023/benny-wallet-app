@@ -24,14 +24,18 @@ class CreateWalletPage extends StatefulWidget {
 
 class _CreateWalletPageState extends State<CreateWalletPage> {
   late String _mnemonic;
+  int _wordCount = 12;
 
   List<String> get _words => _mnemonic.split(' ');
 
   @override
   void initState() {
     super.initState();
-    _mnemonic = bip39.generateMnemonic();
+    _mnemonic = _generate(_wordCount);
   }
+
+  static String _generate(int words) =>
+      bip39.generateMnemonic(strength: words == 24 ? 256 : 128);
 
   @override
   Widget build(BuildContext context) {
@@ -94,6 +98,23 @@ class _CreateWalletPageState extends State<CreateWalletPage> {
               ),
             ],
             const SizedBox(height: 20),
+            Center(
+              child: SegmentedButton<int>(
+                segments: [
+                  for (final count in const [12, 24])
+                    ButtonSegment(
+                      value: count,
+                      label: Text(l10n.createWalletWordCount(count)),
+                    ),
+                ],
+                selected: {_wordCount},
+                onSelectionChanged: (selection) => setState(() {
+                  _wordCount = selection.first;
+                  _mnemonic = _generate(_wordCount);
+                }),
+              ),
+            ),
+            const SizedBox(height: 16),
             WalletCard(
               child: GridView.builder(
                 shrinkWrap: true,

@@ -19,6 +19,7 @@ import 'package:solana/encoder.dart'
 import 'package:solana/dto.dart'
     show
         AccountData,
+        BinaryAccountData,
         Encoding,
         ParsedAccountData,
         ParsedSplTokenProgramAccountData,
@@ -31,6 +32,7 @@ import 'package:solana/dto.dart'
         TransactionDetails;
 import 'package:solana/solana.dart';
 
+import '../../../core/airgap/airgap_protocol.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/backend_session_manager.dart';
@@ -1027,6 +1029,46 @@ class SolanaWalletService {
         encodedTransaction,
       ).compiledMessage.toByteArray().toList(),
     );
+  }
+
+  /// Entries of the address lookup tables an air-gapped signer needs to
+  /// read a v0 transaction, limited to the indexes the transaction uses.
+  Future<List<AirGapLookupTable>> fetchLookupTableEntries(
+    Map<String, Set<int>> references,
+  ) async {
+    if (references.isEmpty) {
+      return const [];
+    }
+    // Lookup table account: 56-byte header, then 32-byte addresses.
+    const headerLength = 56;
+    final rpcClient = await _getRpcClient();
+    final tables = <AirGapLookupTable>[];
+    for (final reference in references.entries) {
+      final account = await rpcClient.getAccountInfo(
+        reference.key,
+        commitment: Commitment.confirmed,
+        encoding: Encoding.base64,
+      );
+      final data = account.value?.data;
+      if (data is! BinaryAccountData) {
+        continue;
+      }
+      final bytes = data.data;
+      final entries = <int, Uint8List>{};
+      for (final index in reference.value) {
+        final start = headerLength + index * 32;
+        if (start + 32 <= bytes.length) {
+          entries[index] = Uint8List.fromList(bytes.sublist(start, start + 32));
+        }
+      }
+      tables.add(
+        AirGapLookupTable(
+          address: Uint8List.fromList(base58decode(reference.key)),
+          entries: entries,
+        ),
+      );
+    }
+    return tables;
   }
 
   List<int> signableTransactionMessageBytes(String encodedTransaction) {

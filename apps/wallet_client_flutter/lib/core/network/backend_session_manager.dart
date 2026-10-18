@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:solana/base58.dart';
 import 'package:solana/solana.dart';
 
+import '../../app/di/providers.dart';
 import '../../features/auth/domain/wallet_derivation.dart';
 import '../../features/auth/domain/wallet_controller_state.dart';
 import '../../features/auth/presentation/providers/ephemeral_store.dart';
@@ -295,6 +296,15 @@ class BackendSessionManager {
           .read(walletControllerProvider.notifier)
           .updateMobileWalletAdapterAuthToken(result.authToken);
       return result.signatures.first;
+    }
+    if (walletState.custody == WalletCustody.airGap) {
+      return _ref
+          .read(airGapSigningServiceProvider)
+          .signMessage(
+            ownerAddress: ownerAddress,
+            message: Uint8List.fromList(utf8.encode(message)),
+            signIn: true,
+          );
     }
     if (walletState.custody == WalletCustody.seedVault) {
       final authToken = walletState.mwaAuthToken;

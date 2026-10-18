@@ -15,7 +15,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TokenInfo {
 
- String get mintAddress; String get symbol; String get name; int get decimals; bool get isNative; bool get isVisible; TokenProgramKind get tokenProgramType;
+ String get mintAddress; String get symbol; String get name; int get decimals; bool get isNative; bool get isVisible; TokenProgramKind get tokenProgramType;/// Offline Benny token key's signature over this token (base64), passed
+/// on to offline signers so they can trust its name. See
+/// `token_attestation.dart` in the app.
+ String? get signerAttestation;
 /// Create a copy of TokenInfo
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +31,16 @@ $TokenInfoCopyWith<TokenInfo> get copyWith => _$TokenInfoCopyWithImpl<TokenInfo>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TokenInfo&&(identical(other.mintAddress, mintAddress) || other.mintAddress == mintAddress)&&(identical(other.symbol, symbol) || other.symbol == symbol)&&(identical(other.name, name) || other.name == name)&&(identical(other.decimals, decimals) || other.decimals == decimals)&&(identical(other.isNative, isNative) || other.isNative == isNative)&&(identical(other.isVisible, isVisible) || other.isVisible == isVisible)&&(identical(other.tokenProgramType, tokenProgramType) || other.tokenProgramType == tokenProgramType));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TokenInfo&&(identical(other.mintAddress, mintAddress) || other.mintAddress == mintAddress)&&(identical(other.symbol, symbol) || other.symbol == symbol)&&(identical(other.name, name) || other.name == name)&&(identical(other.decimals, decimals) || other.decimals == decimals)&&(identical(other.isNative, isNative) || other.isNative == isNative)&&(identical(other.isVisible, isVisible) || other.isVisible == isVisible)&&(identical(other.tokenProgramType, tokenProgramType) || other.tokenProgramType == tokenProgramType)&&(identical(other.signerAttestation, signerAttestation) || other.signerAttestation == signerAttestation));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,mintAddress,symbol,name,decimals,isNative,isVisible,tokenProgramType);
+int get hashCode => Object.hash(runtimeType,mintAddress,symbol,name,decimals,isNative,isVisible,tokenProgramType,signerAttestation);
 
 @override
 String toString() {
-  return 'TokenInfo(mintAddress: $mintAddress, symbol: $symbol, name: $name, decimals: $decimals, isNative: $isNative, isVisible: $isVisible, tokenProgramType: $tokenProgramType)';
+  return 'TokenInfo(mintAddress: $mintAddress, symbol: $symbol, name: $name, decimals: $decimals, isNative: $isNative, isVisible: $isVisible, tokenProgramType: $tokenProgramType, signerAttestation: $signerAttestation)';
 }
 
 
@@ -48,7 +51,7 @@ abstract mixin class $TokenInfoCopyWith<$Res>  {
   factory $TokenInfoCopyWith(TokenInfo value, $Res Function(TokenInfo) _then) = _$TokenInfoCopyWithImpl;
 @useResult
 $Res call({
- String mintAddress, String symbol, String name, int decimals, bool isNative, bool isVisible, TokenProgramKind tokenProgramType
+ String mintAddress, String symbol, String name, int decimals, bool isNative, bool isVisible, TokenProgramKind tokenProgramType, String? signerAttestation
 });
 
 
@@ -65,7 +68,7 @@ class _$TokenInfoCopyWithImpl<$Res>
 
 /// Create a copy of TokenInfo
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? mintAddress = null,Object? symbol = null,Object? name = null,Object? decimals = null,Object? isNative = null,Object? isVisible = null,Object? tokenProgramType = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? mintAddress = null,Object? symbol = null,Object? name = null,Object? decimals = null,Object? isNative = null,Object? isVisible = null,Object? tokenProgramType = null,Object? signerAttestation = freezed,}) {
   return _then(_self.copyWith(
 mintAddress: null == mintAddress ? _self.mintAddress : mintAddress // ignore: cast_nullable_to_non_nullable
 as String,symbol: null == symbol ? _self.symbol : symbol // ignore: cast_nullable_to_non_nullable
@@ -74,7 +77,8 @@ as String,decimals: null == decimals ? _self.decimals : decimals // ignore: cast
 as int,isNative: null == isNative ? _self.isNative : isNative // ignore: cast_nullable_to_non_nullable
 as bool,isVisible: null == isVisible ? _self.isVisible : isVisible // ignore: cast_nullable_to_non_nullable
 as bool,tokenProgramType: null == tokenProgramType ? _self.tokenProgramType : tokenProgramType // ignore: cast_nullable_to_non_nullable
-as TokenProgramKind,
+as TokenProgramKind,signerAttestation: freezed == signerAttestation ? _self.signerAttestation : signerAttestation // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -159,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String mintAddress,  String symbol,  String name,  int decimals,  bool isNative,  bool isVisible,  TokenProgramKind tokenProgramType)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String mintAddress,  String symbol,  String name,  int decimals,  bool isNative,  bool isVisible,  TokenProgramKind tokenProgramType,  String? signerAttestation)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TokenInfo() when $default != null:
-return $default(_that.mintAddress,_that.symbol,_that.name,_that.decimals,_that.isNative,_that.isVisible,_that.tokenProgramType);case _:
+return $default(_that.mintAddress,_that.symbol,_that.name,_that.decimals,_that.isNative,_that.isVisible,_that.tokenProgramType,_that.signerAttestation);case _:
   return orElse();
 
 }
@@ -180,10 +184,10 @@ return $default(_that.mintAddress,_that.symbol,_that.name,_that.decimals,_that.i
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String mintAddress,  String symbol,  String name,  int decimals,  bool isNative,  bool isVisible,  TokenProgramKind tokenProgramType)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String mintAddress,  String symbol,  String name,  int decimals,  bool isNative,  bool isVisible,  TokenProgramKind tokenProgramType,  String? signerAttestation)  $default,) {final _that = this;
 switch (_that) {
 case _TokenInfo():
-return $default(_that.mintAddress,_that.symbol,_that.name,_that.decimals,_that.isNative,_that.isVisible,_that.tokenProgramType);case _:
+return $default(_that.mintAddress,_that.symbol,_that.name,_that.decimals,_that.isNative,_that.isVisible,_that.tokenProgramType,_that.signerAttestation);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +204,10 @@ return $default(_that.mintAddress,_that.symbol,_that.name,_that.decimals,_that.i
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String mintAddress,  String symbol,  String name,  int decimals,  bool isNative,  bool isVisible,  TokenProgramKind tokenProgramType)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String mintAddress,  String symbol,  String name,  int decimals,  bool isNative,  bool isVisible,  TokenProgramKind tokenProgramType,  String? signerAttestation)?  $default,) {final _that = this;
 switch (_that) {
 case _TokenInfo() when $default != null:
-return $default(_that.mintAddress,_that.symbol,_that.name,_that.decimals,_that.isNative,_that.isVisible,_that.tokenProgramType);case _:
+return $default(_that.mintAddress,_that.symbol,_that.name,_that.decimals,_that.isNative,_that.isVisible,_that.tokenProgramType,_that.signerAttestation);case _:
   return null;
 
 }
@@ -215,7 +219,7 @@ return $default(_that.mintAddress,_that.symbol,_that.name,_that.decimals,_that.i
 @JsonSerializable()
 
 class _TokenInfo implements TokenInfo {
-  const _TokenInfo({required this.mintAddress, required this.symbol, required this.name, required this.decimals, required this.isNative, required this.isVisible, this.tokenProgramType = TokenProgramKind.tokenProgram});
+  const _TokenInfo({required this.mintAddress, required this.symbol, required this.name, required this.decimals, required this.isNative, required this.isVisible, this.tokenProgramType = TokenProgramKind.tokenProgram, this.signerAttestation});
   factory _TokenInfo.fromJson(Map<String, dynamic> json) => _$TokenInfoFromJson(json);
 
 @override final  String mintAddress;
@@ -225,6 +229,10 @@ class _TokenInfo implements TokenInfo {
 @override final  bool isNative;
 @override final  bool isVisible;
 @override@JsonKey() final  TokenProgramKind tokenProgramType;
+/// Offline Benny token key's signature over this token (base64), passed
+/// on to offline signers so they can trust its name. See
+/// `token_attestation.dart` in the app.
+@override final  String? signerAttestation;
 
 /// Create a copy of TokenInfo
 /// with the given fields replaced by the non-null parameter values.
@@ -239,16 +247,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TokenInfo&&(identical(other.mintAddress, mintAddress) || other.mintAddress == mintAddress)&&(identical(other.symbol, symbol) || other.symbol == symbol)&&(identical(other.name, name) || other.name == name)&&(identical(other.decimals, decimals) || other.decimals == decimals)&&(identical(other.isNative, isNative) || other.isNative == isNative)&&(identical(other.isVisible, isVisible) || other.isVisible == isVisible)&&(identical(other.tokenProgramType, tokenProgramType) || other.tokenProgramType == tokenProgramType));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TokenInfo&&(identical(other.mintAddress, mintAddress) || other.mintAddress == mintAddress)&&(identical(other.symbol, symbol) || other.symbol == symbol)&&(identical(other.name, name) || other.name == name)&&(identical(other.decimals, decimals) || other.decimals == decimals)&&(identical(other.isNative, isNative) || other.isNative == isNative)&&(identical(other.isVisible, isVisible) || other.isVisible == isVisible)&&(identical(other.tokenProgramType, tokenProgramType) || other.tokenProgramType == tokenProgramType)&&(identical(other.signerAttestation, signerAttestation) || other.signerAttestation == signerAttestation));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,mintAddress,symbol,name,decimals,isNative,isVisible,tokenProgramType);
+int get hashCode => Object.hash(runtimeType,mintAddress,symbol,name,decimals,isNative,isVisible,tokenProgramType,signerAttestation);
 
 @override
 String toString() {
-  return 'TokenInfo(mintAddress: $mintAddress, symbol: $symbol, name: $name, decimals: $decimals, isNative: $isNative, isVisible: $isVisible, tokenProgramType: $tokenProgramType)';
+  return 'TokenInfo(mintAddress: $mintAddress, symbol: $symbol, name: $name, decimals: $decimals, isNative: $isNative, isVisible: $isVisible, tokenProgramType: $tokenProgramType, signerAttestation: $signerAttestation)';
 }
 
 
@@ -259,7 +267,7 @@ abstract mixin class _$TokenInfoCopyWith<$Res> implements $TokenInfoCopyWith<$Re
   factory _$TokenInfoCopyWith(_TokenInfo value, $Res Function(_TokenInfo) _then) = __$TokenInfoCopyWithImpl;
 @override @useResult
 $Res call({
- String mintAddress, String symbol, String name, int decimals, bool isNative, bool isVisible, TokenProgramKind tokenProgramType
+ String mintAddress, String symbol, String name, int decimals, bool isNative, bool isVisible, TokenProgramKind tokenProgramType, String? signerAttestation
 });
 
 
@@ -276,7 +284,7 @@ class __$TokenInfoCopyWithImpl<$Res>
 
 /// Create a copy of TokenInfo
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? mintAddress = null,Object? symbol = null,Object? name = null,Object? decimals = null,Object? isNative = null,Object? isVisible = null,Object? tokenProgramType = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? mintAddress = null,Object? symbol = null,Object? name = null,Object? decimals = null,Object? isNative = null,Object? isVisible = null,Object? tokenProgramType = null,Object? signerAttestation = freezed,}) {
   return _then(_TokenInfo(
 mintAddress: null == mintAddress ? _self.mintAddress : mintAddress // ignore: cast_nullable_to_non_nullable
 as String,symbol: null == symbol ? _self.symbol : symbol // ignore: cast_nullable_to_non_nullable
@@ -285,7 +293,8 @@ as String,decimals: null == decimals ? _self.decimals : decimals // ignore: cast
 as int,isNative: null == isNative ? _self.isNative : isNative // ignore: cast_nullable_to_non_nullable
 as bool,isVisible: null == isVisible ? _self.isVisible : isVisible // ignore: cast_nullable_to_non_nullable
 as bool,tokenProgramType: null == tokenProgramType ? _self.tokenProgramType : tokenProgramType // ignore: cast_nullable_to_non_nullable
-as TokenProgramKind,
+as TokenProgramKind,signerAttestation: freezed == signerAttestation ? _self.signerAttestation : signerAttestation // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

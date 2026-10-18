@@ -111,6 +111,21 @@ class PushNotificationService {
     return true;
   }
 
+  /// Signer mode: stop listening and keep Firebase from fetching a token
+  /// on later launches. Signer launches never initialize Firebase at all.
+  Future<void> stopForSigner() async {
+    await _foregroundSubscription?.cancel();
+    await _openedSubscription?.cancel();
+    await _tokenRefreshSubscription?.cancel();
+    _foregroundSubscription = null;
+    _openedSubscription = null;
+    _tokenRefreshSubscription = null;
+    if (Firebase.apps.isNotEmpty) {
+      await FirebaseMessaging.instance.setAutoInitEnabled(false);
+    }
+    _initialized = false;
+  }
+
   Future<bool> requestPermissionAndRegister({
     required WalletControllerState walletState,
     required bool enabled,

@@ -2079,4 +2079,894 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get travelGuardBiometricsOff => 'Unavailable while travel guard is on';
+
+  @override
+  String get welcomeUseAsSigner => 'Use this phone as an offline signer';
+
+  @override
+  String get walletAddAirGap => 'Connect offline signer';
+
+  @override
+  String get walletAddAirGapSubtitle =>
+      'Keys stay on another phone that never goes online';
+
+  @override
+  String createWalletWordCount(int count) {
+    return '$count words';
+  }
+
+  @override
+  String get signerAppTitle => 'Benny Signer';
+
+  @override
+  String get signerNeedsNoWalletsTitle => 'Remove all wallets first';
+
+  @override
+  String get signerNeedsNoWalletsBody =>
+      'A signer phone holds only its own offline recovery phrase. Back up and remove every wallet on this phone in Settings > Wallets, then try again.';
+
+  @override
+  String get signerEnterTitle => 'Turn this phone into a signer?';
+
+  @override
+  String get signerEnterBody =>
+      'This phone will stay offline and only sign. It will have no wallet screens. To use it as a wallet again you will have to erase it.';
+
+  @override
+  String get signerIntroTitle => 'Offline signer';
+
+  @override
+  String get signerIntroPoint1 =>
+      'This phone keeps your recovery phrase and never goes online again.';
+
+  @override
+  String get signerIntroPoint2 =>
+      'Your other phone with Benny Wallet builds transactions. You sign them here by scanning QR codes.';
+
+  @override
+  String get signerIntroPoint3 =>
+      'Before a recovery phrase is created, we will help you switch off every network.';
+
+  @override
+  String get signerIntroPoint4 =>
+      'Write the recovery phrase on paper. It is the only backup.';
+
+  @override
+  String get signerIntroStart => 'Start';
+
+  @override
+  String get signerIntroCancel => 'Not now, use as a wallet';
+
+  @override
+  String get signerOfflineTitle => 'Take this phone offline';
+
+  @override
+  String get signerOfflineBody =>
+      'Turn on airplane mode and switch off Wi-Fi, Bluetooth and NFC. You can continue once every required item is green.';
+
+  @override
+  String get signerCheckAirplane => 'Airplane mode on';
+
+  @override
+  String get signerCheckWifi => 'Wi-Fi off';
+
+  @override
+  String get signerCheckBluetooth => 'Bluetooth off';
+
+  @override
+  String get signerCheckNfc => 'NFC off';
+
+  @override
+  String get signerCheckNoNetwork => 'No network connection';
+
+  @override
+  String get signerCheckUsbDebugging => 'USB debugging off';
+
+  @override
+  String get signerCheckSim => 'SIM card removed (recommended)';
+
+  @override
+  String get signerCheckManualHint =>
+      'This phone can\'t check this. Confirm it yourself.';
+
+  @override
+  String get signerOpenSettings => 'Open settings';
+
+  @override
+  String get signerNetworkDetected =>
+      'A network connection was detected. Switch it off to continue.';
+
+  @override
+  String get signerPinTitle => 'Set signer PIN';
+
+  @override
+  String get signerPinBody => 'Choose a 6-digit PIN for this signer.';
+
+  @override
+  String get signerPinConfirmTitle => 'Confirm PIN';
+
+  @override
+  String get signerPinConfirmBody => 'Enter the PIN again.';
+
+  @override
+  String get signerPinMismatch => 'The PINs don\'t match. Try again.';
+
+  @override
+  String get signerSourceTitle => 'Recovery phrase';
+
+  @override
+  String get signerSourceBody =>
+      'Create a new recovery phrase on this offline phone, or enter one you already have.';
+
+  @override
+  String get signerSourceCreate24 => 'Create 24 words';
+
+  @override
+  String get signerSourceCreate24Subtitle => 'Recommended for a signer';
+
+  @override
+  String get signerSourceCreate12 => 'Create 12 words';
+
+  @override
+  String get signerSourceCreate12Subtitle => 'Shorter to write down';
+
+  @override
+  String get signerSourceImport => 'Import existing phrase';
+
+  @override
+  String get signerSourceImportSubtitle => '12 or 24 words';
+
+  @override
+  String get signerWordsTitle => 'Write these words down';
+
+  @override
+  String get signerWordsWarning =>
+      'Write the words on paper in order. Never take a photo, screenshot or type them anywhere else. Anyone with these words can take your funds.';
+
+  @override
+  String get signerWordsDone => 'I wrote them down';
+
+  @override
+  String get signerVerifyTitle => 'Check your backup';
+
+  @override
+  String get signerImportTitle => 'Import recovery phrase';
+
+  @override
+  String get signerImportBody =>
+      'Enter your 12 or 24 words separated by spaces.';
+
+  @override
+  String get signerImportInvalid =>
+      'This isn\'t a valid 12 or 24 word recovery phrase.';
+
+  @override
+  String get signerFinishTitle => 'Finish setup';
+
+  @override
+  String get signerDeviceNameLabel => 'Signer name';
+
+  @override
+  String get signerDeviceNameHelper =>
+      'Shown in your wallet after you connect.';
+
+  @override
+  String get signerBiometricToggle => 'Unlock with biometrics';
+
+  @override
+  String get signerFinishButton => 'Finish';
+
+  @override
+  String get signerSetupFailed => 'Setup couldn\'t be saved. Try again.';
+
+  @override
+  String get signerUnlockSubtitle => 'Enter your signer PIN';
+
+  @override
+  String get signerUnlockNetworkBlocked =>
+      'A network connection is on. Turn on airplane mode to unlock.';
+
+  @override
+  String signerWrongPin(int count) {
+    return 'Wrong PIN. $count attempts left before the signer is erased.';
+  }
+
+  @override
+  String get signerUnlockFailed => 'Couldn\'t unlock. Try again.';
+
+  @override
+  String get signerUseBiometric => 'Use biometrics';
+
+  @override
+  String get signerBiometricReason => 'Unlock your Benny signer';
+
+  @override
+  String get signerBiometricFailed => 'Biometrics couldn\'t be changed.';
+
+  @override
+  String get signerRecheckTitle => 'Offline check';
+
+  @override
+  String get signerRecheckBody =>
+      'The app was updated. Make sure this phone is fully offline again before you unlock it.';
+
+  @override
+  String get signerLockNow => 'Lock';
+
+  @override
+  String get signerOfflineChip => 'Offline signer';
+
+  @override
+  String get signerScanToSign => 'Scan to sign';
+
+  @override
+  String get signerPairWallet => 'Connect wallet';
+
+  @override
+  String get signerAccountsTitle => 'Accounts';
+
+  @override
+  String signerAccountName(int number) {
+    return 'Account $number';
+  }
+
+  @override
+  String get signerPairBody =>
+      'In Benny Wallet on your other phone, choose Connect offline signer and scan this code.';
+
+  @override
+  String get signerPairPublicOnly =>
+      'This code contains only public addresses, never your recovery phrase.';
+
+  @override
+  String get signerScanBody =>
+      'Scan the QR code shown by Benny Wallet on your other phone.';
+
+  @override
+  String get signerScanWrongCode =>
+      'This isn\'t a signing request from Benny Wallet.';
+
+  @override
+  String get signerScanAgain => 'Scan again';
+
+  @override
+  String get signerRejectUnknownAccount =>
+      'This request is for an account that isn\'t on this signer.';
+
+  @override
+  String get signerRejectNotASigner =>
+      'This account doesn\'t need to sign this transaction.';
+
+  @override
+  String get signerRejectUnreadable =>
+      'This transaction can\'t be read, so it won\'t be signed.';
+
+  @override
+  String get signerRejectMessageIsTransaction =>
+      'This message is actually a transaction, so it won\'t be signed.';
+
+  @override
+  String get signerRejectInvalidCode =>
+      'This QR code isn\'t a valid signing request.';
+
+  @override
+  String get signerReviewTitle => 'Review and sign';
+
+  @override
+  String get signerReviewAccount => 'Signing account';
+
+  @override
+  String get signerReviewFee => 'Network fee';
+
+  @override
+  String get signerReviewMessage => 'Message';
+
+  @override
+  String signerBinaryMessage(int count) {
+    return 'Binary data ($count bytes)';
+  }
+
+  @override
+  String get signerThisAccount => 'this account';
+
+  @override
+  String signerActionSendSol(String amount) {
+    return 'Send $amount SOL';
+  }
+
+  @override
+  String signerActionSendToken(String amount, String symbol) {
+    return 'Send $amount $symbol';
+  }
+
+  @override
+  String signerActionSendUnverified(String amount) {
+    return 'Send $amount of an unverified token';
+  }
+
+  @override
+  String signerActionTo(String address) {
+    return 'To $address';
+  }
+
+  @override
+  String signerActionToTokenAccount(String address) {
+    return 'To token account $address';
+  }
+
+  @override
+  String signerActionMint(String mint) {
+    return 'Token address $mint';
+  }
+
+  @override
+  String signerActionOwner(String address) {
+    return 'Owner $address';
+  }
+
+  @override
+  String signerActionRentTo(String address) {
+    return 'Rent returned to $address';
+  }
+
+  @override
+  String get signerActionCreateTokenAccount => 'Create token account';
+
+  @override
+  String get signerActionCloseTokenAccount => 'Close token account';
+
+  @override
+  String get signerActionMemo => 'Memo';
+
+  @override
+  String get signerActionApprove =>
+      'Allow another account to spend your tokens';
+
+  @override
+  String get signerActionSetAuthority => 'Change account authority';
+
+  @override
+  String get signerActionAssign => 'Change account owner';
+
+  @override
+  String get signerActionCreateAccount => 'Create account';
+
+  @override
+  String signerActionProgram(String program) {
+    return 'Program $program';
+  }
+
+  @override
+  String get signerHoldToSign => 'Hold to sign';
+
+  @override
+  String get signerReject => 'Reject';
+
+  @override
+  String get signerSignFailed => 'Signing failed. Try again.';
+
+  @override
+  String get signerSignatureTitle => 'Signature';
+
+  @override
+  String get signerSignatureBody =>
+      'Scan this code with Benny Wallet on your other phone to finish.';
+
+  @override
+  String get signerSettingsTitle => 'Signer settings';
+
+  @override
+  String get signerAccountCount => 'Accounts shown';
+
+  @override
+  String get signerAccountCountHint =>
+      'Up to 5 accounts from this recovery phrase';
+
+  @override
+  String get signerUpgradeTitle => 'Update the signer';
+
+  @override
+  String get signerUpgradeIntro =>
+      'Updating the app needs a network, so plan it. Your recovery phrase stays encrypted on this phone while it is online, and the signer will not open it until the phone is offline again.';
+
+  @override
+  String get signerUpgradeStep0 => '1. Check your paper backup';
+
+  @override
+  String get signerUpgradeVerifyBackup => 'Check backup';
+
+  @override
+  String get signerUpgradeBackupOk => 'Backup checked';
+
+  @override
+  String get signerUpgradeOnlineTitle => '2a. Standard update';
+
+  @override
+  String get signerUpgradeOnlineBody =>
+      'Lock the signer. Turn the network on and update Benny Wallet from the same store you installed it from. Turn airplane mode back on. The signer runs the offline check again before you can unlock it.';
+
+  @override
+  String get signerUpgradeSecureTitle => '2b. Most secure update';
+
+  @override
+  String get signerUpgradeSecureBody =>
+      'Erase the signer in settings, then update the app online. Go offline again, set up the signer and import your recovery phrase. Your accounts and addresses stay the same.';
+
+  @override
+  String get signerUpgradeOfflineApkTitle =>
+      'Android: update without going online';
+
+  @override
+  String get signerUpgradeOfflineApkBody =>
+      'You can also copy the new APK to this phone by USB cable or SD card and install it while staying offline. Use an APK from the same source you installed from, otherwise it won\'t install over this one.';
+
+  @override
+  String get signerUpgradeCompatTitle => 'Older signers keep working';
+
+  @override
+  String get signerUpgradeCompatBody =>
+      'A newer wallet app still works with an older signer. The wallet only asks for what this signer supports, so you can update when it suits you.';
+
+  @override
+  String get signerVersionTitle => 'Version';
+
+  @override
+  String signerVersionDetail(String app, int protocol, int tokens) {
+    return 'App $app · protocol $protocol · token list $tokens';
+  }
+
+  @override
+  String get signerEraseTitle => 'Erase signer';
+
+  @override
+  String get signerEraseSubtitle =>
+      'Removes the recovery phrase from this phone';
+
+  @override
+  String get signerEraseBody =>
+      'The recovery phrase will be deleted from this phone. Without your paper backup the funds can\'t be recovered.';
+
+  @override
+  String get signerEraseConfirm => 'Erase';
+
+  @override
+  String get signerEraseWrongPin => 'Wrong PIN. Nothing was erased.';
+
+  @override
+  String get airGapConnectTitle => 'Connect offline signer';
+
+  @override
+  String get airGapConnectBody =>
+      'On your signer phone tap Connect wallet, then scan the code it shows.';
+
+  @override
+  String get airGapConnectInvalid => 'This isn\'t a signer pairing code.';
+
+  @override
+  String airGapConnectChoose(String device) {
+    return 'Choose an account on $device';
+  }
+
+  @override
+  String airGapConnectAccount(int number) {
+    return 'Account $number';
+  }
+
+  @override
+  String airGapConnectAccountAdded(int number) {
+    return 'Account $number (already added)';
+  }
+
+  @override
+  String get airGapConnectCompare =>
+      'Check that the address matches the one shown on your signer.';
+
+  @override
+  String get airGapConnectScanAgain => 'Scan again';
+
+  @override
+  String get airGapSignTitle => 'Sign with your signer';
+
+  @override
+  String get airGapSignShowRequestAgain => 'Show the request again';
+
+  @override
+  String get airGapSignMayHaveExpired =>
+      'This transaction may have expired. If sending fails, start again.';
+
+  @override
+  String get airGapSignWrongRequest =>
+      'This signature belongs to a different request.';
+
+  @override
+  String get airGapSignInvalidCode =>
+      'This isn\'t a signature from your signer.';
+
+  @override
+  String get airGapSignerOutdated =>
+      'Your signer runs an older version. It still works; update it when convenient.';
+
+  @override
+  String get signerIntroSubtitle =>
+      'Keep your keys on a phone that never goes online.';
+
+  @override
+  String get signerFinishSubtitle => 'Give this signer a name and set a PIN.';
+
+  @override
+  String signerQuizBody(int count) {
+    return 'Pick the right word for $count positions. Use your paper backup.';
+  }
+
+  @override
+  String signerQuizProgress(int current, int total) {
+    return 'Question $current of $total';
+  }
+
+  @override
+  String signerQuizQuestion(int position) {
+    return 'Which is word #$position?';
+  }
+
+  @override
+  String get signerQuizCorrect => 'Correct!';
+
+  @override
+  String get signerQuizWrong =>
+      'That\'s not right. Check your paper; we picked new words to try again.';
+
+  @override
+  String get signerQuizShowWords => 'Show the words again';
+
+  @override
+  String get signerScanToSignSubtitle =>
+      'Scan the request shown by your wallet';
+
+  @override
+  String get signerPairWalletSubtitle => 'Show a code for Benny Wallet to scan';
+
+  @override
+  String get signerWalletPhoneLabel => 'Benny Wallet';
+
+  @override
+  String get signerScanRefusedTitle => 'Can\'t sign this';
+
+  @override
+  String get airGapSignerLabel => 'Signer';
+
+  @override
+  String get airGapThisPhone => 'This phone';
+
+  @override
+  String get airGapConnectFound => 'Signer recognized';
+
+  @override
+  String get airGapSignNeedsSigner =>
+      'This needs to be verified and signed by your signer';
+
+  @override
+  String get airGapSignStepShort1 => 'Signer scans';
+
+  @override
+  String get airGapSignStepShort2 => 'Scan signature';
+
+  @override
+  String airGapSignStep1Named(String device) {
+    return 'Step 1: scan this code with “$device”';
+  }
+
+  @override
+  String airGapSignStep1BodyNamed(String device) {
+    return 'On “$device”, tap Scan to sign, check the details, then confirm.';
+  }
+
+  @override
+  String airGapSignStep2Named(String device) {
+    return 'Step 2: scan the signature from “$device”';
+  }
+
+  @override
+  String airGapSignStep2BodyNamed(String device) {
+    return 'After you confirm, “$device” shows a signature code. Scan it with this phone.';
+  }
+
+  @override
+  String airGapSignScanSignatureNamed(String device) {
+    return 'Next: scan signature from $device';
+  }
+
+  @override
+  String signerActionSwapPair(String from, String to) {
+    return 'Swap $from → $to';
+  }
+
+  @override
+  String signerSwapPay(String amount) {
+    return 'Pay $amount';
+  }
+
+  @override
+  String signerSwapPayAtMost(String amount) {
+    return 'Pay at most $amount';
+  }
+
+  @override
+  String signerSwapReceive(String amount) {
+    return 'Receive $amount';
+  }
+
+  @override
+  String signerSwapReceiveAtLeast(String amount) {
+    return 'Receive at least $amount';
+  }
+
+  @override
+  String get signerSwapUnverifiedToken => 'Unverified token';
+
+  @override
+  String airGapSignTimeLeft(int seconds) {
+    return '$seconds s left. If time runs out, a fresh code appears automatically.';
+  }
+
+  @override
+  String get airGapSignRefreshing =>
+      'Time is up. Getting a fresh quote and code…';
+
+  @override
+  String airGapSignRefreshed(String device) {
+    return 'The last code expired, so here is a new one. Scan it again with “$device”.';
+  }
+
+  @override
+  String get airGapSignRefreshFailed =>
+      'Couldn\'t get a fresh code. Check your connection and try again.';
+
+  @override
+  String get airGapSignOldRequest =>
+      'This signature is for the expired code. Scan the new code on your signer first.';
+
+  @override
+  String get scanHintRoleShows => 'Shows code';
+
+  @override
+  String get scanHintRoleScans => 'Scans';
+
+  @override
+  String signerTokenUnchecked(String symbol) {
+    return '$symbol (unverified)';
+  }
+
+  @override
+  String get signerReviewActions => 'Transaction';
+
+  @override
+  String get signerNewerWalletNotice =>
+      'Your wallet app is newer than this signer. Update the signer when you can.';
+
+  @override
+  String get signerDangerBanner =>
+      'High risk. Don\'t sign unless you started this yourself.';
+
+  @override
+  String get signerActionSwap => 'Swap';
+
+  @override
+  String get signerActionSwapDetail => 'Check the amounts in your wallet.';
+
+  @override
+  String get signerActionDangerDetail =>
+      'Dangerous. If you\'re not sure, don\'t sign.';
+
+  @override
+  String get signerActionAdvanceNonce => 'Update transaction number';
+
+  @override
+  String get signerActionSyncNative => 'Update SOL balance';
+
+  @override
+  String get signerHoldLongHint => 'Check carefully, then hold for 3 seconds.';
+
+  @override
+  String signerTokenVerified(String token) {
+    return '$token · Verified by Benny Wallet';
+  }
+
+  @override
+  String signerTokenWalletProvided(String symbol) {
+    return '$symbol · Not verified by Benny Wallet';
+  }
+
+  @override
+  String signerSwapWalletQuote(String pay, String receive) {
+    return 'Estimate: pay $pay, get about $receive';
+  }
+
+  @override
+  String get signerActionUnknown => 'Unrecognized step';
+
+  @override
+  String signerActionCreateTokenAccountFor(String symbol) {
+    return 'Open $symbol account';
+  }
+
+  @override
+  String get signerUnresolvedAccounts =>
+      'The signer can\'t see all of this transaction. Only sign if you just started it.';
+
+  @override
+  String get signerTokenNotVerified => 'Not verified by Benny Wallet';
+
+  @override
+  String get signerKindSwap => 'Swap';
+
+  @override
+  String get signerKindSend => 'Send';
+
+  @override
+  String signerAbout(String amount) {
+    return 'About $amount';
+  }
+
+  @override
+  String get signerAmountsFromWallet => 'Amounts come from the wallet';
+
+  @override
+  String get signerTrustSafe => 'All tokens verified by Benny Wallet';
+
+  @override
+  String get signerTrustCaution =>
+      'One token is not verified by Benny Wallet. Be careful.';
+
+  @override
+  String get signerTrustDangerSwap =>
+      'Neither token is verified by Benny Wallet. High risk.';
+
+  @override
+  String get signerTrustDangerSend =>
+      'This token is not verified by Benny Wallet. High risk.';
+
+  @override
+  String get signerReviewOtherSteps => 'Other steps';
+
+  @override
+  String get signerPay => 'You pay';
+
+  @override
+  String get signerPayAtMost => 'You pay at most';
+
+  @override
+  String get signerGet => 'You get';
+
+  @override
+  String get signerGetAtLeast => 'You get at least';
+
+  @override
+  String get signerGetAbout => 'You get about';
+
+  @override
+  String get signerRecipient => 'Recipient';
+
+  @override
+  String get signerRecipientTokenAccount => 'Recipient token account';
+
+  @override
+  String get signerUsdFromWallet => 'USD values are the wallet\'s estimate';
+
+  @override
+  String signerActionCreateTokenAccountForRecipient(String symbol) {
+    return 'Open $symbol account for the recipient';
+  }
+
+  @override
+  String get signerCreateAccountSkipIfOpen =>
+      '(First time costs about 0.002 SOL; skipped for free if already open)';
+
+  @override
+  String get signerCreateAccountNotOpen =>
+      '(Not open yet; costs about 0.002 SOL)';
+
+  @override
+  String get signerAddressFromWallet =>
+      'This address comes from the wallet. The signer can\'t check it.';
+
+  @override
+  String get signerSwapOutputUnchecked =>
+      'Can\'t confirm the swapped tokens come to you.';
+
+  @override
+  String get signerExtraOutflow => 'This also sends funds to another address.';
+
+  @override
+  String signerHighFee(String amount) {
+    return 'Very high network fee: $amount SOL';
+  }
+
+  @override
+  String get signerDurableNonce =>
+      'This signature never expires. It can be used later.';
+
+  @override
+  String get signerSwapFromWallet =>
+      'Token or amount comes from the wallet and can\'t be checked.';
+
+  @override
+  String signerActionCloseTo(String address) {
+    return 'Balance and rent go to $address';
+  }
+
+  @override
+  String signerWalletNote(String name) {
+    return 'Wallet note: $name';
+  }
+
+  @override
+  String get signerReviewFeePayer => 'Fee paid by';
+
+  @override
+  String signerActionOwnerProgram(String program) {
+    return 'Controlled by program $program';
+  }
+
+  @override
+  String get signerSlippageAll => 'Slippage 100% or more: you may get nothing.';
+
+  @override
+  String get signerQuizTooManyWrong =>
+      'Too many wrong answers. Enter your PIN to try again.';
+
+  @override
+  String get signerSignInTitle => 'Login request';
+
+  @override
+  String get signerKindSignIn => 'Sign in';
+
+  @override
+  String get signerSignInBenny => 'Sign in to Benny Wallet';
+
+  @override
+  String signerSignInOtherSite(String site) {
+    return '“$site” asks you to sign in. Sign only if you started it.';
+  }
+
+  @override
+  String get signerSignInExpired =>
+      'This login request has expired. Check this phone\'s time, or start again in the wallet.';
+
+  @override
+  String get signerSignInOtherAccount =>
+      'This login is for another account. Don\'t sign.';
+
+  @override
+  String get signerSignInWhat =>
+      'Proves this account is yours, so Benny can show its balance, history and alerts.';
+
+  @override
+  String get signerSignInNoFunds => 'Moves no funds and costs no fee.';
+
+  @override
+  String get signerSignInShowText => 'Show original text';
+
+  @override
+  String get airGapSignInTitle => 'Sign in with your signer';
+
+  @override
+  String get airGapSignInWhy => 'Why sign this?';
+
+  @override
+  String get airGapSignInWhyBody =>
+      'Benny needs to confirm this account is yours before it can load your balance, history and alerts. Usually you do this only once per wallet.';
+
+  @override
+  String get airGapSignInSafe =>
+      'This is only a login. It moves no funds and costs no fee.';
+
+  @override
+  String airGapSignInSignerShows(String device) {
+    return '“$device” will show “Sign in to Benny Wallet”.';
+  }
+
+  @override
+  String airGapSignInSignerShowsText(String device) {
+    return '“$device” will show English text starting with “Benny Wallet wants you to sign in”. That is this login. After updating the signer it shows “Sign in to Benny Wallet” instead.';
+  }
 }

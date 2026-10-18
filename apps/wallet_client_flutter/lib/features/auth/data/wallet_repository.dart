@@ -13,6 +13,7 @@ WalletCustody _walletCustodyFromJson(String? value) {
   return switch (value) {
     'mobileWalletAdapter' => WalletCustody.mobileWalletAdapter,
     'seedVault' => WalletCustody.seedVault,
+    'airGap' => WalletCustody.airGap,
     _ => WalletCustody.localMnemonic,
   };
 }
@@ -64,6 +65,7 @@ class StoredWalletRecord {
     this.mwaAuthToken = '',
     this.seedVaultDerivationPath = '',
     this.walletLabel = '',
+    this.airGapMeta = '',
     this.name = '',
     this.secretScheme = WalletSecretScheme.pin,
     required this.biometricEnabled,
@@ -81,8 +83,13 @@ class StoredWalletRecord {
   final WalletDerivation derivation;
   final WalletCustody custody;
   final String mwaAuthToken;
+
+  /// Seed Vault derivation path, or the signer's path for [WalletCustody.airGap].
   final String seedVaultDerivationPath;
   final String walletLabel;
+
+  /// Air-gapped signer metadata as JSON ([AirGapWalletMeta]); empty otherwise.
+  final String airGapMeta;
 
   /// User-visible wallet name, e.g. "Wallet 1".
   final String name;
@@ -109,6 +116,7 @@ class StoredWalletRecord {
     String? mwaAuthToken,
     String? seedVaultDerivationPath,
     String? walletLabel,
+    String? airGapMeta,
     String? name,
     WalletSecretScheme? secretScheme,
     bool? biometricEnabled,
@@ -130,6 +138,7 @@ class StoredWalletRecord {
       seedVaultDerivationPath:
           seedVaultDerivationPath ?? this.seedVaultDerivationPath,
       walletLabel: walletLabel ?? this.walletLabel,
+      airGapMeta: airGapMeta ?? this.airGapMeta,
       name: name ?? this.name,
       secretScheme: secretScheme ?? this.secretScheme,
       biometricEnabled: biometricEnabled ?? this.biometricEnabled,
@@ -158,6 +167,7 @@ class StoredWalletRecord {
       'mwaAuthToken': mwaAuthToken,
       'seedVaultDerivationPath': seedVaultDerivationPath,
       'walletLabel': walletLabel,
+      'airGapMeta': airGapMeta,
       'name': name,
       'secretScheme': secretScheme.name,
       'biometricEnabled': biometricEnabled,
@@ -184,6 +194,7 @@ class StoredWalletRecord {
       mwaAuthToken: json['mwaAuthToken'] as String? ?? '',
       seedVaultDerivationPath: json['seedVaultDerivationPath'] as String? ?? '',
       walletLabel: json['walletLabel'] as String? ?? '',
+      airGapMeta: json['airGapMeta'] as String? ?? '',
       name: json['name'] as String? ?? '',
       secretScheme: _secretSchemeFromJson(json['secretScheme'] as String?),
       biometricEnabled: json['biometricEnabled'] as bool? ?? false,
@@ -407,6 +418,7 @@ class WalletRepository {
     String derivationPath = '',
     String? walletLabel,
     String? name,
+    String airGapMeta = '',
   }) async {
     final records = await readRecords();
     assertCanAddWallet(records, publicKey);
@@ -417,6 +429,7 @@ class WalletRepository {
       mwaAuthToken: authToken,
       seedVaultDerivationPath: derivationPath,
       walletLabel: walletLabel ?? '',
+      airGapMeta: airGapMeta,
       name: _normalizeName(name) ?? nextDefaultWalletName(records),
       secretScheme: WalletSecretScheme.masterKey,
       biometricEnabled: records.any((record) => record.biometricEnabled),
@@ -550,6 +563,46 @@ class WalletRepository {
         walletLabel: walletLabel ?? '',
       ),
     );
+  }
+
+  Future<void> saveAirGapWallet({
+    required String publicKey,
+    required String derivationPath,
+    required String airGapMeta,
+    required String pin,
+    String? walletLabel,
+    String? name,
+  }) {
+    return _saveExternalWallet(
+      publicKey: publicKey,
+      pin: pin,
+      name: name,
+      build: (record) => record.copyWith(
+        custody: WalletCustody.airGap,
+        seedVaultDerivationPath: derivationPath,
+        airGapMeta: airGapMeta,
+        walletLabel: walletLabel ?? '',
+      ),
+    );
+  }
+
+  /// Keeps what the signer last reported about itself (version,
+  /// capabilities) so requests only use what it supports.
+  Future<void> updateAirGapMeta({
+    required String publicKey,
+    required String airGapMeta,
+  }) async {
+    final records = await readRecords();
+    if (_findRecord(records, publicKey)?.custody != WalletCustody.airGap) {
+      return;
+    }
+    await _persistRecords([
+      for (final record in records)
+        if (record.publicKey == publicKey)
+          record.copyWith(airGapMeta: airGapMeta)
+        else
+          record,
+    ], selectedPublicKey: await _selectedPublicKeyOr(records.first.publicKey));
   }
 
   Future<void> _saveExternalWallet({

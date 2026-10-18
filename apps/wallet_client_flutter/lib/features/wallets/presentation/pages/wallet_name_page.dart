@@ -59,6 +59,17 @@ class _WalletNamePageState extends ConsumerState<WalletNamePage> {
         }
       }
     }
+    // An offline-signer wallet is named after the signer ("Seeker Signer").
+    final signerName = widget.flow.walletLabel?.trim();
+    if (widget.flow.isAirGapSetup &&
+        signerName != null &&
+        signerName.isNotEmpty) {
+      final used = {for (final record in records) record.name.trim()};
+      name = signerName;
+      for (var n = 2; used.contains(name); n++) {
+        name = '$signerName $n';
+      }
+    }
     if (!mounted || _controller.text != 'Wallet 1') {
       return;
     }
@@ -77,6 +88,14 @@ class _WalletNamePageState extends ConsumerState<WalletNamePage> {
 
   NewWalletInput _input() {
     final flow = widget.flow;
+    if (flow.isAirGapSetup) {
+      return NewWalletInput.airGap(
+        publicKey: flow.publicKey!,
+        derivationPath: flow.airGapDerivationPath!,
+        airGapMeta: flow.airGapMeta ?? '',
+        walletLabel: flow.walletLabel,
+      );
+    }
     if (flow.isSeedVaultSetup) {
       return NewWalletInput.seedVault(
         publicKey: flow.publicKey!,
