@@ -22,6 +22,8 @@ import '../../domain/app_settings.dart';
 import '../providers/app_settings_controller.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../auth/presentation/pages/unlock_page.dart';
+import '../../../dapp_connect/data/dapp_connect_service.dart';
+import '../../../dapp_connect/presentation/pages/dapp_sites_page.dart';
 import '../../../onboarding/presentation/pages/welcome_page.dart';
 import '../../../portfolio/presentation/pages/child_wallets_page.dart';
 import '../../../portfolio/presentation/pages/portfolio_page.dart';
@@ -865,6 +867,26 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                 ),
               if (!isChildMode) const SizedBox(height: 14),
+              if (!isChildMode &&
+                  ref.read(dappConnectServiceProvider).isAvailable) ...[
+                WalletCard(
+                  child: ValueListenableBuilder(
+                    valueListenable: ref
+                        .read(dappConnectServiceProvider)
+                        .sessions,
+                    builder: (context, sessions, _) => _SettingsActionTile(
+                      icon: Icons.language_rounded,
+                      iconColor: const Color(0xFF3B5BDB),
+                      title: l10n.dappSitesTitle,
+                      trailingText: sessions.isEmpty
+                          ? null
+                          : '${sessions.length}',
+                      onTap: () => context.push(DappSitesPage.routePath),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ],
               WalletCard(
                 child: _SettingsActionTile(
                   icon: Icons.chat_bubble_outline_rounded,

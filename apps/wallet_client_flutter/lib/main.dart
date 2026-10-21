@@ -12,6 +12,7 @@ import 'features/settings/data/app_settings_repository.dart';
 import 'features/settings/presentation/providers/app_settings_controller.dart';
 import 'features/signer/data/network_guard.dart';
 import 'features/signer/data/signer_vault.dart';
+import 'features/dapp_connect/data/mwa_wallet_service.dart';
 
 bool _isPhone() {
   final view = PlatformDispatcher.instance.implicitView;
@@ -41,6 +42,7 @@ Future<void> main() async {
   }
   final initialSettings = await AppSettingsRepository().load();
   await AppFeatures.loadFullUnlock();
+  MwaWalletService.isWalletActivity = await MwaWalletService.detect();
   runApp(
     ProviderScope(
       overrides: [

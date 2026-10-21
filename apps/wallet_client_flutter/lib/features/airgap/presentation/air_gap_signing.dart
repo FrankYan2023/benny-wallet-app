@@ -101,6 +101,45 @@ class AirGapSigningService {
     return base58encode(result.signature);
   }
 
+  /// Signs a website's [payloads] on the offline signer, one QR round
+  /// trip each: transaction messages when [transactions], else a single
+  /// message. The website built them, so an expired transaction cannot be
+  /// refreshed here. [simulation] (the wallet's estimate) goes with a
+  /// single transaction only. Returns the signatures in order.
+  Future<List<Uint8List>> signDappPayloads({
+    required String ownerAddress,
+    required List<Uint8List> payloads,
+    required bool transactions,
+    required AirGapDappSource source,
+    List<TokenInfo> tokens = const [],
+    AirGapSimulation? simulation,
+    DateTime? requestedAt,
+    Duration? window,
+  }) async {
+    final signatures = <Uint8List>[];
+    for (final payload in payloads) {
+      final result = await _sign(
+        ownerAddress: ownerAddress,
+        signData: payload,
+        type: transactions
+            ? AirGapSignType.transaction
+            : AirGapSignType.message,
+        tokenHints: transactions ? tokenHintsFor(tokens) : const [],
+        dappSource: source,
+        simulation: transactions && payloads.length == 1 ? simulation : null,
+        progress: payloads.length > 1
+            ? (signatures.length + 1, payloads.length)
+            : null,
+        // The site stops waiting a fixed time after it asked, however
+        // many codes are scanned in between.
+        startedAt: requestedAt ?? DateTime.now(),
+        window: window ?? AirGapSignPage.siteRequestWindow,
+      );
+      signatures.add(result.signature);
+    }
+    return signatures;
+  }
+
   Future<({Uint8List signData, Uint8List signature})> _sign({
     required String ownerAddress,
     required Uint8List signData,
@@ -111,8 +150,13 @@ class AirGapSigningService {
     AirGapSwapSummary? Function()? swap,
     Map<String, double> Function()? usdPrices,
     AirGapRecipient? recipient,
+    AirGapDappSource? dappSource,
+    AirGapSimulation? simulation,
+    (int, int)? progress,
+    DateTime? startedAt,
+    Duration? window,
   }) async {
-    final startedAt = DateTime.now();
+    startedAt ??= DateTime.now();
     final record = (await _repository.readRecords())
         .where(
           (r) =>
@@ -154,6 +198,12 @@ class AirGapSigningService {
             if (value.isFinite && value > 0 && _isAddress(key)) key: value,
         },
         recipient: recipient,
+        dappSource: dappSource,
+        simulation: simulation,
+        // Keystone shows this field; ours shows the source block instead.
+        origin: dappSource == null || meta.signerInfo.protocolVersion != 0
+            ? 'Benny Wallet'
+            : dappSource.host,
         sourceFingerprint: meta.masterFingerprint == 0
             ? null
             : meta.masterFingerprint,
@@ -176,6 +226,9 @@ class AirGapSigningService {
           meta: meta,
           startedAt: startedAt,
           signIn: signIn,
+          dappSource: dappSource,
+          progress: progress,
+          window: window ?? AirGapSignPage.transactionWindow,
           refresh: rebuild == null
               ? null
               : () async => requestFor(await rebuild()),

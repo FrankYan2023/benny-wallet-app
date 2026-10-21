@@ -2848,4 +2848,546 @@ class AppLocalizationsJa extends AppLocalizations {
   String airGapSignInSignerShowsText(String device) {
     return '「$device」には “Benny Wallet wants you to sign in” で始まる英文が表示されます。これがこのログインです。署名デバイスを更新すると「Benny Wallet にログイン」と表示されます。';
   }
+
+  @override
+  String get dappScanTitle => 'ウェブサイトに接続';
+
+  @override
+  String get dappScanHint => 'ウェブサイトに表示された WalletConnect の QR コードをスキャンしてください';
+
+  @override
+  String get dappPasteLink => 'リンクを貼り付け';
+
+  @override
+  String get dappScanNotWalletConnect => 'WalletConnect のコードではありません';
+
+  @override
+  String get dappConnecting => '接続中…';
+
+  @override
+  String get dappPairFailed => '接続できませんでした。ウェブサイトで新しい QR コードを表示してください。';
+
+  @override
+  String get dappNotConfigured => 'このビルドではウェブサイト接続を利用できません。';
+
+  @override
+  String get dappProposalTitle => 'ウェブサイトに接続';
+
+  @override
+  String dappProposalWants(String site) {
+    return '$site がウォレットへの接続を求めています';
+  }
+
+  @override
+  String get dappProposalCanDo => '接続するとウェブサイトは次のことができます：';
+
+  @override
+  String get dappProposalSeeAddress => 'ウォレットアドレスを見る';
+
+  @override
+  String get dappProposalRequestSign => '取引やメッセージの承認を求める';
+
+  @override
+  String get dappProposalNoAutoFunds =>
+      'ウェブサイトが勝手に資金を動かすことはできません。すべてのリクエストにあなたの承認が必要です。';
+
+  @override
+  String get dappProposalWallet => 'ウォレット';
+
+  @override
+  String get dappProposalNoEligibleWallet =>
+      'ウェブサイトに接続できるウォレットがまだありません。外部ウォレットは今後対応予定です。';
+
+  @override
+  String get dappProposalOnlySolana =>
+      'Benny Wallet は Solana のみ対応しています。このウェブサイトは他のネットワークを要求しています。';
+
+  @override
+  String get dappProposalUnsupportedChain =>
+      'このウェブサイトは Solana のテストネットを要求しています。Benny Wallet は Solana メインネットのみ対応しています。';
+
+  @override
+  String get dappConnect => '接続';
+
+  @override
+  String get dappReject => '拒否';
+
+  @override
+  String dappConnected(String site) {
+    return '$site に接続しました';
+  }
+
+  @override
+  String get dappSiteVerified => '確認済み';
+
+  @override
+  String get dappSiteUnknown => '未確認';
+
+  @override
+  String get dappSiteMismatch => 'ドメイン不一致';
+
+  @override
+  String get dappSiteScam => '既知の詐欺サイト';
+
+  @override
+  String get dappSitesTitle => '接続中のウェブサイト';
+
+  @override
+  String get dappSitesEmpty =>
+      '接続中のウェブサイトはありません。ウェブサイトの WalletConnect QR コードをスキャンして接続できます。';
+
+  @override
+  String get dappSitesDisconnect => '切断';
+
+  @override
+  String get dappSitesDisconnectAll => 'すべて切断';
+
+  @override
+  String get dappSitesDisconnectAllConfirm => 'すべてのウォレットからすべてのウェブサイトを切断しますか？';
+
+  @override
+  String dappSitesExpires(String date) {
+    return '$date に期限切れ';
+  }
+
+  @override
+  String dappSitesWallet(String name) {
+    return 'ウォレット：$name';
+  }
+
+  @override
+  String dappSitesBanner(int count) {
+    return '$count 件接続中';
+  }
+
+  @override
+  String get dappRequestTitle => '署名リクエスト';
+
+  @override
+  String get dappRequestSignMessage => 'メッセージに署名';
+
+  @override
+  String dappRequestSignIn(String domain) {
+    return '$domain にサインイン';
+  }
+
+  @override
+  String get dappRequestTransaction => '取引を承認';
+
+  @override
+  String dappRequestTransactions(int count) {
+    return '$count 件の取引を承認';
+  }
+
+  @override
+  String get dappRequestSendNote => '署名後に Benny Wallet が送信します。';
+
+  @override
+  String get dappRequestBalanceChanges => '予想される残高の変化';
+
+  @override
+  String get dappRequestNoBalanceChange => 'ネットワーク手数料以外、このウォレットの残高は変わりません';
+
+  @override
+  String get dappRequestNetworkFee => 'ネットワーク手数料';
+
+  @override
+  String get dappRequestMessage => 'メッセージ';
+
+  @override
+  String get dappRequestDetails => '詳細';
+
+  @override
+  String get dappRequestPrograms => '呼び出すプログラム';
+
+  @override
+  String get dappActionTitle => 'この取引の内容';
+
+  @override
+  String get browserTitle => 'ブラウザ';
+
+  @override
+  String get browserAddressHint => 'アドレスを入力（例：jup.ag）';
+
+  @override
+  String get browserReload => '再読み込み';
+
+  @override
+  String get browserHome => 'ホーム';
+
+  @override
+  String get browserHomeHint =>
+      'サイトのアドレスを入力してください。サイトで「ウォレットを接続」を押し、Benny Wallet を選ぶだけで接続できます。アプリの切り替えや再ロック解除は不要です。';
+
+  @override
+  String get browserNotConnected => '未接続';
+
+  @override
+  String browserConnectedAs(String wallet) {
+    return '接続中：$wallet';
+  }
+
+  @override
+  String get browserInvalidUrl => '無効なアドレスです';
+
+  @override
+  String get browserOpen => '開く';
+
+  @override
+  String get browserBookmarks => 'ブックマーク';
+
+  @override
+  String get browserBookmark => 'ブックマーク';
+
+  @override
+  String get browserBookmarked => 'ブックマークしました';
+
+  @override
+  String get browserBookmarkRemoved => 'ブックマークを削除しました';
+
+  @override
+  String get browserBookmarkRemove => '削除';
+
+  @override
+  String get browserBookmarksEmpty =>
+      'ページを開き、アドレスバーの星を押すと保存できます。ブックマークはこの端末にのみ保存され、同期されません。';
+
+  @override
+  String get browserBookmarksLocal => 'この端末にのみ保存され、同期されません。';
+
+  @override
+  String get browserBack => '戻る';
+
+  @override
+  String get browserForward => '進む';
+
+  @override
+  String get browserCopyLink => 'リンクをコピー';
+
+  @override
+  String get browserHomeTagline => 'Solana アプリへの入り口';
+
+  @override
+  String get browserBennyFeatures => 'Benny Apps';
+
+  @override
+  String get browserComingSoon => '近日公開';
+
+  @override
+  String get browserPopular => 'おすすめ';
+
+  @override
+  String get browserYourSites => '接続したサイト';
+
+  @override
+  String get dappColdSwapNotice =>
+      'このスワップは約 1 分で期限切れになり、コールドウォレットでは署名が間に合わないことがあります。コールドウォレットでのスワップには Benny 内蔵の「スワップ」をご利用ください。期限切れ時に見積もりを自動更新します。';
+
+  @override
+  String get dappActionSwap => 'スワップ';
+
+  @override
+  String get dappActionTransfer => '送金';
+
+  @override
+  String get dappActionStake => 'ステーク';
+
+  @override
+  String get dappActionLend => '貸し借り';
+
+  @override
+  String get dappActionPerps => '先物取引';
+
+  @override
+  String get dappActionNft => 'NFT 取引';
+
+  @override
+  String get dappActionOther => 'その他の操作';
+
+  @override
+  String dappActionVia(String protocol) {
+    return '$protocol 経由';
+  }
+
+  @override
+  String get dappActionPay => '支払う';
+
+  @override
+  String get dappActionReceive => '受け取る';
+
+  @override
+  String get dappActionUnknownHint =>
+      'Benny はこれらのプログラムの動作を読み取れません。ご自身がサイトで今始めた操作の場合のみ署名してください。';
+
+  @override
+  String dappActionUnknownPrograms(int count) {
+    return '不明なプログラム（$count）';
+  }
+
+  @override
+  String get dappActivityTitle => '接続履歴';
+
+  @override
+  String get dappActivityNote =>
+      'この端末にのみ保存され、クラウドへのアップロードやバックアップは行われません。記録するのはサイト・操作・金額のみで、メッセージの内容や個人情報は記録しません。';
+
+  @override
+  String get dappActivityEmpty => 'ウェブサイトの履歴はまだありません。';
+
+  @override
+  String get dappActivityClear => '履歴を消去';
+
+  @override
+  String get dappActivityClearConfirm => 'この端末のウェブサイト履歴をすべて消去しますか？';
+
+  @override
+  String dappActivityCount(int count) {
+    return '$count 件';
+  }
+
+  @override
+  String get dappActivityConnected => '接続済み';
+
+  @override
+  String get dappActivityConnectRejected => '接続を拒否';
+
+  @override
+  String get dappActivityMessage => 'メッセージ署名';
+
+  @override
+  String get dappActivitySigned => '署名済み';
+
+  @override
+  String get dappActivitySent => '送信済み';
+
+  @override
+  String get dappActivityRejected => '拒否';
+
+  @override
+  String get dappActivityFailed => '失敗';
+
+  @override
+  String get dappActivityViewTx => 'Solscan で表示';
+
+  @override
+  String get dappActivityViaPhone => 'この端末のアプリ';
+
+  @override
+  String get dappActivityInBrowser => '内蔵ブラウザ';
+
+  @override
+  String dappActivityWallet(String wallet) {
+    return 'ウォレット $wallet';
+  }
+
+  @override
+  String get dappActivityDisconnected => '切断済み';
+
+  @override
+  String dappSitesLastUsed(String date) {
+    return '最終利用 $date';
+  }
+
+  @override
+  String get dappActivityDetail => '詳細';
+
+  @override
+  String get dappActivitySite => 'サイト';
+
+  @override
+  String get dappActivityTime => '日時';
+
+  @override
+  String get dappActivityVia => '接続方法';
+
+  @override
+  String get dappActivityViaWalletConnect => 'QR コードをスキャン（WalletConnect）';
+
+  @override
+  String get dappActivityWalletLabel => 'ウォレット';
+
+  @override
+  String get dappActivityTxId => '取引 ID';
+
+  @override
+  String get dappActivityCopied => 'コピーしました';
+
+  @override
+  String get dappActivityResult => '結果';
+
+  @override
+  String get dappRequestSigningWallet => '署名するウォレット';
+
+  @override
+  String get dappRequestLoading => 'リクエストを確認中…';
+
+  @override
+  String get dappRequestInvalid => 'このリクエストは読み取れなかったため拒否しました。';
+
+  @override
+  String get dappRequestSign => '署名';
+
+  @override
+  String get dappRequestHoldToSign => '長押しで署名';
+
+  @override
+  String get dappRequestAcceptRisk => 'リスクを理解した上で署名します';
+
+  @override
+  String get dappRequestBlocked => '資金を守るため、Benny Wallet はこのリクエストをブロックしました。';
+
+  @override
+  String get dappRequestDone => '署名しました。ウェブサイトに戻ってください。';
+
+  @override
+  String get dappRequestSent => '送信しました。ウェブサイトに戻ってください。';
+
+  @override
+  String dappRequestFailed(String error) {
+    return '署名に失敗しました：$error';
+  }
+
+  @override
+  String get dappRequestRejected => 'リクエストを拒否しました';
+
+  @override
+  String get dappAuthReason => '署名を確認';
+
+  @override
+  String get dappPinTitle => '署名するには PIN を入力';
+
+  @override
+  String get dappTrustSafe => '問題なさそうです';
+
+  @override
+  String get dappTrustCaution => 'よく確認してください';
+
+  @override
+  String get dappTrustDanger => '高リスク';
+
+  @override
+  String get dappTrustBlocked => 'ブロック済み';
+
+  @override
+  String get dappWarnSiteScam => 'このウェブサイトは既知の詐欺サイトです。';
+
+  @override
+  String get dappWarnSiteMismatch => 'ウェブサイトのアドレスが名乗っているアプリと一致しません。';
+
+  @override
+  String get dappWarnSiteUnknown => 'このウェブサイトを確認できませんでした。';
+
+  @override
+  String get dappWarnMessageUnreadable => 'メッセージが読める文字ではないため、何に署名するのか分かりません。';
+
+  @override
+  String get dappWarnMessageIsTransaction =>
+      'この「メッセージ」は実際には取引です。署名すると資金が移動する可能性があります。';
+
+  @override
+  String get dappWarnSignInOtherSite => 'サインイン先がリクエスト元のウェブサイトと異なります。';
+
+  @override
+  String get dappWarnSignInOtherAccount => 'サインイン対象は別のウォレットです。';
+
+  @override
+  String get dappWarnSignInExpired => 'このサインインリクエストは期限切れです。';
+
+  @override
+  String get dappWarnTokenApprove => '他のアカウントにあなたのトークンの使用を許可します。';
+
+  @override
+  String get dappWarnSetAuthority => 'あなたのアカウントの管理権限を他人に渡します。';
+
+  @override
+  String get dappWarnAssignAccount => 'ウォレットアカウントの所有者を変更します。';
+
+  @override
+  String get dappWarnCloseAccount => 'トークンアカウントを閉じます。';
+
+  @override
+  String get dappWarnAdvanceNonce => '永続ナンスを使うため、署名は使われるまで有効なままです。';
+
+  @override
+  String get dappWarnUnknownProgram => 'Benny Wallet が認識していないプログラムを呼び出します。';
+
+  @override
+  String get dappWarnBlockedProgram =>
+      'Benny Wallet のブロックリストにある危険なプログラムを呼び出します。署名できません。';
+
+  @override
+  String get dappWarnUnresolvedAccounts => '一部のアカウントを照会できませんでした。';
+
+  @override
+  String get dappWarnSimulationFailed => 'シミュレーションで取引が失敗します。';
+
+  @override
+  String get dappWarnSimulationUnavailable => '残高の変化を予測できませんでした。';
+
+  @override
+  String get dappWarnHighSlippage => '何も受け取れない可能性のあるスワップを許可します。';
+
+  @override
+  String dappRequestQueued(int count) {
+    return 'あと $count 件のリクエストが待機中';
+  }
+
+  @override
+  String airGapSignFromSite(String site) {
+    return 'このリクエストはウェブサイト $site から来ています。署名機にもサイト名が表示されます。';
+  }
+
+  @override
+  String airGapSignFromSiteStep(String site, int current, int total) {
+    return 'ウェブサイト $site から：$total 件中 $current 件目';
+  }
+
+  @override
+  String get airGapSignerNoSiteSupport =>
+      '署名機のバージョンが古く、どのサイトからのリクエストか表示できません。署名機を更新してください。';
+
+  @override
+  String signerDappSource(String site) {
+    return 'ウェブサイト $site から（ウォレット経由）';
+  }
+
+  @override
+  String get signerDappSiteVerified => 'ウォレットがこのサイトを確認済みです。';
+
+  @override
+  String get signerDappSiteUnverified => 'ウォレットはこのサイトを確認できませんでした。';
+
+  @override
+  String get signerDappSiteMismatch =>
+      'サイトのアドレスが名乗っている内容と一致しません。偽サイトの可能性があります。';
+
+  @override
+  String get signerDappSiteScam => '既知の詐欺サイトです。署名しないでください。';
+
+  @override
+  String get signerDappSourceHint => 'そのサイトで自分で操作した直後の場合だけ署名してください。';
+
+  @override
+  String signerDappUnknownStep(String program) {
+    return '署名機はこの手順（プログラム $program）を読めません。サイトで自分で操作した直後の場合だけ署名してください。';
+  }
+
+  @override
+  String get signerDappSimulation => 'ウォレットがシミュレーションした残高の変化';
+
+  @override
+  String get signerDappSimulationNone => 'ネットワーク手数料以外に残高の変化はありません';
+
+  @override
+  String get signerDappSimulationNote =>
+      'ウォレットによるシミュレーションです。署名機では確認できないため、参考程度にしてください。';
+
+  @override
+  String airGapSignSiteTimeLeft(String time) {
+    return 'サイトはあと $time 待ちます';
+  }
+
+  @override
+  String get airGapSignSiteExpired =>
+      'サイトのリクエストは期限切れの可能性があります。閉じてサイトでやり直してください。';
 }

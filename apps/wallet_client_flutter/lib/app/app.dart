@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'di/providers.dart';
 import '../core/widgets/session_activity_listener.dart';
+import '../features/dapp_connect/presentation/dapp_connect_listener.dart';
 import '../features/settings/presentation/providers/app_settings_controller.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/l10n.dart';
@@ -67,7 +68,9 @@ class _WalletAppState extends ConsumerState<WalletApp> {
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: AppRouter.router,
       builder: (context, child) {
-        return SessionActivityListener(child: child ?? const SizedBox.shrink());
+        return SessionActivityListener(
+          child: DappConnectListener(child: child ?? const SizedBox.shrink()),
+        );
       },
     );
   }

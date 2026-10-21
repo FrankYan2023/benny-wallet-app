@@ -13,4 +13,3 @@ abstract final class ErrorMapper {
     );
   }
 }
-

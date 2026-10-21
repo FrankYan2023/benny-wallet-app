@@ -12,6 +12,7 @@ import '../../../../core/airgap/ur.dart';
 import '../../../../core/airgap/widgets/animated_ur_qr.dart';
 import '../../../../core/airgap/widgets/scan_hint_animation.dart';
 import '../../../../core/airgap/widgets/ur_scanner_view.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../signer/presentation/widgets/signer_ui.dart';
 import '../../domain/air_gap_wallet_meta.dart';
@@ -38,6 +39,9 @@ class AirGapSignPage extends StatefulWidget {
     this.startedAt,
     this.refresh,
     this.signIn = false,
+    this.dappSource,
+    this.progress,
+    this.window = transactionWindow,
   });
 
   final AirGapSignRequest request;
@@ -51,8 +55,25 @@ class AirGapSignPage extends StatefulWidget {
   /// needed before the user scans it.
   final bool signIn;
 
+  /// The website a request came from; the page says so before the scan.
+  final AirGapDappSource? dappSource;
+
+  /// Which of several website transactions this is (1-based) and how many.
+  final (int, int)? progress;
+
+  /// How long the countdown runs from [startedAt].
+  final Duration window;
+
   /// How long a transaction is treated as valid.
   static const transactionWindow = Duration(seconds: 90);
+
+  /// How long a website waits for an answer (WalletConnect's default
+  /// request lifetime).
+  static const siteRequestWindow = Duration(minutes: 5);
+
+  /// An app on this phone (Mobile Wallet Adapter) stops waiting much
+  /// sooner: its MWA client gives up about 90 seconds after asking.
+  static const phoneAppRequestWindow = Duration(seconds: 90);
 
   @override
   State<AirGapSignPage> createState() => _AirGapSignPageState();
@@ -76,13 +97,15 @@ class _AirGapSignPageState extends State<AirGapSignPage>
   bool get _isTransaction =>
       widget.request.signType == AirGapSignType.transaction;
 
-  int get _secondsLeft =>
-      (_remaining * AirGapSignPage.transactionWindow.inSeconds).ceil();
+  /// Transactions expire, and a website stops waiting even for a message.
+  bool get _timed => _isTransaction || widget.dappSource != null;
+
+  int get _secondsLeft => (_remaining * widget.window.inSeconds).ceil();
 
   @override
   void initState() {
     super.initState();
-    if (_isTransaction) {
+    if (_timed) {
       _ticker.start();
     }
     unawaited(_checkSignerVersion());
@@ -90,10 +113,7 @@ class _AirGapSignPageState extends State<AirGapSignPage>
 
   void _tick() {
     final elapsed = DateTime.now().difference(_startedAt);
-    final remaining =
-        1 -
-        elapsed.inMilliseconds /
-            AirGapSignPage.transactionWindow.inMilliseconds;
+    final remaining = 1 - elapsed.inMilliseconds / widget.window.inMilliseconds;
     setState(() => _remaining = remaining.clamp(0.0, 1.0));
     if (remaining <= 0 && !_refreshing && !_refreshFailed) {
       unawaited(_refresh());
@@ -152,6 +172,16 @@ class _AirGapSignPageState extends State<AirGapSignPage>
     }
   }
 
+  String _timeLeft(AppLocalizations l10n) {
+    final seconds = _secondsLeft;
+    if (widget.dappSource == null) {
+      return l10n.airGapSignTimeLeft(seconds);
+    }
+    final clock =
+        '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}';
+    return l10n.airGapSignSiteTimeLeft(clock);
+  }
+
   @override
   void dispose() {
     _ticker.dispose();
@@ -187,9 +217,9 @@ class _AirGapSignPageState extends State<AirGapSignPage>
         : widget.meta.deviceName.trim();
     final step = _scanning ? 2 : 1;
     final page = Scaffold(
-      backgroundColor: _isTransaction ? Colors.transparent : null,
+      backgroundColor: _timed ? Colors.transparent : null,
       appBar: AppBar(
-        backgroundColor: _isTransaction ? Colors.transparent : null,
+        backgroundColor: _timed ? Colors.transparent : null,
         title: Text(
           widget.signIn ? l10n.airGapSignInTitle : l10n.airGapSignTitle,
         ),
@@ -226,6 +256,28 @@ class _AirGapSignPageState extends State<AirGapSignPage>
                       ),
                     const SizedBox(height: 12),
                   ],
+                  if (widget.dappSource case final source?) ...[
+                    SignerNotice(
+                      text: widget.progress == null
+                          ? l10n.airGapSignFromSite(source.host)
+                          : l10n.airGapSignFromSiteStep(
+                              source.host,
+                              widget.progress!.$1,
+                              widget.progress!.$2,
+                            ),
+                      icon: Icons.language_rounded,
+                      tone: SignerTone.info,
+                    ),
+                    if (!widget.meta.supports(AirGapCapability.dappSource)) ...[
+                      const SizedBox(height: 8),
+                      SignerNotice(
+                        text: l10n.airGapSignerNoSiteSupport,
+                        icon: Icons.system_update_rounded,
+                        tone: SignerTone.warm,
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                  ],
                   if (_signerOutdated) ...[
                     SignerNotice(
                       text: l10n.airGapSignerOutdated,
@@ -259,7 +311,7 @@ class _AirGapSignPageState extends State<AirGapSignPage>
                         : l10n.airGapSignStep1Named(device),
                     style: theme.textTheme.titleMedium,
                   ),
-                  if (_isTransaction) ...[
+                  if (_timed) ...[
                     const SizedBox(height: 6),
                     Row(
                       children: [
@@ -272,7 +324,9 @@ class _AirGapSignPageState extends State<AirGapSignPage>
                         Expanded(
                           child: Text(
                             _secondsLeft > 0
-                                ? l10n.airGapSignTimeLeft(_secondsLeft)
+                                ? _timeLeft(l10n)
+                                : widget.dappSource != null
+                                ? l10n.airGapSignSiteExpired
                                 : widget.refresh == null
                                 ? l10n.airGapSignMayHaveExpired
                                 : l10n.airGapSignRefreshing,
@@ -370,7 +424,7 @@ class _AirGapSignPageState extends State<AirGapSignPage>
         ),
       ),
     );
-    if (!_isTransaction) {
+    if (!_timed) {
       return page;
     }
     return CountdownBorder(remaining: _remaining, child: page);

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 /// Utility class for secure clipboard operations with automatic data clearing.
-/// 
+///
 /// This addresses security issue #2 (Clipboard not cleared):
 /// Prevents sensitive data (mnemonic phrases, addresses) from remaining
 /// in the system clipboard indefinitely, reducing attack surface for

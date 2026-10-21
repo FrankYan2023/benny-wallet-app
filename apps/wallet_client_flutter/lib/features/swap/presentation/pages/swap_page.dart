@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/di/providers.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/config/app_features.dart';
 import '../../../../core/utils/amount_parser.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/amount_keypad.dart';
@@ -148,9 +149,23 @@ class _SwapPageState extends ConsumerState<SwapPage> {
   SwapPriorityPreset _priorityPreset = SwapPriorityPreset.normal;
   int _quoteRequestId = 0;
 
-  bool get _isXStocksMode => widget.mode == SwapExperience.xstocks;
+  late SwapExperience _mode = widget.mode;
+
+  /// The mints passed in the route apply until the user switches tabs.
+  bool _useInitialMints = true;
+  String? get _initialInputMint =>
+      _useInitialMints ? widget.initialInputMint : null;
+  String? get _initialOutputMint =>
+      _useInitialMints ? widget.initialOutputMint : null;
+
+  bool get _isXStocksMode => _mode == SwapExperience.xstocks;
+
+  /// Crypto and stocks share one page with a tab each when both are on.
+  bool get _showModeTabs =>
+      AppFeatures.canOpenSwap && AppFeatures.canOpenXStocks;
+
   String _pageTitle(AppLocalizations l10n) =>
-      _isXStocksMode ? 'xStocks' : l10n.swapTitle;
+      _isXStocksMode && !_showModeTabs ? 'xStocks' : l10n.swapTitle;
   String _receiveTitle(AppLocalizations l10n) =>
       _isXStocksMode ? l10n.commonBuy : l10n.swapReceive;
 
@@ -238,12 +253,19 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         if (_availableInputOptions.isEmpty) {
           return AppScaffold(
             title: pageTitle,
-            child: Center(
-              child: Text(
-                _isXStocksMode
-                    ? l10n.swapNoBaseAssetsForXStocks
-                    : l10n.swapNoAssetsAvailable,
-              ),
+            child: Column(
+              children: [
+                _buildModeTabs(l10n),
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      _isXStocksMode
+                          ? l10n.swapNoBaseAssetsForXStocks
+                          : l10n.swapNoAssetsAvailable,
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         }
@@ -270,6 +292,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
           ],
           child: Column(
             children: [
+              _buildModeTabs(l10n),
               Expanded(
                 child: ListView(
                   children: [
@@ -601,6 +624,65 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     );
   }
 
+  Widget _buildModeTabs(AppLocalizations l10n) {
+    if (!_showModeTabs) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: SizedBox(
+        width: double.infinity,
+        child: SegmentedButton<SwapExperience>(
+          showSelectedIcon: false,
+          segments: [
+            ButtonSegment(
+              value: SwapExperience.general,
+              label: Text(l10n.portfolioCrypto),
+            ),
+            ButtonSegment(
+              value: SwapExperience.xstocks,
+              label: Text(l10n.portfolioStocks),
+            ),
+          ],
+          selected: {_mode},
+          onSelectionChanged: _buildingSwap
+              ? null
+              : (selection) => _switchMode(selection.first),
+        ),
+      ),
+    );
+  }
+
+  void _switchMode(SwapExperience mode) {
+    if (mode == _mode) {
+      return;
+    }
+    _quoteDebounce?.cancel();
+    _quoteRefreshTimer?.cancel();
+    setState(() {
+      _mode = mode;
+      _useInitialMints = false;
+      _quoteRequestId++;
+      _quote = null;
+      _quoteError = null;
+      _loadingQuote = false;
+      _refreshingQuote = false;
+      _presetInput = null;
+      _inputToken = null;
+      _outputToken = null;
+      if (_tokenOptions.isNotEmpty) {
+        final inputToken = _resolvedInputToken(_tokenOptions);
+        _inputToken = inputToken;
+        _outputToken = _resolvedOutputToken(_tokenOptions, inputToken);
+        _applyDefaultSlippageForPair();
+      }
+    });
+    _amountController.clear();
+    if (_tokenOptions.isNotEmpty) {
+      _fetchInitialQuote();
+    }
+  }
+
   void _bootstrapOptions(PortfolioViewData data, String ownerAddress) {
     if (data.address != ownerAddress) {
       // Portfolio of the previous wallet still on screen; wait for this one.
@@ -815,7 +897,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
     }
     final initial = _findOptionByMint(
       options,
-      widget.initialInputMint,
+      _initialInputMint,
       requireAvailable: true,
     );
     if (initial != null) {
@@ -873,7 +955,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
         return matching.first;
       }
     }
-    final initial = _findOptionByMint(options, widget.initialOutputMint);
+    final initial = _findOptionByMint(options, _initialOutputMint);
     if (initial != null &&
         initial.token.mintAddress != inputToken?.token.mintAddress) {
       return initial;

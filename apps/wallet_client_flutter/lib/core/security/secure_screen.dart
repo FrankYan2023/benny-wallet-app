@@ -3,11 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 class SecureScreen extends StatefulWidget {
-  const SecureScreen({
-    super.key,
-    required this.child,
-    this.enabled = true,
-  });
+  const SecureScreen({super.key, required this.child, this.enabled = true});
 
   final Widget child;
   final bool enabled;
@@ -68,9 +64,7 @@ abstract final class SecureScreenController {
   static int _holdCount = 0;
 
   static bool get isSupported =>
-      !kIsWeb &&
-      defaultTargetPlatform == TargetPlatform.android &&
-      !kDebugMode;
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android && !kDebugMode;
 
   static Future<void> acquire() async {
     if (!isSupported) {

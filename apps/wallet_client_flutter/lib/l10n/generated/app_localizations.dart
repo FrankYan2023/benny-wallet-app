@@ -5133,6 +5133,978 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'“{device}” will show English text starting with “Benny Wallet wants you to sign in”. That is this login. After updating the signer it shows “Sign in to Benny Wallet” instead.'**
   String airGapSignInSignerShowsText(String device);
+
+  /// No description provided for @dappScanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect a website'**
+  String get dappScanTitle;
+
+  /// No description provided for @dappScanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the WalletConnect QR code shown on the website'**
+  String get dappScanHint;
+
+  /// No description provided for @dappPasteLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste link'**
+  String get dappPasteLink;
+
+  /// No description provided for @dappScanNotWalletConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not a WalletConnect code'**
+  String get dappScanNotWalletConnect;
+
+  /// No description provided for @dappConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get dappConnecting;
+
+  /// No description provided for @dappPairFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not connect. Ask the website for a new QR code.'**
+  String get dappPairFailed;
+
+  /// No description provided for @dappNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Website connections are not available in this build.'**
+  String get dappNotConfigured;
+
+  /// No description provided for @dappProposalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to website'**
+  String get dappProposalTitle;
+
+  /// No description provided for @dappProposalWants.
+  ///
+  /// In en, this message translates to:
+  /// **'{site} wants to connect to your wallet'**
+  String dappProposalWants(String site);
+
+  /// No description provided for @dappProposalCanDo.
+  ///
+  /// In en, this message translates to:
+  /// **'The website will be able to:'**
+  String get dappProposalCanDo;
+
+  /// No description provided for @dappProposalSeeAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'See your wallet address'**
+  String get dappProposalSeeAddress;
+
+  /// No description provided for @dappProposalRequestSign.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask you to approve transactions and messages'**
+  String get dappProposalRequestSign;
+
+  /// No description provided for @dappProposalNoAutoFunds.
+  ///
+  /// In en, this message translates to:
+  /// **'It cannot move funds on its own. Every request needs your approval.'**
+  String get dappProposalNoAutoFunds;
+
+  /// No description provided for @dappProposalWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get dappProposalWallet;
+
+  /// No description provided for @dappProposalNoEligibleWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'None of your wallets can connect to websites yet. External wallets will be supported later.'**
+  String get dappProposalNoEligibleWallet;
+
+  /// No description provided for @dappProposalOnlySolana.
+  ///
+  /// In en, this message translates to:
+  /// **'Benny Wallet only supports Solana. This website asked for other networks.'**
+  String get dappProposalOnlySolana;
+
+  /// No description provided for @dappProposalUnsupportedChain.
+  ///
+  /// In en, this message translates to:
+  /// **'This website asked for a Solana test network. Benny Wallet only supports Solana mainnet.'**
+  String get dappProposalUnsupportedChain;
+
+  /// No description provided for @dappConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get dappConnect;
+
+  /// No description provided for @dappReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get dappReject;
+
+  /// No description provided for @dappConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to {site}'**
+  String dappConnected(String site);
+
+  /// No description provided for @dappSiteVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get dappSiteVerified;
+
+  /// No description provided for @dappSiteUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unverified'**
+  String get dappSiteUnknown;
+
+  /// No description provided for @dappSiteMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Domain mismatch'**
+  String get dappSiteMismatch;
+
+  /// No description provided for @dappSiteScam.
+  ///
+  /// In en, this message translates to:
+  /// **'Known scam'**
+  String get dappSiteScam;
+
+  /// No description provided for @dappSitesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected websites'**
+  String get dappSitesTitle;
+
+  /// No description provided for @dappSitesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No websites connected. Scan a WalletConnect QR code on a website to connect.'**
+  String get dappSitesEmpty;
+
+  /// No description provided for @dappSitesDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get dappSitesDisconnect;
+
+  /// No description provided for @dappSitesDisconnectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect all'**
+  String get dappSitesDisconnectAll;
+
+  /// No description provided for @dappSitesDisconnectAllConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect every website from all wallets?'**
+  String get dappSitesDisconnectAllConfirm;
+
+  /// No description provided for @dappSitesExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires {date}'**
+  String dappSitesExpires(String date);
+
+  /// No description provided for @dappSitesWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet: {name}'**
+  String dappSitesWallet(String name);
+
+  /// No description provided for @dappSitesBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected websites: {count}'**
+  String dappSitesBanner(int count);
+
+  /// No description provided for @dappRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Signature request'**
+  String get dappRequestTitle;
+
+  /// No description provided for @dappRequestSignMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign a message'**
+  String get dappRequestSignMessage;
+
+  /// No description provided for @dappRequestSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to {domain}'**
+  String dappRequestSignIn(String domain);
+
+  /// No description provided for @dappRequestTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve transaction'**
+  String get dappRequestTransaction;
+
+  /// No description provided for @dappRequestTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve {count} transactions'**
+  String dappRequestTransactions(int count);
+
+  /// No description provided for @dappRequestSendNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Benny Wallet sends it after you sign.'**
+  String get dappRequestSendNote;
+
+  /// No description provided for @dappRequestBalanceChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated balance changes'**
+  String get dappRequestBalanceChanges;
+
+  /// No description provided for @dappRequestNoBalanceChange.
+  ///
+  /// In en, this message translates to:
+  /// **'No balance change for this wallet besides the network fee'**
+  String get dappRequestNoBalanceChange;
+
+  /// No description provided for @dappRequestNetworkFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Network fee'**
+  String get dappRequestNetworkFee;
+
+  /// No description provided for @dappRequestMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get dappRequestMessage;
+
+  /// No description provided for @dappRequestDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get dappRequestDetails;
+
+  /// No description provided for @dappRequestPrograms.
+  ///
+  /// In en, this message translates to:
+  /// **'Programs called'**
+  String get dappRequestPrograms;
+
+  /// No description provided for @dappActionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What this does'**
+  String get dappActionTitle;
+
+  /// No description provided for @browserTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Browser'**
+  String get browserTitle;
+
+  /// No description provided for @browserAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an address, e.g. jup.ag'**
+  String get browserAddressHint;
+
+  /// No description provided for @browserReload.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get browserReload;
+
+  /// No description provided for @browserHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get browserHome;
+
+  /// No description provided for @browserHomeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a website address. On the site, tap Connect wallet and choose Benny Wallet: no switching apps, no unlocking again.'**
+  String get browserHomeHint;
+
+  /// No description provided for @browserNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected'**
+  String get browserNotConnected;
+
+  /// No description provided for @browserConnectedAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected: {wallet}'**
+  String browserConnectedAs(String wallet);
+
+  /// No description provided for @browserInvalidUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a web address'**
+  String get browserInvalidUrl;
+
+  /// No description provided for @browserOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get browserOpen;
+
+  /// No description provided for @browserBookmarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmarks'**
+  String get browserBookmarks;
+
+  /// No description provided for @browserBookmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark'**
+  String get browserBookmark;
+
+  /// No description provided for @browserBookmarked.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmarked'**
+  String get browserBookmarked;
+
+  /// No description provided for @browserBookmarkRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark removed'**
+  String get browserBookmarkRemoved;
+
+  /// No description provided for @browserBookmarkRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get browserBookmarkRemove;
+
+  /// No description provided for @browserBookmarksEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a page and tap the star in the address bar to save it. Bookmarks stay on this phone and are never synced.'**
+  String get browserBookmarksEmpty;
+
+  /// No description provided for @browserBookmarksLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved only on this phone, never synced.'**
+  String get browserBookmarksLocal;
+
+  /// No description provided for @browserBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get browserBack;
+
+  /// No description provided for @browserForward.
+  ///
+  /// In en, this message translates to:
+  /// **'Forward'**
+  String get browserForward;
+
+  /// No description provided for @browserCopyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get browserCopyLink;
+
+  /// No description provided for @browserHomeTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Your gateway to Solana apps'**
+  String get browserHomeTagline;
+
+  /// No description provided for @browserBennyFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Benny Apps'**
+  String get browserBennyFeatures;
+
+  /// No description provided for @browserComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get browserComingSoon;
+
+  /// No description provided for @browserPopular.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get browserPopular;
+
+  /// No description provided for @browserYourSites.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected sites'**
+  String get browserYourSites;
+
+  /// No description provided for @dappColdSwapNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This swap expires within about a minute and a cold wallet often cannot sign it in time. For swaps with a cold wallet, use Benny\'s built-in Swap: it refreshes the quote when it expires.'**
+  String get dappColdSwapNotice;
+
+  /// No description provided for @dappActionSwap.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap'**
+  String get dappActionSwap;
+
+  /// No description provided for @dappActionTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get dappActionTransfer;
+
+  /// No description provided for @dappActionStake.
+  ///
+  /// In en, this message translates to:
+  /// **'Stake'**
+  String get dappActionStake;
+
+  /// No description provided for @dappActionLend.
+  ///
+  /// In en, this message translates to:
+  /// **'Lend or borrow'**
+  String get dappActionLend;
+
+  /// No description provided for @dappActionPerps.
+  ///
+  /// In en, this message translates to:
+  /// **'Futures trade'**
+  String get dappActionPerps;
+
+  /// No description provided for @dappActionNft.
+  ///
+  /// In en, this message translates to:
+  /// **'NFT trade'**
+  String get dappActionNft;
+
+  /// No description provided for @dappActionOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other action'**
+  String get dappActionOther;
+
+  /// No description provided for @dappActionVia.
+  ///
+  /// In en, this message translates to:
+  /// **'via {protocol}'**
+  String dappActionVia(String protocol);
+
+  /// No description provided for @dappActionPay.
+  ///
+  /// In en, this message translates to:
+  /// **'You pay'**
+  String get dappActionPay;
+
+  /// No description provided for @dappActionReceive.
+  ///
+  /// In en, this message translates to:
+  /// **'You receive'**
+  String get dappActionReceive;
+
+  /// No description provided for @dappActionUnknownHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Benny cannot read what these programs do. Sign only if you just started this on the website yourself.'**
+  String get dappActionUnknownHint;
+
+  /// No description provided for @dappActionUnknownPrograms.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown programs ({count})'**
+  String dappActionUnknownPrograms(int count);
+
+  /// No description provided for @dappActivityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection history'**
+  String get dappActivityTitle;
+
+  /// No description provided for @dappActivityNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved only on this phone. Never uploaded to the cloud or backed up. Records the website, the action and amounts only, not message contents or your personal details.'**
+  String get dappActivityNote;
+
+  /// No description provided for @dappActivityEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No website activity yet.'**
+  String get dappActivityEmpty;
+
+  /// No description provided for @dappActivityClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear activity'**
+  String get dappActivityClear;
+
+  /// No description provided for @dappActivityClearConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all website activity on this phone?'**
+  String get dappActivityClearConfirm;
+
+  /// No description provided for @dappActivityCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} records'**
+  String dappActivityCount(int count);
+
+  /// No description provided for @dappActivityConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get dappActivityConnected;
+
+  /// No description provided for @dappActivityConnectRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection declined'**
+  String get dappActivityConnectRejected;
+
+  /// No description provided for @dappActivityMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message signature'**
+  String get dappActivityMessage;
+
+  /// No description provided for @dappActivitySigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed'**
+  String get dappActivitySigned;
+
+  /// No description provided for @dappActivitySent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent'**
+  String get dappActivitySent;
+
+  /// No description provided for @dappActivityRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get dappActivityRejected;
+
+  /// No description provided for @dappActivityFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get dappActivityFailed;
+
+  /// No description provided for @dappActivityViewTx.
+  ///
+  /// In en, this message translates to:
+  /// **'View on Solscan'**
+  String get dappActivityViewTx;
+
+  /// No description provided for @dappActivityViaPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'App on this phone'**
+  String get dappActivityViaPhone;
+
+  /// No description provided for @dappActivityInBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Benny\'s browser'**
+  String get dappActivityInBrowser;
+
+  /// No description provided for @dappActivityWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet {wallet}'**
+  String dappActivityWallet(String wallet);
+
+  /// No description provided for @dappActivityDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnected'**
+  String get dappActivityDisconnected;
+
+  /// No description provided for @dappSitesLastUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Last used {date}'**
+  String dappSitesLastUsed(String date);
+
+  /// No description provided for @dappActivityDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get dappActivityDetail;
+
+  /// No description provided for @dappActivitySite.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get dappActivitySite;
+
+  /// No description provided for @dappActivityTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get dappActivityTime;
+
+  /// No description provided for @dappActivityVia.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected through'**
+  String get dappActivityVia;
+
+  /// No description provided for @dappActivityViaWalletConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned QR code (WalletConnect)'**
+  String get dappActivityViaWalletConnect;
+
+  /// No description provided for @dappActivityWalletLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get dappActivityWalletLabel;
+
+  /// No description provided for @dappActivityTxId.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction ID'**
+  String get dappActivityTxId;
+
+  /// No description provided for @dappActivityCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get dappActivityCopied;
+
+  /// No description provided for @dappActivityResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get dappActivityResult;
+
+  /// No description provided for @dappRequestSigningWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing wallet'**
+  String get dappRequestSigningWallet;
+
+  /// No description provided for @dappRequestLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking request…'**
+  String get dappRequestLoading;
+
+  /// No description provided for @dappRequestInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This request could not be read and was rejected.'**
+  String get dappRequestInvalid;
+
+  /// No description provided for @dappRequestSign.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign'**
+  String get dappRequestSign;
+
+  /// No description provided for @dappRequestHoldToSign.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to sign'**
+  String get dappRequestHoldToSign;
+
+  /// No description provided for @dappRequestAcceptRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand the risk and still want to sign'**
+  String get dappRequestAcceptRisk;
+
+  /// No description provided for @dappRequestBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Benny Wallet blocked this request to protect your funds.'**
+  String get dappRequestBlocked;
+
+  /// No description provided for @dappRequestDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed. Go back to the website.'**
+  String get dappRequestDone;
+
+  /// No description provided for @dappRequestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent. Go back to the website.'**
+  String get dappRequestSent;
+
+  /// No description provided for @dappRequestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing failed: {error}'**
+  String dappRequestFailed(String error);
+
+  /// No description provided for @dappRequestRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Request rejected'**
+  String get dappRequestRejected;
+
+  /// No description provided for @dappAuthReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the signature'**
+  String get dappAuthReason;
+
+  /// No description provided for @dappPinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter PIN to sign'**
+  String get dappPinTitle;
+
+  /// No description provided for @dappTrustSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Looks normal'**
+  String get dappTrustSafe;
+
+  /// No description provided for @dappTrustCaution.
+  ///
+  /// In en, this message translates to:
+  /// **'Check carefully'**
+  String get dappTrustCaution;
+
+  /// No description provided for @dappTrustDanger.
+  ///
+  /// In en, this message translates to:
+  /// **'High risk'**
+  String get dappTrustDanger;
+
+  /// No description provided for @dappTrustBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked'**
+  String get dappTrustBlocked;
+
+  /// No description provided for @dappWarnSiteScam.
+  ///
+  /// In en, this message translates to:
+  /// **'This website is a known scam.'**
+  String get dappWarnSiteScam;
+
+  /// No description provided for @dappWarnSiteMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The website\'s address does not match the app it claims to be.'**
+  String get dappWarnSiteMismatch;
+
+  /// No description provided for @dappWarnSiteUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'This website could not be verified.'**
+  String get dappWarnSiteUnknown;
+
+  /// No description provided for @dappWarnMessageUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'The message is not readable text, so you cannot tell what you are signing.'**
+  String get dappWarnMessageUnreadable;
+
+  /// No description provided for @dappWarnMessageIsTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'This message is really a transaction. Signing it could move your funds.'**
+  String get dappWarnMessageIsTransaction;
+
+  /// No description provided for @dappWarnSignInOtherSite.
+  ///
+  /// In en, this message translates to:
+  /// **'The sign-in is for a different website than the one asking.'**
+  String get dappWarnSignInOtherSite;
+
+  /// No description provided for @dappWarnSignInOtherAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'The sign-in is for a different wallet.'**
+  String get dappWarnSignInOtherAccount;
+
+  /// No description provided for @dappWarnSignInExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This sign-in request has expired.'**
+  String get dappWarnSignInExpired;
+
+  /// No description provided for @dappWarnTokenApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Gives another account permission to spend your tokens.'**
+  String get dappWarnTokenApprove;
+
+  /// No description provided for @dappWarnSetAuthority.
+  ///
+  /// In en, this message translates to:
+  /// **'Hands control of one of your accounts to someone else.'**
+  String get dappWarnSetAuthority;
+
+  /// No description provided for @dappWarnAssignAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes the owner of your wallet account.'**
+  String get dappWarnAssignAccount;
+
+  /// No description provided for @dappWarnCloseAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Closes a token account.'**
+  String get dappWarnCloseAccount;
+
+  /// No description provided for @dappWarnAdvanceNonce.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses a durable nonce, so the signature stays valid until it is used.'**
+  String get dappWarnAdvanceNonce;
+
+  /// No description provided for @dappWarnUnknownProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Calls a program Benny Wallet does not recognise.'**
+  String get dappWarnUnknownProgram;
+
+  /// No description provided for @dappWarnBlockedProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Calls a program on Benny Wallet\'s blocklist. It cannot be signed.'**
+  String get dappWarnBlockedProgram;
+
+  /// No description provided for @dappWarnUnresolvedAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Some accounts could not be looked up.'**
+  String get dappWarnUnresolvedAccounts;
+
+  /// No description provided for @dappWarnSimulationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The transaction fails in simulation.'**
+  String get dappWarnSimulationFailed;
+
+  /// No description provided for @dappWarnSimulationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The balance changes could not be estimated.'**
+  String get dappWarnSimulationUnavailable;
+
+  /// No description provided for @dappWarnHighSlippage.
+  ///
+  /// In en, this message translates to:
+  /// **'Allows a swap that could return nothing.'**
+  String get dappWarnHighSlippage;
+
+  /// No description provided for @dappRequestQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more requests waiting'**
+  String dappRequestQueued(int count);
+
+  /// No description provided for @airGapSignFromSite.
+  ///
+  /// In en, this message translates to:
+  /// **'This request comes from the website {site}. The signer shows the site too.'**
+  String airGapSignFromSite(String site);
+
+  /// No description provided for @airGapSignFromSiteStep.
+  ///
+  /// In en, this message translates to:
+  /// **'From the website {site}: transaction {current} of {total}'**
+  String airGapSignFromSiteStep(String site, int current, int total);
+
+  /// No description provided for @airGapSignerNoSiteSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Your signer is an older version and cannot show which website this came from. Update the signer when you can.'**
+  String get airGapSignerNoSiteSupport;
+
+  /// No description provided for @signerDappSource.
+  ///
+  /// In en, this message translates to:
+  /// **'From the website {site} (passed on by the wallet)'**
+  String signerDappSource(String site);
+
+  /// No description provided for @signerDappSiteVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'The wallet verified this website.'**
+  String get signerDappSiteVerified;
+
+  /// No description provided for @signerDappSiteUnverified.
+  ///
+  /// In en, this message translates to:
+  /// **'The wallet could not verify this website.'**
+  String get signerDappSiteUnverified;
+
+  /// No description provided for @signerDappSiteMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The website\'s address does not match what it claims to be. It may be a fake site.'**
+  String get signerDappSiteMismatch;
+
+  /// No description provided for @signerDappSiteScam.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a known scam website. Do not sign.'**
+  String get signerDappSiteScam;
+
+  /// No description provided for @signerDappSourceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only sign if you just did this on that website yourself.'**
+  String get signerDappSourceHint;
+
+  /// No description provided for @signerDappUnknownStep.
+  ///
+  /// In en, this message translates to:
+  /// **'The signer cannot read this step (program {program}). Only sign if you just did this on the website yourself.'**
+  String signerDappUnknownStep(String program);
+
+  /// No description provided for @signerDappSimulation.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance changes simulated by the wallet'**
+  String get signerDappSimulation;
+
+  /// No description provided for @signerDappSimulationNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No balance change besides the network fee'**
+  String get signerDappSimulationNone;
+
+  /// No description provided for @signerDappSimulationNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Simulated by the wallet. The signer cannot check this; use it only as a reference.'**
+  String get signerDappSimulationNote;
+
+  /// No description provided for @airGapSignSiteTimeLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'The website waits {time} more'**
+  String airGapSignSiteTimeLeft(String time);
+
+  /// No description provided for @airGapSignSiteExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'The website\'s request has probably expired. Close this and start again on the website.'**
+  String get airGapSignSiteExpired;
 }
 
 class _AppLocalizationsDelegate

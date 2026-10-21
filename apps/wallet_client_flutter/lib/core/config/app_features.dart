@@ -115,8 +115,7 @@ abstract final class AppFeatures {
       buildStoreMode == StoreMode.lite && fullUnlocked.value;
 
   static bool get canOpenSwap =>
-      !isLiteStore &&
-      (_unlockedLite || (swapEnabled && tokenExchangeEnabled));
+      !isLiteStore && (_unlockedLite || (swapEnabled && tokenExchangeEnabled));
 
   static bool get canOpenXStocks =>
       !isLiteStore && (_unlockedLite || (swapEnabled && xstocksEnabled));
@@ -131,6 +130,10 @@ abstract final class AppFeatures {
   static bool get canCheckForUpdates => appUpdatesEnabled;
 
   static bool get canOpenWebView => webviewEnabled;
+
+  /// Benny's dApp browser: part of the full feature set, like Swap (on in
+  /// full builds and in Lite builds after the hidden unlock).
+  static bool get canOpenDappBrowser => !isLiteStore;
 
   static bool get canConnectSeekerVault => seekerVaultEnabled;
 

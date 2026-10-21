@@ -134,8 +134,8 @@ abstract final class Formatters {
     final prefix = value < 0
         ? '-'
         : includePositiveSign && value > 0
-            ? '+'
-            : '';
+        ? '+'
+        : '';
     return '$prefix${usdPrice(value.abs())}';
   }
 
@@ -146,10 +146,10 @@ abstract final class Formatters {
 
     final prefix = signed
         ? value > 0
-            ? '+'
-            : value < 0
-                ? '-'
-                : ''
+              ? '+'
+              : value < 0
+              ? '-'
+              : ''
         : '';
     return '$prefix${value.abs().toStringAsFixed(2)}%';
   }

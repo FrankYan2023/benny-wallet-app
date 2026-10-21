@@ -22,6 +22,10 @@ abstract final class AirGapCapability {
 
   /// Shows Benny's login message as a login, not as raw text (0.1.1).
   static const signIn = 'sign-in';
+
+  /// Shows which website a request came from and the wallet's simulated
+  /// balance changes (keys 106 and 107, 0.1.1).
+  static const dappSource = 'dapp';
 }
 
 /// UR type names. The first three follow Keystone's Solana registry so the
@@ -461,6 +465,122 @@ class AirGapRecipient {
   }
 }
 
+/// What the wallet's site check (WalletConnect Verify) said about the
+/// website behind a request.
+enum AirGapSiteCheck {
+  unknown(0),
+  verified(1),
+  mismatch(2),
+  scam(3);
+
+  const AirGapSiteCheck(this.code);
+
+  final int code;
+
+  static AirGapSiteCheck fromCode(Object? code) =>
+      values.where((v) => v.code == code).firstOrNull ?? unknown;
+}
+
+/// The website a request came from, as the wallet saw it (key 106). The
+/// signer cannot check any of this; it shows it so the user knows the
+/// request did not start in their own wallet.
+class AirGapDappSource {
+  const AirGapDappSource({
+    required this.host,
+    this.name = '',
+    this.check = AirGapSiteCheck.unknown,
+  });
+
+  final String host;
+  final String name;
+  final AirGapSiteCheck check;
+
+  static const maxHostLength = 64;
+  static const maxNameLength = 40;
+
+  Map<Object?, Object?> toCbor() => {
+    1: host,
+    if (name.isNotEmpty) 2: name,
+    3: check.code,
+  };
+
+  static AirGapDappSource? fromCbor(Object? value) {
+    if (value is! Map || value[1] is! String) {
+      return null;
+    }
+    final host = cleanDisplayText(value[1] as String).trim();
+    if (host.isEmpty) {
+      return null;
+    }
+    final name = value[2] is String ? cleanDisplayText(value[2] as String) : '';
+    return AirGapDappSource(
+      host: String.fromCharCodes(host.runes.take(maxHostLength)),
+      name: String.fromCharCodes(name.runes.take(maxNameLength)).trim(),
+      check: AirGapSiteCheck.fromCode(value[3]),
+    );
+  }
+}
+
+/// One token's simulated change for the signing account, in base units.
+class AirGapBalanceChange {
+  const AirGapBalanceChange({required this.mint, required this.amount});
+
+  final Uint8List mint;
+  final BigInt amount;
+}
+
+/// The wallet's simulation of a website's transaction (key 107): what the
+/// signing account pays and receives. Shown as the wallet's estimate only.
+class AirGapSimulation {
+  const AirGapSimulation({required this.lamports, this.tokens = const []});
+
+  /// Change in SOL (lamports), fee included.
+  final BigInt lamports;
+  final List<AirGapBalanceChange> tokens;
+
+  static const maxTokens = 16;
+  static final _amountPattern = RegExp(r'^-?[0-9]{1,40}$');
+
+  Map<Object?, Object?> toCbor() => {
+    1: lamports.toString(),
+    if (tokens.isNotEmpty)
+      2: [
+        for (final change in tokens.take(maxTokens))
+          [change.mint, change.amount.toString()],
+      ],
+  };
+
+  static BigInt? _amount(Object? value) =>
+      value is String && _amountPattern.hasMatch(value)
+      ? BigInt.parse(value)
+      : null;
+
+  static AirGapSimulation? fromCbor(Object? value) {
+    if (value is! Map) {
+      return null;
+    }
+    final lamports = _amount(value[1]);
+    if (lamports == null) {
+      return null;
+    }
+    final tokens = <AirGapBalanceChange>[];
+    final raw = value[2];
+    if (raw is List) {
+      for (final entry in raw.take(maxTokens)) {
+        if (entry is! List || entry.length < 2) {
+          continue;
+        }
+        final mint = entry[0];
+        final amount = _amount(entry[1]);
+        if (mint is Uint8List && mint.length == 32 && amount != null) {
+          tokens.add(AirGapBalanceChange(mint: mint, amount: amount));
+        }
+      }
+    }
+    return AirGapSimulation(lamports: lamports, tokens: tokens);
+  }
+}
+
 /// Entries of an address lookup table, supplied by the online wallet
 /// because the offline signer cannot read the chain. Only the indexes the
 /// transaction uses are sent, keyed by index, so the QR stays small.
@@ -520,6 +640,8 @@ class AirGapSignRequest {
     this.swapSummary,
     this.usdPrices = const {},
     this.recipient,
+    this.dappSource,
+    this.simulation,
     this.sourceFingerprint,
     this.standardOnly = false,
   });
@@ -550,6 +672,13 @@ class AirGapSignRequest {
 
   /// Who a send is for, as the wallet knows them.
   final AirGapRecipient? recipient;
+
+  /// The website the request came from, when it did not start in the
+  /// wallet itself.
+  final AirGapDappSource? dappSource;
+
+  /// The wallet's simulated balance changes for a website's transaction.
+  final AirGapSimulation? simulation;
 
   /// The signer's master fingerprint, written into the key path. Keystone
   /// refuses a request without it; our signer ignores it.
@@ -584,6 +713,8 @@ class AirGapSignRequest {
               [Uint8List.fromList(base58decode(entry.key)), '${entry.value}'],
           ],
         if (recipient != null) 105: recipient!.toCbor(),
+        if (dappSource != null) 106: dappSource!.toCbor(),
+        if (simulation != null) 107: simulation!.toCbor(),
       },
     }),
   );
@@ -635,6 +766,8 @@ class AirGapSignRequest {
       swapSummary: AirGapSwapSummary.fromCbor(value[103]),
       usdPrices: _usdPrices(value[104]),
       recipient: AirGapRecipient.fromCbor(value[105]),
+      dappSource: AirGapDappSource.fromCbor(value[106]),
+      simulation: AirGapSimulation.fromCbor(value[107]),
     );
   }
 

@@ -16,6 +16,11 @@ import '../../../asset_detail/presentation/pages/asset_detail_page.dart';
 import '../../../auth/presentation/pages/unlock_page.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../auth/domain/wallet_controller_state.dart';
+import '../../../dapp_connect/data/dapp_connect_service.dart';
+import '../../../dapp_connect/data/browser_connections.dart';
+import '../../../dapp_connect/data/mwa_connections.dart';
+import '../../../dapp_connect/presentation/pages/dapp_browser_page.dart';
+import '../../../dapp_connect/presentation/pages/dapp_scan_page.dart';
 import '../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../notifications/presentation/providers/notification_inbox_provider.dart';
 import '../../../onboarding/presentation/pages/welcome_page.dart';
@@ -218,15 +223,63 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
               onPressed: () => context.push(AirdropPage.routePath),
               icon: const Icon(Icons.card_giftcard_rounded),
             ),
-          if (canOpenXStocks && !walletState.childModeEnabled)
+          // Stocks live in the swap page's second tab; the shortcut stays
+          // only for builds without the general swap.
+          if (canOpenXStocks && !canOpenSwap && !walletState.childModeEnabled)
             IconButton(
               tooltip: 'xStocks',
               onPressed: () => context.push(XStocksSwapPage.routePath),
               icon: const Icon(Icons.candlestick_chart_rounded),
             ),
-          _MessageButton(
-            unreadCount: unreadMessageCount,
+          // Child accounts (family); the badge counts them.
+          if (!walletState.childModeEnabled)
+            _BadgeIconButton(
+              tooltip: l10n.portfolioChildAccounts,
+              count: walletState.childWallets.length,
+              badgeColor: const Color(0xFF6C63FF),
+              onPressed: () => context.push(ChildWalletsPage.routePath),
+              icon: Icons.family_restroom_rounded,
+            ),
+          if ((ref.read(dappConnectServiceProvider).isAvailable ||
+                  AppFeatures.canOpenDappBrowser) &&
+              !walletState.childModeEnabled)
+            // The badge counts every connected site (scanned, phone apps,
+            // Benny's browser). With the browser, the icon opens it (its
+            // bar has the QR scanner); without, the scan page.
+            ValueListenableBuilder(
+              valueListenable: ref.read(dappConnectServiceProvider).sessions,
+              builder: (context, sessions, _) => ValueListenableBuilder(
+                valueListenable: ref.read(mwaConnectionsProvider).connections,
+                builder: (context, phoneApps, _) => ValueListenableBuilder(
+                  valueListenable: ref
+                      .read(browserConnectionsProvider)
+                      .connections,
+                  builder: (context, browserSites, _) => _BadgeIconButton(
+                    tooltip: AppFeatures.canOpenDappBrowser
+                        ? l10n.browserTitle
+                        : l10n.dappScanTitle,
+                    count:
+                        sessions.length +
+                        phoneApps.length +
+                        browserSites.length,
+                    badgeColor: AppColors.success,
+                    onPressed: () => context.push(
+                      AppFeatures.canOpenDappBrowser
+                          ? DappBrowserPage.routePath
+                          : DappScanPage.routePath,
+                    ),
+                    icon: AppFeatures.canOpenDappBrowser
+                        ? Icons.travel_explore_rounded
+                        : Icons.qr_code_scanner_rounded,
+                  ),
+                ),
+              ),
+            ),
+          _BadgeIconButton(
+            tooltip: l10n.portfolioMessages,
+            count: unreadMessageCount,
             onPressed: () => context.push(NotificationsPage.routePath),
+            icon: Icons.notifications_none_rounded,
           ),
           IconButton(
             onPressed: () => context.push(SettingsPage.routePath),
@@ -336,70 +389,6 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
       hasDefiPositions ? defiData : null,
     );
     return [
-      if (!walletState.childModeEnabled &&
-          walletState.childWallets.isNotEmpty) ...[
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: GestureDetector(
-            onTap: () => context.push(ChildWalletsPage.routePath),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF0E6FF),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFD4C5FF), width: 1),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.child_care_rounded,
-                        color: Color(0xFF6C63FF),
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          context.l10n.portfolioChildAccounts,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: const Color(0xFF6C63FF),
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          '${walletState.childWallets.length}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF6C63FF),
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        Icons.arrow_forward_rounded,
-                        color: const Color(0xFF6C63FF),
-                        size: 18,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
       Container(
         padding: const EdgeInsets.fromLTRB(16, 26, 16, 20),
         decoration: BoxDecoration(
@@ -900,25 +889,32 @@ class _TotalPerformance {
   final double changePct;
 }
 
-class _MessageButton extends StatelessWidget {
-  const _MessageButton({required this.unreadCount, required this.onPressed});
+/// Top bar icon button with a count badge (unread messages, connected
+/// websites); no badge at zero.
+class _BadgeIconButton extends StatelessWidget {
+  const _BadgeIconButton({
+    required this.tooltip,
+    required this.count,
+    required this.onPressed,
+    required this.icon,
+    this.badgeColor = const Color(0xFFE1582A),
+  });
 
-  final int unreadCount;
+  final String tooltip;
+  final int count;
   final VoidCallback onPressed;
+  final IconData icon;
+  final Color badgeColor;
 
   @override
   Widget build(BuildContext context) {
-    final badgeText = unreadCount > 99 ? '99+' : '$unreadCount';
+    final badgeText = count > 99 ? '99+' : '$count';
 
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        IconButton(
-          tooltip: context.l10n.portfolioMessages,
-          onPressed: onPressed,
-          icon: const Icon(Icons.notifications_none_rounded),
-        ),
-        if (unreadCount > 0)
+        IconButton(tooltip: tooltip, onPressed: onPressed, icon: Icon(icon)),
+        if (count > 0)
           Positioned(
             right: 4,
             top: 3,
@@ -926,7 +922,7 @@ class _MessageButton extends StatelessWidget {
               constraints: const BoxConstraints(minWidth: 17),
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
               decoration: BoxDecoration(
-                color: const Color(0xFFE1582A),
+                color: badgeColor,
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(

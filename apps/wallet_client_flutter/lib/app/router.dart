@@ -8,6 +8,14 @@ import '../features/airgap/presentation/pages/connect_signer_page.dart';
 import '../features/auth/presentation/providers/wallet_controller.dart';
 import '../features/auth/presentation/pages/pin_setup_page.dart';
 import '../features/auth/presentation/pages/unlock_page.dart';
+import '../features/dapp_connect/data/dapp_connect_service.dart';
+import '../features/dapp_connect/presentation/pages/dapp_proposal_page.dart';
+import '../features/dapp_connect/presentation/pages/dapp_request_page.dart';
+import '../features/dapp_connect/data/dapp_activity_store.dart';
+import '../features/dapp_connect/presentation/pages/dapp_activity_page.dart';
+import '../features/dapp_connect/presentation/pages/dapp_browser_page.dart';
+import '../features/dapp_connect/presentation/pages/dapp_scan_page.dart';
+import '../features/dapp_connect/presentation/pages/dapp_sites_page.dart';
 import '../features/asset_detail/presentation/pages/asset_detail_page.dart';
 import '../features/airdrop/presentation/pages/airdrop_page.dart';
 import '../features/onboarding/presentation/pages/create_wallet_page.dart';
@@ -500,6 +508,118 @@ class AppRouter {
             currentLocation: state.matchedLocation,
             allowInChildMode: false,
             child: ChildWalletMonitorPage(childId: childId),
+          );
+        },
+      ),
+      GoRoute(
+        path: DappSitesPage.routePath,
+        name: DappSitesPage.routeName,
+        builder: (context, state) => _RouteAccessGuard(
+          currentLocation: state.matchedLocation,
+          allowInChildMode: false,
+          requireUnlocked: true,
+          child: const DappSitesPage(),
+        ),
+      ),
+      GoRoute(
+        path: DappActivityPage.routePath,
+        name: DappActivityPage.routeName,
+        builder: (context, state) => _RouteAccessGuard(
+          currentLocation: state.matchedLocation,
+          allowInChildMode: false,
+          requireUnlocked: true,
+          child: const DappActivityPage(),
+        ),
+      ),
+      GoRoute(
+        path: DappSiteActivityPage.routePath,
+        name: DappSiteActivityPage.routeName,
+        builder: (context, state) => _RouteAccessGuard(
+          currentLocation: state.matchedLocation,
+          allowInChildMode: false,
+          requireUnlocked: true,
+          child: DappSiteActivityPage(host: state.extra as String? ?? ''),
+        ),
+      ),
+      GoRoute(
+        path: DappActivityDetailPage.routePath,
+        name: DappActivityDetailPage.routeName,
+        builder: (context, state) {
+          final entry = state.extra;
+          if (entry is! DappActivity) {
+            return const DappActivityPage();
+          }
+          return _RouteAccessGuard(
+            currentLocation: state.matchedLocation,
+            allowInChildMode: false,
+            requireUnlocked: true,
+            child: DappActivityDetailPage(entry: entry),
+          );
+        },
+      ),
+      GoRoute(
+        path: DappBrowserPage.routePath,
+        name: DappBrowserPage.routeName,
+        builder: (context, state) {
+          if (!AppFeatures.canOpenDappBrowser) {
+            return _FeatureUnavailablePage(
+              title: context.l10n.routerFeatureUnavailableTitle,
+              message: context.l10n.routerFeatureUnavailableMessage,
+            );
+          }
+          return _RouteAccessGuard(
+            currentLocation: state.matchedLocation,
+            allowInChildMode: false,
+            requireUnlocked: true,
+            child: DappBrowserPage(initialUrl: state.extra as String?),
+          );
+        },
+      ),
+      GoRoute(
+        path: DappScanPage.routePath,
+        name: DappScanPage.routeName,
+        builder: (context, state) => _RouteAccessGuard(
+          currentLocation: state.matchedLocation,
+          allowInChildMode: false,
+          requireUnlocked: true,
+          child: const DappScanPage(),
+        ),
+      ),
+      GoRoute(
+        path: DappProposalPage.routePath,
+        name: DappProposalPage.routeName,
+        builder: (context, state) {
+          final proposal = state.extra;
+          if (proposal is! DappProposal) {
+            return _FeatureUnavailablePage(
+              title: context.l10n.routerFeatureUnavailableTitle,
+              message: context.l10n.routerFeatureUnavailableMessage,
+            );
+          }
+          return _RouteAccessGuard(
+            currentLocation: state.matchedLocation,
+            allowInChildMode: false,
+            requireUnlocked: true,
+            child: DappProposalPage(proposal: proposal),
+          );
+        },
+      ),
+      GoRoute(
+        path: DappRequestPage.routePath,
+        name: DappRequestPage.routeName,
+        builder: (context, state) {
+          final request = state.extra;
+          if (request is! DappRequest) {
+            return _FeatureUnavailablePage(
+              title: context.l10n.routerFeatureUnavailableTitle,
+              message: context.l10n.routerFeatureUnavailableMessage,
+            );
+          }
+          return _RouteAccessGuard(
+            currentLocation: state.matchedLocation,
+            allowInChildMode: false,
+            requireUnlocked: true,
+            child: DappRequestPage(request: request),
           );
         },
       ),

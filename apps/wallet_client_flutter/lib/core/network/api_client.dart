@@ -482,6 +482,14 @@ class BackendApiClient {
     );
   }
 
+  /// Websites and programs the app refuses to connect to or sign for.
+  Future<Map<String, dynamic>> getDappBlocklist() async {
+    return _requestJsonMap(
+      (dio) => dio.get<Map<String, dynamic>>('/v1/dapp-blocklist'),
+      fallback: 'Unable to load the blocklist right now.',
+    );
+  }
+
   Future<List<RemoteTokenCatalogItem>> getTokens() async {
     final payload = await _requestJsonMap(
       (dio) => dio.get<Map<String, dynamic>>('/v1/tokens'),

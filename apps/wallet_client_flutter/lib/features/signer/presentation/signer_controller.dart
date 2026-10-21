@@ -96,6 +96,7 @@ class SignerController extends ChangeNotifier {
       AirGapCapability.lookupTables,
       AirGapCapability.tokenHints,
       AirGapCapability.signIn,
+      AirGapCapability.dappSource,
     },
   );
 

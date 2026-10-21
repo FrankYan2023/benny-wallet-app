@@ -3005,4 +3005,569 @@ class AppLocalizationsRu extends AppLocalizations {
   String airGapSignInSignerShowsText(String device) {
     return '«$device» покажет английский текст, начинающийся с «Benny Wallet wants you to sign in». Это и есть вход. После обновления подписанта он покажет «Вход в Benny Wallet».';
   }
+
+  @override
+  String get dappScanTitle => 'Подключить сайт';
+
+  @override
+  String get dappScanHint =>
+      'Отсканируйте QR-код WalletConnect, показанный на сайте';
+
+  @override
+  String get dappPasteLink => 'Вставить ссылку';
+
+  @override
+  String get dappScanNotWalletConnect => 'Это не код WalletConnect';
+
+  @override
+  String get dappConnecting => 'Подключение…';
+
+  @override
+  String get dappPairFailed =>
+      'Не удалось подключиться. Получите на сайте новый QR-код.';
+
+  @override
+  String get dappNotConfigured =>
+      'Подключение к сайтам недоступно в этой сборке.';
+
+  @override
+  String get dappProposalTitle => 'Подключение к сайту';
+
+  @override
+  String dappProposalWants(String site) {
+    return '$site хочет подключиться к вашему кошельку';
+  }
+
+  @override
+  String get dappProposalCanDo => 'Сайт сможет:';
+
+  @override
+  String get dappProposalSeeAddress => 'Видеть адрес кошелька';
+
+  @override
+  String get dappProposalRequestSign =>
+      'Запрашивать подтверждение транзакций и сообщений';
+
+  @override
+  String get dappProposalNoAutoFunds =>
+      'Сайт не может сам перемещать средства. Каждый запрос требует вашего подтверждения.';
+
+  @override
+  String get dappProposalWallet => 'Кошелёк';
+
+  @override
+  String get dappProposalNoEligibleWallet =>
+      'Пока ни один ваш кошелёк не может подключаться к сайтам. Внешние кошельки появятся позже.';
+
+  @override
+  String get dappProposalOnlySolana =>
+      'Benny Wallet поддерживает только Solana. Этот сайт запросил другие сети.';
+
+  @override
+  String get dappProposalUnsupportedChain =>
+      'Этот сайт запросил тестовую сеть Solana. Benny Wallet поддерживает только основную сеть.';
+
+  @override
+  String get dappConnect => 'Подключить';
+
+  @override
+  String get dappReject => 'Отклонить';
+
+  @override
+  String dappConnected(String site) {
+    return 'Подключено к $site';
+  }
+
+  @override
+  String get dappSiteVerified => 'Проверен';
+
+  @override
+  String get dappSiteUnknown => 'Не проверен';
+
+  @override
+  String get dappSiteMismatch => 'Домен не совпадает';
+
+  @override
+  String get dappSiteScam => 'Известный мошеннический сайт';
+
+  @override
+  String get dappSitesTitle => 'Подключённые сайты';
+
+  @override
+  String get dappSitesEmpty =>
+      'Нет подключённых сайтов. Отсканируйте QR-код WalletConnect на сайте, чтобы подключиться.';
+
+  @override
+  String get dappSitesDisconnect => 'Отключить';
+
+  @override
+  String get dappSitesDisconnectAll => 'Отключить все';
+
+  @override
+  String get dappSitesDisconnectAllConfirm =>
+      'Отключить все сайты от всех кошельков?';
+
+  @override
+  String dappSitesExpires(String date) {
+    return 'Истекает $date';
+  }
+
+  @override
+  String dappSitesWallet(String name) {
+    return 'Кошелёк: $name';
+  }
+
+  @override
+  String dappSitesBanner(int count) {
+    return 'Подключено: $count';
+  }
+
+  @override
+  String get dappRequestTitle => 'Запрос подписи';
+
+  @override
+  String get dappRequestSignMessage => 'Подписать сообщение';
+
+  @override
+  String dappRequestSignIn(String domain) {
+    return 'Вход на $domain';
+  }
+
+  @override
+  String get dappRequestTransaction => 'Подтвердить транзакцию';
+
+  @override
+  String dappRequestTransactions(int count) {
+    return 'Подтвердить транзакции: $count';
+  }
+
+  @override
+  String get dappRequestSendNote => 'Benny Wallet отправит её после подписи.';
+
+  @override
+  String get dappRequestBalanceChanges => 'Ожидаемые изменения баланса';
+
+  @override
+  String get dappRequestNoBalanceChange =>
+      'Кроме комиссии сети, баланс кошелька не изменится';
+
+  @override
+  String get dappRequestNetworkFee => 'Комиссия сети';
+
+  @override
+  String get dappRequestMessage => 'Сообщение';
+
+  @override
+  String get dappRequestDetails => 'Подробности';
+
+  @override
+  String get dappRequestPrograms => 'Вызываемые программы';
+
+  @override
+  String get dappActionTitle => 'Что делает эта транзакция';
+
+  @override
+  String get browserTitle => 'Браузер';
+
+  @override
+  String get browserAddressHint => 'Введите адрес, например jup.ag';
+
+  @override
+  String get browserReload => 'Обновить';
+
+  @override
+  String get browserHome => 'Главная';
+
+  @override
+  String get browserHomeHint =>
+      'Введите адрес сайта. На сайте нажмите «Подключить кошелёк» и выберите Benny Wallet — без переключения приложений и повторной разблокировки.';
+
+  @override
+  String get browserNotConnected => 'Не подключено';
+
+  @override
+  String browserConnectedAs(String wallet) {
+    return 'Подключено: $wallet';
+  }
+
+  @override
+  String get browserInvalidUrl => 'Это не веб-адрес';
+
+  @override
+  String get browserOpen => 'Открыть';
+
+  @override
+  String get browserBookmarks => 'Закладки';
+
+  @override
+  String get browserBookmark => 'В закладки';
+
+  @override
+  String get browserBookmarked => 'Добавлено в закладки';
+
+  @override
+  String get browserBookmarkRemoved => 'Закладка удалена';
+
+  @override
+  String get browserBookmarkRemove => 'Удалить';
+
+  @override
+  String get browserBookmarksEmpty =>
+      'Откройте страницу и нажмите звёздочку в адресной строке, чтобы сохранить её. Закладки хранятся только на этом телефоне и не синхронизируются.';
+
+  @override
+  String get browserBookmarksLocal =>
+      'Только на этом телефоне, без синхронизации.';
+
+  @override
+  String get browserBack => 'Назад';
+
+  @override
+  String get browserForward => 'Вперёд';
+
+  @override
+  String get browserCopyLink => 'Копировать ссылку';
+
+  @override
+  String get browserHomeTagline => 'Ваш вход в приложения Solana';
+
+  @override
+  String get browserBennyFeatures => 'Benny Apps';
+
+  @override
+  String get browserComingSoon => 'Скоро';
+
+  @override
+  String get browserPopular => 'Рекомендуем';
+
+  @override
+  String get browserYourSites => 'Подключённые сайты';
+
+  @override
+  String get dappColdSwapNotice =>
+      'Этот обмен истекает примерно через минуту, и холодный кошелёк часто не успевает его подписать. Для обмена с холодным кошельком используйте встроенный обмен Benny: он обновляет котировку, когда она истекает.';
+
+  @override
+  String get dappActionSwap => 'Обмен';
+
+  @override
+  String get dappActionTransfer => 'Перевод';
+
+  @override
+  String get dappActionStake => 'Стейкинг';
+
+  @override
+  String get dappActionLend => 'Кредитование';
+
+  @override
+  String get dappActionPerps => 'Фьючерсная сделка';
+
+  @override
+  String get dappActionNft => 'Сделка с NFT';
+
+  @override
+  String get dappActionOther => 'Другое действие';
+
+  @override
+  String dappActionVia(String protocol) {
+    return 'через $protocol';
+  }
+
+  @override
+  String get dappActionPay => 'Вы отдаёте';
+
+  @override
+  String get dappActionReceive => 'Вы получаете';
+
+  @override
+  String get dappActionUnknownHint =>
+      'Benny не может прочитать, что делают эти программы. Подписывайте, только если вы сами только что начали это на сайте.';
+
+  @override
+  String dappActionUnknownPrograms(int count) {
+    return 'Неизвестные программы ($count)';
+  }
+
+  @override
+  String get dappActivityTitle => 'История подключений';
+
+  @override
+  String get dappActivityNote =>
+      'Хранится только на этом телефоне. Не загружается в облако и не попадает в резервные копии. Записываются только сайт, действие и суммы, без содержимого сообщений и ваших личных данных.';
+
+  @override
+  String get dappActivityEmpty => 'Активности на сайтах пока нет.';
+
+  @override
+  String get dappActivityClear => 'Очистить историю';
+
+  @override
+  String get dappActivityClearConfirm =>
+      'Удалить всю активность на сайтах с этого телефона?';
+
+  @override
+  String dappActivityCount(int count) {
+    return 'Записей: $count';
+  }
+
+  @override
+  String get dappActivityConnected => 'Подключено';
+
+  @override
+  String get dappActivityConnectRejected => 'Подключение отклонено';
+
+  @override
+  String get dappActivityMessage => 'Подпись сообщения';
+
+  @override
+  String get dappActivitySigned => 'Подписано';
+
+  @override
+  String get dappActivitySent => 'Отправлено';
+
+  @override
+  String get dappActivityRejected => 'Отклонено';
+
+  @override
+  String get dappActivityFailed => 'Ошибка';
+
+  @override
+  String get dappActivityViewTx => 'Открыть в Solscan';
+
+  @override
+  String get dappActivityViaPhone => 'Приложение на этом телефоне';
+
+  @override
+  String get dappActivityInBrowser => 'Браузер Benny';
+
+  @override
+  String dappActivityWallet(String wallet) {
+    return 'Кошелёк $wallet';
+  }
+
+  @override
+  String get dappActivityDisconnected => 'Отключено';
+
+  @override
+  String dappSitesLastUsed(String date) {
+    return 'Последнее использование $date';
+  }
+
+  @override
+  String get dappActivityDetail => 'Подробности';
+
+  @override
+  String get dappActivitySite => 'Сайт';
+
+  @override
+  String get dappActivityTime => 'Время';
+
+  @override
+  String get dappActivityVia => 'Способ подключения';
+
+  @override
+  String get dappActivityViaWalletConnect =>
+      'Сканирование QR-кода (WalletConnect)';
+
+  @override
+  String get dappActivityWalletLabel => 'Кошелёк';
+
+  @override
+  String get dappActivityTxId => 'ID транзакции';
+
+  @override
+  String get dappActivityCopied => 'Скопировано';
+
+  @override
+  String get dappActivityResult => 'Результат';
+
+  @override
+  String get dappRequestSigningWallet => 'Подписывающий кошелёк';
+
+  @override
+  String get dappRequestLoading => 'Проверка запроса…';
+
+  @override
+  String get dappRequestInvalid => 'Не удалось прочитать запрос, он отклонён.';
+
+  @override
+  String get dappRequestSign => 'Подписать';
+
+  @override
+  String get dappRequestHoldToSign => 'Удерживайте для подписи';
+
+  @override
+  String get dappRequestAcceptRisk => 'Я понимаю риск и всё равно подписываю';
+
+  @override
+  String get dappRequestBlocked =>
+      'Benny Wallet заблокировал запрос, чтобы защитить ваши средства.';
+
+  @override
+  String get dappRequestDone => 'Подписано. Вернитесь на сайт.';
+
+  @override
+  String get dappRequestSent => 'Отправлено. Вернитесь на сайт.';
+
+  @override
+  String dappRequestFailed(String error) {
+    return 'Ошибка подписи: $error';
+  }
+
+  @override
+  String get dappRequestRejected => 'Запрос отклонён';
+
+  @override
+  String get dappAuthReason => 'Подтвердите подпись';
+
+  @override
+  String get dappPinTitle => 'Введите PIN для подписи';
+
+  @override
+  String get dappTrustSafe => 'Выглядит нормально';
+
+  @override
+  String get dappTrustCaution => 'Проверьте внимательно';
+
+  @override
+  String get dappTrustDanger => 'Высокий риск';
+
+  @override
+  String get dappTrustBlocked => 'Заблокировано';
+
+  @override
+  String get dappWarnSiteScam => 'Это известный мошеннический сайт.';
+
+  @override
+  String get dappWarnSiteMismatch =>
+      'Адрес сайта не совпадает с приложением, за которое он себя выдаёт.';
+
+  @override
+  String get dappWarnSiteUnknown => 'Не удалось проверить этот сайт.';
+
+  @override
+  String get dappWarnMessageUnreadable =>
+      'Сообщение не является читаемым текстом, нельзя понять, что вы подписываете.';
+
+  @override
+  String get dappWarnMessageIsTransaction =>
+      'Это «сообщение» на самом деле транзакция. Подпись может переместить ваши средства.';
+
+  @override
+  String get dappWarnSignInOtherSite =>
+      'Вход выполняется на другой сайт, не на тот, что запрашивает.';
+
+  @override
+  String get dappWarnSignInOtherAccount => 'Вход выполняется в другой кошелёк.';
+
+  @override
+  String get dappWarnSignInExpired => 'Срок действия запроса на вход истёк.';
+
+  @override
+  String get dappWarnTokenApprove =>
+      'Даёт другому аккаунту право тратить ваши токены.';
+
+  @override
+  String get dappWarnSetAuthority =>
+      'Передаёт управление одним из ваших аккаунтов другому лицу.';
+
+  @override
+  String get dappWarnAssignAccount => 'Меняет владельца аккаунта кошелька.';
+
+  @override
+  String get dappWarnCloseAccount => 'Закрывает токен-аккаунт.';
+
+  @override
+  String get dappWarnAdvanceNonce =>
+      'Использует долговременный nonce: подпись действует, пока её не используют.';
+
+  @override
+  String get dappWarnUnknownProgram =>
+      'Вызывает программу, которую Benny Wallet не знает.';
+
+  @override
+  String get dappWarnBlockedProgram =>
+      'Вызывает программу из чёрного списка Benny Wallet. Подписать нельзя.';
+
+  @override
+  String get dappWarnUnresolvedAccounts =>
+      'Не удалось найти некоторые аккаунты.';
+
+  @override
+  String get dappWarnSimulationFailed => 'Транзакция не проходит в симуляции.';
+
+  @override
+  String get dappWarnSimulationUnavailable =>
+      'Не удалось оценить изменения баланса.';
+
+  @override
+  String get dappWarnHighSlippage =>
+      'Разрешает обмен, который может ничего не вернуть.';
+
+  @override
+  String dappRequestQueued(int count) {
+    return 'Ещё запросов в очереди: $count';
+  }
+
+  @override
+  String airGapSignFromSite(String site) {
+    return 'Этот запрос пришёл с сайта $site. Подписант тоже покажет сайт.';
+  }
+
+  @override
+  String airGapSignFromSiteStep(String site, int current, int total) {
+    return 'С сайта $site: транзакция $current из $total';
+  }
+
+  @override
+  String get airGapSignerNoSiteSupport =>
+      'Подписант устаревшей версии и не покажет, с какого сайта запрос. Обновите подписант.';
+
+  @override
+  String signerDappSource(String site) {
+    return 'С сайта $site (передано кошельком)';
+  }
+
+  @override
+  String get signerDappSiteVerified => 'Кошелёк проверил этот сайт.';
+
+  @override
+  String get signerDappSiteUnverified => 'Кошелёк не смог проверить этот сайт.';
+
+  @override
+  String get signerDappSiteMismatch =>
+      'Адрес сайта не совпадает с заявленным. Это может быть подделка.';
+
+  @override
+  String get signerDappSiteScam =>
+      'Это известный мошеннический сайт. Не подписывайте.';
+
+  @override
+  String get signerDappSourceHint =>
+      'Подписывайте, только если сами только что сделали это на сайте.';
+
+  @override
+  String signerDappUnknownStep(String program) {
+    return 'Подписант не может прочитать этот шаг (программа $program). Подписывайте, только если сами только что сделали это на сайте.';
+  }
+
+  @override
+  String get signerDappSimulation => 'Изменения баланса по симуляции кошелька';
+
+  @override
+  String get signerDappSimulationNone =>
+      'Кроме комиссии сети, баланс не меняется';
+
+  @override
+  String get signerDappSimulationNote =>
+      'Симуляция кошелька. Подписант не может это проверить; только для справки.';
+
+  @override
+  String airGapSignSiteTimeLeft(String time) {
+    return 'Сайт ждёт ещё $time';
+  }
+
+  @override
+  String get airGapSignSiteExpired =>
+      'Запрос сайта, вероятно, истёк. Закройте и начните заново на сайте.';
 }

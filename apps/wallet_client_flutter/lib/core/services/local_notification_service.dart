@@ -82,6 +82,43 @@ class LocalNotificationService {
     await _plugin.show(id, title, body, details);
   }
 
+  /// A website sent a request while the app was closed; tapping opens the
+  /// app, which shows the request once the wallet is unlocked. The text is
+  /// generic: the push carries the request encrypted.
+  Future<void> showDappRequestNotification({
+    required String languageCode,
+  }) async {
+    await initialize();
+    final chinese = languageCode.startsWith('zh');
+    const androidDetails = AndroidNotificationDetails(
+      dappRequestChannel,
+      'Website requests',
+      channelDescription: 'A connected website asks you to sign.',
+      importance: Importance.max,
+      priority: Priority.high,
+      icon: 'ic_stat_benny',
+      largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
+      color: Color(0xFF111827),
+    );
+    await _plugin.show(
+      dappRequestNotificationId,
+      chinese ? '網站請求簽名' : 'Website request',
+      chinese
+          ? '已連接的網站請你簽名。打開 Benny 查看並確認。'
+          : 'A connected website asks you to sign. Open Benny to review it.',
+      const NotificationDetails(
+        android: androidDetails,
+        iOS: DarwinNotificationDetails(),
+      ),
+    );
+  }
+
+  static const dappRequestChannel = 'dapp-requests';
+
+  /// One notification at a time for website requests: the app shows them
+  /// all once opened.
+  static const dappRequestNotificationId = 2001;
+
   Future<void> _createAndroidChannels() async {
     final androidImplementation = _plugin
         .resolvePlatformSpecificImplementation<
@@ -96,6 +133,14 @@ class LocalNotificationService {
         'incoming-funds',
         'Incoming funds',
         description: 'Alerts when new funds arrive in the wallet.',
+        importance: Importance.max,
+      ),
+    );
+    await androidImplementation.createNotificationChannel(
+      const AndroidNotificationChannel(
+        dappRequestChannel,
+        'Website requests',
+        description: 'A connected website asks you to sign.',
         importance: Importance.max,
       ),
     );

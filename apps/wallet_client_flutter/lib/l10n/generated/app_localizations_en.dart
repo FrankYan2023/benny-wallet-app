@@ -2969,4 +2969,570 @@ class AppLocalizationsEn extends AppLocalizations {
   String airGapSignInSignerShowsText(String device) {
     return '“$device” will show English text starting with “Benny Wallet wants you to sign in”. That is this login. After updating the signer it shows “Sign in to Benny Wallet” instead.';
   }
+
+  @override
+  String get dappScanTitle => 'Connect a website';
+
+  @override
+  String get dappScanHint =>
+      'Scan the WalletConnect QR code shown on the website';
+
+  @override
+  String get dappPasteLink => 'Paste link';
+
+  @override
+  String get dappScanNotWalletConnect => 'This is not a WalletConnect code';
+
+  @override
+  String get dappConnecting => 'Connecting…';
+
+  @override
+  String get dappPairFailed =>
+      'Could not connect. Ask the website for a new QR code.';
+
+  @override
+  String get dappNotConfigured =>
+      'Website connections are not available in this build.';
+
+  @override
+  String get dappProposalTitle => 'Connect to website';
+
+  @override
+  String dappProposalWants(String site) {
+    return '$site wants to connect to your wallet';
+  }
+
+  @override
+  String get dappProposalCanDo => 'The website will be able to:';
+
+  @override
+  String get dappProposalSeeAddress => 'See your wallet address';
+
+  @override
+  String get dappProposalRequestSign =>
+      'Ask you to approve transactions and messages';
+
+  @override
+  String get dappProposalNoAutoFunds =>
+      'It cannot move funds on its own. Every request needs your approval.';
+
+  @override
+  String get dappProposalWallet => 'Wallet';
+
+  @override
+  String get dappProposalNoEligibleWallet =>
+      'None of your wallets can connect to websites yet. External wallets will be supported later.';
+
+  @override
+  String get dappProposalOnlySolana =>
+      'Benny Wallet only supports Solana. This website asked for other networks.';
+
+  @override
+  String get dappProposalUnsupportedChain =>
+      'This website asked for a Solana test network. Benny Wallet only supports Solana mainnet.';
+
+  @override
+  String get dappConnect => 'Connect';
+
+  @override
+  String get dappReject => 'Reject';
+
+  @override
+  String dappConnected(String site) {
+    return 'Connected to $site';
+  }
+
+  @override
+  String get dappSiteVerified => 'Verified';
+
+  @override
+  String get dappSiteUnknown => 'Unverified';
+
+  @override
+  String get dappSiteMismatch => 'Domain mismatch';
+
+  @override
+  String get dappSiteScam => 'Known scam';
+
+  @override
+  String get dappSitesTitle => 'Connected websites';
+
+  @override
+  String get dappSitesEmpty =>
+      'No websites connected. Scan a WalletConnect QR code on a website to connect.';
+
+  @override
+  String get dappSitesDisconnect => 'Disconnect';
+
+  @override
+  String get dappSitesDisconnectAll => 'Disconnect all';
+
+  @override
+  String get dappSitesDisconnectAllConfirm =>
+      'Disconnect every website from all wallets?';
+
+  @override
+  String dappSitesExpires(String date) {
+    return 'Expires $date';
+  }
+
+  @override
+  String dappSitesWallet(String name) {
+    return 'Wallet: $name';
+  }
+
+  @override
+  String dappSitesBanner(int count) {
+    return 'Connected websites: $count';
+  }
+
+  @override
+  String get dappRequestTitle => 'Signature request';
+
+  @override
+  String get dappRequestSignMessage => 'Sign a message';
+
+  @override
+  String dappRequestSignIn(String domain) {
+    return 'Sign in to $domain';
+  }
+
+  @override
+  String get dappRequestTransaction => 'Approve transaction';
+
+  @override
+  String dappRequestTransactions(int count) {
+    return 'Approve $count transactions';
+  }
+
+  @override
+  String get dappRequestSendNote => 'Benny Wallet sends it after you sign.';
+
+  @override
+  String get dappRequestBalanceChanges => 'Estimated balance changes';
+
+  @override
+  String get dappRequestNoBalanceChange =>
+      'No balance change for this wallet besides the network fee';
+
+  @override
+  String get dappRequestNetworkFee => 'Network fee';
+
+  @override
+  String get dappRequestMessage => 'Message';
+
+  @override
+  String get dappRequestDetails => 'Details';
+
+  @override
+  String get dappRequestPrograms => 'Programs called';
+
+  @override
+  String get dappActionTitle => 'What this does';
+
+  @override
+  String get browserTitle => 'Browser';
+
+  @override
+  String get browserAddressHint => 'Enter an address, e.g. jup.ag';
+
+  @override
+  String get browserReload => 'Reload';
+
+  @override
+  String get browserHome => 'Home';
+
+  @override
+  String get browserHomeHint =>
+      'Enter a website address. On the site, tap Connect wallet and choose Benny Wallet: no switching apps, no unlocking again.';
+
+  @override
+  String get browserNotConnected => 'Not connected';
+
+  @override
+  String browserConnectedAs(String wallet) {
+    return 'Connected: $wallet';
+  }
+
+  @override
+  String get browserInvalidUrl => 'Not a web address';
+
+  @override
+  String get browserOpen => 'Open';
+
+  @override
+  String get browserBookmarks => 'Bookmarks';
+
+  @override
+  String get browserBookmark => 'Bookmark';
+
+  @override
+  String get browserBookmarked => 'Bookmarked';
+
+  @override
+  String get browserBookmarkRemoved => 'Bookmark removed';
+
+  @override
+  String get browserBookmarkRemove => 'Remove';
+
+  @override
+  String get browserBookmarksEmpty =>
+      'Open a page and tap the star in the address bar to save it. Bookmarks stay on this phone and are never synced.';
+
+  @override
+  String get browserBookmarksLocal => 'Saved only on this phone, never synced.';
+
+  @override
+  String get browserBack => 'Back';
+
+  @override
+  String get browserForward => 'Forward';
+
+  @override
+  String get browserCopyLink => 'Copy link';
+
+  @override
+  String get browserHomeTagline => 'Your gateway to Solana apps';
+
+  @override
+  String get browserBennyFeatures => 'Benny Apps';
+
+  @override
+  String get browserComingSoon => 'Coming soon';
+
+  @override
+  String get browserPopular => 'Recommended';
+
+  @override
+  String get browserYourSites => 'Connected sites';
+
+  @override
+  String get dappColdSwapNotice =>
+      'This swap expires within about a minute and a cold wallet often cannot sign it in time. For swaps with a cold wallet, use Benny\'s built-in Swap: it refreshes the quote when it expires.';
+
+  @override
+  String get dappActionSwap => 'Swap';
+
+  @override
+  String get dappActionTransfer => 'Transfer';
+
+  @override
+  String get dappActionStake => 'Stake';
+
+  @override
+  String get dappActionLend => 'Lend or borrow';
+
+  @override
+  String get dappActionPerps => 'Futures trade';
+
+  @override
+  String get dappActionNft => 'NFT trade';
+
+  @override
+  String get dappActionOther => 'Other action';
+
+  @override
+  String dappActionVia(String protocol) {
+    return 'via $protocol';
+  }
+
+  @override
+  String get dappActionPay => 'You pay';
+
+  @override
+  String get dappActionReceive => 'You receive';
+
+  @override
+  String get dappActionUnknownHint =>
+      'Benny cannot read what these programs do. Sign only if you just started this on the website yourself.';
+
+  @override
+  String dappActionUnknownPrograms(int count) {
+    return 'Unknown programs ($count)';
+  }
+
+  @override
+  String get dappActivityTitle => 'Connection history';
+
+  @override
+  String get dappActivityNote =>
+      'Saved only on this phone. Never uploaded to the cloud or backed up. Records the website, the action and amounts only, not message contents or your personal details.';
+
+  @override
+  String get dappActivityEmpty => 'No website activity yet.';
+
+  @override
+  String get dappActivityClear => 'Clear activity';
+
+  @override
+  String get dappActivityClearConfirm =>
+      'Clear all website activity on this phone?';
+
+  @override
+  String dappActivityCount(int count) {
+    return '$count records';
+  }
+
+  @override
+  String get dappActivityConnected => 'Connected';
+
+  @override
+  String get dappActivityConnectRejected => 'Connection declined';
+
+  @override
+  String get dappActivityMessage => 'Message signature';
+
+  @override
+  String get dappActivitySigned => 'Signed';
+
+  @override
+  String get dappActivitySent => 'Sent';
+
+  @override
+  String get dappActivityRejected => 'Declined';
+
+  @override
+  String get dappActivityFailed => 'Failed';
+
+  @override
+  String get dappActivityViewTx => 'View on Solscan';
+
+  @override
+  String get dappActivityViaPhone => 'App on this phone';
+
+  @override
+  String get dappActivityInBrowser => 'Benny\'s browser';
+
+  @override
+  String dappActivityWallet(String wallet) {
+    return 'Wallet $wallet';
+  }
+
+  @override
+  String get dappActivityDisconnected => 'Disconnected';
+
+  @override
+  String dappSitesLastUsed(String date) {
+    return 'Last used $date';
+  }
+
+  @override
+  String get dappActivityDetail => 'Details';
+
+  @override
+  String get dappActivitySite => 'Website';
+
+  @override
+  String get dappActivityTime => 'Time';
+
+  @override
+  String get dappActivityVia => 'Connected through';
+
+  @override
+  String get dappActivityViaWalletConnect => 'Scanned QR code (WalletConnect)';
+
+  @override
+  String get dappActivityWalletLabel => 'Wallet';
+
+  @override
+  String get dappActivityTxId => 'Transaction ID';
+
+  @override
+  String get dappActivityCopied => 'Copied';
+
+  @override
+  String get dappActivityResult => 'Result';
+
+  @override
+  String get dappRequestSigningWallet => 'Signing wallet';
+
+  @override
+  String get dappRequestLoading => 'Checking request…';
+
+  @override
+  String get dappRequestInvalid =>
+      'This request could not be read and was rejected.';
+
+  @override
+  String get dappRequestSign => 'Sign';
+
+  @override
+  String get dappRequestHoldToSign => 'Hold to sign';
+
+  @override
+  String get dappRequestAcceptRisk =>
+      'I understand the risk and still want to sign';
+
+  @override
+  String get dappRequestBlocked =>
+      'Benny Wallet blocked this request to protect your funds.';
+
+  @override
+  String get dappRequestDone => 'Signed. Go back to the website.';
+
+  @override
+  String get dappRequestSent => 'Sent. Go back to the website.';
+
+  @override
+  String dappRequestFailed(String error) {
+    return 'Signing failed: $error';
+  }
+
+  @override
+  String get dappRequestRejected => 'Request rejected';
+
+  @override
+  String get dappAuthReason => 'Confirm the signature';
+
+  @override
+  String get dappPinTitle => 'Enter PIN to sign';
+
+  @override
+  String get dappTrustSafe => 'Looks normal';
+
+  @override
+  String get dappTrustCaution => 'Check carefully';
+
+  @override
+  String get dappTrustDanger => 'High risk';
+
+  @override
+  String get dappTrustBlocked => 'Blocked';
+
+  @override
+  String get dappWarnSiteScam => 'This website is a known scam.';
+
+  @override
+  String get dappWarnSiteMismatch =>
+      'The website\'s address does not match the app it claims to be.';
+
+  @override
+  String get dappWarnSiteUnknown => 'This website could not be verified.';
+
+  @override
+  String get dappWarnMessageUnreadable =>
+      'The message is not readable text, so you cannot tell what you are signing.';
+
+  @override
+  String get dappWarnMessageIsTransaction =>
+      'This message is really a transaction. Signing it could move your funds.';
+
+  @override
+  String get dappWarnSignInOtherSite =>
+      'The sign-in is for a different website than the one asking.';
+
+  @override
+  String get dappWarnSignInOtherAccount =>
+      'The sign-in is for a different wallet.';
+
+  @override
+  String get dappWarnSignInExpired => 'This sign-in request has expired.';
+
+  @override
+  String get dappWarnTokenApprove =>
+      'Gives another account permission to spend your tokens.';
+
+  @override
+  String get dappWarnSetAuthority =>
+      'Hands control of one of your accounts to someone else.';
+
+  @override
+  String get dappWarnAssignAccount =>
+      'Changes the owner of your wallet account.';
+
+  @override
+  String get dappWarnCloseAccount => 'Closes a token account.';
+
+  @override
+  String get dappWarnAdvanceNonce =>
+      'Uses a durable nonce, so the signature stays valid until it is used.';
+
+  @override
+  String get dappWarnUnknownProgram =>
+      'Calls a program Benny Wallet does not recognise.';
+
+  @override
+  String get dappWarnBlockedProgram =>
+      'Calls a program on Benny Wallet\'s blocklist. It cannot be signed.';
+
+  @override
+  String get dappWarnUnresolvedAccounts =>
+      'Some accounts could not be looked up.';
+
+  @override
+  String get dappWarnSimulationFailed => 'The transaction fails in simulation.';
+
+  @override
+  String get dappWarnSimulationUnavailable =>
+      'The balance changes could not be estimated.';
+
+  @override
+  String get dappWarnHighSlippage => 'Allows a swap that could return nothing.';
+
+  @override
+  String dappRequestQueued(int count) {
+    return '$count more requests waiting';
+  }
+
+  @override
+  String airGapSignFromSite(String site) {
+    return 'This request comes from the website $site. The signer shows the site too.';
+  }
+
+  @override
+  String airGapSignFromSiteStep(String site, int current, int total) {
+    return 'From the website $site: transaction $current of $total';
+  }
+
+  @override
+  String get airGapSignerNoSiteSupport =>
+      'Your signer is an older version and cannot show which website this came from. Update the signer when you can.';
+
+  @override
+  String signerDappSource(String site) {
+    return 'From the website $site (passed on by the wallet)';
+  }
+
+  @override
+  String get signerDappSiteVerified => 'The wallet verified this website.';
+
+  @override
+  String get signerDappSiteUnverified =>
+      'The wallet could not verify this website.';
+
+  @override
+  String get signerDappSiteMismatch =>
+      'The website\'s address does not match what it claims to be. It may be a fake site.';
+
+  @override
+  String get signerDappSiteScam => 'This is a known scam website. Do not sign.';
+
+  @override
+  String get signerDappSourceHint =>
+      'Only sign if you just did this on that website yourself.';
+
+  @override
+  String signerDappUnknownStep(String program) {
+    return 'The signer cannot read this step (program $program). Only sign if you just did this on the website yourself.';
+  }
+
+  @override
+  String get signerDappSimulation => 'Balance changes simulated by the wallet';
+
+  @override
+  String get signerDappSimulationNone =>
+      'No balance change besides the network fee';
+
+  @override
+  String get signerDappSimulationNote =>
+      'Simulated by the wallet. The signer cannot check this; use it only as a reference.';
+
+  @override
+  String airGapSignSiteTimeLeft(String time) {
+    return 'The website waits $time more';
+  }
+
+  @override
+  String get airGapSignSiteExpired =>
+      'The website\'s request has probably expired. Close this and start again on the website.';
 }

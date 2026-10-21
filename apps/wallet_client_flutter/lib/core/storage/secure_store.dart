@@ -8,6 +8,17 @@ class SecureStore implements KeyValueStore {
         aOptions: AndroidOptions(encryptedSharedPreferences: true),
       );
 
+  /// Kept on this phone only: on iOS the keychain item never leaves the
+  /// device (no backup, no migration); Android excludes app data from
+  /// backup (allowBackup=false).
+  SecureStore.deviceOnly()
+    : _storage = const FlutterSecureStorage(
+        aOptions: AndroidOptions(encryptedSharedPreferences: true),
+        iOptions: IOSOptions(
+          accessibility: KeychainAccessibility.first_unlock_this_device,
+        ),
+      );
+
   final FlutterSecureStorage _storage;
 
   @override

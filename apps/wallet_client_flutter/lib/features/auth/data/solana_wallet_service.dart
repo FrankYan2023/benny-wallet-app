@@ -18,6 +18,7 @@ import 'package:solana/encoder.dart'
         SignedTx;
 import 'package:solana/dto.dart'
     show
+        Account,
         AccountData,
         BinaryAccountData,
         Encoding,
@@ -29,10 +30,12 @@ import 'package:solana/dto.dart'
         TokenAmount,
         TokenAccountData,
         TokenAccountsFilter,
-        TransactionDetails;
+        TransactionDetails,
+        SimulateTransactionAccounts;
 import 'package:solana/solana.dart';
 
 import '../../../core/airgap/airgap_protocol.dart';
+import '../../../core/walletconnect/balance_changes.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/backend_session_manager.dart';
@@ -1069,6 +1072,89 @@ class SolanaWalletService {
       );
     }
     return tables;
+  }
+
+  /// Signs [bytes] (a message or a transaction message) with the wallet
+  /// derived from [mnemonic].
+  Future<Uint8List> signBytes({
+    required String mnemonic,
+    required Uint8List bytes,
+    WalletDerivation derivation = WalletDerivation.legacy,
+  }) async {
+    final signer = await keyPairFromMnemonic(mnemonic, derivation: derivation);
+    final signature = await signer.sign(bytes);
+    return Uint8List.fromList(signature.bytes);
+  }
+
+  /// Sends a transaction a dApp asked the wallet to sign and send; returns
+  /// its signature without waiting for confirmation, as dApps expect.
+  Future<String> broadcastSignedTransaction(Uint8List signedTransaction) async {
+    final rpcClient = await _getRpcClient();
+    return _broadcastEncodedTransaction(
+      rpcClient: rpcClient,
+      encodedTransaction: base64Encode(signedTransaction),
+    );
+  }
+
+  /// The state of [addresses] now (null where an account does not exist)
+  /// and after [transaction] would run. Signatures are not checked and the
+  /// blockhash is replaced, so an unsigned transaction can be simulated.
+  /// Throws when the RPC cannot simulate it; a program error is returned in
+  /// the third field.
+  Future<
+    (
+      Map<String, AccountSnapshot?> before,
+      Map<String, AccountSnapshot?> after,
+      String? error,
+    )
+  >
+  simulateAccounts({
+    required Uint8List transaction,
+    required List<String> addresses,
+  }) async {
+    final rpcClient = await _getRpcClient();
+    AccountSnapshot? snapshot(Account? account) {
+      final data = account?.data;
+      if (account == null) {
+        return null;
+      }
+      return AccountSnapshot(
+        lamports: account.lamports,
+        programOwner: account.owner,
+        data: data is BinaryAccountData
+            ? Uint8List.fromList(data.data)
+            : Uint8List(0),
+      );
+    }
+
+    final pre = await rpcClient.getMultipleAccounts(
+      addresses,
+      commitment: Commitment.confirmed,
+      encoding: Encoding.base64,
+    );
+    final result = await rpcClient.simulateTransaction(
+      base64Encode(transaction),
+      sigVerify: false,
+      replaceRecentBlockhash: true,
+      commitment: Commitment.confirmed,
+      accounts: SimulateTransactionAccounts(
+        encoding: Encoding.base64,
+        addresses: addresses,
+      ),
+    );
+    final status = result.value;
+    final post = status.accounts ?? const <Account?>[];
+    return (
+      {
+        for (var i = 0; i < addresses.length; i++)
+          addresses[i]: i < pre.value.length ? snapshot(pre.value[i]) : null,
+      },
+      {
+        for (var i = 0; i < addresses.length; i++)
+          addresses[i]: i < post.length ? snapshot(post[i]) : null,
+      },
+      status.err == null ? null : status.err.toString(),
+    );
   }
 
   List<int> signableTransactionMessageBytes(String encodedTransaction) {

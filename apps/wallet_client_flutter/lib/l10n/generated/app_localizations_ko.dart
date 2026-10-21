@@ -2842,4 +2842,546 @@ class AppLocalizationsKo extends AppLocalizations {
   String airGapSignInSignerShowsText(String device) {
     return '“$device”에 “Benny Wallet wants you to sign in”으로 시작하는 영어 문장이 표시됩니다. 이것이 이번 로그인입니다. 서명 기기를 업데이트하면 “Benny Wallet 로그인”으로 표시됩니다.';
   }
+
+  @override
+  String get dappScanTitle => '웹사이트 연결';
+
+  @override
+  String get dappScanHint => '웹사이트에 표시된 WalletConnect QR 코드를 스캔하세요';
+
+  @override
+  String get dappPasteLink => '링크 붙여넣기';
+
+  @override
+  String get dappScanNotWalletConnect => 'WalletConnect 코드가 아닙니다';
+
+  @override
+  String get dappConnecting => '연결 중…';
+
+  @override
+  String get dappPairFailed => '연결하지 못했습니다. 웹사이트에서 새 QR 코드를 받아 주세요.';
+
+  @override
+  String get dappNotConfigured => '이 빌드에서는 웹사이트 연결을 사용할 수 없습니다.';
+
+  @override
+  String get dappProposalTitle => '웹사이트에 연결';
+
+  @override
+  String dappProposalWants(String site) {
+    return '$site에서 지갑 연결을 요청합니다';
+  }
+
+  @override
+  String get dappProposalCanDo => '연결하면 웹사이트는 다음을 할 수 있습니다:';
+
+  @override
+  String get dappProposalSeeAddress => '지갑 주소 보기';
+
+  @override
+  String get dappProposalRequestSign => '거래와 메시지 승인을 요청하기';
+
+  @override
+  String get dappProposalNoAutoFunds =>
+      '웹사이트가 스스로 자금을 옮길 수는 없습니다. 모든 요청에 승인이 필요합니다.';
+
+  @override
+  String get dappProposalWallet => '지갑';
+
+  @override
+  String get dappProposalNoEligibleWallet =>
+      '아직 웹사이트에 연결할 수 있는 지갑이 없습니다. 외부 지갑은 추후 지원됩니다.';
+
+  @override
+  String get dappProposalOnlySolana =>
+      'Benny Wallet은 Solana만 지원합니다. 이 웹사이트는 다른 네트워크를 요청했습니다.';
+
+  @override
+  String get dappProposalUnsupportedChain =>
+      '이 웹사이트는 Solana 테스트넷을 요청했습니다. Benny Wallet은 Solana 메인넷만 지원합니다.';
+
+  @override
+  String get dappConnect => '연결';
+
+  @override
+  String get dappReject => '거절';
+
+  @override
+  String dappConnected(String site) {
+    return '$site에 연결됨';
+  }
+
+  @override
+  String get dappSiteVerified => '확인됨';
+
+  @override
+  String get dappSiteUnknown => '미확인';
+
+  @override
+  String get dappSiteMismatch => '도메인 불일치';
+
+  @override
+  String get dappSiteScam => '알려진 사기 사이트';
+
+  @override
+  String get dappSitesTitle => '연결된 웹사이트';
+
+  @override
+  String get dappSitesEmpty =>
+      '연결된 웹사이트가 없습니다. 웹사이트의 WalletConnect QR 코드를 스캔해 연결하세요.';
+
+  @override
+  String get dappSitesDisconnect => '연결 해제';
+
+  @override
+  String get dappSitesDisconnectAll => '모두 연결 해제';
+
+  @override
+  String get dappSitesDisconnectAllConfirm => '모든 지갑에서 모든 웹사이트 연결을 해제할까요?';
+
+  @override
+  String dappSitesExpires(String date) {
+    return '$date 만료';
+  }
+
+  @override
+  String dappSitesWallet(String name) {
+    return '지갑: $name';
+  }
+
+  @override
+  String dappSitesBanner(int count) {
+    return '$count개 연결됨';
+  }
+
+  @override
+  String get dappRequestTitle => '서명 요청';
+
+  @override
+  String get dappRequestSignMessage => '메시지 서명';
+
+  @override
+  String dappRequestSignIn(String domain) {
+    return '$domain에 로그인';
+  }
+
+  @override
+  String get dappRequestTransaction => '거래 승인';
+
+  @override
+  String dappRequestTransactions(int count) {
+    return '거래 $count건 승인';
+  }
+
+  @override
+  String get dappRequestSendNote => '서명 후 Benny Wallet이 전송합니다.';
+
+  @override
+  String get dappRequestBalanceChanges => '예상 잔액 변화';
+
+  @override
+  String get dappRequestNoBalanceChange => '네트워크 수수료 외에는 이 지갑의 잔액 변화가 없습니다';
+
+  @override
+  String get dappRequestNetworkFee => '네트워크 수수료';
+
+  @override
+  String get dappRequestMessage => '메시지';
+
+  @override
+  String get dappRequestDetails => '상세 정보';
+
+  @override
+  String get dappRequestPrograms => '호출하는 프로그램';
+
+  @override
+  String get dappActionTitle => '이 거래가 하는 일';
+
+  @override
+  String get browserTitle => '브라우저';
+
+  @override
+  String get browserAddressHint => '주소 입력 (예: jup.ag)';
+
+  @override
+  String get browserReload => '새로고침';
+
+  @override
+  String get browserHome => '홈';
+
+  @override
+  String get browserHomeHint =>
+      '웹사이트 주소를 입력하세요. 사이트에서 \'지갑 연결\'을 누르고 Benny Wallet을 선택하면 앱 전환이나 재잠금 해제 없이 연결됩니다.';
+
+  @override
+  String get browserNotConnected => '연결 안 됨';
+
+  @override
+  String browserConnectedAs(String wallet) {
+    return '연결됨: $wallet';
+  }
+
+  @override
+  String get browserInvalidUrl => '올바른 주소가 아닙니다';
+
+  @override
+  String get browserOpen => '열기';
+
+  @override
+  String get browserBookmarks => '북마크';
+
+  @override
+  String get browserBookmark => '북마크';
+
+  @override
+  String get browserBookmarked => '북마크했습니다';
+
+  @override
+  String get browserBookmarkRemoved => '북마크를 삭제했습니다';
+
+  @override
+  String get browserBookmarkRemove => '삭제';
+
+  @override
+  String get browserBookmarksEmpty =>
+      '페이지를 연 뒤 주소창의 별을 누르면 저장됩니다. 북마크는 이 휴대폰에만 저장되며 동기화되지 않습니다.';
+
+  @override
+  String get browserBookmarksLocal => '이 휴대폰에만 저장되며 동기화되지 않습니다.';
+
+  @override
+  String get browserBack => '뒤로';
+
+  @override
+  String get browserForward => '앞으로';
+
+  @override
+  String get browserCopyLink => '링크 복사';
+
+  @override
+  String get browserHomeTagline => 'Solana 앱으로 가는 입구';
+
+  @override
+  String get browserBennyFeatures => 'Benny Apps';
+
+  @override
+  String get browserComingSoon => '곧 출시';
+
+  @override
+  String get browserPopular => '추천';
+
+  @override
+  String get browserYourSites => '연결한 사이트';
+
+  @override
+  String get dappColdSwapNotice =>
+      '이 스왑은 약 1분 안에 만료되어 콜드 월렛으로는 제때 서명하지 못할 수 있습니다. 콜드 월렛으로 스왑할 때는 Benny 내장 \'스왑\'을 사용하세요. 만료되면 견적을 자동으로 새로 받습니다.';
+
+  @override
+  String get dappActionSwap => '스왑';
+
+  @override
+  String get dappActionTransfer => '전송';
+
+  @override
+  String get dappActionStake => '스테이킹';
+
+  @override
+  String get dappActionLend => '대출·차입';
+
+  @override
+  String get dappActionPerps => '선물 거래';
+
+  @override
+  String get dappActionNft => 'NFT 거래';
+
+  @override
+  String get dappActionOther => '기타 작업';
+
+  @override
+  String dappActionVia(String protocol) {
+    return '$protocol 경유';
+  }
+
+  @override
+  String get dappActionPay => '보내는 금액';
+
+  @override
+  String get dappActionReceive => '받는 금액';
+
+  @override
+  String get dappActionUnknownHint =>
+      'Benny는 이 프로그램들이 무엇을 하는지 읽을 수 없습니다. 방금 웹사이트에서 직접 시작한 경우에만 서명하세요.';
+
+  @override
+  String dappActionUnknownPrograms(int count) {
+    return '알 수 없는 프로그램 ($count)';
+  }
+
+  @override
+  String get dappActivityTitle => '연결 기록';
+
+  @override
+  String get dappActivityNote =>
+      '이 휴대폰에만 저장되며 클라우드에 업로드되거나 백업되지 않습니다. 웹사이트, 작업, 금액만 기록하며 메시지 내용이나 개인 정보는 기록하지 않습니다.';
+
+  @override
+  String get dappActivityEmpty => '아직 웹사이트 활동이 없습니다.';
+
+  @override
+  String get dappActivityClear => '기록 지우기';
+
+  @override
+  String get dappActivityClearConfirm => '이 휴대폰의 모든 웹사이트 활동 기록을 지울까요?';
+
+  @override
+  String dappActivityCount(int count) {
+    return '$count건';
+  }
+
+  @override
+  String get dappActivityConnected => '연결됨';
+
+  @override
+  String get dappActivityConnectRejected => '연결 거부';
+
+  @override
+  String get dappActivityMessage => '메시지 서명';
+
+  @override
+  String get dappActivitySigned => '서명됨';
+
+  @override
+  String get dappActivitySent => '전송됨';
+
+  @override
+  String get dappActivityRejected => '거부됨';
+
+  @override
+  String get dappActivityFailed => '실패';
+
+  @override
+  String get dappActivityViewTx => 'Solscan에서 보기';
+
+  @override
+  String get dappActivityViaPhone => '이 휴대폰의 앱';
+
+  @override
+  String get dappActivityInBrowser => '내장 브라우저';
+
+  @override
+  String dappActivityWallet(String wallet) {
+    return '지갑 $wallet';
+  }
+
+  @override
+  String get dappActivityDisconnected => '연결 해제됨';
+
+  @override
+  String dappSitesLastUsed(String date) {
+    return '최근 사용 $date';
+  }
+
+  @override
+  String get dappActivityDetail => '상세';
+
+  @override
+  String get dappActivitySite => '웹사이트';
+
+  @override
+  String get dappActivityTime => '시간';
+
+  @override
+  String get dappActivityVia => '연결 방식';
+
+  @override
+  String get dappActivityViaWalletConnect => 'QR 코드 스캔 (WalletConnect)';
+
+  @override
+  String get dappActivityWalletLabel => '지갑';
+
+  @override
+  String get dappActivityTxId => '거래 ID';
+
+  @override
+  String get dappActivityCopied => '복사됨';
+
+  @override
+  String get dappActivityResult => '결과';
+
+  @override
+  String get dappRequestSigningWallet => '서명할 지갑';
+
+  @override
+  String get dappRequestLoading => '요청 확인 중…';
+
+  @override
+  String get dappRequestInvalid => '이 요청을 읽을 수 없어 거절했습니다.';
+
+  @override
+  String get dappRequestSign => '서명';
+
+  @override
+  String get dappRequestHoldToSign => '길게 눌러 서명';
+
+  @override
+  String get dappRequestAcceptRisk => '위험을 이해했으며 서명하겠습니다';
+
+  @override
+  String get dappRequestBlocked => '자금을 보호하기 위해 Benny Wallet이 이 요청을 차단했습니다.';
+
+  @override
+  String get dappRequestDone => '서명했습니다. 웹사이트로 돌아가세요.';
+
+  @override
+  String get dappRequestSent => '전송했습니다. 웹사이트로 돌아가세요.';
+
+  @override
+  String dappRequestFailed(String error) {
+    return '서명 실패: $error';
+  }
+
+  @override
+  String get dappRequestRejected => '요청을 거절했습니다';
+
+  @override
+  String get dappAuthReason => '서명 확인';
+
+  @override
+  String get dappPinTitle => '서명하려면 PIN 입력';
+
+  @override
+  String get dappTrustSafe => '정상으로 보입니다';
+
+  @override
+  String get dappTrustCaution => '주의해서 확인하세요';
+
+  @override
+  String get dappTrustDanger => '고위험';
+
+  @override
+  String get dappTrustBlocked => '차단됨';
+
+  @override
+  String get dappWarnSiteScam => '알려진 사기 웹사이트입니다.';
+
+  @override
+  String get dappWarnSiteMismatch => '웹사이트 주소가 스스로 밝힌 앱과 일치하지 않습니다.';
+
+  @override
+  String get dappWarnSiteUnknown => '이 웹사이트를 확인할 수 없습니다.';
+
+  @override
+  String get dappWarnMessageUnreadable =>
+      '메시지가 읽을 수 있는 글이 아니어서 무엇에 서명하는지 알 수 없습니다.';
+
+  @override
+  String get dappWarnMessageIsTransaction =>
+      '이 \'메시지\'는 실제로 거래입니다. 서명하면 자금이 이동할 수 있습니다.';
+
+  @override
+  String get dappWarnSignInOtherSite => '로그인 대상이 요청한 웹사이트와 다릅니다.';
+
+  @override
+  String get dappWarnSignInOtherAccount => '다른 지갑으로 로그인하려는 요청입니다.';
+
+  @override
+  String get dappWarnSignInExpired => '이 로그인 요청은 만료되었습니다.';
+
+  @override
+  String get dappWarnTokenApprove => '다른 계정이 내 토큰을 사용할 수 있도록 허용합니다.';
+
+  @override
+  String get dappWarnSetAuthority => '내 계정 중 하나의 관리 권한을 다른 사람에게 넘깁니다.';
+
+  @override
+  String get dappWarnAssignAccount => '지갑 계정의 소유자를 변경합니다.';
+
+  @override
+  String get dappWarnCloseAccount => '토큰 계정을 닫습니다.';
+
+  @override
+  String get dappWarnAdvanceNonce => '지속 nonce를 사용하므로 서명이 사용될 때까지 유효합니다.';
+
+  @override
+  String get dappWarnUnknownProgram => 'Benny Wallet이 알지 못하는 프로그램을 호출합니다.';
+
+  @override
+  String get dappWarnBlockedProgram =>
+      'Benny Wallet 차단 목록에 있는 위험한 프로그램을 호출합니다. 서명할 수 없습니다.';
+
+  @override
+  String get dappWarnUnresolvedAccounts => '일부 계정을 조회할 수 없습니다.';
+
+  @override
+  String get dappWarnSimulationFailed => '시뮬레이션에서 거래가 실패합니다.';
+
+  @override
+  String get dappWarnSimulationUnavailable => '잔액 변화를 예측할 수 없습니다.';
+
+  @override
+  String get dappWarnHighSlippage => '아무것도 돌려받지 못할 수 있는 스왑을 허용합니다.';
+
+  @override
+  String dappRequestQueued(int count) {
+    return '대기 중인 요청 $count건';
+  }
+
+  @override
+  String airGapSignFromSite(String site) {
+    return '이 요청은 웹사이트 $site에서 왔습니다. 서명기에도 사이트가 표시됩니다.';
+  }
+
+  @override
+  String airGapSignFromSiteStep(String site, int current, int total) {
+    return '웹사이트 $site: $total건 중 $current번째 거래';
+  }
+
+  @override
+  String get airGapSignerNoSiteSupport =>
+      '서명기 버전이 오래되어 어느 웹사이트에서 온 요청인지 표시할 수 없습니다. 서명기를 업데이트하세요.';
+
+  @override
+  String signerDappSource(String site) {
+    return '웹사이트 $site에서 온 요청 (지갑이 전달)';
+  }
+
+  @override
+  String get signerDappSiteVerified => '지갑이 이 웹사이트를 확인했습니다.';
+
+  @override
+  String get signerDappSiteUnverified => '지갑이 이 웹사이트를 확인하지 못했습니다.';
+
+  @override
+  String get signerDappSiteMismatch => '웹사이트 주소가 주장하는 것과 다릅니다. 가짜 사이트일 수 있습니다.';
+
+  @override
+  String get signerDappSiteScam => '알려진 사기 사이트입니다. 서명하지 마세요.';
+
+  @override
+  String get signerDappSourceHint => '방금 그 웹사이트에서 직접 한 작업일 때만 서명하세요.';
+
+  @override
+  String signerDappUnknownStep(String program) {
+    return '서명기가 이 단계(프로그램 $program)를 읽을 수 없습니다. 방금 웹사이트에서 직접 한 작업일 때만 서명하세요.';
+  }
+
+  @override
+  String get signerDappSimulation => '지갑이 시뮬레이션한 잔액 변화';
+
+  @override
+  String get signerDappSimulationNone => '네트워크 수수료 외에는 잔액 변화가 없습니다';
+
+  @override
+  String get signerDappSimulationNote =>
+      '지갑이 시뮬레이션한 결과입니다. 서명기는 확인할 수 없으니 참고용으로만 보세요.';
+
+  @override
+  String airGapSignSiteTimeLeft(String time) {
+    return '웹사이트가 $time 더 기다립니다';
+  }
+
+  @override
+  String get airGapSignSiteExpired =>
+      '웹사이트 요청이 만료되었을 수 있습니다. 닫고 웹사이트에서 다시 시작하세요.';
 }

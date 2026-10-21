@@ -10,14 +10,9 @@ enum AppErrorType {
 }
 
 class AppError implements Exception {
-  const AppError({
-    required this.type,
-    required this.message,
-    this.details,
-  });
+  const AppError({required this.type, required this.message, this.details});
 
   final AppErrorType type;
   final String message;
   final Object? details;
 }
-

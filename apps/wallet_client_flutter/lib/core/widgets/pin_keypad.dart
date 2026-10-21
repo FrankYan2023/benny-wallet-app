@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 
 class PinDots extends StatelessWidget {
-  const PinDots({
-    super.key,
-    required this.filledCount,
-    this.length = 6,
-  });
+  const PinDots({super.key, required this.filledCount, this.length = 6});
 
   final int filledCount;
   final int length;

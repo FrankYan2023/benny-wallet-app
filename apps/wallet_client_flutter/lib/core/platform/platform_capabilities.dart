@@ -5,4 +5,3 @@ abstract final class PlatformCapabilities {
   static bool get shouldWarnWebStorageRisk => kIsWeb;
   static bool get shouldOfferShareOnReceive => !kIsWeb;
 }
-

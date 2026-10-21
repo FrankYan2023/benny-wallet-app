@@ -2801,6 +2801,536 @@ class AppLocalizationsZh extends AppLocalizations {
   String airGapSignInSignerShowsText(String device) {
     return '「$device」上會顯示一段英文，開頭是 “Benny Wallet wants you to sign in”，這就是這次登入。更新簽名機後會直接顯示「登入 Benny Wallet」。';
   }
+
+  @override
+  String get dappScanTitle => '连接网站';
+
+  @override
+  String get dappScanHint => '扫描网站上显示的 WalletConnect 二维码';
+
+  @override
+  String get dappPasteLink => '粘贴链接';
+
+  @override
+  String get dappScanNotWalletConnect => '这不是 WalletConnect 二维码';
+
+  @override
+  String get dappConnecting => '正在连接…';
+
+  @override
+  String get dappPairFailed => '连接失败，请在网站上刷新二维码再试。';
+
+  @override
+  String get dappNotConfigured => '这个版本不支持连接网站。';
+
+  @override
+  String get dappProposalTitle => '连接网站';
+
+  @override
+  String dappProposalWants(String site) {
+    return '$site 请求连接你的钱包';
+  }
+
+  @override
+  String get dappProposalCanDo => '连接后网站可以：';
+
+  @override
+  String get dappProposalSeeAddress => '查看你的钱包地址';
+
+  @override
+  String get dappProposalRequestSign => '请求你确认交易和消息签名';
+
+  @override
+  String get dappProposalNoAutoFunds => '网站不能自己动用资金，每一笔都要你确认。';
+
+  @override
+  String get dappProposalWallet => '钱包';
+
+  @override
+  String get dappProposalNoEligibleWallet => '你目前没有可以连接网站的钱包。外部钱包会在后续版本支持。';
+
+  @override
+  String get dappProposalOnlySolana => 'Benny Wallet 只支持 Solana，这个网站要求连接其他网络。';
+
+  @override
+  String get dappProposalUnsupportedChain =>
+      '这个网站要求连接 Solana 测试网，Benny Wallet 只支持 Solana 主网。';
+
+  @override
+  String get dappConnect => '连接';
+
+  @override
+  String get dappReject => '拒绝';
+
+  @override
+  String dappConnected(String site) {
+    return '已连接 $site';
+  }
+
+  @override
+  String get dappSiteVerified => '已验证';
+
+  @override
+  String get dappSiteUnknown => '未验证';
+
+  @override
+  String get dappSiteMismatch => '域名不匹配';
+
+  @override
+  String get dappSiteScam => '已知诈骗网站';
+
+  @override
+  String get dappSitesTitle => '已连接网站';
+
+  @override
+  String get dappSitesEmpty => '还没有连接网站。在网站上扫描 WalletConnect 二维码即可连接。';
+
+  @override
+  String get dappSitesDisconnect => '断开';
+
+  @override
+  String get dappSitesDisconnectAll => '全部断开';
+
+  @override
+  String get dappSitesDisconnectAllConfirm => '要断开所有钱包上的全部网站吗？';
+
+  @override
+  String dappSitesExpires(String date) {
+    return '$date 到期';
+  }
+
+  @override
+  String dappSitesWallet(String name) {
+    return '钱包：$name';
+  }
+
+  @override
+  String dappSitesBanner(int count) {
+    return '已连接 $count 个网站';
+  }
+
+  @override
+  String get dappRequestTitle => '签名请求';
+
+  @override
+  String get dappRequestSignMessage => '签名一条消息';
+
+  @override
+  String dappRequestSignIn(String domain) {
+    return '登录 $domain';
+  }
+
+  @override
+  String get dappRequestTransaction => '确认交易';
+
+  @override
+  String dappRequestTransactions(int count) {
+    return '确认 $count 笔交易';
+  }
+
+  @override
+  String get dappRequestSendNote => '签名后由 Benny Wallet 发送。';
+
+  @override
+  String get dappRequestBalanceChanges => '预计余额变化';
+
+  @override
+  String get dappRequestNoBalanceChange => '除网络费外，这个钱包余额不变';
+
+  @override
+  String get dappRequestNetworkFee => '网络费';
+
+  @override
+  String get dappRequestMessage => '消息内容';
+
+  @override
+  String get dappRequestDetails => '详情';
+
+  @override
+  String get dappRequestPrograms => '调用的程序';
+
+  @override
+  String get dappActionTitle => '这笔交易会做什么';
+
+  @override
+  String get browserTitle => '浏览器';
+
+  @override
+  String get browserAddressHint => '输入网址，例如 jup.ag';
+
+  @override
+  String get browserReload => '刷新';
+
+  @override
+  String get browserHome => '首页';
+
+  @override
+  String get browserHomeHint =>
+      '输入网址打开网站。在网站上点「连接钱包」并选择 Benny Wallet 即可连接，不用跳转，也不用再解锁。';
+
+  @override
+  String get browserNotConnected => '未连接';
+
+  @override
+  String browserConnectedAs(String wallet) {
+    return '已连接：$wallet';
+  }
+
+  @override
+  String get browserInvalidUrl => '网址无效';
+
+  @override
+  String get browserOpen => '打开';
+
+  @override
+  String get browserBookmarks => '收藏夹';
+
+  @override
+  String get browserBookmark => '收藏';
+
+  @override
+  String get browserBookmarked => '已收藏';
+
+  @override
+  String get browserBookmarkRemoved => '已取消收藏';
+
+  @override
+  String get browserBookmarkRemove => '删除';
+
+  @override
+  String get browserBookmarksEmpty => '打开网页后，点地址栏里的星标即可收藏。收藏只保存在这台手机上，不会同步。';
+
+  @override
+  String get browserBookmarksLocal => '只保存在这台手机上，不同步。';
+
+  @override
+  String get browserBack => '后退';
+
+  @override
+  String get browserForward => '前进';
+
+  @override
+  String get browserCopyLink => '复制链接';
+
+  @override
+  String get browserHomeTagline => '通往 Solana 应用的入口';
+
+  @override
+  String get browserBennyFeatures => 'Benny Apps';
+
+  @override
+  String get browserComingSoon => '即将到来';
+
+  @override
+  String get browserPopular => '推荐';
+
+  @override
+  String get browserYourSites => '连接过的网站';
+
+  @override
+  String get dappColdSwapNotice =>
+      '这笔兑换交易大约 1 分钟内就会过期，冷钱包常常来不及签完。用冷钱包兑换，建议改用 Benny 内置的「兑换」：过期时会自动重新报价。';
+
+  @override
+  String get dappActionSwap => '兑换';
+
+  @override
+  String get dappActionTransfer => '转账';
+
+  @override
+  String get dappActionStake => '质押';
+
+  @override
+  String get dappActionLend => '借贷';
+
+  @override
+  String get dappActionPerps => '合约交易';
+
+  @override
+  String get dappActionNft => 'NFT 交易';
+
+  @override
+  String get dappActionOther => '其他操作';
+
+  @override
+  String dappActionVia(String protocol) {
+    return '通过 $protocol';
+  }
+
+  @override
+  String get dappActionPay => '你付出';
+
+  @override
+  String get dappActionReceive => '你收到';
+
+  @override
+  String get dappActionUnknownHint => 'Benny 看不懂这些程序在做什么。只有你刚在网站上亲手发起时才签。';
+
+  @override
+  String dappActionUnknownPrograms(int count) {
+    return '未识别的程序（$count 个）';
+  }
+
+  @override
+  String get dappActivityTitle => '历史连接';
+
+  @override
+  String get dappActivityNote =>
+      '只保存在这台手机上，不上传云端，也不会备份。只记录网站、操作和金额，不记录消息内容或你的个人信息。';
+
+  @override
+  String get dappActivityEmpty => '还没有网站活动。';
+
+  @override
+  String get dappActivityClear => '清除记录';
+
+  @override
+  String get dappActivityClearConfirm => '要清除这台手机上的所有网站活动记录吗？';
+
+  @override
+  String dappActivityCount(int count) {
+    return '$count 条记录';
+  }
+
+  @override
+  String get dappActivityConnected => '已连接';
+
+  @override
+  String get dappActivityConnectRejected => '已拒绝连接';
+
+  @override
+  String get dappActivityMessage => '消息签名';
+
+  @override
+  String get dappActivitySigned => '已签名';
+
+  @override
+  String get dappActivitySent => '已发送';
+
+  @override
+  String get dappActivityRejected => '已拒绝';
+
+  @override
+  String get dappActivityFailed => '失败';
+
+  @override
+  String get dappActivityViewTx => '在 Solscan 查看';
+
+  @override
+  String get dappActivityViaPhone => '本机 App';
+
+  @override
+  String get dappActivityInBrowser => '内置浏览器';
+
+  @override
+  String dappActivityWallet(String wallet) {
+    return '钱包 $wallet';
+  }
+
+  @override
+  String get dappActivityDisconnected => '已断开';
+
+  @override
+  String dappSitesLastUsed(String date) {
+    return '最近使用 $date';
+  }
+
+  @override
+  String get dappActivityDetail => '明细';
+
+  @override
+  String get dappActivitySite => '网站';
+
+  @override
+  String get dappActivityTime => '时间';
+
+  @override
+  String get dappActivityVia => '连接方式';
+
+  @override
+  String get dappActivityViaWalletConnect => '扫码连接（WalletConnect）';
+
+  @override
+  String get dappActivityWalletLabel => '钱包';
+
+  @override
+  String get dappActivityTxId => '交易号';
+
+  @override
+  String get dappActivityCopied => '已复制';
+
+  @override
+  String get dappActivityResult => '结果';
+
+  @override
+  String get dappRequestSigningWallet => '签名钱包';
+
+  @override
+  String get dappRequestLoading => '正在检查请求…';
+
+  @override
+  String get dappRequestInvalid => '无法读取这个请求，已自动拒绝。';
+
+  @override
+  String get dappRequestSign => '签名';
+
+  @override
+  String get dappRequestHoldToSign => '长按签名';
+
+  @override
+  String get dappRequestAcceptRisk => '我了解风险，仍要签名';
+
+  @override
+  String get dappRequestBlocked => '为保护你的资金，Benny Wallet 已拦截这个请求。';
+
+  @override
+  String get dappRequestDone => '已签名，请回到网站。';
+
+  @override
+  String get dappRequestSent => '已发送，请回到网站。';
+
+  @override
+  String dappRequestFailed(String error) {
+    return '签名失败：$error';
+  }
+
+  @override
+  String get dappRequestRejected => '已拒绝请求';
+
+  @override
+  String get dappAuthReason => '确认签名';
+
+  @override
+  String get dappPinTitle => '输入 PIN 码签名';
+
+  @override
+  String get dappTrustSafe => '看起来正常';
+
+  @override
+  String get dappTrustCaution => '请仔细核对';
+
+  @override
+  String get dappTrustDanger => '高风险';
+
+  @override
+  String get dappTrustBlocked => '已拦截';
+
+  @override
+  String get dappWarnSiteScam => '这是已知的诈骗网站。';
+
+  @override
+  String get dappWarnSiteMismatch => '网站地址和它自称的应用不一致。';
+
+  @override
+  String get dappWarnSiteUnknown => '无法验证这个网站。';
+
+  @override
+  String get dappWarnMessageUnreadable => '消息不是可读文字，你无法知道自己签的是什么。';
+
+  @override
+  String get dappWarnMessageIsTransaction => '这条「消息」其实是一笔交易，签了可能会转走你的资金。';
+
+  @override
+  String get dappWarnSignInOtherSite => '登录对象和发出请求的网站不是同一个。';
+
+  @override
+  String get dappWarnSignInOtherAccount => '登录的是另一个钱包。';
+
+  @override
+  String get dappWarnSignInExpired => '这个登录请求已过期。';
+
+  @override
+  String get dappWarnTokenApprove => '允许其他账户动用你的代币。';
+
+  @override
+  String get dappWarnSetAuthority => '把你某个账户的控制权交给别人。';
+
+  @override
+  String get dappWarnAssignAccount => '更改你钱包账户的所有者。';
+
+  @override
+  String get dappWarnCloseAccount => '关闭一个代币账户。';
+
+  @override
+  String get dappWarnAdvanceNonce => '使用了持久随机数，签名会一直有效直到被使用。';
+
+  @override
+  String get dappWarnUnknownProgram => '调用了 Benny Wallet 不认识的程序。';
+
+  @override
+  String get dappWarnBlockedProgram => '调用了 Benny Wallet 黑名单上的危险程序，不能签名。';
+
+  @override
+  String get dappWarnUnresolvedAccounts => '部分账户无法查询。';
+
+  @override
+  String get dappWarnSimulationFailed => '模拟执行时交易失败。';
+
+  @override
+  String get dappWarnSimulationUnavailable => '无法预估余额变化。';
+
+  @override
+  String get dappWarnHighSlippage => '允许一笔可能什么都换不回来的兑换。';
+
+  @override
+  String dappRequestQueued(int count) {
+    return '还有 $count 个请求在排队';
+  }
+
+  @override
+  String airGapSignFromSite(String site) {
+    return '這筆請求來自網站 $site，簽名機上也會顯示網站名稱。';
+  }
+
+  @override
+  String airGapSignFromSiteStep(String site, int current, int total) {
+    return '來自網站 $site：第 $current/$total 筆';
+  }
+
+  @override
+  String get airGapSignerNoSiteSupport => '簽名機版本較舊，看不到網站來源。建議先更新簽名機。';
+
+  @override
+  String signerDappSource(String site) {
+    return '來自網站 $site（由錢包轉交）';
+  }
+
+  @override
+  String get signerDappSiteVerified => '錢包已驗證這個網站。';
+
+  @override
+  String get signerDappSiteUnverified => '錢包無法驗證這個網站。';
+
+  @override
+  String get signerDappSiteMismatch => '網站地址和它聲稱的不符，可能是假冒網站。';
+
+  @override
+  String get signerDappSiteScam => '這是已知的詐騙網站，不要簽。';
+
+  @override
+  String get signerDappSourceHint => '只有你剛在這個網站上親手操作時才簽。';
+
+  @override
+  String signerDappUnknownStep(String program) {
+    return '簽名機看不懂這一步（程式 $program）。只有你剛在網站上親手操作時才簽。';
+  }
+
+  @override
+  String get signerDappSimulation => '錢包模擬的餘額變化';
+
+  @override
+  String get signerDappSimulationNone => '除網路費外沒有餘額變化';
+
+  @override
+  String get signerDappSimulationNote => '由錢包模擬，簽名機無法核對，僅供參考。';
+
+  @override
+  String airGapSignSiteTimeLeft(String time) {
+    return '網站還會等 $time';
+  }
+
+  @override
+  String get airGapSignSiteExpired => '網站的請求可能已過期，請關閉後回到網站重新發起。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -5600,4 +6130,534 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String airGapSignInSignerShowsText(String device) {
     return '「$device」上會顯示一段英文，開頭是 “Benny Wallet wants you to sign in”，這就是這次登入。更新簽名機後會直接顯示「登入 Benny Wallet」。';
   }
+
+  @override
+  String get dappScanTitle => '連接網站';
+
+  @override
+  String get dappScanHint => '掃描網站上顯示的 WalletConnect QR 碼';
+
+  @override
+  String get dappPasteLink => '貼上連結';
+
+  @override
+  String get dappScanNotWalletConnect => '這不是 WalletConnect QR 碼';
+
+  @override
+  String get dappConnecting => '正在連接…';
+
+  @override
+  String get dappPairFailed => '連接失敗，請在網站上重新產生 QR 碼再試。';
+
+  @override
+  String get dappNotConfigured => '這個版本不支援連接網站。';
+
+  @override
+  String get dappProposalTitle => '連接網站';
+
+  @override
+  String dappProposalWants(String site) {
+    return '$site 請求連接你的錢包';
+  }
+
+  @override
+  String get dappProposalCanDo => '連接後網站可以：';
+
+  @override
+  String get dappProposalSeeAddress => '查看你的錢包地址';
+
+  @override
+  String get dappProposalRequestSign => '請求你確認交易和訊息簽名';
+
+  @override
+  String get dappProposalNoAutoFunds => '網站不能自行動用資金，每一筆都需要你確認。';
+
+  @override
+  String get dappProposalWallet => '錢包';
+
+  @override
+  String get dappProposalNoEligibleWallet => '你目前沒有可以連接網站的錢包。外部錢包會在後續版本支援。';
+
+  @override
+  String get dappProposalOnlySolana => 'Benny Wallet 只支援 Solana，這個網站要求連接其他網路。';
+
+  @override
+  String get dappProposalUnsupportedChain =>
+      '這個網站要求連接 Solana 測試網，Benny Wallet 只支援 Solana 主網。';
+
+  @override
+  String get dappConnect => '連接';
+
+  @override
+  String get dappReject => '拒絕';
+
+  @override
+  String dappConnected(String site) {
+    return '已連接 $site';
+  }
+
+  @override
+  String get dappSiteVerified => '已驗證';
+
+  @override
+  String get dappSiteUnknown => '未驗證';
+
+  @override
+  String get dappSiteMismatch => '網域不符';
+
+  @override
+  String get dappSiteScam => '已知詐騙網站';
+
+  @override
+  String get dappSitesTitle => '已連接網站';
+
+  @override
+  String get dappSitesEmpty => '還沒有連接網站。在網站上掃描 WalletConnect QR 碼即可連接。';
+
+  @override
+  String get dappSitesDisconnect => '中斷連接';
+
+  @override
+  String get dappSitesDisconnectAll => '全部中斷';
+
+  @override
+  String get dappSitesDisconnectAllConfirm => '要中斷所有錢包上的全部網站嗎？';
+
+  @override
+  String dappSitesExpires(String date) {
+    return '$date 到期';
+  }
+
+  @override
+  String dappSitesWallet(String name) {
+    return '錢包：$name';
+  }
+
+  @override
+  String dappSitesBanner(int count) {
+    return '已連接 $count 個網站';
+  }
+
+  @override
+  String get dappRequestTitle => '簽名請求';
+
+  @override
+  String get dappRequestSignMessage => '簽署一則訊息';
+
+  @override
+  String dappRequestSignIn(String domain) {
+    return '登入 $domain';
+  }
+
+  @override
+  String get dappRequestTransaction => '確認交易';
+
+  @override
+  String dappRequestTransactions(int count) {
+    return '確認 $count 筆交易';
+  }
+
+  @override
+  String get dappRequestSendNote => '簽名後由 Benny Wallet 發送。';
+
+  @override
+  String get dappRequestBalanceChanges => '預估餘額變化';
+
+  @override
+  String get dappRequestNoBalanceChange => '除網路費外，這個錢包餘額不變';
+
+  @override
+  String get dappRequestNetworkFee => '網路費';
+
+  @override
+  String get dappRequestMessage => '訊息內容';
+
+  @override
+  String get dappRequestDetails => '詳情';
+
+  @override
+  String get dappRequestPrograms => '呼叫的程式';
+
+  @override
+  String get dappActionTitle => '這筆交易會做什麼';
+
+  @override
+  String get browserTitle => '瀏覽器';
+
+  @override
+  String get browserAddressHint => '輸入網址，例如 jup.ag';
+
+  @override
+  String get browserReload => '重新整理';
+
+  @override
+  String get browserHome => '首頁';
+
+  @override
+  String get browserHomeHint =>
+      '輸入網址打開網站。在網站上點「連接錢包」並選擇 Benny Wallet 即可連接，不用跳轉，也不用再解鎖。';
+
+  @override
+  String get browserNotConnected => '未連接';
+
+  @override
+  String browserConnectedAs(String wallet) {
+    return '已連接：$wallet';
+  }
+
+  @override
+  String get browserInvalidUrl => '網址無效';
+
+  @override
+  String get browserOpen => '打開';
+
+  @override
+  String get browserBookmarks => '收藏夾';
+
+  @override
+  String get browserBookmark => '收藏';
+
+  @override
+  String get browserBookmarked => '已收藏';
+
+  @override
+  String get browserBookmarkRemoved => '已取消收藏';
+
+  @override
+  String get browserBookmarkRemove => '刪除';
+
+  @override
+  String get browserBookmarksEmpty => '打開網頁後，點網址列裡的星標即可收藏。收藏只保存在這台手機上，不會同步。';
+
+  @override
+  String get browserBookmarksLocal => '只保存在這台手機上，不同步。';
+
+  @override
+  String get browserBack => '上一頁';
+
+  @override
+  String get browserForward => '下一頁';
+
+  @override
+  String get browserCopyLink => '複製連結';
+
+  @override
+  String get browserHomeTagline => '通往 Solana 應用的入口';
+
+  @override
+  String get browserBennyFeatures => 'Benny Apps';
+
+  @override
+  String get browserComingSoon => '即將到來';
+
+  @override
+  String get browserPopular => '推薦';
+
+  @override
+  String get browserYourSites => '連接過的網站';
+
+  @override
+  String get dappColdSwapNotice =>
+      '這筆兌換交易大約 1 分鐘內就會過期，冷錢包常常來不及簽完。用冷錢包兌換，建議改用 Benny 內建的「兌換」：過期時會自動重新報價。';
+
+  @override
+  String get dappActionSwap => '兌換';
+
+  @override
+  String get dappActionTransfer => '轉帳';
+
+  @override
+  String get dappActionStake => '質押';
+
+  @override
+  String get dappActionLend => '借貸';
+
+  @override
+  String get dappActionPerps => '合約交易';
+
+  @override
+  String get dappActionNft => 'NFT 交易';
+
+  @override
+  String get dappActionOther => '其他操作';
+
+  @override
+  String dappActionVia(String protocol) {
+    return '透過 $protocol';
+  }
+
+  @override
+  String get dappActionPay => '你付出';
+
+  @override
+  String get dappActionReceive => '你收到';
+
+  @override
+  String get dappActionUnknownHint => 'Benny 看不懂這些程式在做什麼。只有你剛在網站上親手發起時才簽。';
+
+  @override
+  String dappActionUnknownPrograms(int count) {
+    return '未識別的程式（$count 個）';
+  }
+
+  @override
+  String get dappActivityTitle => '歷史連接';
+
+  @override
+  String get dappActivityNote =>
+      '只保存在這台手機上，不上傳雲端，也不會備份。只記錄網站、操作和金額，不記錄訊息內容或你的個人資料。';
+
+  @override
+  String get dappActivityEmpty => '還沒有網站活動。';
+
+  @override
+  String get dappActivityClear => '清除記錄';
+
+  @override
+  String get dappActivityClearConfirm => '要清除這台手機上的所有網站活動記錄嗎？';
+
+  @override
+  String dappActivityCount(int count) {
+    return '$count 筆記錄';
+  }
+
+  @override
+  String get dappActivityConnected => '已連接';
+
+  @override
+  String get dappActivityConnectRejected => '已拒絕連接';
+
+  @override
+  String get dappActivityMessage => '訊息簽名';
+
+  @override
+  String get dappActivitySigned => '已簽名';
+
+  @override
+  String get dappActivitySent => '已送出';
+
+  @override
+  String get dappActivityRejected => '已拒絕';
+
+  @override
+  String get dappActivityFailed => '失敗';
+
+  @override
+  String get dappActivityViewTx => '在 Solscan 查看';
+
+  @override
+  String get dappActivityViaPhone => '本機 App';
+
+  @override
+  String get dappActivityInBrowser => '內建瀏覽器';
+
+  @override
+  String dappActivityWallet(String wallet) {
+    return '錢包 $wallet';
+  }
+
+  @override
+  String get dappActivityDisconnected => '已斷開';
+
+  @override
+  String dappSitesLastUsed(String date) {
+    return '最近使用 $date';
+  }
+
+  @override
+  String get dappActivityDetail => '明細';
+
+  @override
+  String get dappActivitySite => '網站';
+
+  @override
+  String get dappActivityTime => '時間';
+
+  @override
+  String get dappActivityVia => '連接方式';
+
+  @override
+  String get dappActivityViaWalletConnect => '掃碼連接（WalletConnect）';
+
+  @override
+  String get dappActivityWalletLabel => '錢包';
+
+  @override
+  String get dappActivityTxId => '交易編號';
+
+  @override
+  String get dappActivityCopied => '已複製';
+
+  @override
+  String get dappActivityResult => '結果';
+
+  @override
+  String get dappRequestSigningWallet => '簽名錢包';
+
+  @override
+  String get dappRequestLoading => '正在檢查請求…';
+
+  @override
+  String get dappRequestInvalid => '無法讀取這個請求，已自動拒絕。';
+
+  @override
+  String get dappRequestSign => '簽名';
+
+  @override
+  String get dappRequestHoldToSign => '長按簽名';
+
+  @override
+  String get dappRequestAcceptRisk => '我了解風險，仍要簽名';
+
+  @override
+  String get dappRequestBlocked => '為保護你的資金，Benny Wallet 已攔截這個請求。';
+
+  @override
+  String get dappRequestDone => '已簽名，請回到網站。';
+
+  @override
+  String get dappRequestSent => '已送出，請回到網站。';
+
+  @override
+  String dappRequestFailed(String error) {
+    return '簽名失敗：$error';
+  }
+
+  @override
+  String get dappRequestRejected => '已拒絕請求';
+
+  @override
+  String get dappAuthReason => '確認簽名';
+
+  @override
+  String get dappPinTitle => '輸入 PIN 碼簽名';
+
+  @override
+  String get dappTrustSafe => '看起來正常';
+
+  @override
+  String get dappTrustCaution => '請仔細核對';
+
+  @override
+  String get dappTrustDanger => '高風險';
+
+  @override
+  String get dappTrustBlocked => '已攔截';
+
+  @override
+  String get dappWarnSiteScam => '這是已知的詐騙網站。';
+
+  @override
+  String get dappWarnSiteMismatch => '網站地址和它自稱的應用不一致。';
+
+  @override
+  String get dappWarnSiteUnknown => '無法驗證這個網站。';
+
+  @override
+  String get dappWarnMessageUnreadable => '訊息不是可讀文字，你無法知道自己簽的是什麼。';
+
+  @override
+  String get dappWarnMessageIsTransaction => '這則「訊息」其實是一筆交易，簽了可能會轉走你的資金。';
+
+  @override
+  String get dappWarnSignInOtherSite => '登入對象和發出請求的網站不是同一個。';
+
+  @override
+  String get dappWarnSignInOtherAccount => '登入的是另一個錢包。';
+
+  @override
+  String get dappWarnSignInExpired => '這個登入請求已過期。';
+
+  @override
+  String get dappWarnTokenApprove => '允許其他帳戶動用你的代幣。';
+
+  @override
+  String get dappWarnSetAuthority => '把你某個帳戶的控制權交給別人。';
+
+  @override
+  String get dappWarnAssignAccount => '變更你錢包帳戶的擁有者。';
+
+  @override
+  String get dappWarnCloseAccount => '關閉一個代幣帳戶。';
+
+  @override
+  String get dappWarnAdvanceNonce => '使用了持久隨機數，簽名會一直有效直到被使用。';
+
+  @override
+  String get dappWarnUnknownProgram => '呼叫了 Benny Wallet 不認識的程式。';
+
+  @override
+  String get dappWarnBlockedProgram => '呼叫了 Benny Wallet 黑名單上的危險程式，不能簽名。';
+
+  @override
+  String get dappWarnUnresolvedAccounts => '部分帳戶無法查詢。';
+
+  @override
+  String get dappWarnSimulationFailed => '模擬執行時交易失敗。';
+
+  @override
+  String get dappWarnSimulationUnavailable => '無法預估餘額變化。';
+
+  @override
+  String get dappWarnHighSlippage => '允許一筆可能什麼都換不回來的兌換。';
+
+  @override
+  String dappRequestQueued(int count) {
+    return '還有 $count 個請求在排隊';
+  }
+
+  @override
+  String airGapSignFromSite(String site) {
+    return '這筆請求來自網站 $site，簽名機上也會顯示網站名稱。';
+  }
+
+  @override
+  String airGapSignFromSiteStep(String site, int current, int total) {
+    return '來自網站 $site：第 $current/$total 筆';
+  }
+
+  @override
+  String get airGapSignerNoSiteSupport => '簽名機版本較舊，看不到網站來源。建議先更新簽名機。';
+
+  @override
+  String signerDappSource(String site) {
+    return '來自網站 $site（由錢包轉交）';
+  }
+
+  @override
+  String get signerDappSiteVerified => '錢包已驗證這個網站。';
+
+  @override
+  String get signerDappSiteUnverified => '錢包無法驗證這個網站。';
+
+  @override
+  String get signerDappSiteMismatch => '網站地址和它聲稱的不符，可能是假冒網站。';
+
+  @override
+  String get signerDappSiteScam => '這是已知的詐騙網站，不要簽。';
+
+  @override
+  String get signerDappSourceHint => '只有你剛在這個網站上親手操作時才簽。';
+
+  @override
+  String signerDappUnknownStep(String program) {
+    return '簽名機看不懂這一步（程式 $program）。只有你剛在網站上親手操作時才簽。';
+  }
+
+  @override
+  String get signerDappSimulation => '錢包模擬的餘額變化';
+
+  @override
+  String get signerDappSimulationNone => '除網路費外沒有餘額變化';
+
+  @override
+  String get signerDappSimulationNote => '由錢包模擬，簽名機無法核對，僅供參考。';
+
+  @override
+  String airGapSignSiteTimeLeft(String time) {
+    return '網站還會等 $time';
+  }
+
+  @override
+  String get airGapSignSiteExpired => '網站的請求可能已過期，請關閉後回到網站重新發起。';
 }

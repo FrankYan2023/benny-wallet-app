@@ -22,7 +22,18 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(options: options);
   }
+  if (isDappRequestPush(message.data) && message.notification == null) {
+    await LocalNotificationService().showDappRequestNotification(
+      languageCode: PlatformDispatcher.instance.locale.languageCode,
+    );
+  }
 }
+
+/// A WalletConnect push (Reown's push server): a connected website sent a
+/// request. It carries the request encrypted, keyed by the session topic.
+bool isDappRequestPush(Map<String, dynamic> data) =>
+    data['topic'] is String &&
+    (data.containsKey('blob') || data.containsKey('message'));
 
 /// A wallet to register for incoming-funds push, with the backend auth
 /// headers of that wallet's own session (the backend binds the device row to
@@ -425,6 +436,11 @@ class PushNotificationService {
   }
 
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
+    // The app is open: the website's request arrives over WalletConnect
+    // itself and opens its review page.
+    if (isDappRequestPush(message.data)) {
+      return;
+    }
     await _recordMessage(message);
     final title = message.notification?.title ?? 'Funds received';
     final body = message.notification?.body ?? _bodyFromData(message.data);

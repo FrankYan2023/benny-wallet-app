@@ -330,6 +330,28 @@ class _SignerReviewPageState extends State<SignerReviewPage> {
     if (_extraOutflows.isNotEmpty) {
       add(l10n.signerExtraOutflow, danger);
     }
+    // A website's request: what the wallet said about the site, and each
+    // program the signer cannot read, named so the user knows what it is.
+    if (_source case final source?) {
+      if (source.check == AirGapSiteCheck.scam) {
+        add(l10n.signerDappSiteScam, danger, Icons.gpp_bad_rounded);
+      } else if (source.check == AirGapSiteCheck.mismatch) {
+        add(l10n.signerDappSiteMismatch, danger, Icons.gpp_bad_rounded);
+      }
+      final unread = {
+        for (final i in _instructions)
+          if (i.kind == ParsedInstructionKind.unknown &&
+              i.risk == InstructionRisk.danger)
+            i.programId,
+      };
+      for (final program in unread) {
+        add(
+          l10n.signerDappUnknownStep(shortAddress(program)),
+          danger,
+          Icons.help_outline_rounded,
+        );
+      }
+    }
     // Any other step the signer flags as dangerous.
     if (!out.any((w) => w.level == danger) &&
         _instructions.any((i) => i.risk == InstructionRisk.danger)) {
@@ -359,6 +381,9 @@ class _SignerReviewPageState extends State<SignerReviewPage> {
   }();
 
   TxTrust? get _tokenTrust => _headline?.tokenTrust(_tokens);
+
+  /// The website the request came from, as the wallet reports it.
+  AirGapDappSource? get _source => _review.request.dappSource;
 
   SolanaSignInMessage? get _signIn => _review.signIn;
 
@@ -516,12 +541,15 @@ class _SignerReviewPageState extends State<SignerReviewPage> {
     ];
     final headline = _headline;
     final trust = _trust;
+    final source = _source;
+    final simulation = tx == null ? null : _review.request.simulation;
     final page = SignerScaffold(
       title: _signInVerdict == null
           ? l10n.signerReviewTitle
           : l10n.signerSignInTitle,
       transparent: trust != null,
       children: [
+        if (source != null) ...[_DappSourceCard(source: source), signerGap],
         if (headline != null) ...[
           _HeadlineCard(
             headline: headline,
@@ -538,6 +566,10 @@ class _SignerReviewPageState extends State<SignerReviewPage> {
           signerGap,
         ],
         for (final notice in notices) ...[notice, signerGap],
+        if (simulation != null) ...[
+          _SimulationCard(simulation: simulation, tokens: _tokens),
+          signerGap,
+        ],
         if (tx != null && _otherSteps(tx).isNotEmpty) ...[
           SignerSection(
             label: headline == null
@@ -619,6 +651,119 @@ class _SignerReviewPageState extends State<SignerReviewPage> {
       return page;
     }
     return CountdownBorder(remaining: 1, color: trust.color, child: page);
+  }
+}
+
+/// Where a website's request came from. The wallet passed this on; the
+/// signer cannot check it, but it tells the user the request did not
+/// start in their own wallet.
+class _DappSourceCard extends StatelessWidget {
+  const _DappSourceCard({required this.source});
+
+  final AirGapDappSource source;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final check = switch (source.check) {
+      AirGapSiteCheck.verified => l10n.signerDappSiteVerified,
+      AirGapSiteCheck.unknown => l10n.signerDappSiteUnverified,
+      AirGapSiteCheck.mismatch => l10n.signerDappSiteMismatch,
+      AirGapSiteCheck.scam => l10n.signerDappSiteScam,
+    };
+    final tone = switch (source.check) {
+      AirGapSiteCheck.verified => SignerTone.info,
+      AirGapSiteCheck.unknown => SignerTone.warm,
+      AirGapSiteCheck.mismatch || AirGapSiteCheck.scam => SignerTone.danger,
+    };
+    return SignerNotice(
+      icon: Icons.language_rounded,
+      tone: tone,
+      text: [
+        l10n.signerDappSource(source.host),
+        check,
+        l10n.signerDappSourceHint,
+      ].join('\n'),
+    );
+  }
+}
+
+/// The wallet's simulated balance changes for a website's transaction,
+/// shown as its estimate: the signer cannot run the chain to check them.
+class _SimulationCard extends StatelessWidget {
+  const _SimulationCard({required this.simulation, required this.tokens});
+
+  final AirGapSimulation simulation;
+  final TokenRegistry tokens;
+
+  static String _signed(BigInt amount, int decimals) {
+    final text = formatBaseUnits(amount.abs(), decimals);
+    return amount.isNegative ? '-$text' : '+$text';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final rows = <(String, String, bool)>[
+      if (simulation.lamports != BigInt.zero)
+        (
+          'SOL',
+          _signed(simulation.lamports, 9),
+          simulation.lamports.isNegative,
+        ),
+      for (final change in simulation.tokens)
+        if (change.amount != BigInt.zero)
+          () {
+            final mint = base58encode(change.mint);
+            final resolved = tokens.resolve(mint);
+            // A name only the wallet vouches for is marked with "?".
+            final token = resolved.token;
+            final symbol = token == null
+                ? shortAddress(mint)
+                : resolved.isVerified
+                ? token.symbol
+                : '${token.symbol}?';
+            final decimals = resolved.decimals ?? 0;
+            return (
+              symbol,
+              _signed(change.amount, decimals),
+              change.amount.isNegative,
+            );
+          }(),
+    ];
+    return SignerSection(
+      label: l10n.signerDappSimulation,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final (symbol, amount, out) in rows)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              child: Row(
+                children: [
+                  Expanded(child: Text(symbol)),
+                  Text(
+                    amount,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: out ? AppColors.danger : AppColors.success,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (rows.isEmpty) Text(l10n.signerDappSimulationNone),
+          const SizedBox(height: 6),
+          Text(
+            l10n.signerDappSimulationNote,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
