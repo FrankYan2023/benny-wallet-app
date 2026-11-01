@@ -67,7 +67,7 @@ class _PinPromptDialogState extends State<PinPromptDialog> {
                   widget.title!,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -76,7 +76,7 @@ class _PinPromptDialogState extends State<PinPromptDialog> {
                 context.l10n.unlockEnterPin,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 18),

@@ -121,7 +121,7 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
                           Text(
                             l10n.rentAccountsToClose,
                             style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 14),
@@ -174,7 +174,7 @@ class _RentReclaimPageState extends ConsumerState<RentReclaimPage> {
                         Text(
                           l10n.rentReclaimingRent,
                           style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -565,7 +565,7 @@ class _SummaryRow extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: 8),
@@ -593,7 +593,7 @@ class _ClosableAccountRow extends StatelessWidget {
               Text(
                 account.symbol,
                 style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 2),
@@ -620,7 +620,7 @@ class _ClosableAccountRow extends StatelessWidget {
         Text(
           '${Formatters.amount(account.rentLamports / lamportsPerSol)} SOL',
           style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],

@@ -289,7 +289,7 @@ class _SendHistoryTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -324,7 +324,7 @@ class _SendHistoryTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -332,7 +332,7 @@ class _SendHistoryTile extends StatelessWidget {
                     _statusLabel(l10n, item),
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: statusColor,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],
@@ -383,7 +383,7 @@ class _StatusCard extends StatelessWidget {
                   _statusLabel(l10n, item),
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: color,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -426,7 +426,7 @@ class _TimelinePanel extends StatelessWidget {
           Text(
             l10n.transactionTimeline,
             style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 14),
@@ -509,7 +509,7 @@ class _TimelineEntry extends StatelessWidget {
               Text(
                 title,
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 2),
@@ -571,7 +571,7 @@ class _TokenInfoCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -654,7 +654,7 @@ class _DetailRow extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -765,7 +765,7 @@ class _FallbackTokenIcon extends StatelessWidget {
         initial,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
           color: Colors.white,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );

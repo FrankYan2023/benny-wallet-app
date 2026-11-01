@@ -46,6 +46,7 @@ abstract final class AppConstants {
   static const autoLockOptionKey = 'auto_lock_option';
   static const appLanguageOptionKey = 'app_language_option';
   static const notificationsEnabledKey = 'notifications_enabled';
+  static const priceTrendStyleKey = 'price_trend_style';
   static const lastPushFcmTokenKey = 'last_push_fcm_token_v1';
   static const lastPushWalletPublicKeyKey = 'last_push_wallet_public_key_v1';
   static const lastPushPermissionStatusKey = 'last_push_permission_status_v1';

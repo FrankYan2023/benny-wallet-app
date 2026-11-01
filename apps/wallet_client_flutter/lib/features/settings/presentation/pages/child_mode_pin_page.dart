@@ -175,7 +175,7 @@ class _ChildModePinPageState extends State<ChildModePinPage> {
                           textAlign: TextAlign.center,
                           style: theme.textTheme.headlineSmall?.copyWith(
                             color: const Color(0xFF16364D),
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -194,7 +194,7 @@ class _ChildModePinPageState extends State<ChildModePinPage> {
                             textAlign: TextAlign.center,
                             style: theme.textTheme.titleMedium?.copyWith(
                               color: const Color(0xFF16364D),
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 18),

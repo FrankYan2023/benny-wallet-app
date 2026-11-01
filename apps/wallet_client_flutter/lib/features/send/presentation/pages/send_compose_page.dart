@@ -563,7 +563,7 @@ class _MyWalletPicker extends ConsumerWidget {
         .firstOrNull;
     final nameStyle = theme.textTheme.titleMedium?.copyWith(
       color: WalletPalette.ink,
-      fontWeight: FontWeight.w800,
+      fontWeight: FontWeight.w700,
     );
 
     Widget walletRow(WalletSummary wallet, {required bool showBalance}) {
@@ -738,7 +738,7 @@ class _AmountCard extends StatelessWidget {
               Text(
                 symbol,
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(width: 8),
@@ -754,7 +754,7 @@ class _AmountCard extends StatelessWidget {
                 ),
                 child: Text(
                   context.l10n.commonMax,
-                  style: const TextStyle(fontWeight: FontWeight.w800),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
             ],

@@ -62,26 +62,43 @@ enum AppLanguageOption {
   }
 }
 
+/// Which color marks a rising price.
+enum PriceTrendStyle {
+  greenUp,
+  redUp;
+
+  static PriceTrendStyle fromStorageValue(String? value) {
+    return PriceTrendStyle.values.firstWhere(
+      (style) => style.name == value,
+      orElse: () => PriceTrendStyle.greenUp,
+    );
+  }
+}
+
 class AppSettings {
   const AppSettings({
     this.autoLockOption = AutoLockOption.fiveMinutes,
     this.languageOption = AppLanguageOption.system,
     this.notificationsEnabled = true,
+    this.priceTrendStyle = PriceTrendStyle.greenUp,
   });
 
   final AutoLockOption autoLockOption;
   final AppLanguageOption languageOption;
   final bool notificationsEnabled;
+  final PriceTrendStyle priceTrendStyle;
 
   AppSettings copyWith({
     AutoLockOption? autoLockOption,
     AppLanguageOption? languageOption,
     bool? notificationsEnabled,
+    PriceTrendStyle? priceTrendStyle,
   }) {
     return AppSettings(
       autoLockOption: autoLockOption ?? this.autoLockOption,
       languageOption: languageOption ?? this.languageOption,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      priceTrendStyle: priceTrendStyle ?? this.priceTrendStyle,
     );
   }
 }

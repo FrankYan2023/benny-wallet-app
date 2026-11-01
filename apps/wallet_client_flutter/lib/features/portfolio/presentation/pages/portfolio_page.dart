@@ -10,8 +10,11 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/app_update_gate.dart';
+import '../../../../core/widgets/brand_logo.dart';
 import '../../../../l10n/l10n.dart';
+import '../../../airdrop/domain/airdrop_view_data.dart';
 import '../../../airdrop/presentation/pages/airdrop_page.dart';
+import '../../../airdrop/presentation/providers/airdrop_provider.dart';
 import '../../../asset_detail/presentation/pages/asset_detail_page.dart';
 import '../../../auth/presentation/pages/unlock_page.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
@@ -30,6 +33,7 @@ import '../../../settings/presentation/pages/settings_page.dart';
 import '../../../swap/presentation/pages/swap_page.dart';
 import '../../domain/entities/portfolio_view_data.dart';
 import '../../domain/entities/defi_position_view_data.dart';
+import '../../../token_list/presentation/pages/token_whitelist_page.dart';
 import '../pages/child_wallets_page.dart';
 import '../providers/portfolio_provider.dart';
 import '../../../wallets/presentation/widgets/wallet_switcher_chip.dart';
@@ -216,13 +220,21 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
         travelGuardTooltip: walletState.travelGuardArmed
             ? l10n.travelGuardActiveBadge
             : null,
+        // The logo opens the messages and carries their unread count; the
+        // daily check-in sits beside it in place of the name.
+        leading: _NotificationLogo(
+          count: unreadMessageCount,
+          tooltip: l10n.portfolioMessages,
+          onTap: () => context.push(NotificationsPage.routePath),
+        ),
+        titleWidget: canOpenAirdrop
+            ? _CheckInButton(
+                airdrop: ref.watch(activeAirdropProfileProvider).valueOrNull,
+                tooltip: l10n.airdropTitle,
+                onTap: () => context.push(AirdropPage.routePath),
+              )
+            : const SizedBox.shrink(),
         actions: [
-          if (canOpenAirdrop)
-            IconButton(
-              tooltip: l10n.airdropTitle,
-              onPressed: () => context.push(AirdropPage.routePath),
-              icon: const Icon(Icons.card_giftcard_rounded),
-            ),
           // Stocks live in the swap page's second tab; the shortcut stays
           // only for builds without the general swap.
           if (canOpenXStocks && !canOpenSwap && !walletState.childModeEnabled)
@@ -231,6 +243,12 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
               onPressed: () => context.push(XStocksSwapPage.routePath),
               icon: const Icon(Icons.candlestick_chart_rounded),
             ),
+          // Markets (the whitelist of coins and stocks), left of the children.
+          IconButton(
+            tooltip: l10n.whitelistTitle,
+            onPressed: () => context.push(TokenWhitelistPage.routePath),
+            icon: const Icon(Icons.format_list_bulleted_rounded),
+          ),
           // Child accounts (family); the badge counts them.
           if (!walletState.childModeEnabled)
             _BadgeIconButton(
@@ -275,12 +293,15 @@ class _PortfolioPageState extends ConsumerState<PortfolioPage> {
                 ),
               ),
             ),
-          _BadgeIconButton(
-            tooltip: l10n.portfolioMessages,
-            count: unreadMessageCount,
-            onPressed: () => context.push(NotificationsPage.routePath),
-            icon: Icons.notifications_none_rounded,
-          ),
+          // With the travel guard on, its badge takes the logo's place, so
+          // the messages keep their own button.
+          if (walletState.travelGuardArmed)
+            _BadgeIconButton(
+              tooltip: l10n.portfolioMessages,
+              count: unreadMessageCount,
+              onPressed: () => context.push(NotificationsPage.routePath),
+              icon: Icons.notifications_none_rounded,
+            ),
           IconButton(
             onPressed: () => context.push(SettingsPage.routePath),
             icon: const Icon(Icons.settings_outlined),
@@ -891,6 +912,172 @@ class _TotalPerformance {
 
 /// Top bar icon button with a count badge (unread messages, connected
 /// websites); no badge at zero.
+/// Benny's logo, which opens the messages; unread ones show as a count on
+/// its corner.
+class _NotificationLogo extends StatelessWidget {
+  const _NotificationLogo({
+    required this.count,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  final int count;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Semantics(
+        button: true,
+        label: count > 0 ? '$tooltip ($count)' : tooltip,
+        excludeSemantics: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              const BrandLogo(size: 44, radius: 22),
+              if (count > 0)
+                Positioned(
+                  right: -5,
+                  top: -4,
+                  child: Container(
+                    constraints: const BoxConstraints(minWidth: 19),
+                    height: 19,
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE1582A),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: AppColors.background, width: 2),
+                    ),
+                    child: Text(
+                      count > 99 ? '99+' : '$count',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        height: 1,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The airdrop's daily check-in beside the logo, drawn like the menu's
+/// icons. Until today's check-in is done it hops every couple of seconds.
+class _CheckInButton extends StatefulWidget {
+  const _CheckInButton({
+    required this.airdrop,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  /// Unknown while loading (or without a wallet): the icon sits still.
+  final AirdropProfileViewData? airdrop;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  State<_CheckInButton> createState() => _CheckInButtonState();
+}
+
+class _CheckInButtonState extends State<_CheckInButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2000),
+  );
+
+  // Two hops, the second smaller, in the first quarter; then a rest.
+  late final Animation<double> _lift = TweenSequence<double>([
+    TweenSequenceItem(
+      tween: Tween(
+        begin: 0.0,
+        end: -7.0,
+      ).chain(CurveTween(curve: Curves.easeOut)),
+      weight: 6,
+    ),
+    TweenSequenceItem(
+      tween: Tween(
+        begin: -7.0,
+        end: 0.0,
+      ).chain(CurveTween(curve: Curves.easeIn)),
+      weight: 6,
+    ),
+    TweenSequenceItem(
+      tween: Tween(
+        begin: 0.0,
+        end: -3.0,
+      ).chain(CurveTween(curve: Curves.easeOut)),
+      weight: 4,
+    ),
+    TweenSequenceItem(
+      tween: Tween(
+        begin: -3.0,
+        end: 0.0,
+      ).chain(CurveTween(curve: Curves.easeIn)),
+      weight: 4,
+    ),
+    TweenSequenceItem(tween: ConstantTween(0.0), weight: 80),
+  ]).animate(_controller);
+
+  bool get _pending => widget.airdrop?.canCheckInToday ?? false;
+
+  @override
+  void initState() {
+    super.initState();
+    _update();
+  }
+
+  @override
+  void didUpdateWidget(covariant _CheckInButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _update();
+  }
+
+  void _update() {
+    if (_pending) {
+      if (!_controller.isAnimating) {
+        _controller.repeat();
+      }
+    } else {
+      _controller
+        ..stop()
+        ..value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _lift,
+      builder: (context, child) =>
+          Transform.translate(offset: Offset(0, _lift.value), child: child),
+      child: IconButton(
+        tooltip: widget.tooltip,
+        onPressed: widget.onTap,
+        icon: const Icon(Icons.card_giftcard_rounded),
+      ),
+    );
+  }
+}
+
 class _BadgeIconButton extends StatelessWidget {
   const _BadgeIconButton({
     required this.tooltip,
@@ -932,7 +1119,7 @@ class _BadgeIconButton extends StatelessWidget {
                   color: Colors.white,
                   fontSize: 10,
                   height: 1,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -1016,7 +1203,7 @@ class _PortfolioAssetTabButton extends StatelessWidget {
             color: selected
                 ? theme.colorScheme.onPrimary
                 : theme.colorScheme.onSurface.withValues(alpha: 0.58),
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -1068,7 +1255,7 @@ class _DefiPositionRow extends StatelessWidget {
               _protocolInitials(position.protocol),
               style: theme.textTheme.titleMedium?.copyWith(
                 color: const Color(0xFF9B5C00),
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -1081,7 +1268,7 @@ class _DefiPositionRow extends StatelessWidget {
                   position.protocol,
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: primaryText,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1096,7 +1283,7 @@ class _DefiPositionRow extends StatelessWidget {
                           text: '  $apyText',
                           style: TextStyle(
                             color: const Color(0xFF30A46C),
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                     ],
@@ -1126,7 +1313,7 @@ class _DefiPositionRow extends StatelessWidget {
             Formatters.usd(position.valueUsd),
             style: theme.textTheme.titleLarge?.copyWith(
               color: primaryText,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -1270,7 +1457,7 @@ class _ReceiveSolPromptCard extends StatelessWidget {
             textAlign: TextAlign.center,
             style: theme.textTheme.headlineSmall?.copyWith(
               color: AppColors.primaryStrong.withValues(alpha: 0.72),
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 7),
@@ -1410,7 +1597,7 @@ class _BalanceActionButton extends StatelessWidget {
               style: theme.textTheme.titleMedium?.copyWith(
                 color: foregroundColor,
                 fontSize: 11,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 height: 1.15,
               ),
             ),
@@ -1468,7 +1655,7 @@ class _ValueBreakdownChip extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onPrimary,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
             ),
           ),
           if (showPerformance || reservePerformanceSpace) ...[
@@ -1485,7 +1672,7 @@ class _ValueBreakdownChip extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 fontSize: 11,
                 color: !showPerformance
                     ? Colors.transparent

@@ -2269,8 +2269,20 @@ abstract class AppLocalizations {
   /// No description provided for @assetMintCopied.
   ///
   /// In en, this message translates to:
-  /// **'Mint copied (will clear in 60s)'**
+  /// **'Token address copied (clears in 60s)'**
   String get assetMintCopied;
+
+  /// No description provided for @assetMoreActions.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get assetMoreActions;
+
+  /// No description provided for @assetCopyAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy token address'**
+  String get assetCopyAddress;
 
   /// No description provided for @assetCouldNotOpenWebsite.
   ///
@@ -6105,6 +6117,600 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The website\'s request has probably expired. Close this and start again on the website.'**
   String get airGapSignSiteExpired;
+
+  /// No description provided for @assetChartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Price chart'**
+  String get assetChartTitle;
+
+  /// No description provided for @assetChartDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get assetChartDay;
+
+  /// No description provided for @assetChartWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get assetChartWeek;
+
+  /// No description provided for @assetChartMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get assetChartMonth;
+
+  /// No description provided for @assetChartYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get assetChartYear;
+
+  /// No description provided for @assetChartOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'O'**
+  String get assetChartOpen;
+
+  /// No description provided for @assetChartHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'H'**
+  String get assetChartHigh;
+
+  /// No description provided for @assetChartLow.
+  ///
+  /// In en, this message translates to:
+  /// **'L'**
+  String get assetChartLow;
+
+  /// No description provided for @assetChartClose.
+  ///
+  /// In en, this message translates to:
+  /// **'C'**
+  String get assetChartClose;
+
+  /// No description provided for @assetChartVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Vol'**
+  String get assetChartVolume;
+
+  /// No description provided for @assetChartEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No price history yet.'**
+  String get assetChartEmpty;
+
+  /// No description provided for @assetChartLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the chart.'**
+  String get assetChartLoadFailed;
+
+  /// No description provided for @assetChartUnderlying.
+  ///
+  /// In en, this message translates to:
+  /// **'Underlying {market}'**
+  String assetChartUnderlying(String market);
+
+  /// No description provided for @assetDataSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Data: {source}'**
+  String assetDataSource(String source);
+
+  /// No description provided for @stockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Underlying stock'**
+  String get stockTitle;
+
+  /// No description provided for @stockFundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Underlying fund'**
+  String get stockFundTitle;
+
+  /// No description provided for @stockCompanyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get stockCompanyTitle;
+
+  /// No description provided for @stockUnderlying.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracks'**
+  String get stockUnderlying;
+
+  /// No description provided for @stockPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get stockPrice;
+
+  /// No description provided for @stockChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get stockChange;
+
+  /// No description provided for @stockDayRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Day range'**
+  String get stockDayRange;
+
+  /// No description provided for @stockYearRange.
+  ///
+  /// In en, this message translates to:
+  /// **'52-week range'**
+  String get stockYearRange;
+
+  /// No description provided for @stockVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume'**
+  String get stockVolume;
+
+  /// No description provided for @stockMarketCap.
+  ///
+  /// In en, this message translates to:
+  /// **'Market cap'**
+  String get stockMarketCap;
+
+  /// No description provided for @stockPeRatio.
+  ///
+  /// In en, this message translates to:
+  /// **'P/E (TTM)'**
+  String get stockPeRatio;
+
+  /// No description provided for @stockEps.
+  ///
+  /// In en, this message translates to:
+  /// **'EPS (TTM)'**
+  String get stockEps;
+
+  /// No description provided for @stockRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue (TTM)'**
+  String get stockRevenue;
+
+  /// No description provided for @stockNetIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Net income (TTM)'**
+  String get stockNetIncome;
+
+  /// No description provided for @stockDividendYield.
+  ///
+  /// In en, this message translates to:
+  /// **'Dividend yield'**
+  String get stockDividendYield;
+
+  /// No description provided for @stockFinancialsThrough.
+  ///
+  /// In en, this message translates to:
+  /// **'Financials through {date}'**
+  String stockFinancialsThrough(String date);
+
+  /// No description provided for @stockAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get stockAbout;
+
+  /// No description provided for @stockIndustry.
+  ///
+  /// In en, this message translates to:
+  /// **'Industry'**
+  String get stockIndustry;
+
+  /// No description provided for @stockCeo.
+  ///
+  /// In en, this message translates to:
+  /// **'CEO'**
+  String get stockCeo;
+
+  /// No description provided for @stockFounded.
+  ///
+  /// In en, this message translates to:
+  /// **'Founded'**
+  String get stockFounded;
+
+  /// No description provided for @stockHeadquarters.
+  ///
+  /// In en, this message translates to:
+  /// **'Headquarters'**
+  String get stockHeadquarters;
+
+  /// No description provided for @stockEmployees.
+  ///
+  /// In en, this message translates to:
+  /// **'Employees'**
+  String get stockEmployees;
+
+  /// No description provided for @stockPrivateNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'A private company: there is no stock market price.'**
+  String get stockPrivateNotice;
+
+  /// No description provided for @stockLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load stock details.'**
+  String get stockLoadFailed;
+
+  /// No description provided for @stockShowMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get stockShowMore;
+
+  /// No description provided for @stockShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get stockShowLess;
+
+  /// No description provided for @stockWikipediaLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'Description from Wikipedia, CC BY-SA 4.0'**
+  String get stockWikipediaLicense;
+
+  /// No description provided for @stockTabMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Market'**
+  String get stockTabMarket;
+
+  /// No description provided for @stockTabFundamentals.
+  ///
+  /// In en, this message translates to:
+  /// **'Fundamentals'**
+  String get stockTabFundamentals;
+
+  /// No description provided for @stockTabCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get stockTabCompany;
+
+  /// No description provided for @stockTabFund.
+  ///
+  /// In en, this message translates to:
+  /// **'Fund'**
+  String get stockTabFund;
+
+  /// No description provided for @stockNoFundamentals.
+  ///
+  /// In en, this message translates to:
+  /// **'Financials come from US SEC filings; none are available for this company.'**
+  String get stockNoFundamentals;
+
+  /// No description provided for @stockNoFundamentalsFund.
+  ///
+  /// In en, this message translates to:
+  /// **'Funds don\'t report company financials.'**
+  String get stockNoFundamentalsFund;
+
+  /// No description provided for @stockNoProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'No company profile yet.'**
+  String get stockNoProfile;
+
+  /// No description provided for @stockOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get stockOpen;
+
+  /// No description provided for @stockPrevClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Prev close'**
+  String get stockPrevClose;
+
+  /// No description provided for @stockHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get stockHigh;
+
+  /// No description provided for @stockLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get stockLow;
+
+  /// No description provided for @stock52wHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'52W high'**
+  String get stock52wHigh;
+
+  /// No description provided for @stock52wLow.
+  ///
+  /// In en, this message translates to:
+  /// **'52W low'**
+  String get stock52wLow;
+
+  /// No description provided for @stockPeStatic.
+  ///
+  /// In en, this message translates to:
+  /// **'P/E (FY)'**
+  String get stockPeStatic;
+
+  /// No description provided for @stockPeDynamic.
+  ///
+  /// In en, this message translates to:
+  /// **'P/E (annualized)'**
+  String get stockPeDynamic;
+
+  /// No description provided for @stockPbRatio.
+  ///
+  /// In en, this message translates to:
+  /// **'P/B'**
+  String get stockPbRatio;
+
+  /// No description provided for @stockShares.
+  ///
+  /// In en, this message translates to:
+  /// **'Shares out'**
+  String get stockShares;
+
+  /// No description provided for @stockBookValuePerShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Book value/share'**
+  String get stockBookValuePerShare;
+
+  /// No description provided for @stockLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'Loss'**
+  String get stockLoss;
+
+  /// No description provided for @stockMarketPre.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-market'**
+  String get stockMarketPre;
+
+  /// No description provided for @stockMarketOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Trading'**
+  String get stockMarketOpen;
+
+  /// No description provided for @stockMarketPost.
+  ///
+  /// In en, this message translates to:
+  /// **'After hours'**
+  String get stockMarketPost;
+
+  /// No description provided for @stockMarketClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get stockMarketClosed;
+
+  /// No description provided for @stockTimeZoneEastern.
+  ///
+  /// In en, this message translates to:
+  /// **'ET'**
+  String get stockTimeZoneEastern;
+
+  /// No description provided for @stockQuoteUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The share price is unavailable right now.'**
+  String get stockQuoteUnavailable;
+
+  /// No description provided for @coinVolume24h.
+  ///
+  /// In en, this message translates to:
+  /// **'24h volume'**
+  String get coinVolume24h;
+
+  /// No description provided for @coinTraders24h.
+  ///
+  /// In en, this message translates to:
+  /// **'24h traders'**
+  String get coinTraders24h;
+
+  /// No description provided for @coinChange24h.
+  ///
+  /// In en, this message translates to:
+  /// **'24h change'**
+  String get coinChange24h;
+
+  /// No description provided for @coinAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About {symbol}'**
+  String coinAbout(String symbol);
+
+  /// No description provided for @coinNoDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No description yet.'**
+  String get coinNoDescription;
+
+  /// No description provided for @coinDescriptionLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the description.'**
+  String get coinDescriptionLoadFailed;
+
+  /// No description provided for @coinWhitepaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Whitepaper'**
+  String get coinWhitepaper;
+
+  /// No description provided for @coinLaunched.
+  ///
+  /// In en, this message translates to:
+  /// **'Launched'**
+  String get coinLaunched;
+
+  /// No description provided for @coinCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get coinCategories;
+
+  /// No description provided for @settingsPriceColors.
+  ///
+  /// In en, this message translates to:
+  /// **'Price colors'**
+  String get settingsPriceColors;
+
+  /// No description provided for @settingsPriceColorsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Colors for rising and falling prices'**
+  String get settingsPriceColorsSubtitle;
+
+  /// No description provided for @settingsPriceGreenUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Green up, red down'**
+  String get settingsPriceGreenUp;
+
+  /// No description provided for @settingsPriceRedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Red up, green down'**
+  String get settingsPriceRedUp;
+
+  /// No description provided for @browserTabsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Tabs ({count})'**
+  String browserTabsCount(int count);
+
+  /// No description provided for @browserNewTab.
+  ///
+  /// In en, this message translates to:
+  /// **'New tab'**
+  String get browserNewTab;
+
+  /// No description provided for @browserCloseTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Close tab'**
+  String get browserCloseTab;
+
+  /// No description provided for @coinLiquidity.
+  ///
+  /// In en, this message translates to:
+  /// **'Liquidity'**
+  String get coinLiquidity;
+
+  /// No description provided for @whitelistTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Markets'**
+  String get whitelistTitle;
+
+  /// No description provided for @whitelistCoins.
+  ///
+  /// In en, this message translates to:
+  /// **'Crypto'**
+  String get whitelistCoins;
+
+  /// No description provided for @whitelistStocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Stocks'**
+  String get whitelistStocks;
+
+  /// No description provided for @whitelistSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search name or symbol'**
+  String get whitelistSearchHint;
+
+  /// No description provided for @whitelistTopCoins.
+  ///
+  /// In en, this message translates to:
+  /// **'Top 20 by market cap'**
+  String get whitelistTopCoins;
+
+  /// No description provided for @whitelistTopStocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Top 20 tech stocks by market value'**
+  String get whitelistTopStocks;
+
+  /// No description provided for @whitelistNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching tokens.'**
+  String get whitelistNoResults;
+
+  /// No description provided for @whitelistLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the list.'**
+  String get whitelistLoadFailed;
+
+  /// No description provided for @whitelistMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} matches'**
+  String whitelistMatches(int count);
+
+  /// No description provided for @whitelistMarketCapShort.
+  ///
+  /// In en, this message translates to:
+  /// **'MC'**
+  String get whitelistMarketCapShort;
+
+  /// No description provided for @whitelistPreviousPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous page'**
+  String get whitelistPreviousPage;
+
+  /// No description provided for @whitelistNextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next page'**
+  String get whitelistNextPage;
+
+  /// No description provided for @whitelistStablecoins.
+  ///
+  /// In en, this message translates to:
+  /// **'Stablecoins'**
+  String get whitelistStablecoins;
+
+  /// No description provided for @assetChart15m.
+  ///
+  /// In en, this message translates to:
+  /// **'15m'**
+  String get assetChart15m;
+
+  /// No description provided for @assetChart1h.
+  ///
+  /// In en, this message translates to:
+  /// **'1H'**
+  String get assetChart1h;
+
+  /// No description provided for @assetChart4h.
+  ///
+  /// In en, this message translates to:
+  /// **'4H'**
+  String get assetChart4h;
 }
 
 class _AppLocalizationsDelegate

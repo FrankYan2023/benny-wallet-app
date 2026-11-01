@@ -139,7 +139,7 @@ class _ChangePinPageState extends ConsumerState<ChangePinPage> {
                 key: ValueKey(_step),
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),

@@ -16,7 +16,7 @@ class WalletBalanceText extends ConsumerWidget {
     final portfolio = ref.watch(displayPortfolioProvider(publicKey));
     final style = Theme.of(context).textTheme.titleMedium?.copyWith(
       color: WalletPalette.ink,
-      fontWeight: FontWeight.w800,
+      fontWeight: FontWeight.w700,
     );
     return portfolio.when(
       data: (data) => Text(Formatters.usd(data.totalValueUsd), style: style),

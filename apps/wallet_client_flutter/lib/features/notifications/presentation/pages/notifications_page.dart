@@ -398,7 +398,7 @@ class _ReceivedHistoryTile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: const Color(0xFF2FA36B),
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -516,7 +516,7 @@ class _MessageCard extends ConsumerWidget {
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: message.isRead
                                   ? FontWeight.w700
-                                  : FontWeight.w900,
+                                  : FontWeight.w700,
                             ),
                           ),
                         ),
@@ -538,7 +538,7 @@ class _MessageCard extends ConsumerWidget {
                       body,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: isReceived ? const Color(0xFF2FA36B) : null,
-                        fontWeight: isReceived ? FontWeight.w900 : null,
+                        fontWeight: isReceived ? FontWeight.w700 : null,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -606,7 +606,7 @@ class _RelatedTransfersPanel extends StatelessWidget {
           Text(
             context.l10n.receivedRelatedChanges,
             style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 14),
@@ -621,7 +621,7 @@ class _RelatedTransfersPanel extends StatelessWidget {
                         ? context.l10n.commonToken
                         : items[index].symbol,
                     style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -629,7 +629,7 @@ class _RelatedTransfersPanel extends StatelessWidget {
                   items[index].displayAmount,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: const Color(0xFF2FA36B),
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -678,7 +678,7 @@ class _ReceivedStatusCard extends StatelessWidget {
                   context.l10n.assetReceived,
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: color,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -732,7 +732,7 @@ class _ReceivedTokenInfoCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -778,7 +778,7 @@ class _ReceivedTimelinePanel extends StatelessWidget {
           Text(
             context.l10n.transactionTimeline,
             style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 14),
@@ -843,7 +843,7 @@ class _TimelineEntry extends StatelessWidget {
               Text(
                 title,
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 2),
@@ -921,7 +921,7 @@ class _FallbackCoinAvatar extends StatelessWidget {
         style: TextStyle(
           color: const Color(0xFF8A5700),
           fontSize: size * 0.46,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -954,7 +954,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               title,
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
               textAlign: TextAlign.center,
             ),
@@ -1029,7 +1029,7 @@ class _DetailRow extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),

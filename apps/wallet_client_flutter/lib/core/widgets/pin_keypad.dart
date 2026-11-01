@@ -168,7 +168,7 @@ class _PinKeyButton extends StatelessWidget {
                           ? foregroundColor
                           : foregroundColor.withValues(alpha: 0.45),
                       fontSize: 28,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
           ),

@@ -11,6 +11,7 @@ import '../../../../l10n/l10n.dart';
 import '../../../auth/domain/wallet_controller_state.dart';
 import '../../../auth/presentation/providers/wallet_controller.dart';
 import '../../../send/presentation/pages/send_page.dart';
+import '../../../asset_detail/presentation/pages/asset_detail_page.dart';
 import '../../domain/entities/portfolio_view_data.dart';
 import '../providers/portfolio_provider.dart';
 
@@ -201,7 +202,12 @@ class ChildWalletMonitorPage extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        ...assets.map((asset) => _ChildAssetCard(asset: asset)),
+                        ...assets.map(
+                          (asset) => _ChildAssetCard(
+                            asset: asset,
+                            ownerAddress: childWallet.address,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -232,75 +238,86 @@ class ChildWalletMonitorPage extends ConsumerWidget {
 }
 
 class _ChildAssetCard extends StatelessWidget {
-  const _ChildAssetCard({required this.asset});
+  const _ChildAssetCard({required this.asset, required this.ownerAddress});
 
   final AssetHolding asset;
+
+  /// The child's address, whose activity the detail page lists.
+  final String ownerAddress;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFCF9F4),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2DBD2)),
+    // Opens the coin's detail with the child's holding, read-only.
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => context.push(
+        AssetDetailPage.pathFor(asset.token.mintAddress),
+        extra: AssetDetailArgs(holding: asset, ownerAddress: ownerAddress),
       ),
-      child: Row(
-        children: [
-          ChainBadged(
-            size: 44,
-            ringColor: const Color(0xFFFCF9F4),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: _ChildTokenAvatar(
-                symbol: Formatters.tokenSymbol(asset.token.symbol),
-                iconUrl: asset.logoUrl,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFCF9F4),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE2DBD2)),
+        ),
+        child: Row(
+          children: [
+            ChainBadged(
+              size: 44,
+              ringColor: const Color(0xFFFCF9F4),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: _ChildTokenAvatar(
+                  symbol: Formatters.tokenSymbol(asset.token.symbol),
+                  iconUrl: asset.logoUrl,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    Formatters.tokenSymbol(asset.token.symbol),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    '${Formatters.compactNumber(asset.balance)} ${Formatters.tokenSymbol(asset.token.symbol)}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: const Color(0xFF8A7D6A),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  Formatters.tokenSymbol(asset.token.symbol),
+                  asset.priceQuote == null
+                      ? '--'
+                      : Formatters.usd(asset.totalValueUsd),
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
+                  textAlign: TextAlign.right,
                 ),
-                Text(
-                  '${Formatters.compactNumber(asset.balance)} ${Formatters.tokenSymbol(asset.token.symbol)}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF8A7D6A),
-                  ),
-                ),
+                const SizedBox(height: 2),
+                _AssetMarketLine(asset: asset),
               ],
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                asset.priceQuote == null
-                    ? '--'
-                    : Formatters.usd(asset.totalValueUsd),
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.right,
-              ),
-              const SizedBox(height: 2),
-              _AssetMarketLine(asset: asset),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -373,7 +390,7 @@ class _LetterAvatar extends StatelessWidget {
           symbol.substring(0, 1).toUpperCase(),
           style: theme.textTheme.titleSmall?.copyWith(
             color: theme.colorScheme.primary,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -392,7 +409,7 @@ class _AssetMarketLine extends StatelessWidget {
     final secondaryTextColor = const Color(0xFF8A7D6A);
     final priceLine = _normalizeDetailText(_assetPriceLine(asset));
     final changeLine = _normalizeDetailText(_assetChangePctLine(asset));
-    final changeColor = _assetChangeColor(asset);
+    final changeColor = _assetChangeColor(context, asset);
 
     if (priceLine == null && changeLine == null) {
       return Text(
@@ -472,13 +489,11 @@ class _AssetMarketLine extends StatelessWidget {
     return Formatters.percent(changePct, signed: true);
   }
 
-  Color _assetChangeColor(AssetHolding asset) {
+  Color _assetChangeColor(BuildContext context, AssetHolding asset) {
     final changePct = double.tryParse(asset.priceQuote?.change24hPct ?? '');
-    if (changePct == null || changePct == 0) {
-      return const Color(0xFF8A7D6A);
-    }
-
-    return changePct > 0 ? const Color(0xFF30A46C) : const Color(0xFFE2562A);
+    return PriceTrendColors.of(
+      context,
+    ).forChange(changePct, neutral: const Color(0xFF8A7D6A));
   }
 
   String? _normalizeDetailText(String? value) {

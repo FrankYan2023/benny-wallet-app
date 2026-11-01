@@ -1160,7 +1160,13 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get assetMintCopied => 'Mint 已複製（60 秒後清除）';
+  String get assetMintCopied => '代幣地址已複製（60 秒後清除）';
+
+  @override
+  String get assetMoreActions => '更多操作';
+
+  @override
+  String get assetCopyAddress => '複製代幣地址';
 
   @override
   String get assetCouldNotOpenWebsite => '無法開啟網站。';
@@ -3331,6 +3337,315 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get airGapSignSiteExpired => '網站的請求可能已過期，請關閉後回到網站重新發起。';
+
+  @override
+  String get assetChartTitle => 'K線圖';
+
+  @override
+  String get assetChartDay => '日K';
+
+  @override
+  String get assetChartWeek => '週K';
+
+  @override
+  String get assetChartMonth => '月K';
+
+  @override
+  String get assetChartYear => '年K';
+
+  @override
+  String get assetChartOpen => '開';
+
+  @override
+  String get assetChartHigh => '高';
+
+  @override
+  String get assetChartLow => '低';
+
+  @override
+  String get assetChartClose => '收';
+
+  @override
+  String get assetChartVolume => '量';
+
+  @override
+  String get assetChartEmpty => '暫無價格歷史。';
+
+  @override
+  String get assetChartLoadFailed => 'K線圖載入失敗。';
+
+  @override
+  String assetChartUnderlying(String market) {
+    return '標的 $market';
+  }
+
+  @override
+  String assetDataSource(String source) {
+    return '資料來源：$source';
+  }
+
+  @override
+  String get stockTitle => '標的股票';
+
+  @override
+  String get stockFundTitle => '標的基金';
+
+  @override
+  String get stockCompanyTitle => '公司';
+
+  @override
+  String get stockUnderlying => '追蹤標的';
+
+  @override
+  String get stockPrice => '股價';
+
+  @override
+  String get stockChange => '漲跌幅';
+
+  @override
+  String get stockDayRange => '今日區間';
+
+  @override
+  String get stockYearRange => '52 週區間';
+
+  @override
+  String get stockVolume => '成交量';
+
+  @override
+  String get stockMarketCap => '市值';
+
+  @override
+  String get stockPeRatio => '本益比（TTM）';
+
+  @override
+  String get stockEps => '每股盈餘（TTM）';
+
+  @override
+  String get stockRevenue => '營收（TTM）';
+
+  @override
+  String get stockNetIncome => '淨利（TTM）';
+
+  @override
+  String get stockDividendYield => '殖利率';
+
+  @override
+  String stockFinancialsThrough(String date) {
+    return '財務資料截至 $date';
+  }
+
+  @override
+  String get stockAbout => '公司簡介';
+
+  @override
+  String get stockIndustry => '產業';
+
+  @override
+  String get stockCeo => '執行長';
+
+  @override
+  String get stockFounded => '成立';
+
+  @override
+  String get stockHeadquarters => '總部';
+
+  @override
+  String get stockEmployees => '員工';
+
+  @override
+  String get stockPrivateNotice => '未上市公司，沒有股票市場報價。';
+
+  @override
+  String get stockLoadFailed => '股票資料載入失敗。';
+
+  @override
+  String get stockShowMore => '展開';
+
+  @override
+  String get stockShowLess => '收起';
+
+  @override
+  String get stockWikipediaLicense => '簡介來自維基百科，CC BY-SA 4.0';
+
+  @override
+  String get stockTabMarket => '行情';
+
+  @override
+  String get stockTabFundamentals => '基本面';
+
+  @override
+  String get stockTabCompany => '公司概況';
+
+  @override
+  String get stockTabFund => '基金概況';
+
+  @override
+  String get stockNoFundamentals => '財務資料來自美國 SEC 申報，這家公司沒有可用的資料。';
+
+  @override
+  String get stockNoFundamentalsFund => '基金沒有公司財務資料。';
+
+  @override
+  String get stockNoProfile => '暫無公司簡介。';
+
+  @override
+  String get stockOpen => '今開';
+
+  @override
+  String get stockPrevClose => '昨收';
+
+  @override
+  String get stockHigh => '最高';
+
+  @override
+  String get stockLow => '最低';
+
+  @override
+  String get stock52wHigh => '52 週最高';
+
+  @override
+  String get stock52wLow => '52 週最低';
+
+  @override
+  String get stockPeStatic => '本益比（靜）';
+
+  @override
+  String get stockPeDynamic => '本益比（動）';
+
+  @override
+  String get stockPbRatio => '股價淨值比';
+
+  @override
+  String get stockShares => '總股本';
+
+  @override
+  String get stockBookValuePerShare => '每股淨值';
+
+  @override
+  String get stockLoss => '虧損';
+
+  @override
+  String get stockMarketPre => '盤前';
+
+  @override
+  String get stockMarketOpen => '交易中';
+
+  @override
+  String get stockMarketPost => '盤後';
+
+  @override
+  String get stockMarketClosed => '已收盤';
+
+  @override
+  String get stockTimeZoneEastern => '美東';
+
+  @override
+  String get stockQuoteUnavailable => '暫時無法取得股價。';
+
+  @override
+  String get coinVolume24h => '24 小時交易量';
+
+  @override
+  String get coinTraders24h => '24 小時交易者';
+
+  @override
+  String get coinChange24h => '24 小時漲跌';
+
+  @override
+  String coinAbout(String symbol) {
+    return '關於 $symbol';
+  }
+
+  @override
+  String get coinNoDescription => '暫無簡介。';
+
+  @override
+  String get coinDescriptionLoadFailed => '簡介載入失敗。';
+
+  @override
+  String get coinWhitepaper => '白皮書';
+
+  @override
+  String get coinLaunched => '上線日期';
+
+  @override
+  String get coinCategories => '分類';
+
+  @override
+  String get settingsPriceColors => '漲跌顏色';
+
+  @override
+  String get settingsPriceColorsSubtitle => '價格上漲和下跌的顯示顏色';
+
+  @override
+  String get settingsPriceGreenUp => '綠漲紅跌';
+
+  @override
+  String get settingsPriceRedUp => '紅漲綠跌';
+
+  @override
+  String browserTabsCount(int count) {
+    return '標籤頁（$count）';
+  }
+
+  @override
+  String get browserNewTab => '新標籤頁';
+
+  @override
+  String get browserCloseTab => '關閉標籤頁';
+
+  @override
+  String get coinLiquidity => '流動性';
+
+  @override
+  String get whitelistTitle => '行情';
+
+  @override
+  String get whitelistCoins => '數字幣';
+
+  @override
+  String get whitelistStocks => '股票';
+
+  @override
+  String get whitelistSearchHint => '搜尋名稱或代號';
+
+  @override
+  String get whitelistTopCoins => '市值前 20';
+
+  @override
+  String get whitelistTopStocks => '市值前 20 的科技股';
+
+  @override
+  String get whitelistNoResults => '沒有符合的幣種。';
+
+  @override
+  String get whitelistLoadFailed => '列表載入失敗。';
+
+  @override
+  String whitelistMatches(int count) {
+    return '$count 個結果';
+  }
+
+  @override
+  String get whitelistMarketCapShort => '市值';
+
+  @override
+  String get whitelistPreviousPage => '上一頁';
+
+  @override
+  String get whitelistNextPage => '下一頁';
+
+  @override
+  String get whitelistStablecoins => '穩定幣';
+
+  @override
+  String get assetChart15m => '15分';
+
+  @override
+  String get assetChart1h => '1小時';
+
+  @override
+  String get assetChart4h => '4小時';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -4489,7 +4804,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   }
 
   @override
-  String get assetMintCopied => 'Mint 已複製（60 秒後清除）';
+  String get assetMintCopied => '代幣地址已複製（60 秒後清除）';
+
+  @override
+  String get assetMoreActions => '更多操作';
+
+  @override
+  String get assetCopyAddress => '複製代幣地址';
 
   @override
   String get assetCouldNotOpenWebsite => '無法開啟網站。';
@@ -6660,4 +6981,313 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get airGapSignSiteExpired => '網站的請求可能已過期，請關閉後回到網站重新發起。';
+
+  @override
+  String get assetChartTitle => 'K線圖';
+
+  @override
+  String get assetChartDay => '日K';
+
+  @override
+  String get assetChartWeek => '週K';
+
+  @override
+  String get assetChartMonth => '月K';
+
+  @override
+  String get assetChartYear => '年K';
+
+  @override
+  String get assetChartOpen => '開';
+
+  @override
+  String get assetChartHigh => '高';
+
+  @override
+  String get assetChartLow => '低';
+
+  @override
+  String get assetChartClose => '收';
+
+  @override
+  String get assetChartVolume => '量';
+
+  @override
+  String get assetChartEmpty => '暫無價格歷史。';
+
+  @override
+  String get assetChartLoadFailed => 'K線圖載入失敗。';
+
+  @override
+  String assetChartUnderlying(String market) {
+    return '標的 $market';
+  }
+
+  @override
+  String assetDataSource(String source) {
+    return '資料來源：$source';
+  }
+
+  @override
+  String get stockTitle => '標的股票';
+
+  @override
+  String get stockFundTitle => '標的基金';
+
+  @override
+  String get stockCompanyTitle => '公司';
+
+  @override
+  String get stockUnderlying => '追蹤標的';
+
+  @override
+  String get stockPrice => '股價';
+
+  @override
+  String get stockChange => '漲跌幅';
+
+  @override
+  String get stockDayRange => '今日區間';
+
+  @override
+  String get stockYearRange => '52 週區間';
+
+  @override
+  String get stockVolume => '成交量';
+
+  @override
+  String get stockMarketCap => '市值';
+
+  @override
+  String get stockPeRatio => '本益比（TTM）';
+
+  @override
+  String get stockEps => '每股盈餘（TTM）';
+
+  @override
+  String get stockRevenue => '營收（TTM）';
+
+  @override
+  String get stockNetIncome => '淨利（TTM）';
+
+  @override
+  String get stockDividendYield => '殖利率';
+
+  @override
+  String stockFinancialsThrough(String date) {
+    return '財務資料截至 $date';
+  }
+
+  @override
+  String get stockAbout => '公司簡介';
+
+  @override
+  String get stockIndustry => '產業';
+
+  @override
+  String get stockCeo => '執行長';
+
+  @override
+  String get stockFounded => '成立';
+
+  @override
+  String get stockHeadquarters => '總部';
+
+  @override
+  String get stockEmployees => '員工';
+
+  @override
+  String get stockPrivateNotice => '未上市公司，沒有股票市場報價。';
+
+  @override
+  String get stockLoadFailed => '股票資料載入失敗。';
+
+  @override
+  String get stockShowMore => '展開';
+
+  @override
+  String get stockShowLess => '收起';
+
+  @override
+  String get stockWikipediaLicense => '簡介來自維基百科，CC BY-SA 4.0';
+
+  @override
+  String get stockTabMarket => '行情';
+
+  @override
+  String get stockTabFundamentals => '基本面';
+
+  @override
+  String get stockTabCompany => '公司概況';
+
+  @override
+  String get stockTabFund => '基金概況';
+
+  @override
+  String get stockNoFundamentals => '財務資料來自美國 SEC 申報，這家公司沒有可用的資料。';
+
+  @override
+  String get stockNoFundamentalsFund => '基金沒有公司財務資料。';
+
+  @override
+  String get stockNoProfile => '暫無公司簡介。';
+
+  @override
+  String get stockOpen => '今開';
+
+  @override
+  String get stockPrevClose => '昨收';
+
+  @override
+  String get stockHigh => '最高';
+
+  @override
+  String get stockLow => '最低';
+
+  @override
+  String get stock52wHigh => '52 週最高';
+
+  @override
+  String get stock52wLow => '52 週最低';
+
+  @override
+  String get stockPeStatic => '本益比（靜）';
+
+  @override
+  String get stockPeDynamic => '本益比（動）';
+
+  @override
+  String get stockPbRatio => '股價淨值比';
+
+  @override
+  String get stockShares => '總股本';
+
+  @override
+  String get stockBookValuePerShare => '每股淨值';
+
+  @override
+  String get stockLoss => '虧損';
+
+  @override
+  String get stockMarketPre => '盤前';
+
+  @override
+  String get stockMarketOpen => '交易中';
+
+  @override
+  String get stockMarketPost => '盤後';
+
+  @override
+  String get stockMarketClosed => '已收盤';
+
+  @override
+  String get stockTimeZoneEastern => '美東';
+
+  @override
+  String get stockQuoteUnavailable => '暫時無法取得股價。';
+
+  @override
+  String get coinVolume24h => '24 小時交易量';
+
+  @override
+  String get coinTraders24h => '24 小時交易者';
+
+  @override
+  String get coinChange24h => '24 小時漲跌';
+
+  @override
+  String coinAbout(String symbol) {
+    return '關於 $symbol';
+  }
+
+  @override
+  String get coinNoDescription => '暫無簡介。';
+
+  @override
+  String get coinDescriptionLoadFailed => '簡介載入失敗。';
+
+  @override
+  String get coinWhitepaper => '白皮書';
+
+  @override
+  String get coinLaunched => '上線日期';
+
+  @override
+  String get coinCategories => '分類';
+
+  @override
+  String get settingsPriceColors => '漲跌顏色';
+
+  @override
+  String get settingsPriceColorsSubtitle => '價格上漲和下跌的顯示顏色';
+
+  @override
+  String get settingsPriceGreenUp => '綠漲紅跌';
+
+  @override
+  String get settingsPriceRedUp => '紅漲綠跌';
+
+  @override
+  String browserTabsCount(int count) {
+    return '標籤頁（$count）';
+  }
+
+  @override
+  String get browserNewTab => '新標籤頁';
+
+  @override
+  String get browserCloseTab => '關閉標籤頁';
+
+  @override
+  String get coinLiquidity => '流動性';
+
+  @override
+  String get whitelistTitle => '行情';
+
+  @override
+  String get whitelistCoins => '數字幣';
+
+  @override
+  String get whitelistStocks => '股票';
+
+  @override
+  String get whitelistSearchHint => '搜尋名稱或代號';
+
+  @override
+  String get whitelistTopCoins => '市值前 20';
+
+  @override
+  String get whitelistTopStocks => '市值前 20 的科技股';
+
+  @override
+  String get whitelistNoResults => '沒有符合的幣種。';
+
+  @override
+  String get whitelistLoadFailed => '列表載入失敗。';
+
+  @override
+  String whitelistMatches(int count) {
+    return '$count 個結果';
+  }
+
+  @override
+  String get whitelistMarketCapShort => '市值';
+
+  @override
+  String get whitelistPreviousPage => '上一頁';
+
+  @override
+  String get whitelistNextPage => '下一頁';
+
+  @override
+  String get whitelistStablecoins => '穩定幣';
+
+  @override
+  String get assetChart15m => '15分';
+
+  @override
+  String get assetChart1h => '1小時';
+
+  @override
+  String get assetChart4h => '4小時';
 }

@@ -1,5 +1,8 @@
-import 'chain_badge.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+
+import '../theme/price_trend_colors.dart';
+import 'chain_badge.dart';
 
 class TokenRow extends StatelessWidget {
   const TokenRow({
@@ -30,11 +33,12 @@ class TokenRow extends StatelessWidget {
     final theme = Theme.of(context);
     final primaryText = theme.colorScheme.onSurface;
     final secondaryText = theme.colorScheme.onSurface.withValues(alpha: 0.58);
+    final trend = PriceTrendColors.of(context);
     final changeColor = isPositiveChange == null
         ? secondaryText
         : isPositiveChange!
-        ? const Color(0xFF30A46C)
-        : const Color(0xFFE2562A);
+        ? trend.up
+        : trend.down;
     final normalizedSecondaryValue = _normalizeDetailText(secondaryValue);
     final normalizedChange = _normalizeDetailText(change);
     final shouldRenderStandaloneChange =
@@ -68,7 +72,7 @@ class TokenRow extends StatelessWidget {
                     name,
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: primaryText,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -94,7 +98,7 @@ class TokenRow extends StatelessWidget {
                   value,
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: primaryText,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -268,11 +272,15 @@ class _TokenAvatar extends StatelessWidget {
       );
     }
 
+    // Cached on disk, so the list does not download every logo again on
+    // each launch, and decoded small: some logos are full-size artwork.
     return ClipOval(
-      child: Image.network(
-        resolvedIconUrl,
+      child: CachedNetworkImage(
+        imageUrl: resolvedIconUrl,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Center(
+        memCacheWidth: 128,
+        fadeInDuration: const Duration(milliseconds: 120),
+        errorWidget: (context, url, error) => Center(
           child: Text(
             symbol.substring(0, 1),
             style: theme.textTheme.titleMedium?.copyWith(

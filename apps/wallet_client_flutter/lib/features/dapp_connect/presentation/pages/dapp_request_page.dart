@@ -738,7 +738,7 @@ class _BalanceChanges extends ConsumerWidget {
                   '${amount > 0 ? '+' : '−'}'
                   '${Formatters.amount(amount.abs())}',
                   style: TextStyle(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: amount > 0
                         ? DappTrust.safe.color
                         : DappTrust.danger.color,
@@ -844,7 +844,7 @@ class _ActionSummary extends ConsumerWidget {
                     children: [
                       TextSpan(
                         text: label,
-                        style: const TextStyle(fontWeight: FontWeight.w800),
+                        style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                       if (action.protocol != null)
                         TextSpan(
@@ -915,7 +915,7 @@ class _SummaryLine extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            style: TextStyle(fontWeight: FontWeight.w800, color: color),
+            style: TextStyle(fontWeight: FontWeight.w700, color: color),
           ),
         ),
       ],

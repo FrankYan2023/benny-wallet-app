@@ -15,6 +15,9 @@ class AppSettingsRepository {
       ),
       notificationsEnabled:
           prefs.getBool(AppConstants.notificationsEnabledKey) ?? true,
+      priceTrendStyle: PriceTrendStyle.fromStorageValue(
+        prefs.getString(AppConstants.priceTrendStyleKey),
+      ),
     );
   }
 
@@ -31,6 +34,11 @@ class AppSettingsRepository {
   Future<void> setNotificationsEnabled(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(AppConstants.notificationsEnabledKey, enabled);
+  }
+
+  Future<void> setPriceTrendStyle(PriceTrendStyle style) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(AppConstants.priceTrendStyleKey, style.name);
   }
 
   Future<String?> getLastIncomingNotificationSignature({

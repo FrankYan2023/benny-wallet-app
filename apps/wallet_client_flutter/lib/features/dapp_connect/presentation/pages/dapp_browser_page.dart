@@ -16,6 +16,7 @@ import '../../data/browser_bookmarks.dart';
 import '../../data/browser_connections.dart';
 import '../../data/browser_wallet_bridge.dart';
 import '../../data/dapp_connect_service.dart';
+import '../browser_tabs.dart';
 import '../widgets/connected_sites_section.dart';
 import '../widgets/dapp_ui.dart';
 import 'dapp_scan_page.dart';
@@ -26,7 +27,8 @@ import 'dapp_scan_page.dart';
 ///
 /// The page gets the whole screen: one slim bar on top that takes the
 /// site's own colour, no bottom bar (back is the system back gesture; the
-/// rest is in the menu). With no address it shows Benny's home.
+/// rest is in the menu). Pages open in tabs (the count in the bar lists
+/// them); a new tab shows Benny's home.
 class DappBrowserPage extends ConsumerStatefulWidget {
   const DappBrowserPage({super.key, this.initialUrl});
 
@@ -54,8 +56,35 @@ class DappBrowserPage extends ConsumerStatefulWidget {
     return uri;
   }
 
+  static Future<UserScript>? _script;
+
+  /// The wallet provider every page gets, read and encoded once per run;
+  /// pages that link here call it ahead so the browser opens at once.
+  static Future<UserScript> preloadScript() {
+    return _script ??= _DappBrowserPageState._loadScript();
+  }
+
   @override
   ConsumerState<DappBrowserPage> createState() => _DappBrowserPageState();
+}
+
+/// What a tab needs while its page is loaded: its web view, and a wallet
+/// bridge that answers for that page only, so a tab in the background can
+/// never borrow the address of the one on screen.
+class _TabSession {
+  // A page shows a sliver of progress at once, before the web view is up.
+  _TabSession(this.tab) : progress = tab.url == null ? 1 : 0.05;
+
+  final BrowserTab tab;
+  late final BrowserWalletBridge bridge;
+  InAppWebViewController? controller;
+  double progress;
+  bool canGoBack = false;
+  bool canGoForward = false;
+
+  /// The site's colour (theme-color, else its background); the bar and the
+  /// screen edges take it so the page looks full screen.
+  Color barColor = _DappBrowserPageState._homeColor;
 }
 
 class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
@@ -63,27 +92,44 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
 
   final _address = TextEditingController();
   final _addressFocus = FocusNode();
-  InAppWebViewController? _controller;
-  late final BrowserWalletBridge _bridge;
+  late final BrowserTabs _tabs;
+  final Map<int, _TabSession> _sessions = {};
   Future<UserScript>? _script;
-  Uri? _url;
-  double _progress = 1;
-  bool _canGoBack = false;
-  bool _canGoForward = false;
   bool _editing = false;
 
-  /// The site's colour (theme-color, else its background); the bar and the
-  /// screen edges take it so the page looks full screen.
-  Color _barColor = _homeColor;
+  BrowserTab get _tab => _tabs.ensureActive();
+
+  _TabSession get _session => _sessionFor(_tab);
+
+  Uri? get _url => _tab.url;
+
+  _TabSession _sessionFor(BrowserTab tab) {
+    return _sessions.putIfAbsent(tab.id, () {
+      final session = _TabSession(tab);
+      session.bridge = BrowserWalletBridge(
+        ref.read,
+        currentPage: () => _currentPage(session),
+      );
+      return session;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    _bridge = BrowserWalletBridge(ref.read, currentPage: _currentPage);
-    _script = _loadScript();
-    _url = widget.initialUrl == null
+    _tabs = ref.read(browserTabsProvider);
+    _script = DappBrowserPage.preloadScript();
+    final initial = widget.initialUrl == null
         ? null
         : DappBrowserPage.parseAddress(widget.initialUrl!);
+    // A link from elsewhere in the app gets a tab of its own; opening the
+    // browser itself returns to the tab left on screen.
+    if (initial != null) {
+      _tabs.open(initial);
+    } else {
+      _tabs.ensureActive();
+    }
+    _tabs.addListener(_onTabsChanged);
     _addressFocus.addListener(() {
       if (!_addressFocus.hasFocus && _editing) {
         setState(() => _editing = false);
@@ -93,12 +139,21 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
 
   @override
   void dispose() {
+    _tabs.removeListener(_onTabsChanged);
     _address.dispose();
     _addressFocus.dispose();
     super.dispose();
   }
 
-  Future<UserScript> _loadScript() async {
+  void _onTabsChanged() {
+    final open = {for (final tab in _tabs.tabs) tab.id};
+    _sessions.removeWhere((id, _) => !open.contains(id));
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  static Future<UserScript> _loadScript() async {
     final source = await rootBundle.loadString(
       'assets/browser/benny_provider.js',
     );
@@ -112,20 +167,20 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
     );
   }
 
-  Future<BrowserPage?> _currentPage() async {
-    final controller = _controller;
+  Future<BrowserPage?> _currentPage(_TabSession session) async {
+    final controller = session.controller;
     if (controller == null) {
       return null;
     }
     // A page still starting up may not answer yet: fall back to the
-    // address in the bar.
+    // tab's address.
     WebUri? url;
     try {
       url = await controller.getUrl();
     } on Object {
       url = null;
     }
-    final address = url?.toString() ?? _url?.toString();
+    final address = url?.toString() ?? session.tab.url?.toString();
     if (address == null) {
       return null;
     }
@@ -157,11 +212,13 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
       return;
     }
     _addressFocus.unfocus();
-    setState(() {
-      _editing = false;
-      _url = uri;
-    });
-    final controller = _controller;
+    _editing = false;
+    final session = _session;
+    if (session.controller == null) {
+      session.progress = 0.05;
+    }
+    _tabs.update(session.tab.id, url: uri);
+    final controller = session.controller;
     if (controller != null) {
       unawaited(
         controller.loadUrl(urlRequest: URLRequest(url: WebUri.uri(uri))),
@@ -180,18 +237,54 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
   }
 
   void _goHome() {
-    setState(() {
-      _url = null;
-      _controller = null;
-      _canGoBack = false;
-      _canGoForward = false;
-      _barColor = _homeColor;
-      _editing = false;
-    });
+    final session = _session;
+    session
+      ..controller = null
+      ..canGoBack = false
+      ..canGoForward = false
+      ..progress = 1
+      ..barColor = _homeColor;
+    _editing = false;
+    _tabs.update(session.tab.id, clearUrl: true);
   }
 
-  Future<void> _afterLoad() async {
-    final controller = _controller;
+  /// Shows another tab. The one left behind is paused (Android stops its
+  /// scripts and timers) and keeps its page and history.
+  void _activate(int id) {
+    if (id == _tab.id) {
+      return;
+    }
+    unawaited(_pause(_session.controller));
+    _addressFocus.unfocus();
+    _editing = false;
+    _tabs.activate(id);
+    unawaited(_resume(_sessions[id]?.controller));
+  }
+
+  void _newTab() {
+    unawaited(_pause(_session.controller));
+    _editing = false;
+    _tabs.open(null);
+  }
+
+  static Future<void> _pause(InAppWebViewController? controller) async {
+    try {
+      await controller?.pause();
+    } on Object {
+      // Not every platform pauses a web view.
+    }
+  }
+
+  static Future<void> _resume(InAppWebViewController? controller) async {
+    try {
+      await controller?.resume();
+    } on Object {
+      // Not every platform pauses a web view.
+    }
+  }
+
+  Future<void> _afterLoad(_TabSession session) async {
+    final controller = session.controller;
     if (controller == null || !mounted) {
       return;
     }
@@ -214,15 +307,27 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
     } on Object {
       color = null;
     }
-    if (mounted) {
-      setState(() {
-        _canGoBack = back;
-        _canGoForward = forward;
-        if (color != null) {
-          _barColor = color;
-        }
-      });
+    String? title;
+    try {
+      title = await controller.getTitle();
+    } on Object {
+      title = null;
     }
+    if (!mounted || session.controller != controller) {
+      return;
+    }
+    session
+      ..canGoBack = back
+      ..canGoForward = forward;
+    if (color != null) {
+      session.barColor = color;
+    }
+    final trimmed = title?.trim();
+    _tabs.update(
+      session.tab.id,
+      title: trimmed == null || trimmed.isEmpty ? null : trimmed,
+    );
+    setState(() {});
   }
 
   /// "#rgb", "#rrggbb" or "rgb(a)(r, g, b[, a])"; null for anything else
@@ -277,7 +382,7 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
       );
       return;
     }
-    final page = await _currentPage();
+    final page = await _currentPage(_session);
     final title = (page?.title ?? '').trim();
     await bookmarks.add(
       BrowserBookmark(
@@ -315,7 +420,7 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
                       child: Text(
                         l10n.browserBookmarks,
                         style: Theme.of(sheetContext).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w800),
+                            ?.copyWith(fontWeight: FontWeight.w700),
                       ),
                     ),
                     IconButton(
@@ -401,9 +506,118 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
     }
   }
 
+  /// The open tabs: tap one to show it, close it with its button, or start
+  /// a new tab on Benny's home.
+  Future<void> _showTabs() async {
+    const newTab = -1;
+    final picked = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.8,
+      ),
+      builder: (sheetContext) => ListenableBuilder(
+        listenable: _tabs,
+        builder: (sheetContext, _) {
+          final l10n = sheetContext.l10n;
+          final tabs = _tabs.tabs;
+          final activeId = _tabs.active?.id;
+          return SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 12, 4),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.browserTabsCount(tabs.length),
+                          style: Theme.of(sheetContext).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () => Navigator.of(sheetContext).pop(newTab),
+                        icon: const Icon(Icons.add_rounded),
+                        label: Text(l10n.browserNewTab),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    children: [
+                      for (final tab in tabs.reversed)
+                        ListTile(
+                          selected: tab.id == activeId,
+                          selectedTileColor: AppColors.surfaceMuted,
+                          onTap: () => Navigator.of(sheetContext).pop(tab.id),
+                          leading: tab.url == null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.asset(
+                                    'assets/brand/benny_logo.png',
+                                    width: 36,
+                                    height: 36,
+                                  ),
+                                )
+                              : DappIcon(
+                                  peer: PairingMetadata(
+                                    name: tab.title ?? tab.url!.host,
+                                    description: '',
+                                    url: 'https://${tab.url!.host}',
+                                    icons: [?tab.icon],
+                                  ),
+                                  size: 36,
+                                ),
+                          title: Text(
+                            tab.url == null
+                                ? l10n.appTitle
+                                : tab.title ?? tab.url!.host,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          subtitle: Text(
+                            tab.url == null ? l10n.browserHome : tab.url!.host,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          trailing: IconButton(
+                            tooltip: l10n.browserCloseTab,
+                            onPressed: () => _tabs.close(tab.id),
+                            icon: const Icon(Icons.close_rounded),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+    if (!mounted || picked == null) {
+      return;
+    }
+    if (picked == newTab) {
+      _newTab();
+    } else {
+      _activate(picked);
+    }
+  }
+
   Future<void> _showMenu(BrowserConnection? connection) async {
     final l10n = context.l10n;
     final connections = ref.read(browserConnectionsProvider);
+    final session = _session;
     final action = await showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,
@@ -421,14 +635,14 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
                 children: [
                   IconButton(
                     tooltip: l10n.browserBack,
-                    onPressed: _canGoBack
+                    onPressed: session.canGoBack
                         ? () => Navigator.of(sheetContext).pop('back')
                         : null,
                     icon: const Icon(Icons.arrow_back_rounded),
                   ),
                   IconButton(
                     tooltip: l10n.browserForward,
-                    onPressed: _canGoForward
+                    onPressed: session.canGoForward
                         ? () => Navigator.of(sheetContext).pop('forward')
                         : null,
                     icon: const Icon(Icons.arrow_forward_rounded),
@@ -469,21 +683,23 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
     }
     switch (action) {
       case 'disconnect':
-        final host = _url?.host;
+        final host = session.tab.url?.host;
         if (host != null) {
           await connections.remove(host);
-          await _controller?.reload();
+          await session.controller?.reload();
         }
       case 'back':
-        await _controller?.goBack();
+        await session.controller?.goBack();
       case 'forward':
-        await _controller?.goForward();
+        await session.controller?.goForward();
       case 'reload':
-        await _controller?.reload();
+        await session.controller?.reload();
       case 'bookmark':
         await _toggleBookmark();
       case 'copy':
-        await Clipboard.setData(ClipboardData(text: _url?.toString() ?? ''));
+        await Clipboard.setData(
+          ClipboardData(text: session.tab.url?.toString() ?? ''),
+        );
         if (mounted) {
           ScaffoldMessenger.of(
             context,
@@ -494,17 +710,93 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
     }
   }
 
+  /// A tab's page: Benny's home, or the site in a web view of its own.
+  Widget _tabBody(_TabSession session) {
+    final tab = session.tab;
+    final url = tab.url;
+    if (url == null) {
+      return _BennyHome(onOpen: _open);
+    }
+    return FutureBuilder<UserScript>(
+      future: _script,
+      builder: (context, snapshot) {
+        final script = snapshot.data;
+        if (script == null) {
+          return const SizedBox.shrink();
+        }
+        bool onScreen() => _tabs.active?.id == tab.id;
+        return InAppWebView(
+          initialUrlRequest: URLRequest(url: WebUri.uri(url)),
+          initialUserScripts: UnmodifiableListView([script]),
+          initialSettings: InAppWebViewSettings(
+            javaScriptEnabled: true,
+            useShouldOverrideUrlLoading: true,
+            supportMultipleWindows: false,
+            mediaPlaybackRequiresUserGesture: true,
+            allowsInlineMediaPlayback: true,
+            isFraudulentWebsiteWarningEnabled: true,
+            safeBrowsingEnabled: true,
+            overScrollMode: OverScrollMode.NEVER,
+            transparentBackground: true,
+          ),
+          onWebViewCreated: (controller) {
+            session.controller = controller;
+            controller.addJavaScriptHandler(
+              handlerName: 'bennyWallet',
+              callback: (args) =>
+                  session.bridge.handle(args.isEmpty ? null : args.first),
+            );
+          },
+          shouldOverrideUrlLoading: (controller, action) async {
+            final scheme = action.request.url?.scheme;
+            // Only web pages: wallet links (wc:, solana-wallet:) and app
+            // intents are not followed from inside the wallet.
+            return scheme == 'https' ||
+                    scheme == 'http' ||
+                    scheme == 'about' ||
+                    scheme == 'data' ||
+                    scheme == 'blob'
+                ? NavigationActionPolicy.ALLOW
+                : NavigationActionPolicy.CANCEL;
+          },
+          onLoadStop: (controller, url) {
+            if (url != null) {
+              _tabs.update(tab.id, url: Uri.parse(url.toString()));
+            }
+            unawaited(_afterLoad(session));
+          },
+          onUpdateVisitedHistory: (controller, url, _) {
+            if (url != null) {
+              _tabs.update(tab.id, url: Uri.parse(url.toString()));
+            }
+            unawaited(_afterLoad(session));
+          },
+          onProgressChanged: (controller, progress) {
+            session.progress = progress / 100;
+            if (onScreen() && mounted) {
+              setState(() {});
+            }
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final connections = ref.watch(browserConnectionsProvider);
-    final dark = _barColor.computeLuminance() < 0.4;
+    final tab = _tab;
+    final session = _sessionFor(tab);
+    final url = tab.url;
+    final barColor = url == null ? _homeColor : session.barColor;
+    final dark = barColor.computeLuminance() < 0.4;
     final onBar = dark ? Colors.white : const Color(0xFF111418);
     final overlay =
         (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
             .copyWith(
               statusBarColor: Colors.transparent,
-              systemNavigationBarColor: _barColor,
+              systemNavigationBarColor: barColor,
               systemNavigationBarIconBrightness: dark
                   ? Brightness.light
                   : Brightness.dark,
@@ -513,7 +805,7 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlay,
       child: PopScope(
-        canPop: !_canGoBack && !_editing,
+        canPop: !session.canGoBack && !_editing,
         onPopInvokedWithResult: (didPop, _) {
           if (didPop) {
             return;
@@ -522,15 +814,15 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
             _addressFocus.unfocus();
             return;
           }
-          unawaited(_controller?.goBack());
+          unawaited(session.controller?.goBack());
         },
         child: Scaffold(
-          backgroundColor: _barColor,
+          backgroundColor: barColor,
           body: Column(
             children: [
               // Slim bar in the site's colour, under the status bar.
               Material(
-                color: _barColor,
+                color: barColor,
                 child: SafeArea(
                   bottom: false,
                   child: SizedBox(
@@ -547,7 +839,7 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
                         ),
                         Expanded(
                           child: _AddressPill(
-                            url: _url,
+                            url: url,
                             editing: _editing,
                             controller: _address,
                             focusNode: _addressFocus,
@@ -582,13 +874,22 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
                           onPressed: _showBookmarks,
                           icon: Icon(Icons.bookmarks_outlined, color: onBar),
                         ),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          tooltip: l10n.browserTabsCount(_tabs.tabs.length),
+                          onPressed: _showTabs,
+                          icon: _TabCount(
+                            count: _tabs.tabs.length,
+                            color: onBar,
+                          ),
+                        ),
                         ValueListenableBuilder<List<BrowserConnection>>(
                           valueListenable: connections.connections,
                           builder: (context, list, _) {
-                            final connection = _url == null
+                            final connection = url == null
                                 ? null
                                 : list
-                                      .where((c) => c.host == _url!.host)
+                                      .where((c) => c.host == url.host)
                                       .firstOrNull;
                             return IconButton(
                               visualDensity: VisualDensity.compact,
@@ -608,7 +909,7 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
                                           color: AppColors.success,
                                           shape: BoxShape.circle,
                                           border: Border.all(
-                                            color: _barColor,
+                                            color: barColor,
                                             width: 1.5,
                                           ),
                                         ),
@@ -626,9 +927,9 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
               ),
               SizedBox(
                 height: 2,
-                child: _progress < 1
+                child: url != null && session.progress < 1
                     ? LinearProgressIndicator(
-                        value: _progress,
+                        value: session.progress,
                         minHeight: 2,
                         backgroundColor: Colors.transparent,
                       )
@@ -637,82 +938,56 @@ class _DappBrowserPageState extends ConsumerState<DappBrowserPage> {
               Expanded(
                 child: SafeArea(
                   top: false,
-                  child: _url == null
-                      ? _BennyHome(onOpen: _open)
-                      : FutureBuilder<UserScript>(
-                          future: _script,
-                          builder: (context, snapshot) {
-                            final script = snapshot.data;
-                            if (script == null) {
-                              return const SizedBox.shrink();
-                            }
-                            return InAppWebView(
-                              initialUrlRequest: URLRequest(
-                                url: WebUri.uri(_url!),
-                              ),
-                              initialUserScripts: UnmodifiableListView([
-                                script,
-                              ]),
-                              initialSettings: InAppWebViewSettings(
-                                javaScriptEnabled: true,
-                                useShouldOverrideUrlLoading: true,
-                                supportMultipleWindows: false,
-                                mediaPlaybackRequiresUserGesture: true,
-                                allowsInlineMediaPlayback: true,
-                                isFraudulentWebsiteWarningEnabled: true,
-                                safeBrowsingEnabled: true,
-                                overScrollMode: OverScrollMode.NEVER,
-                                transparentBackground: true,
-                              ),
-                              onWebViewCreated: (controller) {
-                                _controller = controller;
-                                controller.addJavaScriptHandler(
-                                  handlerName: 'bennyWallet',
-                                  callback: (args) => _bridge.handle(
-                                    args.isEmpty ? null : args.first,
-                                  ),
-                                );
-                              },
-                              shouldOverrideUrlLoading:
-                                  (controller, action) async {
-                                    final scheme = action.request.url?.scheme;
-                                    // Only web pages: wallet links (wc:,
-                                    // solana-wallet:) and app intents are
-                                    // not followed from inside the wallet.
-                                    return scheme == 'https' ||
-                                            scheme == 'http' ||
-                                            scheme == 'about' ||
-                                            scheme == 'data' ||
-                                            scheme == 'blob'
-                                        ? NavigationActionPolicy.ALLOW
-                                        : NavigationActionPolicy.CANCEL;
-                                  },
-                              onLoadStop: (controller, url) {
-                                if (url != null) {
-                                  setState(
-                                    () => _url = Uri.parse(url.toString()),
-                                  );
-                                }
-                                unawaited(_afterLoad());
-                              },
-                              onUpdateVisitedHistory: (controller, url, _) {
-                                if (url != null) {
-                                  setState(
-                                    () => _url = Uri.parse(url.toString()),
-                                  );
-                                }
-                                unawaited(_afterLoad());
-                              },
-                              onProgressChanged: (controller, progress) {
-                                setState(() => _progress = progress / 100);
-                              },
-                            );
-                          },
-                        ),
+                  // Every tab opened so far stays built, out of sight when
+                  // it is not the one on screen.
+                  child: Stack(
+                    children: [
+                      for (final other in _tabs.tabs)
+                        if (_sessions.containsKey(other.id))
+                          Offstage(
+                            key: ValueKey(other.id),
+                            offstage: other.id != tab.id,
+                            child: TickerMode(
+                              enabled: other.id == tab.id,
+                              child: _tabBody(_sessions[other.id]!),
+                            ),
+                          ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The tab count in a rounded square, as browsers show it.
+class _TabCount extends StatelessWidget {
+  const _TabCount({required this.count, required this.color});
+
+  final int count;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 20,
+      height: 20,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        border: Border.all(color: color, width: 1.6),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Text(
+        '$count',
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          height: 1,
         ),
       ),
     );
@@ -898,7 +1173,7 @@ class _BennyHome extends ConsumerWidget {
         title,
         style: theme.textTheme.titleSmall?.copyWith(
           color: onHome,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -963,7 +1238,7 @@ class _BennyHome extends ConsumerWidget {
                     'Benny Wallet',
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: onHome,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),

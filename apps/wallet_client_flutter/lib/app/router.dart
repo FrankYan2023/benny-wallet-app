@@ -51,6 +51,7 @@ import '../features/wallets/presentation/pages/change_pin_page.dart';
 import '../features/wallets/presentation/pages/wallet_name_page.dart';
 import '../features/wallets/presentation/pages/wallets_page.dart';
 import '../features/wallets/presentation/wallet_flow.dart';
+import '../features/token_list/presentation/pages/token_whitelist_page.dart';
 
 class AppRouter {
   static final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -461,7 +462,12 @@ class AppRouter {
         name: AssetDetailPage.routeName,
         builder: (context, state) => _RouteAccessGuard(
           currentLocation: state.matchedLocation,
-          child: AssetDetailPage(mintAddress: state.pathParameters['mint']!),
+          child: AssetDetailPage(
+            mintAddress: state.pathParameters['mint']!,
+            args: state.extra is AssetDetailArgs
+                ? state.extra! as AssetDetailArgs
+                : null,
+          ),
         ),
       ),
       GoRoute(
@@ -482,6 +488,14 @@ class AppRouter {
         path: ContactFeedbackPage.routePath,
         name: ContactFeedbackPage.routeName,
         builder: (context, state) => const ContactFeedbackPage(),
+      ),
+      GoRoute(
+        path: TokenWhitelistPage.routePath,
+        name: TokenWhitelistPage.routeName,
+        builder: (context, state) => _RouteAccessGuard(
+          currentLocation: state.matchedLocation,
+          child: const TokenWhitelistPage(),
+        ),
       ),
       GoRoute(
         path: ChildWalletsPage.routePath,

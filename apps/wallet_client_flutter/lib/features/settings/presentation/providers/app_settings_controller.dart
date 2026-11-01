@@ -31,6 +31,11 @@ class AppSettingsController extends StateNotifier<AppSettings> {
         .setNotificationsEnabled(enabled);
     state = state.copyWith(notificationsEnabled: enabled);
   }
+
+  Future<void> setPriceTrendStyle(PriceTrendStyle style) async {
+    await ref.read(appSettingsRepositoryProvider).setPriceTrendStyle(style);
+    state = state.copyWith(priceTrendStyle: style);
+  }
 }
 
 final initialAppSettingsProvider = Provider<AppSettings>((ref) {

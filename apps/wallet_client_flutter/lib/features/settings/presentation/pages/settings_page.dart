@@ -272,6 +272,89 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
+  Future<void> _showPriceTrendPicker(
+    BuildContext context,
+    PriceTrendStyle selectedStyle,
+  ) async {
+    final notifier = ref.read(appSettingsControllerProvider.notifier);
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final theme = Theme.of(context);
+        final l10n = context.l10n;
+
+        return Container(
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 22),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.16,
+                      ),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  l10n.settingsPriceColors,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.displaySmall,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.settingsPriceColorsSubtitle,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 16),
+                for (final style in PriceTrendStyle.values) ...[
+                  ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    tileColor: style == selectedStyle
+                        ? const Color(0xFFF8E8B8)
+                        : theme.colorScheme.surfaceContainerHigh.withValues(
+                            alpha: 0.28,
+                          ),
+                    title: Text(_priceTrendLabel(l10n, style)),
+                    subtitle: _PriceTrendPreview(style: style),
+                    trailing: style == selectedStyle
+                        ? const Icon(Icons.check_rounded)
+                        : null,
+                    onTap: () async {
+                      await notifier.setPriceTrendStyle(style);
+                      if (!context.mounted) {
+                        return;
+                      }
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _handleRecoveryPhrase() async {
     final pin = await _requestPin(context);
     if (pin == null || !mounted) {
@@ -720,7 +803,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       Text(
                         l10n.settingsChildModeActive,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -817,6 +900,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 trailingText: _languageLabel(l10n, settings.languageOption),
                 onTap: () =>
                     _showLanguagePicker(context, settings.languageOption),
+              ),
+              const SizedBox(height: 10),
+              _SettingsActionTile(
+                icon: Icons.candlestick_chart_rounded,
+                iconColor: const Color(0xFF8A5A2B),
+                title: l10n.settingsPriceColors,
+                subtitle: l10n.settingsPriceColorsSubtitle,
+                trailingText: _priceTrendLabel(l10n, settings.priceTrendStyle),
+                onTap: () =>
+                    _showPriceTrendPicker(context, settings.priceTrendStyle),
               ),
               const SizedBox(height: 10),
               _SettingsToggleTile(
@@ -985,6 +1078,44 @@ String _languageLabel(AppLocalizations l10n, AppLanguageOption option) {
   return option.nativeLabel ?? l10n.languageSystem;
 }
 
+String _priceTrendLabel(AppLocalizations l10n, PriceTrendStyle style) {
+  return switch (style) {
+    PriceTrendStyle.greenUp => l10n.settingsPriceGreenUp,
+    PriceTrendStyle.redUp => l10n.settingsPriceRedUp,
+  };
+}
+
+/// A rising and a falling price drawn in the style's colors.
+class _PriceTrendPreview extends StatelessWidget {
+  const _PriceTrendPreview({required this.style});
+
+  final PriceTrendStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = switch (style) {
+      PriceTrendStyle.greenUp => PriceTrendColors.greenUp,
+      PriceTrendStyle.redUp => PriceTrendColors.redUp,
+    };
+    final textStyle = Theme.of(
+      context,
+    ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        children: [
+          Icon(Icons.arrow_drop_up_rounded, color: colors.up),
+          Text('+2.48%', style: textStyle?.copyWith(color: colors.up)),
+          const SizedBox(width: 14),
+          Icon(Icons.arrow_drop_down_rounded, color: colors.down),
+          Text('-1.37%', style: textStyle?.copyWith(color: colors.down)),
+        ],
+      ),
+    );
+  }
+}
+
 class _RecoveryPhraseCard extends StatelessWidget {
   const _RecoveryPhraseCard({required this.onTap, this.walletName});
 
@@ -1123,7 +1254,7 @@ class _SettingsToggleTile extends StatelessWidget {
                           color: enabled
                               ? const Color(0xFF2D2A23)
                               : const Color(0xFF8A7D6A),
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           fontSize: 19,
                         ),
                       ),
@@ -1212,7 +1343,7 @@ class _SeekerVaultCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: const Color(0xFF2D2A23),
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       fontSize: 19,
                     ),
                   ),
@@ -1286,7 +1417,7 @@ class _SettingsActionTile extends StatelessWidget {
                     title,
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: const Color(0xFF2D2A23),
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       fontSize: 19,
                     ),
                   ),

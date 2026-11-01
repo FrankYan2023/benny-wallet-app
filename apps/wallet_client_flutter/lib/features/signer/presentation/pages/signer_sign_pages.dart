@@ -1775,7 +1775,7 @@ class _DetailRow extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: warn ? theme.colorScheme.error : AppColors.textPrimary,
-                fontWeight: warn ? FontWeight.w800 : FontWeight.w600,
+                fontWeight: warn ? FontWeight.w700 : FontWeight.w600,
               ),
             ),
           ),
@@ -1994,7 +1994,7 @@ class _AmountPanel extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
                             ),
                           ),
@@ -2015,7 +2015,7 @@ class _AmountPanel extends StatelessWidget {
                       child: Text(
                         value,
                         style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
                         ),
                       ),

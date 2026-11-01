@@ -437,7 +437,7 @@ class _WalletRevealHero extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.tertiaryStrong.withValues(alpha: 0.74),
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -849,7 +849,7 @@ class _WelcomeLanguagePrompt extends ConsumerWidget {
                           _languageLabel(l10n, selectedOption),
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: AppColors.primaryStrong,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),

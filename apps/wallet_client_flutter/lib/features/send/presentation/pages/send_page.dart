@@ -103,7 +103,7 @@ class SendPage extends ConsumerWidget {
                       Text(
                         l10n.sendRecipientPrefilled,
                         style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w800),
+                            ?.copyWith(fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: 8),
                       Text(

@@ -52,7 +52,7 @@ class _ContactFeedbackPageState extends ConsumerState<ContactFeedbackPage> {
                 Text(
                   l10n.feedbackHeading,
                   style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -197,7 +197,7 @@ class _FieldLabel extends StatelessWidget {
       label,
       style: Theme.of(
         context,
-      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
     );
   }
 }

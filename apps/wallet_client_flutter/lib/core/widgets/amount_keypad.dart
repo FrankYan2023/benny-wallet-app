@@ -54,7 +54,7 @@ Future<String?> showAmountKeypadSheet(
           final readoutStyle = Theme.of(context).textTheme.displayLarge
               ?.copyWith(
                 fontSize: 48,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 height: 0.92,
                 letterSpacing: -1.8,
               );
@@ -155,7 +155,7 @@ class AmountDisplayButton extends StatelessWidget {
               maxLines: 1,
               style: Theme.of(context).textTheme.displayLarge?.copyWith(
                 fontSize: 42,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 height: 0.94,
                 letterSpacing: -1.6,
                 color: muted
@@ -263,7 +263,7 @@ class _AmountPadKey extends StatelessWidget {
                     label ?? '',
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
                       fontSize: 28,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: foregroundColor,
                     ),
                   ),

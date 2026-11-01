@@ -277,7 +277,7 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
                             : l10n.unlockEnterPin,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       if (_needsPinSetup) ...[

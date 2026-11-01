@@ -218,7 +218,7 @@ class _WalletNamePageState extends ConsumerState<WalletNamePage> {
               },
               onSubmitted: (_) => _continue(),
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 color: WalletPalette.ink,
               ),
               decoration: InputDecoration(

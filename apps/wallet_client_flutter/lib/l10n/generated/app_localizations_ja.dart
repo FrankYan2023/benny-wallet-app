@@ -1180,7 +1180,13 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get assetMintCopied => 'ミントがコピーされました (60 秒後にクリアされます)';
+  String get assetMintCopied => 'トークンアドレスをコピーしました（60 秒後に消去）';
+
+  @override
+  String get assetMoreActions => 'その他の操作';
+
+  @override
+  String get assetCopyAddress => 'トークンアドレスをコピー';
 
   @override
   String get assetCouldNotOpenWebsite => 'ウェブサイトを開けませんでした。';
@@ -3390,4 +3396,313 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get airGapSignSiteExpired =>
       'サイトのリクエストは期限切れの可能性があります。閉じてサイトでやり直してください。';
+
+  @override
+  String get assetChartTitle => 'チャート';
+
+  @override
+  String get assetChartDay => '日足';
+
+  @override
+  String get assetChartWeek => '週足';
+
+  @override
+  String get assetChartMonth => '月足';
+
+  @override
+  String get assetChartYear => '年足';
+
+  @override
+  String get assetChartOpen => '始';
+
+  @override
+  String get assetChartHigh => '高';
+
+  @override
+  String get assetChartLow => '安';
+
+  @override
+  String get assetChartClose => '終';
+
+  @override
+  String get assetChartVolume => '出来高';
+
+  @override
+  String get assetChartEmpty => '価格の履歴はまだありません。';
+
+  @override
+  String get assetChartLoadFailed => 'チャートを読み込めませんでした。';
+
+  @override
+  String assetChartUnderlying(String market) {
+    return '対象 $market';
+  }
+
+  @override
+  String assetDataSource(String source) {
+    return 'データ：$source';
+  }
+
+  @override
+  String get stockTitle => '対象の株式';
+
+  @override
+  String get stockFundTitle => '対象のファンド';
+
+  @override
+  String get stockCompanyTitle => '企業';
+
+  @override
+  String get stockUnderlying => '連動対象';
+
+  @override
+  String get stockPrice => '株価';
+
+  @override
+  String get stockChange => '騰落率';
+
+  @override
+  String get stockDayRange => '当日の値幅';
+
+  @override
+  String get stockYearRange => '52週の値幅';
+
+  @override
+  String get stockVolume => '出来高';
+
+  @override
+  String get stockMarketCap => '時価総額';
+
+  @override
+  String get stockPeRatio => 'PER（TTM）';
+
+  @override
+  String get stockEps => 'EPS（TTM）';
+
+  @override
+  String get stockRevenue => '売上高（TTM）';
+
+  @override
+  String get stockNetIncome => '純利益（TTM）';
+
+  @override
+  String get stockDividendYield => '配当利回り';
+
+  @override
+  String stockFinancialsThrough(String date) {
+    return '$date までの財務データ';
+  }
+
+  @override
+  String get stockAbout => '概要';
+
+  @override
+  String get stockIndustry => '業種';
+
+  @override
+  String get stockCeo => 'CEO';
+
+  @override
+  String get stockFounded => '設立';
+
+  @override
+  String get stockHeadquarters => '本社';
+
+  @override
+  String get stockEmployees => '従業員数';
+
+  @override
+  String get stockPrivateNotice => '非上場企業のため、株式市場の価格はありません。';
+
+  @override
+  String get stockLoadFailed => '株式情報を読み込めませんでした。';
+
+  @override
+  String get stockShowMore => '続きを読む';
+
+  @override
+  String get stockShowLess => '閉じる';
+
+  @override
+  String get stockWikipediaLicense => '説明は Wikipedia より（CC BY-SA 4.0）';
+
+  @override
+  String get stockTabMarket => '相場';
+
+  @override
+  String get stockTabFundamentals => 'ファンダメンタルズ';
+
+  @override
+  String get stockTabCompany => '企業概要';
+
+  @override
+  String get stockTabFund => 'ファンド概要';
+
+  @override
+  String get stockNoFundamentals => '財務データは米国SECへの提出書類に基づきます。この企業のデータはありません。';
+
+  @override
+  String get stockNoFundamentalsFund => 'ファンドには企業の財務データがありません。';
+
+  @override
+  String get stockNoProfile => '企業情報はまだありません。';
+
+  @override
+  String get stockOpen => '始値';
+
+  @override
+  String get stockPrevClose => '前日終値';
+
+  @override
+  String get stockHigh => '高値';
+
+  @override
+  String get stockLow => '安値';
+
+  @override
+  String get stock52wHigh => '52週高値';
+
+  @override
+  String get stock52wLow => '52週安値';
+
+  @override
+  String get stockPeStatic => 'PER（前期）';
+
+  @override
+  String get stockPeDynamic => 'PER（年換算）';
+
+  @override
+  String get stockPbRatio => 'PBR';
+
+  @override
+  String get stockShares => '発行済株式数';
+
+  @override
+  String get stockBookValuePerShare => '1株当たり純資産';
+
+  @override
+  String get stockLoss => '赤字';
+
+  @override
+  String get stockMarketPre => 'プレマーケット';
+
+  @override
+  String get stockMarketOpen => '取引中';
+
+  @override
+  String get stockMarketPost => 'アフターマーケット';
+
+  @override
+  String get stockMarketClosed => '取引終了';
+
+  @override
+  String get stockTimeZoneEastern => '米東部';
+
+  @override
+  String get stockQuoteUnavailable => '現在、株価を取得できません。';
+
+  @override
+  String get coinVolume24h => '24時間取引高';
+
+  @override
+  String get coinTraders24h => '24時間取引者数';
+
+  @override
+  String get coinChange24h => '24時間変動';
+
+  @override
+  String coinAbout(String symbol) {
+    return '$symbol について';
+  }
+
+  @override
+  String get coinNoDescription => '説明はまだありません。';
+
+  @override
+  String get coinDescriptionLoadFailed => '説明を読み込めませんでした。';
+
+  @override
+  String get coinWhitepaper => 'ホワイトペーパー';
+
+  @override
+  String get coinLaunched => 'ローンチ';
+
+  @override
+  String get coinCategories => 'カテゴリ';
+
+  @override
+  String get settingsPriceColors => '騰落の色';
+
+  @override
+  String get settingsPriceColorsSubtitle => '値上がりと値下がりの表示色';
+
+  @override
+  String get settingsPriceGreenUp => '上昇は緑、下落は赤';
+
+  @override
+  String get settingsPriceRedUp => '上昇は赤、下落は緑';
+
+  @override
+  String browserTabsCount(int count) {
+    return 'タブ（$count）';
+  }
+
+  @override
+  String get browserNewTab => '新しいタブ';
+
+  @override
+  String get browserCloseTab => 'タブを閉じる';
+
+  @override
+  String get coinLiquidity => '流動性';
+
+  @override
+  String get whitelistTitle => 'マーケット';
+
+  @override
+  String get whitelistCoins => '暗号資産';
+
+  @override
+  String get whitelistStocks => '株式';
+
+  @override
+  String get whitelistSearchHint => '名前またはシンボルで検索';
+
+  @override
+  String get whitelistTopCoins => '時価総額トップ20';
+
+  @override
+  String get whitelistTopStocks => '時価総額トップ20のテック株';
+
+  @override
+  String get whitelistNoResults => '一致するトークンはありません。';
+
+  @override
+  String get whitelistLoadFailed => 'リストを読み込めませんでした。';
+
+  @override
+  String whitelistMatches(int count) {
+    return '$count 件';
+  }
+
+  @override
+  String get whitelistMarketCapShort => '時価';
+
+  @override
+  String get whitelistPreviousPage => '前のページ';
+
+  @override
+  String get whitelistNextPage => '次のページ';
+
+  @override
+  String get whitelistStablecoins => 'ステーブルコイン';
+
+  @override
+  String get assetChart15m => '15分';
+
+  @override
+  String get assetChart1h => '1時間';
+
+  @override
+  String get assetChart4h => '4時間';
 }

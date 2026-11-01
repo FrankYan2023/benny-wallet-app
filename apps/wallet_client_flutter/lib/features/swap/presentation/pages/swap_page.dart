@@ -479,7 +479,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
                                           .displayLarge
                                           ?.copyWith(
                                             fontSize: 40,
-                                            fontWeight: FontWeight.w800,
+                                            fontWeight: FontWeight.w700,
                                             height: 0.96,
                                             letterSpacing: -1.4,
                                             color: AppColors.textPrimary,
@@ -1906,7 +1906,7 @@ class _SwapPageState extends ConsumerState<SwapPage> {
               onPressed: () => Navigator.of(dialogContext).pop(),
               child: Text(
                 context.l10n.commonClose,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
               ),
             ),
           ],
@@ -2137,7 +2137,7 @@ class _SwapSectionCard extends StatelessWidget {
             title,
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: 11,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: AppColors.textSecondary,
             ),
           ),
@@ -2809,7 +2809,7 @@ class _TokenSectionHeader extends StatelessWidget {
         title,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           fontSize: 11,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w700,
           color: AppColors.textSecondary,
         ),
       ),

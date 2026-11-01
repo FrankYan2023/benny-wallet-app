@@ -526,7 +526,7 @@ class _StepPills extends StatelessWidget {
                             (i + 1).toString(),
                             style: theme.textTheme.labelMedium?.copyWith(
                               color: AppColors.textPrimary,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                   ),

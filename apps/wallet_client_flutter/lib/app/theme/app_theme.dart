@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 abstract final class AppTheme {
+  // Manrope for all text; Sora only for large figures (balances, prices).
   static const _bodyFont = 'Manrope';
   static const _displayFont = 'Sora';
-  static const _titleFont = 'Plus Jakarta Sans';
 
   static ThemeData light() {
     final scheme = ColorScheme.fromSeed(
@@ -50,65 +50,84 @@ abstract final class AppTheme {
       textTheme: bodyTextTheme.copyWith(
         displayLarge: display.copyWith(
           fontSize: 40,
-          height: 0.98,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -1.2,
+          height: 1.05,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.8,
         ),
         displayMedium: display.copyWith(
           fontSize: 28,
-          height: 1.04,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -0.6,
+          height: 1.1,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.4,
         ),
         displaySmall: display.copyWith(
           fontSize: 24,
-          height: 1.08,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -0.4,
+          height: 1.15,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.2,
+        ),
+        headlineMedium: display.copyWith(
+          fontSize: 28,
+          height: 1.15,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.3,
         ),
         headlineSmall: display.copyWith(
           fontSize: 20,
-          height: 1.12,
-          fontWeight: FontWeight.w700,
+          height: 1.2,
+          fontWeight: FontWeight.w600,
         ),
         titleLarge: const TextStyle(
-          fontFamily: _titleFont,
+          fontFamily: _bodyFont,
           fontSize: 18,
-          height: 1.12,
+          height: 1.3,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
         titleMedium: const TextStyle(
-          fontFamily: _displayFont,
+          fontFamily: _bodyFont,
           fontSize: 15,
-          height: 1.15,
+          height: 1.3,
           fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
+        ),
+        titleSmall: const TextStyle(
+          fontFamily: _bodyFont,
+          fontSize: 14,
+          height: 1.3,
+          fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
         bodyLarge: const TextStyle(
           fontFamily: _bodyFont,
-          fontSize: 14,
-          height: 1.45,
+          fontSize: 15,
+          height: 1.5,
           color: AppColors.textSecondary,
         ),
         bodyMedium: const TextStyle(
+          fontFamily: _bodyFont,
+          fontSize: 13,
+          height: 1.45,
+          color: AppColors.textSecondary,
+        ),
+        bodySmall: const TextStyle(
           fontFamily: _bodyFont,
           fontSize: 12,
           height: 1.4,
           color: AppColors.textSecondary,
         ),
-        bodySmall: const TextStyle(
+        labelLarge: const TextStyle(
           fontFamily: _bodyFont,
-          fontSize: 11,
-          height: 1.35,
-          color: AppColors.textSecondary,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.1,
         ),
         labelMedium: const TextStyle(
           fontFamily: _bodyFont,
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
           color: AppColors.textSecondary,
-          letterSpacing: 0.3,
+          letterSpacing: 0.2,
         ),
       ),
       appBarTheme: AppBarTheme(
@@ -121,7 +140,7 @@ abstract final class AppTheme {
         titleTextStyle: const TextStyle(
           fontFamily: _displayFont,
           fontSize: 20,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
       ),

@@ -1,6 +1,9 @@
 import '../../../core/network/api_client.dart';
 import '../../transaction_history/domain/transaction_activity.dart';
 import '../domain/asset_detail_view_data.dart';
+import '../domain/stock_profile.dart';
+import '../domain/token_candles.dart';
+import '../domain/token_profile.dart';
 
 class AssetDetailRepository {
   const AssetDetailRepository(this._apiClient);
@@ -31,7 +34,51 @@ class AssetDetailRepository {
       createdAt: DateTime.tryParse(payload['createdAt'] as String? ?? ''),
       volume24hUsd: _readDouble(payload['volume24hUsd']),
       traderCount24h: (payload['traderCount24h'] as num?)?.toInt(),
+      liquidityUsd: _readDouble(payload['liquidityUsd']),
     );
+  }
+
+  /// Null when the token has no chart (it is not in the backend catalog).
+  Future<TokenCandles?> loadCandles(
+    String mintAddress,
+    CandleInterval interval,
+  ) async {
+    final payload = await _apiClient.getTokenCandles(
+      mintAddress: mintAddress,
+      interval: interval.apiValue,
+    );
+    if (payload == null) {
+      return null;
+    }
+    return TokenCandles.fromJson(
+      payload,
+      mintAddress: mintAddress,
+      interval: interval,
+    );
+  }
+
+  /// Null for tokens that are not xStocks.
+  Future<StockProfile?> loadStockProfile(
+    String mintAddress, {
+    required String language,
+  }) async {
+    final payload = await _apiClient.getStockProfile(
+      mintAddress: mintAddress,
+      language: language,
+    );
+    return payload == null ? null : StockProfile.fromJson(payload);
+  }
+
+  /// Null when the token is not a catalog coin.
+  Future<TokenProfile?> loadTokenProfile(
+    String mintAddress, {
+    required String language,
+  }) async {
+    final payload = await _apiClient.getTokenProfile(
+      mintAddress: mintAddress,
+      language: language,
+    );
+    return payload == null ? null : TokenProfile.fromJson(payload);
   }
 
   Future<List<TransactionActivity>> loadTokenActivity({

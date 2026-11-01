@@ -713,7 +713,7 @@ class _SeedVaultAccountPickerState extends State<_SeedVaultAccountPicker> {
                             l10n.walletAlreadyAddedBadge,
                             style: theme.textTheme.labelMedium?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                             ),
                           )
                         else

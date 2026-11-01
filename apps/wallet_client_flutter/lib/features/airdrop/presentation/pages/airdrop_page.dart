@@ -103,7 +103,7 @@ class _AirdropPageState extends ConsumerState<AirdropPage> {
                   Text(
                     l10n.airdropUnavailableTitle,
                     style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -284,7 +284,7 @@ class _AirdropHeroCard extends StatelessWidget {
                   context.l10n.airdropTitle,
                   style: theme.textTheme.displaySmall?.copyWith(
                     color: Colors.white,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -396,7 +396,7 @@ class _HeroMetric extends StatelessWidget {
             value,
             style: theme.textTheme.titleLarge?.copyWith(
               color: Colors.white,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -427,7 +427,7 @@ class _JoinAirdropCard extends StatelessWidget {
           Text(
             context.l10n.airdropJoinCardTitle,
             style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 8),
@@ -458,7 +458,7 @@ class _JoinAirdropCard extends StatelessWidget {
                             visibleChars: 6,
                           ),
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -548,7 +548,7 @@ class _RewardsRuleCard extends StatelessWidget {
           Text(
             context.l10n.airdropRewardRules,
             style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 14),
@@ -604,14 +604,14 @@ class _RuleRow extends StatelessWidget {
             child: Text(
               title,
               style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
           Text(
             reward,
             style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               color: AppColors.primary,
             ),
           ),
@@ -676,7 +676,7 @@ class _BycDetailCard extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: theme.textTheme.headlineLarge?.copyWith(
                         color: AppColors.primaryStrong,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -770,7 +770,7 @@ class _PumpFunButton extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.labelLarge?.copyWith(
                           color: Colors.white,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
@@ -800,7 +800,7 @@ class _BycLogo extends StatelessWidget {
         symbol.substring(0, 1),
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
           color: AppColors.primary,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -944,7 +944,7 @@ class _CheckInCelebrationDialogState extends State<_CheckInCelebrationDialog>
                         textAlign: TextAlign.center,
                         style: theme.textTheme.displaySmall?.copyWith(
                           color: AppColors.primaryStrong,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -952,7 +952,7 @@ class _CheckInCelebrationDialogState extends State<_CheckInCelebrationDialog>
                         '+${widget.awardedPoints} BYC',
                         style: theme.textTheme.displaySmall?.copyWith(
                           color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(height: 10),

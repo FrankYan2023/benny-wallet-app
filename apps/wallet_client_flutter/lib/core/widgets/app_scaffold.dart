@@ -17,6 +17,9 @@ class AppScaffold extends StatelessWidget {
     this.showTopBar = true,
     this.showBackgroundDecorations = true,
     this.travelGuardTooltip,
+    this.leading,
+    this.titleWidget,
+    this.horizontalPadding = 16,
   });
 
   final String title;
@@ -30,6 +33,16 @@ class AppScaffold extends StatelessWidget {
   /// When set, the travel guard badge replaces the brand logo (top left) and
   /// this is its tooltip.
   final String? travelGuardTooltip;
+
+  /// Replaces the brand logo top left (the home page's notifications).
+  final Widget? leading;
+
+  /// Replaces the title text (the home page's name with its airdrop badge).
+  final Widget? titleWidget;
+
+  /// The page's side margin; 0 lets content (a chart) run edge to edge and
+  /// pad itself.
+  final double horizontalPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +61,12 @@ class AppScaffold extends StatelessWidget {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 520),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    12,
+                    horizontalPadding,
+                    16,
+                  ),
                   child: Column(
                     children: [
                       if (showTopBar) ...[
@@ -86,10 +104,15 @@ class AppScaffold extends StatelessWidget {
                             else if (travelGuardTooltip != null)
                               TravelGuardBadge(tooltip: travelGuardTooltip)
                             else
-                              const BrandLogo(size: 44, radius: 22),
+                              leading ?? const BrandLogo(size: 44, radius: 22),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: enableTitleNavigation
+                              child: titleWidget != null
+                                  ? Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: titleWidget,
+                                    )
+                                  : enableTitleNavigation
                                   ? InkWell(
                                       borderRadius: BorderRadius.circular(16),
                                       onTap: () => context.go('/'),
@@ -99,7 +122,7 @@ class AppScaffold extends StatelessWidget {
                                         overflow: TextOverflow.ellipsis,
                                         style: theme.textTheme.titleLarge
                                             ?.copyWith(
-                                              fontWeight: FontWeight.w800,
+                                              fontWeight: FontWeight.w700,
                                               color: AppColors.primary,
                                             ),
                                       ),
@@ -110,7 +133,7 @@ class AppScaffold extends StatelessWidget {
                                       overflow: TextOverflow.ellipsis,
                                       style: theme.textTheme.titleLarge
                                           ?.copyWith(
-                                            fontWeight: FontWeight.w800,
+                                            fontWeight: FontWeight.w700,
                                             color: AppColors.primary,
                                           ),
                                     ),

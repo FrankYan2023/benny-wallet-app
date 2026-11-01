@@ -82,7 +82,7 @@ class DappHeader extends StatelessWidget {
           name,
           textAlign: TextAlign.center,
           style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
           ),
         ),
         if (host != null) ...[
@@ -216,7 +216,7 @@ class DappTrustPanel extends StatelessWidget {
                 review.trust.label(l10n),
                 style: TextStyle(
                   color: color,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   fontSize: 16,
                 ),
               ),

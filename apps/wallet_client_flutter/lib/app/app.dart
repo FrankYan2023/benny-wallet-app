@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'di/providers.dart';
 import '../core/widgets/session_activity_listener.dart';
 import '../features/dapp_connect/presentation/dapp_connect_listener.dart';
+import '../features/settings/domain/app_settings.dart';
 import '../features/settings/presentation/providers/app_settings_controller.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/l10n.dart';
@@ -20,7 +22,15 @@ class WalletApp extends ConsumerStatefulWidget {
 }
 
 class _WalletAppState extends ConsumerState<WalletApp> {
-  late final ThemeData _theme = AppTheme.light();
+  late final ThemeData _baseTheme = AppTheme.light();
+  late final Map<PriceTrendStyle, ThemeData> _themes = {
+    PriceTrendStyle.greenUp: _baseTheme.copyWith(
+      extensions: const [PriceTrendColors.greenUp],
+    ),
+    PriceTrendStyle.redUp: _baseTheme.copyWith(
+      extensions: const [PriceTrendColors.redUp],
+    ),
+  };
 
   @override
   void initState() {
@@ -56,13 +66,14 @@ class _WalletAppState extends ConsumerState<WalletApp> {
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(appSettingsControllerProvider);
+    final theme = _themes[settings.priceTrendStyle]!;
 
     return MaterialApp.router(
       onGenerateTitle: (context) => context.l10n.appTitle,
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.light,
-      theme: _theme,
-      darkTheme: _theme,
+      theme: theme,
+      darkTheme: theme,
       locale: settings.languageOption.locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

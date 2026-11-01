@@ -1222,7 +1222,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get assetMintCopied => 'Mint copied (will clear in 60s)';
+  String get assetMintCopied => 'Token address copied (clears in 60s)';
+
+  @override
+  String get assetMoreActions => 'More actions';
+
+  @override
+  String get assetCopyAddress => 'Copy token address';
 
   @override
   String get assetCouldNotOpenWebsite => 'Could not open website.';
@@ -3535,4 +3541,319 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get airGapSignSiteExpired =>
       'The website\'s request has probably expired. Close this and start again on the website.';
+
+  @override
+  String get assetChartTitle => 'Price chart';
+
+  @override
+  String get assetChartDay => 'Day';
+
+  @override
+  String get assetChartWeek => 'Week';
+
+  @override
+  String get assetChartMonth => 'Month';
+
+  @override
+  String get assetChartYear => 'Year';
+
+  @override
+  String get assetChartOpen => 'O';
+
+  @override
+  String get assetChartHigh => 'H';
+
+  @override
+  String get assetChartLow => 'L';
+
+  @override
+  String get assetChartClose => 'C';
+
+  @override
+  String get assetChartVolume => 'Vol';
+
+  @override
+  String get assetChartEmpty => 'No price history yet.';
+
+  @override
+  String get assetChartLoadFailed => 'Couldn\'t load the chart.';
+
+  @override
+  String assetChartUnderlying(String market) {
+    return 'Underlying $market';
+  }
+
+  @override
+  String assetDataSource(String source) {
+    return 'Data: $source';
+  }
+
+  @override
+  String get stockTitle => 'Underlying stock';
+
+  @override
+  String get stockFundTitle => 'Underlying fund';
+
+  @override
+  String get stockCompanyTitle => 'Company';
+
+  @override
+  String get stockUnderlying => 'Tracks';
+
+  @override
+  String get stockPrice => 'Price';
+
+  @override
+  String get stockChange => 'Change';
+
+  @override
+  String get stockDayRange => 'Day range';
+
+  @override
+  String get stockYearRange => '52-week range';
+
+  @override
+  String get stockVolume => 'Volume';
+
+  @override
+  String get stockMarketCap => 'Market cap';
+
+  @override
+  String get stockPeRatio => 'P/E (TTM)';
+
+  @override
+  String get stockEps => 'EPS (TTM)';
+
+  @override
+  String get stockRevenue => 'Revenue (TTM)';
+
+  @override
+  String get stockNetIncome => 'Net income (TTM)';
+
+  @override
+  String get stockDividendYield => 'Dividend yield';
+
+  @override
+  String stockFinancialsThrough(String date) {
+    return 'Financials through $date';
+  }
+
+  @override
+  String get stockAbout => 'About';
+
+  @override
+  String get stockIndustry => 'Industry';
+
+  @override
+  String get stockCeo => 'CEO';
+
+  @override
+  String get stockFounded => 'Founded';
+
+  @override
+  String get stockHeadquarters => 'Headquarters';
+
+  @override
+  String get stockEmployees => 'Employees';
+
+  @override
+  String get stockPrivateNotice =>
+      'A private company: there is no stock market price.';
+
+  @override
+  String get stockLoadFailed => 'Couldn\'t load stock details.';
+
+  @override
+  String get stockShowMore => 'More';
+
+  @override
+  String get stockShowLess => 'Less';
+
+  @override
+  String get stockWikipediaLicense =>
+      'Description from Wikipedia, CC BY-SA 4.0';
+
+  @override
+  String get stockTabMarket => 'Market';
+
+  @override
+  String get stockTabFundamentals => 'Fundamentals';
+
+  @override
+  String get stockTabCompany => 'Company';
+
+  @override
+  String get stockTabFund => 'Fund';
+
+  @override
+  String get stockNoFundamentals =>
+      'Financials come from US SEC filings; none are available for this company.';
+
+  @override
+  String get stockNoFundamentalsFund =>
+      'Funds don\'t report company financials.';
+
+  @override
+  String get stockNoProfile => 'No company profile yet.';
+
+  @override
+  String get stockOpen => 'Open';
+
+  @override
+  String get stockPrevClose => 'Prev close';
+
+  @override
+  String get stockHigh => 'High';
+
+  @override
+  String get stockLow => 'Low';
+
+  @override
+  String get stock52wHigh => '52W high';
+
+  @override
+  String get stock52wLow => '52W low';
+
+  @override
+  String get stockPeStatic => 'P/E (FY)';
+
+  @override
+  String get stockPeDynamic => 'P/E (annualized)';
+
+  @override
+  String get stockPbRatio => 'P/B';
+
+  @override
+  String get stockShares => 'Shares out';
+
+  @override
+  String get stockBookValuePerShare => 'Book value/share';
+
+  @override
+  String get stockLoss => 'Loss';
+
+  @override
+  String get stockMarketPre => 'Pre-market';
+
+  @override
+  String get stockMarketOpen => 'Trading';
+
+  @override
+  String get stockMarketPost => 'After hours';
+
+  @override
+  String get stockMarketClosed => 'Closed';
+
+  @override
+  String get stockTimeZoneEastern => 'ET';
+
+  @override
+  String get stockQuoteUnavailable =>
+      'The share price is unavailable right now.';
+
+  @override
+  String get coinVolume24h => '24h volume';
+
+  @override
+  String get coinTraders24h => '24h traders';
+
+  @override
+  String get coinChange24h => '24h change';
+
+  @override
+  String coinAbout(String symbol) {
+    return 'About $symbol';
+  }
+
+  @override
+  String get coinNoDescription => 'No description yet.';
+
+  @override
+  String get coinDescriptionLoadFailed => 'Couldn\'t load the description.';
+
+  @override
+  String get coinWhitepaper => 'Whitepaper';
+
+  @override
+  String get coinLaunched => 'Launched';
+
+  @override
+  String get coinCategories => 'Categories';
+
+  @override
+  String get settingsPriceColors => 'Price colors';
+
+  @override
+  String get settingsPriceColorsSubtitle =>
+      'Colors for rising and falling prices';
+
+  @override
+  String get settingsPriceGreenUp => 'Green up, red down';
+
+  @override
+  String get settingsPriceRedUp => 'Red up, green down';
+
+  @override
+  String browserTabsCount(int count) {
+    return 'Tabs ($count)';
+  }
+
+  @override
+  String get browserNewTab => 'New tab';
+
+  @override
+  String get browserCloseTab => 'Close tab';
+
+  @override
+  String get coinLiquidity => 'Liquidity';
+
+  @override
+  String get whitelistTitle => 'Markets';
+
+  @override
+  String get whitelistCoins => 'Crypto';
+
+  @override
+  String get whitelistStocks => 'Stocks';
+
+  @override
+  String get whitelistSearchHint => 'Search name or symbol';
+
+  @override
+  String get whitelistTopCoins => 'Top 20 by market cap';
+
+  @override
+  String get whitelistTopStocks => 'Top 20 tech stocks by market value';
+
+  @override
+  String get whitelistNoResults => 'No matching tokens.';
+
+  @override
+  String get whitelistLoadFailed => 'Couldn\'t load the list.';
+
+  @override
+  String whitelistMatches(int count) {
+    return '$count matches';
+  }
+
+  @override
+  String get whitelistMarketCapShort => 'MC';
+
+  @override
+  String get whitelistPreviousPage => 'Previous page';
+
+  @override
+  String get whitelistNextPage => 'Next page';
+
+  @override
+  String get whitelistStablecoins => 'Stablecoins';
+
+  @override
+  String get assetChart15m => '15m';
+
+  @override
+  String get assetChart1h => '1H';
+
+  @override
+  String get assetChart4h => '4H';
 }

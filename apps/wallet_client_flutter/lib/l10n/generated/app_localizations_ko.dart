@@ -1175,7 +1175,13 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get assetMintCopied => '민트 복사됨(60초 후에 지워짐)';
+  String get assetMintCopied => '토큰 주소가 복사되었습니다(60초 후 지워짐)';
+
+  @override
+  String get assetMoreActions => '더보기';
+
+  @override
+  String get assetCopyAddress => '토큰 주소 복사';
 
   @override
   String get assetCouldNotOpenWebsite => '웹사이트를 열 수 없습니다.';
@@ -3384,4 +3390,314 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get airGapSignSiteExpired =>
       '웹사이트 요청이 만료되었을 수 있습니다. 닫고 웹사이트에서 다시 시작하세요.';
+
+  @override
+  String get assetChartTitle => '차트';
+
+  @override
+  String get assetChartDay => '일봉';
+
+  @override
+  String get assetChartWeek => '주봉';
+
+  @override
+  String get assetChartMonth => '월봉';
+
+  @override
+  String get assetChartYear => '연봉';
+
+  @override
+  String get assetChartOpen => '시';
+
+  @override
+  String get assetChartHigh => '고';
+
+  @override
+  String get assetChartLow => '저';
+
+  @override
+  String get assetChartClose => '종';
+
+  @override
+  String get assetChartVolume => '거래량';
+
+  @override
+  String get assetChartEmpty => '아직 가격 기록이 없습니다.';
+
+  @override
+  String get assetChartLoadFailed => '차트를 불러오지 못했습니다.';
+
+  @override
+  String assetChartUnderlying(String market) {
+    return '기초자산 $market';
+  }
+
+  @override
+  String assetDataSource(String source) {
+    return '데이터: $source';
+  }
+
+  @override
+  String get stockTitle => '기초 주식';
+
+  @override
+  String get stockFundTitle => '기초 펀드';
+
+  @override
+  String get stockCompanyTitle => '회사';
+
+  @override
+  String get stockUnderlying => '추종 대상';
+
+  @override
+  String get stockPrice => '주가';
+
+  @override
+  String get stockChange => '등락률';
+
+  @override
+  String get stockDayRange => '당일 범위';
+
+  @override
+  String get stockYearRange => '52주 범위';
+
+  @override
+  String get stockVolume => '거래량';
+
+  @override
+  String get stockMarketCap => '시가총액';
+
+  @override
+  String get stockPeRatio => 'PER (TTM)';
+
+  @override
+  String get stockEps => 'EPS (TTM)';
+
+  @override
+  String get stockRevenue => '매출 (TTM)';
+
+  @override
+  String get stockNetIncome => '순이익 (TTM)';
+
+  @override
+  String get stockDividendYield => '배당수익률';
+
+  @override
+  String stockFinancialsThrough(String date) {
+    return '$date까지의 재무 데이터';
+  }
+
+  @override
+  String get stockAbout => '회사 소개';
+
+  @override
+  String get stockIndustry => '업종';
+
+  @override
+  String get stockCeo => 'CEO';
+
+  @override
+  String get stockFounded => '설립';
+
+  @override
+  String get stockHeadquarters => '본사';
+
+  @override
+  String get stockEmployees => '직원 수';
+
+  @override
+  String get stockPrivateNotice => '비상장 회사라 주식 시장 가격이 없습니다.';
+
+  @override
+  String get stockLoadFailed => '주식 정보를 불러오지 못했습니다.';
+
+  @override
+  String get stockShowMore => '더 보기';
+
+  @override
+  String get stockShowLess => '접기';
+
+  @override
+  String get stockWikipediaLicense => '설명 출처: 위키백과, CC BY-SA 4.0';
+
+  @override
+  String get stockTabMarket => '시세';
+
+  @override
+  String get stockTabFundamentals => '펀더멘털';
+
+  @override
+  String get stockTabCompany => '기업 개요';
+
+  @override
+  String get stockTabFund => '펀드 개요';
+
+  @override
+  String get stockNoFundamentals =>
+      '재무 데이터는 미국 SEC 공시를 기반으로 하며, 이 기업의 데이터는 없습니다.';
+
+  @override
+  String get stockNoFundamentalsFund => '펀드는 기업 재무 데이터가 없습니다.';
+
+  @override
+  String get stockNoProfile => '아직 기업 정보가 없습니다.';
+
+  @override
+  String get stockOpen => '시가';
+
+  @override
+  String get stockPrevClose => '전일 종가';
+
+  @override
+  String get stockHigh => '고가';
+
+  @override
+  String get stockLow => '저가';
+
+  @override
+  String get stock52wHigh => '52주 최고';
+
+  @override
+  String get stock52wLow => '52주 최저';
+
+  @override
+  String get stockPeStatic => 'PER(전년도)';
+
+  @override
+  String get stockPeDynamic => 'PER(연환산)';
+
+  @override
+  String get stockPbRatio => 'PBR';
+
+  @override
+  String get stockShares => '발행주식수';
+
+  @override
+  String get stockBookValuePerShare => '주당순자산';
+
+  @override
+  String get stockLoss => '적자';
+
+  @override
+  String get stockMarketPre => '프리마켓';
+
+  @override
+  String get stockMarketOpen => '거래 중';
+
+  @override
+  String get stockMarketPost => '애프터마켓';
+
+  @override
+  String get stockMarketClosed => '장 마감';
+
+  @override
+  String get stockTimeZoneEastern => '미 동부';
+
+  @override
+  String get stockQuoteUnavailable => '지금은 주가를 불러올 수 없습니다.';
+
+  @override
+  String get coinVolume24h => '24시간 거래량';
+
+  @override
+  String get coinTraders24h => '24시간 거래자';
+
+  @override
+  String get coinChange24h => '24시간 변동';
+
+  @override
+  String coinAbout(String symbol) {
+    return '$symbol 소개';
+  }
+
+  @override
+  String get coinNoDescription => '아직 설명이 없습니다.';
+
+  @override
+  String get coinDescriptionLoadFailed => '설명을 불러오지 못했습니다.';
+
+  @override
+  String get coinWhitepaper => '백서';
+
+  @override
+  String get coinLaunched => '출시일';
+
+  @override
+  String get coinCategories => '카테고리';
+
+  @override
+  String get settingsPriceColors => '등락 색상';
+
+  @override
+  String get settingsPriceColorsSubtitle => '가격 상승과 하락 표시 색상';
+
+  @override
+  String get settingsPriceGreenUp => '상승 초록, 하락 빨강';
+
+  @override
+  String get settingsPriceRedUp => '상승 빨강, 하락 초록';
+
+  @override
+  String browserTabsCount(int count) {
+    return '탭 ($count)';
+  }
+
+  @override
+  String get browserNewTab => '새 탭';
+
+  @override
+  String get browserCloseTab => '탭 닫기';
+
+  @override
+  String get coinLiquidity => '유동성';
+
+  @override
+  String get whitelistTitle => '마켓';
+
+  @override
+  String get whitelistCoins => '코인';
+
+  @override
+  String get whitelistStocks => '주식';
+
+  @override
+  String get whitelistSearchHint => '이름 또는 심볼 검색';
+
+  @override
+  String get whitelistTopCoins => '시가총액 상위 20';
+
+  @override
+  String get whitelistTopStocks => '시가총액 상위 20 기술주';
+
+  @override
+  String get whitelistNoResults => '일치하는 토큰이 없습니다.';
+
+  @override
+  String get whitelistLoadFailed => '목록을 불러오지 못했습니다.';
+
+  @override
+  String whitelistMatches(int count) {
+    return '$count개 결과';
+  }
+
+  @override
+  String get whitelistMarketCapShort => '시총';
+
+  @override
+  String get whitelistPreviousPage => '이전 페이지';
+
+  @override
+  String get whitelistNextPage => '다음 페이지';
+
+  @override
+  String get whitelistStablecoins => '스테이블코인';
+
+  @override
+  String get assetChart15m => '15분';
+
+  @override
+  String get assetChart1h => '1시간';
+
+  @override
+  String get assetChart4h => '4시간';
 }

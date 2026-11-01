@@ -1,7 +1,7 @@
 name: wallet_client_flutter
 description: Benny Wallet Flutter client for Web, iOS and Android.
 publish_to: none
-version: 0.2.0+60
+version: 0.2.1+61
 
 environment:
   sdk: "^3.8.0"
@@ -63,24 +63,30 @@ flutter:
     - assets/brand/pump_mark.svg
     - assets/market_logos/
     - assets/signer_token_icons/
+    - assets/kline/
+  # Static weights cut from the variable fonts: Flutter does not move a
+  # variable font's weight axis for FontWeight, so one variable file under
+  # several weights rendered faux bold over Manrope's ExtraLight default.
   fonts:
     - family: Manrope
       fonts:
-        - asset: assets/fonts/Manrope/Manrope-wght.ttf
+        - asset: assets/fonts/Manrope/Manrope-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Manrope/Manrope-wght.ttf
+        - asset: assets/fonts/Manrope/Manrope-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Manrope/Manrope-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Manrope/Manrope-wght.ttf
+        - asset: assets/fonts/Manrope/Manrope-Bold.ttf
           weight: 700
+        - asset: assets/fonts/Manrope/Manrope-ExtraBold.ttf
+          weight: 800
     - family: Sora
       fonts:
-        - asset: assets/fonts/Sora/Sora-wght.ttf
+        - asset: assets/fonts/Sora/Sora-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Sora/Sora-wght.ttf
+        - asset: assets/fonts/Sora/Sora-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Sora/Sora-Bold.ttf
           weight: 700
-        - asset: assets/fonts/Sora/Sora-wght.ttf
+        - asset: assets/fonts/Sora/Sora-ExtraBold.ttf
           weight: 800
-    - family: Plus Jakarta Sans
-      fonts:
-        - asset: assets/fonts/PlusJakartaSans/PlusJakartaSans-wght.ttf
-          weight: 700

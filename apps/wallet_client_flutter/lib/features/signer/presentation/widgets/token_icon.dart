@@ -32,7 +32,7 @@ class SignerTokenIcon extends StatelessWidget {
         symbol.isEmpty ? '?' : symbol.characters.first.toUpperCase(),
         style: TextStyle(
           fontSize: size * 0.45,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
       ),

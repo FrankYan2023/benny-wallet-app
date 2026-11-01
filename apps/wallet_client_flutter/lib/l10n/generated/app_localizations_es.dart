@@ -1246,7 +1246,14 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get assetMintCopied => 'Mint copiado (se borrará en 60 s)';
+  String get assetMintCopied =>
+      'Dirección del token copiada (se borrará en 60 s)';
+
+  @override
+  String get assetMoreActions => 'Más acciones';
+
+  @override
+  String get assetCopyAddress => 'Copiar dirección del token';
 
   @override
   String get assetCouldNotOpenWebsite => 'No se pudo abrir el sitio web.';
@@ -3582,4 +3589,317 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get airGapSignSiteExpired =>
       'La solicitud del sitio probablemente caducó. Cierra esto y vuelve a empezar en el sitio.';
+
+  @override
+  String get assetChartTitle => 'Gráfico de precio';
+
+  @override
+  String get assetChartDay => 'Día';
+
+  @override
+  String get assetChartWeek => 'Semana';
+
+  @override
+  String get assetChartMonth => 'Mes';
+
+  @override
+  String get assetChartYear => 'Año';
+
+  @override
+  String get assetChartOpen => 'Ap';
+
+  @override
+  String get assetChartHigh => 'Máx';
+
+  @override
+  String get assetChartLow => 'Mín';
+
+  @override
+  String get assetChartClose => 'Cie';
+
+  @override
+  String get assetChartVolume => 'Vol';
+
+  @override
+  String get assetChartEmpty => 'Todavía no hay historial de precios.';
+
+  @override
+  String get assetChartLoadFailed => 'No se pudo cargar el gráfico.';
+
+  @override
+  String assetChartUnderlying(String market) {
+    return 'Subyacente $market';
+  }
+
+  @override
+  String assetDataSource(String source) {
+    return 'Datos: $source';
+  }
+
+  @override
+  String get stockTitle => 'Acción subyacente';
+
+  @override
+  String get stockFundTitle => 'Fondo subyacente';
+
+  @override
+  String get stockCompanyTitle => 'Empresa';
+
+  @override
+  String get stockUnderlying => 'Replica';
+
+  @override
+  String get stockPrice => 'Precio';
+
+  @override
+  String get stockChange => 'Variación';
+
+  @override
+  String get stockDayRange => 'Rango del día';
+
+  @override
+  String get stockYearRange => 'Rango de 52 semanas';
+
+  @override
+  String get stockVolume => 'Volumen';
+
+  @override
+  String get stockMarketCap => 'Capitalización';
+
+  @override
+  String get stockPeRatio => 'PER (TTM)';
+
+  @override
+  String get stockEps => 'BPA (TTM)';
+
+  @override
+  String get stockRevenue => 'Ingresos (TTM)';
+
+  @override
+  String get stockNetIncome => 'Beneficio neto (TTM)';
+
+  @override
+  String get stockDividendYield => 'Rentabilidad por dividendo';
+
+  @override
+  String stockFinancialsThrough(String date) {
+    return 'Datos financieros hasta $date';
+  }
+
+  @override
+  String get stockAbout => 'Acerca de';
+
+  @override
+  String get stockIndustry => 'Sector';
+
+  @override
+  String get stockCeo => 'CEO';
+
+  @override
+  String get stockFounded => 'Fundación';
+
+  @override
+  String get stockHeadquarters => 'Sede';
+
+  @override
+  String get stockEmployees => 'Empleados';
+
+  @override
+  String get stockPrivateNotice => 'Empresa privada: no tiene precio en bolsa.';
+
+  @override
+  String get stockLoadFailed => 'No se pudieron cargar los datos de la acción.';
+
+  @override
+  String get stockShowMore => 'Más';
+
+  @override
+  String get stockShowLess => 'Menos';
+
+  @override
+  String get stockWikipediaLicense => 'Descripción de Wikipedia, CC BY-SA 4.0';
+
+  @override
+  String get stockTabMarket => 'Mercado';
+
+  @override
+  String get stockTabFundamentals => 'Fundamentales';
+
+  @override
+  String get stockTabCompany => 'Empresa';
+
+  @override
+  String get stockTabFund => 'Fondo';
+
+  @override
+  String get stockNoFundamentals =>
+      'Los datos financieros provienen de los informes a la SEC de EE. UU.; no hay datos para esta empresa.';
+
+  @override
+  String get stockNoFundamentalsFund =>
+      'Los fondos no publican estados financieros de empresa.';
+
+  @override
+  String get stockNoProfile => 'Aún no hay perfil de la empresa.';
+
+  @override
+  String get stockOpen => 'Apertura';
+
+  @override
+  String get stockPrevClose => 'Cierre anterior';
+
+  @override
+  String get stockHigh => 'Máximo';
+
+  @override
+  String get stockLow => 'Mínimo';
+
+  @override
+  String get stock52wHigh => 'Máx. 52 sem.';
+
+  @override
+  String get stock52wLow => 'Mín. 52 sem.';
+
+  @override
+  String get stockPeStatic => 'PER (último año)';
+
+  @override
+  String get stockPeDynamic => 'PER (anualizado)';
+
+  @override
+  String get stockPbRatio => 'P/VC';
+
+  @override
+  String get stockShares => 'Acciones';
+
+  @override
+  String get stockBookValuePerShare => 'Valor contable/acción';
+
+  @override
+  String get stockLoss => 'Pérdidas';
+
+  @override
+  String get stockMarketPre => 'Preapertura';
+
+  @override
+  String get stockMarketOpen => 'Cotizando';
+
+  @override
+  String get stockMarketPost => 'Tras el cierre';
+
+  @override
+  String get stockMarketClosed => 'Cerrado';
+
+  @override
+  String get stockTimeZoneEastern => 'ET';
+
+  @override
+  String get stockQuoteUnavailable =>
+      'El precio de la acción no está disponible ahora.';
+
+  @override
+  String get coinVolume24h => 'Volumen 24 h';
+
+  @override
+  String get coinTraders24h => 'Operadores 24 h';
+
+  @override
+  String get coinChange24h => 'Cambio 24 h';
+
+  @override
+  String coinAbout(String symbol) {
+    return 'Acerca de $symbol';
+  }
+
+  @override
+  String get coinNoDescription => 'Aún no hay descripción.';
+
+  @override
+  String get coinDescriptionLoadFailed => 'No se pudo cargar la descripción.';
+
+  @override
+  String get coinWhitepaper => 'Whitepaper';
+
+  @override
+  String get coinLaunched => 'Lanzamiento';
+
+  @override
+  String get coinCategories => 'Categorías';
+
+  @override
+  String get settingsPriceColors => 'Colores de precio';
+
+  @override
+  String get settingsPriceColorsSubtitle =>
+      'Colores para subidas y bajadas de precio';
+
+  @override
+  String get settingsPriceGreenUp => 'Verde sube, rojo baja';
+
+  @override
+  String get settingsPriceRedUp => 'Rojo sube, verde baja';
+
+  @override
+  String browserTabsCount(int count) {
+    return 'Pestañas ($count)';
+  }
+
+  @override
+  String get browserNewTab => 'Nueva pestaña';
+
+  @override
+  String get browserCloseTab => 'Cerrar pestaña';
+
+  @override
+  String get coinLiquidity => 'Liquidez';
+
+  @override
+  String get whitelistTitle => 'Mercados';
+
+  @override
+  String get whitelistCoins => 'Cripto';
+
+  @override
+  String get whitelistStocks => 'Acciones';
+
+  @override
+  String get whitelistSearchHint => 'Buscar nombre o símbolo';
+
+  @override
+  String get whitelistTopCoins => 'Top 20 por capitalización';
+
+  @override
+  String get whitelistTopStocks => 'Top 20 tecnológicas por valor de mercado';
+
+  @override
+  String get whitelistNoResults => 'No hay tokens que coincidan.';
+
+  @override
+  String get whitelistLoadFailed => 'No se pudo cargar la lista.';
+
+  @override
+  String whitelistMatches(int count) {
+    return '$count resultados';
+  }
+
+  @override
+  String get whitelistMarketCapShort => 'Cap.';
+
+  @override
+  String get whitelistPreviousPage => 'Página anterior';
+
+  @override
+  String get whitelistNextPage => 'Página siguiente';
+
+  @override
+  String get whitelistStablecoins => 'Stablecoins';
+
+  @override
+  String get assetChart15m => '15m';
+
+  @override
+  String get assetChart1h => '1h';
+
+  @override
+  String get assetChart4h => '4h';
 }

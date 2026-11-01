@@ -77,7 +77,7 @@ class WalletAvatar extends StatelessWidget {
           initial,
           style: TextStyle(
             color: color,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w700,
             fontSize: size * 0.42,
             height: 1,
           ),
@@ -163,7 +163,7 @@ class WalletTypeTag extends StatelessWidget {
               l10n.walletTypeStandard,
               style: TextStyle(
                 color: color,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 fontSize: 11,
                 height: 1.2,
               ),
@@ -193,7 +193,7 @@ class SeekerMark extends StatelessWidget {
             color: ink,
             fontSize: size * 0.92,
             height: 1,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w700,
             fontFamily: 'Sora',
           ),
         ),
@@ -221,7 +221,7 @@ class WalletBadge extends StatelessWidget {
         label,
         style: TextStyle(
           color: badgeColor,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           fontSize: 12,
         ),
       ),
@@ -353,7 +353,7 @@ class WalletActionRow extends StatelessWidget {
                               color: enabled
                                   ? WalletPalette.ink
                                   : WalletPalette.muted,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                               fontSize: 17,
                             ),
                           ),

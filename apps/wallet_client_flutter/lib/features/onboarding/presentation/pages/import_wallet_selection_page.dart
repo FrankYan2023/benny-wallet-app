@@ -405,7 +405,7 @@ class _ImportWalletSelectionPageState
                           child: Text(
                             context.l10n.walletAlreadyAddedBadge,
                             style: theme.textTheme.labelLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         )

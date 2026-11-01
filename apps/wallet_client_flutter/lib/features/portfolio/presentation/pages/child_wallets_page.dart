@@ -369,7 +369,7 @@ class _ChildWalletsPageState extends ConsumerState<ChildWalletsPage> {
                       ? context.l10n.childNoAccountsYet
                       : context.l10n.childAccountCount(childWallets.length),
                   style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -454,7 +454,7 @@ class _ChildWalletListTile extends StatelessWidget {
                   Text(
                     child.name,
                     style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -580,7 +580,7 @@ class _ChildWalletEditorSheetState extends State<_ChildWalletEditorSheet> {
                       ? context.l10n.childEditAccount
                       : context.l10n.childAddAccount,
                   style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 14),

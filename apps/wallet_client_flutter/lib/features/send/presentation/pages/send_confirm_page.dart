@@ -197,7 +197,7 @@ class _InfoRow extends StatelessWidget {
                           ? theme.textTheme.titleMedium
                           : theme.textTheme.titleLarge)
                       ?.copyWith(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         letterSpacing: data.isAddress ? 0.2 : null,
                       ),
             ),

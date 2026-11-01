@@ -138,7 +138,7 @@ class _TravelGuardSetupPageState extends ConsumerState<TravelGuardSetupPage> {
           child: Text(
             l10n.travelGuardChooseWallet,
             style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),
@@ -178,7 +178,7 @@ class _TravelGuardSetupPageState extends ConsumerState<TravelGuardSetupPage> {
             key: ValueKey(_step),
             textAlign: TextAlign.center,
             style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),

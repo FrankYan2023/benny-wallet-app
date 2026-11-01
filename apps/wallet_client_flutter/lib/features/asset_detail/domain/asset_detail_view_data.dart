@@ -18,6 +18,7 @@ class AssetDetailViewData {
     this.createdAt,
     this.volume24hUsd,
     this.traderCount24h,
+    this.liquidityUsd,
   });
 
   final String mintAddress;
@@ -38,4 +39,5 @@ class AssetDetailViewData {
   final DateTime? createdAt;
   final double? volume24hUsd;
   final int? traderCount24h;
+  final double? liquidityUsd;
 }

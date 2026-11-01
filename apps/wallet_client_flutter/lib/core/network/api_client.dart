@@ -464,6 +464,56 @@ class BackendApiClient {
     );
   }
 
+  /// Every listed coin and xStock with its price, ranked by market value.
+  Future<Map<String, dynamic>> getTokenList() {
+    return _requestJsonMap(
+      (dio) => dio.get<Map<String, dynamic>>('/v1/token-list'),
+      fallback: 'Unable to load the token list right now.',
+    );
+  }
+
+  /// Candles for a catalog token, or null when the backend has no chart
+  /// for it (tokens outside the catalog).
+  Future<Map<String, dynamic>?> getTokenCandles({
+    required String mintAddress,
+    required String interval,
+  }) {
+    return _requestJsonMapOrNullWhenMissing(
+      (dio) => dio.post<Map<String, dynamic>>(
+        '/v1/token-candles',
+        data: {'mintAddress': mintAddress, 'interval': interval},
+      ),
+      fallback: 'Unable to load the chart right now.',
+    );
+  }
+
+  /// The listed stock behind an xStock, or null for other tokens.
+  Future<Map<String, dynamic>?> getStockProfile({
+    required String mintAddress,
+    required String language,
+  }) {
+    return _requestJsonMapOrNullWhenMissing(
+      (dio) => dio.post<Map<String, dynamic>>(
+        '/v1/stock-profile',
+        data: {'mintAddress': mintAddress, 'language': language},
+      ),
+      fallback: 'Unable to load stock details right now.',
+    );
+  }
+
+  Future<Map<String, dynamic>?> getTokenProfile({
+    required String mintAddress,
+    required String language,
+  }) {
+    return _requestJsonMapOrNullWhenMissing(
+      (dio) => dio.post<Map<String, dynamic>>(
+        '/v1/token-profile',
+        data: {'mintAddress': mintAddress, 'language': language},
+      ),
+      fallback: 'Unable to load token details right now.',
+    );
+  }
+
   Future<Map<String, dynamic>> getAssetActivity({
     required String ownerAddress,
     required String mintAddress,
@@ -1017,6 +1067,26 @@ class BackendApiClient {
       throw Exception(_messageFromDio(error, fallback: fallback));
     } on StateError catch (error) {
       throw Exception(error.message);
+    } catch (error) {
+      throw Exception(_messageFromUnknown(error, fallback: fallback));
+    }
+  }
+
+  Future<Map<String, dynamic>?> _requestJsonMapOrNullWhenMissing(
+    Future<Response<Map<String, dynamic>>> Function(Dio dio) request, {
+    required String fallback,
+  }) async {
+    try {
+      final response = await _requestWithFallback(
+        request,
+        allowBackendFallback: true,
+      );
+      return response.data ?? const {};
+    } on DioException catch (error) {
+      if (error.response?.statusCode == 404) {
+        return null;
+      }
+      throw Exception(_messageFromDio(error, fallback: fallback));
     } catch (error) {
       throw Exception(_messageFromUnknown(error, fallback: fallback));
     }

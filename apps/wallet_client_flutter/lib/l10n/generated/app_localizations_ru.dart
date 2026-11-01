@@ -1238,7 +1238,14 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get assetMintCopied => 'Mint скопирован (очистится через 60 секунд)';
+  String get assetMintCopied =>
+      'Адрес токена скопирован (очистится через 60 секунд)';
+
+  @override
+  String get assetMoreActions => 'Другие действия';
+
+  @override
+  String get assetCopyAddress => 'Скопировать адрес токена';
 
   @override
   String get assetCouldNotOpenWebsite => 'Не удалось открыть сайт.';
@@ -3570,4 +3577,315 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get airGapSignSiteExpired =>
       'Запрос сайта, вероятно, истёк. Закройте и начните заново на сайте.';
+
+  @override
+  String get assetChartTitle => 'График цены';
+
+  @override
+  String get assetChartDay => 'День';
+
+  @override
+  String get assetChartWeek => 'Неделя';
+
+  @override
+  String get assetChartMonth => 'Месяц';
+
+  @override
+  String get assetChartYear => 'Год';
+
+  @override
+  String get assetChartOpen => 'Откр';
+
+  @override
+  String get assetChartHigh => 'Макс';
+
+  @override
+  String get assetChartLow => 'Мин';
+
+  @override
+  String get assetChartClose => 'Закр';
+
+  @override
+  String get assetChartVolume => 'Объём';
+
+  @override
+  String get assetChartEmpty => 'Истории цен пока нет.';
+
+  @override
+  String get assetChartLoadFailed => 'Не удалось загрузить график.';
+
+  @override
+  String assetChartUnderlying(String market) {
+    return 'Базовый актив $market';
+  }
+
+  @override
+  String assetDataSource(String source) {
+    return 'Данные: $source';
+  }
+
+  @override
+  String get stockTitle => 'Базовая акция';
+
+  @override
+  String get stockFundTitle => 'Базовый фонд';
+
+  @override
+  String get stockCompanyTitle => 'Компания';
+
+  @override
+  String get stockUnderlying => 'Отслеживает';
+
+  @override
+  String get stockPrice => 'Цена';
+
+  @override
+  String get stockChange => 'Изменение';
+
+  @override
+  String get stockDayRange => 'Диапазон дня';
+
+  @override
+  String get stockYearRange => 'Диапазон 52 недель';
+
+  @override
+  String get stockVolume => 'Объём';
+
+  @override
+  String get stockMarketCap => 'Капитализация';
+
+  @override
+  String get stockPeRatio => 'P/E (TTM)';
+
+  @override
+  String get stockEps => 'EPS (TTM)';
+
+  @override
+  String get stockRevenue => 'Выручка (TTM)';
+
+  @override
+  String get stockNetIncome => 'Чистая прибыль (TTM)';
+
+  @override
+  String get stockDividendYield => 'Дивидендная доходность';
+
+  @override
+  String stockFinancialsThrough(String date) {
+    return 'Финансовые данные по $date';
+  }
+
+  @override
+  String get stockAbout => 'О компании';
+
+  @override
+  String get stockIndustry => 'Отрасль';
+
+  @override
+  String get stockCeo => 'Гендиректор';
+
+  @override
+  String get stockFounded => 'Основана';
+
+  @override
+  String get stockHeadquarters => 'Штаб-квартира';
+
+  @override
+  String get stockEmployees => 'Сотрудники';
+
+  @override
+  String get stockPrivateNotice => 'Частная компания: биржевой цены нет.';
+
+  @override
+  String get stockLoadFailed => 'Не удалось загрузить данные акции.';
+
+  @override
+  String get stockShowMore => 'Ещё';
+
+  @override
+  String get stockShowLess => 'Свернуть';
+
+  @override
+  String get stockWikipediaLicense => 'Описание из Википедии, CC BY-SA 4.0';
+
+  @override
+  String get stockTabMarket => 'Рынок';
+
+  @override
+  String get stockTabFundamentals => 'Показатели';
+
+  @override
+  String get stockTabCompany => 'О компании';
+
+  @override
+  String get stockTabFund => 'О фонде';
+
+  @override
+  String get stockNoFundamentals =>
+      'Финансовые показатели берутся из отчётов в SEC США; для этой компании их нет.';
+
+  @override
+  String get stockNoFundamentalsFund =>
+      'У фондов нет финансовой отчётности компании.';
+
+  @override
+  String get stockNoProfile => 'Описания компании пока нет.';
+
+  @override
+  String get stockOpen => 'Открытие';
+
+  @override
+  String get stockPrevClose => 'Пред. закрытие';
+
+  @override
+  String get stockHigh => 'Максимум';
+
+  @override
+  String get stockLow => 'Минимум';
+
+  @override
+  String get stock52wHigh => 'Макс. 52 нед.';
+
+  @override
+  String get stock52wLow => 'Мин. 52 нед.';
+
+  @override
+  String get stockPeStatic => 'P/E (за год)';
+
+  @override
+  String get stockPeDynamic => 'P/E (годовой темп)';
+
+  @override
+  String get stockPbRatio => 'P/B';
+
+  @override
+  String get stockShares => 'Акций';
+
+  @override
+  String get stockBookValuePerShare => 'Балансовая стоимость/акция';
+
+  @override
+  String get stockLoss => 'Убыток';
+
+  @override
+  String get stockMarketPre => 'До открытия';
+
+  @override
+  String get stockMarketOpen => 'Идут торги';
+
+  @override
+  String get stockMarketPost => 'После закрытия';
+
+  @override
+  String get stockMarketClosed => 'Закрыто';
+
+  @override
+  String get stockTimeZoneEastern => 'ET';
+
+  @override
+  String get stockQuoteUnavailable => 'Цена акции сейчас недоступна.';
+
+  @override
+  String get coinVolume24h => 'Объём за 24 ч';
+
+  @override
+  String get coinTraders24h => 'Трейдеры за 24 ч';
+
+  @override
+  String get coinChange24h => 'Изменение за 24 ч';
+
+  @override
+  String coinAbout(String symbol) {
+    return 'О $symbol';
+  }
+
+  @override
+  String get coinNoDescription => 'Описания пока нет.';
+
+  @override
+  String get coinDescriptionLoadFailed => 'Не удалось загрузить описание.';
+
+  @override
+  String get coinWhitepaper => 'Whitepaper';
+
+  @override
+  String get coinLaunched => 'Запуск';
+
+  @override
+  String get coinCategories => 'Категории';
+
+  @override
+  String get settingsPriceColors => 'Цвета цен';
+
+  @override
+  String get settingsPriceColorsSubtitle => 'Цвета роста и падения цены';
+
+  @override
+  String get settingsPriceGreenUp => 'Рост зелёный, падение красное';
+
+  @override
+  String get settingsPriceRedUp => 'Рост красный, падение зелёное';
+
+  @override
+  String browserTabsCount(int count) {
+    return 'Вкладки ($count)';
+  }
+
+  @override
+  String get browserNewTab => 'Новая вкладка';
+
+  @override
+  String get browserCloseTab => 'Закрыть вкладку';
+
+  @override
+  String get coinLiquidity => 'Ликвидность';
+
+  @override
+  String get whitelistTitle => 'Рынки';
+
+  @override
+  String get whitelistCoins => 'Криптовалюты';
+
+  @override
+  String get whitelistStocks => 'Акции';
+
+  @override
+  String get whitelistSearchHint => 'Поиск по названию или тикеру';
+
+  @override
+  String get whitelistTopCoins => 'Топ-20 по капитализации';
+
+  @override
+  String get whitelistTopStocks => 'Топ-20 техкомпаний по капитализации';
+
+  @override
+  String get whitelistNoResults => 'Ничего не найдено.';
+
+  @override
+  String get whitelistLoadFailed => 'Не удалось загрузить список.';
+
+  @override
+  String whitelistMatches(int count) {
+    return 'Найдено: $count';
+  }
+
+  @override
+  String get whitelistMarketCapShort => 'Кап.';
+
+  @override
+  String get whitelistPreviousPage => 'Предыдущая страница';
+
+  @override
+  String get whitelistNextPage => 'Следующая страница';
+
+  @override
+  String get whitelistStablecoins => 'Стейблкоины';
+
+  @override
+  String get assetChart15m => '15м';
+
+  @override
+  String get assetChart1h => '1ч';
+
+  @override
+  String get assetChart4h => '4ч';
 }
